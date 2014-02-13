@@ -1,0 +1,76 @@
+# ***************************************************************************
+# Copyright (c) 2011, 2012 Digi International Inc.,
+# All rights not expressly granted are reserved.
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
+#
+# ***************************************************************************
+# Use GNU C Compiler
+CPP = g++
+CC = gcc
+
+# Target Platform
+CONNECTOR_DIR = ./source/cc_ansic
+CONNECTOR_PRIVATE = $(CONNECTOR_DIR)/private
+CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
+CONNECTOR_PLATFORM = $(CONNECTOR_DIR)/public/run/platforms/linux
+UNIT_TEST_INCLUDE = ./tests/unit_tests
+CCAPI_INCLUDE = ./include
+SOURCES_DIR = ./source/
+TEST_DIR = ./tests
+# CFLAG Definition
+CFLAGS += $(DFLAGS)
+# Enable Compiler Warnings
+CFLAGS += -Winit-self -Wpointer-arith
+CFLAGS += -Wformat-security
+CFLAGS += -Wformat-y2k -Wcast-align -Wformat-nonliteral
+CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
+CFLAGS += -Wall -Werror -Wextra -pedantic
+CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
+
+# Include POSIX and GNU features.
+CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
+# Include Public Header Files.
+CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE) -I$(CONNECTOR_PRIVATE)  
+CFLAGS += -g -O0
+
+# Target output to generate.
+CSRCS = $(SOURCES_DIR)/ccapi_init.c $(SOURCES_DIR)/ccapi.c $(TEST_DIR)/ccimp_os.c
+CPPSRCS = testrunner.cpp ./tests/unit_tests/ccapi_test.cpp
+
+# Libraries to Link
+LIBS = -lc -lCppUTest -lCppUTestExt
+
+CFLAGS += -DCONNECTOR_HAVE_STDINT_HEADER
+CCFLAGS += $(CFLAGS) -std=c89
+
+# Generated Sample Executable Name.
+EXEC_NAME = test
+
+# since each of the samples shares private and platform files, do a clean each time we make
+.PHONY:all
+all: clean $(EXEC_NAME)
+
+# Linking Flags.
+LDFLAGS += $(DFLAGS) -Wl,-Map,$(EXEC_NAME).map,--sort-common
+
+COBJS = $(CSRCS:.c=.o)
+CPPOBJS = $(CPPSRCS:.cpp=.o)
+
+test: $(COBJS) $(CPPOBJS)
+	$(CPP) -DUNIT_TEST $(LDFLAGS) $^ $(LIBS) -o $@
+	./$@
+
+.cpp.o:
+	$(CPP) -DUNIT_TEST $(CFLAGS) -c $^ -o $@
+
+.c.o:
+	$(CC) -DUNIT_TEST $(CCFLAGS) -c $^ -o $@
+
+.PHONY: clean
+clean:
+	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/unit_tests/*.map $(TEST_DIR)/unit_tests/*.o $(SOURCES_DIR)/*.o $(SOURCES_DIR)/*.map
