@@ -1,0 +1,16 @@
+# Ignore C output files
+*.d
+*.a
+*.so
+*.o
+*.map
+
+# Ignore compiled python data
+*.pyc
+
+# Eclipse droppings
+.project
+.cproject
+
+# Test launcher binary
+test
