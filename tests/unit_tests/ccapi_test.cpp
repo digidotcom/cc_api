@@ -12,7 +12,7 @@ void * (*previous_ccimp_malloc)(size_t size);
 
 void * ccimp_malloc_NULL(size_t size)
 {
-    (void)size;
+    UNUSED_ARGUMENT(size);
     return NULL;
 }
 
@@ -31,10 +31,6 @@ void * ccimp_malloc_mock(size_t size)
 
 using namespace std;
 
-TEST_GROUP(ccapi_init_test)
-{
-};
-
 static void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[DEVICE_ID_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
@@ -51,6 +47,10 @@ static void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->service.firmware = NULL;
     start->service.rci = NULL;
 }
+
+TEST_GROUP(ccapi_init_test)
+{
+};
 
 TEST(ccapi_init_test, testParamNULL)
 {
@@ -199,12 +199,13 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_init_error_t error;
-    void * pointer1 = &pointer1; /* Dummy */
+    void * pointer1 = &pointer1; /* Not-Null */
     void * pointer2 = NULL;
 
     fill_start_structure_with_good_parameters(&start);
 
     UT_PTR_SET(ccimp_malloc, ccimp_malloc_mock);
+
     mock().expectOneCall("ccimp_malloc")
             .andReturnValue(pointer1);
     mock().expectOneCall("ccimp_malloc")

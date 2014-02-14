@@ -12,6 +12,8 @@
 
 #define DEVICE_ID_LENGTH    16
 
+#define UNUSED_ARGUMENT(a)  (void)(a)
+
 typedef enum {
     CCAPI_FALSE,
     CCAPI_TRUE
