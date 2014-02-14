@@ -15,9 +15,7 @@ CC = gcc
 
 # Target Platform
 CONNECTOR_DIR = ./source/cc_ansic
-CONNECTOR_PRIVATE = $(CONNECTOR_DIR)/private
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
-CONNECTOR_PLATFORM = $(CONNECTOR_DIR)/public/run/platforms/linux
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 CCAPI_INCLUDE = ./include
 SOURCES_DIR = ./source/
@@ -35,7 +33,7 @@ CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -W
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
 # Include Public Header Files.
-CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE) -I$(CONNECTOR_PRIVATE)  
+CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE)
 CFLAGS += -g -O0
 
 # Target output to generate.
