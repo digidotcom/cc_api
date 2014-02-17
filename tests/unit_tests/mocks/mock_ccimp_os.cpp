@@ -1,5 +1,5 @@
 #include "CppUTestExt/MockSupport.h"
-#include "ccimp/ccimp_types.h"
+#include "internal/ccapi_definitions.h"
 
 void Mock_ccimp_malloc_create(void)
 {
@@ -30,8 +30,8 @@ void Mock_ccimp_create_thread_destroy(void)
 
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, ccapi_bool_t retval)
 {
+    UNUSED_ARGUMENT(create_thread_info);
     mock().expectOneCall("ccimp_create_thread")
-            .withParameter("create_thread_info", (void *)create_thread_info)
             .andReturnValue(retval);
 }
 
@@ -47,7 +47,8 @@ void * ccimp_malloc(size_t size)
 
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
-    mock_c()->actualCall("ccimp_create_thread")->withPointerParameters("create_thread_info", create_thread_info);
+    UNUSED_ARGUMENT(create_thread_info);
+    mock_c()->actualCall("ccimp_create_thread");
     return (ccapi_bool_t)mock_c()->returnValue().value.intValue;
 }
 

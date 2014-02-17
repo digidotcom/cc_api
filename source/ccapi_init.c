@@ -88,6 +88,19 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
+    {
+        ccimp_create_thread_info_t connector_thread_info = {0};
+
+        connector_thread_info.argument = ccapi_connector_handle;
+        connector_thread_info.thread_start = ccapi_connector_thread;
+        connector_thread_info.thread_type = CCIMP_CONNECTOR_THREAD;
+
+        if (ccimp_create_thread(&connector_thread_info) != CCAPI_TRUE)
+        {
+            error = CCAPI_INIT_ERROR_THREAD_FAILED;
+            goto done;
+        }
+    }
 done:
     return error;
 }
