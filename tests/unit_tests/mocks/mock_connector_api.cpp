@@ -36,17 +36,8 @@ connector_handle_t connector_init(connector_callback_t const callback)
     return connector_init_retval;
 }
 
-extern "C" {
-#include "CppUTestExt/MockSupport_c.h"
-#include "internal/ccapi_definitions.h"
-#include "connector_api.h"
-
-}
-
-#if 0
-connector_handle_t connector_init(connector_callback_t const callback)
+connector_status_t connector_run(connector_handle_t const handle)
 {
-    mock_c()->actualCall("connector_init")->withIntParameters("callback", callback);
-    return mock_c()->returnValue().value.pointerValue;
+    assert(handle != NULL);
+    return connector_success;
 }
-#endif

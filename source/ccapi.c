@@ -12,6 +12,16 @@ connector_handle_t ccapi_connector_handle;
 
 ccapi_config_t * ccapi_config;
 
+
+void ccapi_connector_thread(void * const argument)
+{
+    for (;;)
+    {
+        connector_status_t const status = connector_run(argument);
+        assert(status == connector_open_error);
+    }
+}
+
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data)
 {
     connector_callback_status_t status = connector_callback_continue;
