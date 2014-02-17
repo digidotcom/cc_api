@@ -11,5 +11,6 @@
 #include "ccimp/ccimp_types.h"
 
 void * ccimp_malloc(size_t size);
+ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 
 #endif
