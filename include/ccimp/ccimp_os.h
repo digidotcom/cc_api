@@ -10,12 +10,6 @@
 
 #include "ccimp/ccimp_types.h"
 
-#if (defined UNIT_TEST)
-extern void * (*ccimp_malloc)(size_t size);
-extern void * ccimp_malloc_real(size_t size);
-
-#else
 void * ccimp_malloc(size_t size);
-#endif
 
 #endif

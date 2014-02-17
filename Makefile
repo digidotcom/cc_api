@@ -19,7 +19,9 @@ CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 CCAPI_INCLUDE = ./include
 SOURCES_DIR = ./source/
-TEST_DIR = ./tests
+TEST_DIR = ./tests/unit_tests
+MOCKS_DIR = ./tests/unit_tests/mocks
+
 # CFLAG Definition
 CFLAGS += $(DFLAGS)
 # Enable Compiler Warnings
@@ -37,8 +39,8 @@ CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE)
 CFLAGS += -g -O0
 
 # Target output to generate.
-CSRCS = $(SOURCES_DIR)/ccapi_init.c $(SOURCES_DIR)/ccapi.c $(TEST_DIR)/ccimp_os.c
-CPPSRCS = testrunner.cpp ./tests/unit_tests/ccapi_test.cpp
+CSRCS = $(SOURCES_DIR)/ccapi_init.c $(SOURCES_DIR)/ccapi.c 
+CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
 
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt
@@ -60,7 +62,7 @@ COBJS = $(CSRCS:.c=.o)
 CPPOBJS = $(CPPSRCS:.cpp=.o)
 
 test: $(COBJS) $(CPPOBJS)
-	$(CPP) -DUNIT_TEST $(LDFLAGS) $^ $(LIBS) -o $@
+	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 	./$@
 
 .cpp.o:

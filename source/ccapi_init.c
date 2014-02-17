@@ -64,19 +64,29 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
 
     ccapi_config->vendor_id = start->vendor_id;
     memcpy(ccapi_config->device_id, start->device_id, sizeof ccapi_config->device_id);
-    ccapi_config->device_type = ccimp_malloc(strlen(start->device_type) + 1);
 
+    ccapi_config->device_type = ccimp_malloc(strlen(start->device_type) + 1);
     error = check_malloc(ccapi_config->device_type);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
-
     strcpy(ccapi_config->device_type, start->device_type);
+
+    ccapi_config->device_cloud_url = ccimp_malloc(strlen(start->device_cloud_url) + 1);
+    error = check_malloc(ccapi_config->device_cloud_url);
+    if (error != CCAPI_INIT_ERROR_NONE)
+        goto done;
+    strcpy(ccapi_config->device_cloud_url, start->device_cloud_url);
 
     ccapi_config->cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_config->receive_supported = start->service.receive == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_config->firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_config->rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_config->filesystem_supported = start->service.file_system == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+
+    ccapi_connector_handle = connector_init(ccapi_connector_callback);
+    error = check_malloc(ccapi_connector_handle);
+    if (error != CCAPI_INIT_ERROR_NONE)
+        goto done;
 
 done:
     return error;
