@@ -54,6 +54,24 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                 device_type->length = strlen(ccapi_config->device_type);
             }
             break;
+        case connector_request_id_config_firmware_facility:
+            {
+                connector_config_supported_t * firmware_supported = data;
+                firmware_supported->supported = ccapi_config->firmware_supported;
+            }
+            break;
+        case connector_request_id_config_file_system:
+            {
+                connector_config_supported_t * filesystem_supported = data;
+                filesystem_supported->supported = ccapi_config->filesystem_supported;
+            }
+            break;
+        case connector_request_id_config_remote_configuration:
+            {
+                connector_config_supported_t * rci_supported = data;
+                rci_supported->supported = ccapi_config->rci_supported;
+            }
+            break;
         default:
             assert(0);
             break;

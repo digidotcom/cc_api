@@ -32,7 +32,6 @@ static void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 }
 
 
-
 TEST_GROUP(ccapi_config_test)
 {
     void setup()
@@ -104,4 +103,34 @@ TEST(ccapi_config_test, testDeviceType)
     ccapi_connector_callback(connector_class_id_config, request, &device_type);
     STRCMP_EQUAL(device_type.string, ccapi_config->device_type);
     CHECK(strlen(ccapi_config->device_type) == device_type.length);
+}
+
+TEST(ccapi_config_test, testFirmwareSupport)
+{
+    connector_request_id_t request;
+    connector_config_supported_t firmware_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
+
+    request.config_request = connector_request_id_config_firmware_facility;
+    ccapi_connector_callback(connector_class_id_config, request, &firmware_supported);
+    CHECK(firmware_supported.supported == connector_false);
+}
+
+TEST(ccapi_config_test, testFileSystemSupport)
+{
+    connector_request_id_t request;
+    connector_config_supported_t filesystem_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
+
+    request.config_request = connector_request_id_config_file_system;
+    ccapi_connector_callback(connector_class_id_config, request, &filesystem_supported);
+    CHECK(filesystem_supported.supported == connector_false);
+}
+
+TEST(ccapi_config_test, testRCISupport)
+{
+    connector_request_id_t request;
+    connector_config_supported_t rci_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
+
+    request.config_request = connector_request_id_config_remote_configuration;
+    ccapi_connector_callback(connector_class_id_config, request, &rci_supported);
+    CHECK(rci_supported.supported == connector_false);
 }
