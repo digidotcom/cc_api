@@ -9,6 +9,7 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccimp/ccimp_types.h"
+#include "ccimp/ccimp_os.h"
 #include "connector_api.h"
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
@@ -30,12 +31,19 @@ typedef enum {
     CCAPI_THREAD_RUNNING,
     CCAPI_THREAD_REQUEST_STOP,
     CCAPI_THREAD_STOPPED
-} ccapi_thread_state;
+} ccapi_thread_status_t;
+
+typedef struct {
+    ccimp_create_thread_info_t ccimp_info;
+    ccapi_thread_status_t status;
+} ccapi_thread_info_t;
 
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
-    ccapi_thread_state connector_thread_status;
+    struct {
+        ccapi_thread_info_t * connector_run;
+    } thread;
 } ccapi_data_t;
 
 extern ccapi_data_t * ccapi_data;

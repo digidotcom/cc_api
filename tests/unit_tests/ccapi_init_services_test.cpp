@@ -38,12 +38,15 @@ TEST_GROUP(ccapi_init_services_test)
         void * malloc_for_ccapi_config = malloc(sizeof (ccapi_data_t));
         void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
         void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
+        void * malloc_for_thread_connector_run = malloc(sizeof (ccapi_thread_info_t));
         connector_handle_t handle = &handle; /* Not-NULL */
 
         Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_config);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
+        Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), malloc_for_thread_connector_run);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
+
         Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
     }
 

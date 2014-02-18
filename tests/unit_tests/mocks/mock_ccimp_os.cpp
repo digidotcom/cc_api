@@ -44,7 +44,7 @@ static void * thread_wrapper(void * argument)
 {
     ccimp_create_thread_info_t * create_thread_info = (ccimp_create_thread_info_t *)argument;
 
-    create_thread_info->thread_start(create_thread_info->argument);
+    create_thread_info->start(create_thread_info->argument);
 
     return NULL;
 }
@@ -66,13 +66,10 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
-    ccimp_create_thread_info_t * allocated_thread_info = (ccimp_create_thread_info_t *)malloc(sizeof *create_thread_info);
-
     mock_c()->actualCall("ccimp_create_thread");
     if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == CCAPI_TRUE)
     {
-        memcpy(allocated_thread_info, create_thread_info, sizeof *create_thread_info);
-        ccimp_create_thread_real(allocated_thread_info);
+        ccimp_create_thread_real(create_thread_info);
     }
 
     return (ccapi_bool_t)mock_c()->returnValue().value.intValue;

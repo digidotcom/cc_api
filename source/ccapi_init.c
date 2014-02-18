@@ -89,14 +89,17 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
         goto done;
 
     {
-        ccimp_create_thread_info_t connector_thread_info = {0};
+        ccapi_data->thread.connector_run = ccimp_malloc(sizeof *ccapi_data->thread.connector_run);
+        error = check_malloc(ccapi_data->thread.connector_run);
+        if (error != CCAPI_INIT_ERROR_NONE)
+            goto done;
 
-        ccapi_data->connector_thread_status = CCAPI_THREAD_NOT_STARTED;
-        connector_thread_info.argument = ccapi_data;
-        connector_thread_info.thread_start = ccapi_connector_run_thread;
-        connector_thread_info.thread_type = CCIMP_THREAD_CONNECTOR_RUN;
+        ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+        ccapi_data->thread.connector_run->ccimp_info.argument = ccapi_data;
+        ccapi_data->thread.connector_run->ccimp_info.start = ccapi_connector_run_thread;
+        ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_CONNECTOR_RUN;
 
-        if (ccimp_create_thread(&connector_thread_info) != CCAPI_TRUE)
+        if (ccimp_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCAPI_TRUE)
         {
             error = CCAPI_INIT_ERROR_THREAD_FAILED;
             goto done;
@@ -104,7 +107,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
 
         do {
             /* TODO Put a synch mechanism */
-        } while(ccapi_data->connector_thread_status != CCAPI_THREAD_RUNNING);
+        } while(ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING);
 
     }
 done:

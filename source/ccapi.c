@@ -15,13 +15,13 @@ void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * local_ccapi_data = argument;
 
-    local_ccapi_data->connector_thread_status = CCAPI_THREAD_RUNNING;
-    while (local_ccapi_data->connector_thread_status == CCAPI_THREAD_RUNNING)
+    local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
+    while (local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
     {
         connector_status_t const status = connector_run(local_ccapi_data->connector_handle);
         assert(status != connector_open_error);
     }
-    assert(local_ccapi_data->connector_thread_status == CCAPI_THREAD_REQUEST_STOP);
+    assert(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
 }
 
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data)

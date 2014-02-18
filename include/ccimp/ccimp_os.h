@@ -18,8 +18,8 @@ typedef enum {
 
 typedef struct
 {
-    ccimp_thread_type_t thread_type;
-    ccimp_thread_start_t thread_start;
+    ccimp_thread_type_t type;
+    ccimp_thread_start_t start;
     void * argument;
 } ccimp_create_thread_info_t;
 
