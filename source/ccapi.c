@@ -11,12 +11,13 @@
 ccapi_data_t * ccapi_data;
 
 
-void ccapi_connector_thread(void * const argument)
+void ccapi_connector_run_thread(void * const argument)
 {
-    for (;;)
+    ccapi_data->connector_thread_is_running = CCAPI_TRUE;
+    while (ccapi_data->connector_thread_is_running == CCAPI_TRUE)
     {
         connector_status_t const status = connector_run(argument);
-        assert(status == connector_open_error);
+        assert(status != connector_open_error);
     }
 }
 

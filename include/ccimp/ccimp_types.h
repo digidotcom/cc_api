@@ -32,7 +32,7 @@ typedef struct {
 } ccapi_config_t;
 
 typedef enum {
-    CCIMP_CONNECTOR_THREAD
+    CCIMP_THREAD_CONNECTOR_RUN
 } ccimp_thread_type_t;
 
 typedef struct
@@ -45,6 +45,7 @@ typedef struct
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
+    ccapi_bool_t connector_thread_is_running;
 } ccapi_data_t;
 
 #endif /* CCIMP_TYPES_H_ */

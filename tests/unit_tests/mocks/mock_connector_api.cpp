@@ -39,5 +39,9 @@ connector_handle_t connector_init(connector_callback_t const callback)
 connector_status_t connector_run(connector_handle_t const handle)
 {
     assert(handle != NULL);
-    return connector_success;
+    for(;;)
+    {
+
+    }
+    return connector_open_error;
 }

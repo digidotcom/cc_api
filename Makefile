@@ -43,7 +43,7 @@ CSRCS = $(SOURCES_DIR)/ccapi_init.c $(SOURCES_DIR)/ccapi.c
 CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
 
 # Libraries to Link
-LIBS = -lc -lCppUTest -lCppUTestExt
+LIBS = -lc -lCppUTest -lCppUTestExt -lpthread
 
 CFLAGS += -DCONNECTOR_HAVE_STDINT_HEADER
 CCFLAGS += $(CFLAGS) -std=c89
