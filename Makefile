@@ -18,7 +18,7 @@ CONNECTOR_DIR = ./source/cc_ansic
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 CCAPI_INCLUDE = ./include
-SOURCES_DIR = ./source/
+CCAPI_SOURCE_DIR = ./source/
 TEST_DIR = ./tests/unit_tests
 MOCKS_DIR = ./tests/unit_tests/mocks
 
@@ -35,11 +35,11 @@ CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -W
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
 # Include Public Header Files.
-CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE)
+CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
 CFLAGS += -g -O0
 
 # Target output to generate.
-CSRCS = $(SOURCES_DIR)/ccapi_init.c $(SOURCES_DIR)/ccapi.c 
+CSRCS = $(CCAPI_SOURCE_DIR)/ccapi_init.c $(CCAPI_SOURCE_DIR)/ccapi.c 
 CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
 
 # Libraries to Link
@@ -73,4 +73,4 @@ test: $(COBJS) $(CPPOBJS)
 
 .PHONY: clean
 clean:
-	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/unit_tests/*.map $(TEST_DIR)/unit_tests/*.o $(SOURCES_DIR)/*.o $(SOURCES_DIR)/*.map
+	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/unit_tests/*.map $(TEST_DIR)/unit_tests/*.o $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map
