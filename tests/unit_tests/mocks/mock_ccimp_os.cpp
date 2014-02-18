@@ -36,7 +36,7 @@ void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const
 
 extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
-#include "internal/ccapi_definitions.h"
+#include "ccapi_definitions.h"
 #include <pthread.h>
 
 /******************** LINUX IMPLEMENTATION ********************/
@@ -69,9 +69,12 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
     ccimp_create_thread_info_t * allocated_thread_info = (ccimp_create_thread_info_t *)malloc(sizeof *create_thread_info);
 
     mock_c()->actualCall("ccimp_create_thread");
-    UNUSED_ARGUMENT(create_thread_info);
-    memcpy(allocated_thread_info, create_thread_info, sizeof *create_thread_info);
-    ccimp_create_thread_real(allocated_thread_info);
+    if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == CCAPI_TRUE)
+    {
+        memcpy(allocated_thread_info, create_thread_info, sizeof *create_thread_info);
+        ccimp_create_thread_real(allocated_thread_info);
+    }
+
     return (ccapi_bool_t)mock_c()->returnValue().value.intValue;
 }
 
