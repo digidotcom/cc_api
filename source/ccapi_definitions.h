@@ -25,10 +25,17 @@ typedef struct {
     ccapi_bool_t filesystem_supported;
 } ccapi_config_t;
 
+typedef enum {
+    CCAPI_THREAD_NOT_STARTED,
+    CCAPI_THREAD_RUNNING,
+    CCAPI_THREAD_REQUEST_STOP,
+    CCAPI_THREAD_STOPPED
+} ccapi_thread_state;
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
-    ccapi_bool_t connector_thread_is_running;
+    ccapi_thread_state connector_thread_status;
 } ccapi_data_t;
 
 extern ccapi_data_t * ccapi_data;

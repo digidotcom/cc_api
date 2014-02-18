@@ -91,7 +91,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     {
         ccimp_create_thread_info_t connector_thread_info = {0};
 
-        ccapi_data->connector_thread_is_running = CCAPI_FALSE;
+        ccapi_data->connector_thread_status = CCAPI_THREAD_NOT_STARTED;
         connector_thread_info.argument = ccapi_data;
         connector_thread_info.thread_start = ccapi_connector_run_thread;
         connector_thread_info.thread_type = CCIMP_THREAD_CONNECTOR_RUN;
@@ -104,7 +104,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
 
         do {
             /* TODO Put a synch mechanism */
-        } while(ccapi_data->connector_thread_is_running != CCAPI_TRUE);
+        } while(ccapi_data->connector_thread_status != CCAPI_THREAD_RUNNING);
 
     }
 done:
