@@ -73,4 +73,4 @@ test: $(COBJS) $(CPPOBJS)
 
 .PHONY: clean
 clean:
-	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/unit_tests/*.map $(TEST_DIR)/unit_tests/*.o $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map
+	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/*.map $(TEST_DIR)/*.o $(MOCKS_DIR)/*.o  $(MOCKS_DIR)/*.map $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map
