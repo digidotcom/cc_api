@@ -23,8 +23,12 @@ typedef struct
     void * argument;
 } ccimp_create_thread_info_t;
 
+typedef struct {
+    size_t size;
+    void * ptr;
+} ccimp_malloc_t;
 
-void * ccimp_malloc(size_t size);
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc);
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 
 #endif

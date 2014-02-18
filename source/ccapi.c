@@ -10,6 +10,16 @@
 
 ccapi_data_t * ccapi_data;
 
+void * ccapi_malloc(size_t size)
+{
+    ccimp_malloc_t malloc_struct;
+    ccimp_status_t status;
+
+    malloc_struct.size = size;
+    status = ccimp_malloc(&malloc_struct);
+
+    return status == CCIMP_STATUS_OK ? malloc_struct.ptr : NULL;
+}
 
 void ccapi_connector_run_thread(void * const argument)
 {

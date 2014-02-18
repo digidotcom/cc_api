@@ -48,6 +48,7 @@ typedef struct {
 
 extern ccapi_data_t * ccapi_data;
 extern void ccapi_connector_run_thread(void * const argument);
+extern void * ccapi_malloc(size_t size);
 extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data);
 
 #endif

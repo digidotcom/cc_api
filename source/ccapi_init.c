@@ -57,7 +57,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
-    ccapi_data = ccimp_malloc(sizeof *ccapi_data);
+    ccapi_data = ccapi_malloc(sizeof *ccapi_data);
     error = check_malloc(ccapi_data);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
@@ -65,13 +65,13 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     ccapi_data->config.vendor_id = start->vendor_id;
     memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);
 
-    ccapi_data->config.device_type = ccimp_malloc(strlen(start->device_type) + 1);
+    ccapi_data->config.device_type = ccapi_malloc(strlen(start->device_type) + 1);
     error = check_malloc(ccapi_data->config.device_type);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
     strcpy(ccapi_data->config.device_type, start->device_type);
 
-    ccapi_data->config.device_cloud_url = ccimp_malloc(strlen(start->device_cloud_url) + 1);
+    ccapi_data->config.device_cloud_url = ccapi_malloc(strlen(start->device_cloud_url) + 1);
     error = check_malloc(ccapi_data->config.device_cloud_url);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
@@ -89,7 +89,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
         goto done;
 
     {
-        ccapi_data->thread.connector_run = ccimp_malloc(sizeof *ccapi_data->thread.connector_run);
+        ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
         if (error != CCAPI_INIT_ERROR_NONE)
             goto done;

@@ -40,6 +40,7 @@ extern "C" {
 #include <pthread.h>
 
 /******************** LINUX IMPLEMENTATION ********************/
+
 static void * thread_wrapper(void * argument)
 {
     ccimp_create_thread_info_t * create_thread_info = (ccimp_create_thread_info_t *)argument;
@@ -75,10 +76,11 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
     return (ccapi_bool_t)mock_c()->returnValue().value.intValue;
 }
 
-void * ccimp_malloc(size_t size)
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
 {
-    mock_c()->actualCall("ccimp_malloc")->withIntParameters("size", size);
-    return mock_c()->returnValue().value.pointerValue;
+    mock_c()->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
+    malloc->ptr = mock_c()->returnValue().value.pointerValue;
+    return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
 }
