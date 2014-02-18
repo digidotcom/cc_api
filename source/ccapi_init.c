@@ -1,6 +1,6 @@
 #include "ccapi/ccapi.h"
 #include "ccimp/ccimp_os.h"
-#include "internal/ccapi_definitions.h"
+#include "ccapi_definitions.h"
 
 static ccapi_init_error_t check_params(ccapi_start_t const * const start)
 {
@@ -104,7 +104,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
 
         do {
             /* TODO Put a synch mechanism */
-        } while(ccapi_data->connector_thread_is_running == CCAPI_FALSE);
+        } while(ccapi_data->connector_thread_is_running != CCAPI_TRUE);
 
     }
 done:

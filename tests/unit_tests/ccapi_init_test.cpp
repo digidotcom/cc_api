@@ -5,7 +5,7 @@
 
 extern "C" {
 #include "ccapi/ccapi.h"
-#include "internal/ccapi_definitions.h"
+#include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
 }
 
@@ -218,7 +218,7 @@ TEST(ccapi_init_test, testStartOk)
     CHECK(memcmp(start.device_id, ccapi_data->config.device_id, sizeof start.device_id) == 0);
     STRCMP_EQUAL(start.device_type, ccapi_data->config.device_type);
     STRCMP_EQUAL(start.device_cloud_url, ccapi_data->config.device_cloud_url);
-    CHECK(ccapi_data->connector_thread_started == CCAPI_TRUE);
+    CHECK(ccapi_data->connector_thread_is_running == CCAPI_TRUE);
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
 }

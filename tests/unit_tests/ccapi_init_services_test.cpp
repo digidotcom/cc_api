@@ -5,7 +5,7 @@
 
 extern "C" {
 #include "ccapi/ccapi.h"
-#include "internal/ccapi_definitions.h"
+#include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
 }
 

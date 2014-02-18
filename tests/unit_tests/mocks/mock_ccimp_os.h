@@ -8,7 +8,10 @@
 #ifndef _MOCK_CCIMP_OS_H_
 #define _MOCK_CCIMP_OS_H_
 
+#include "CppUTestExt/MockSupport.h"
+
 extern "C" {
+#include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
 }
 

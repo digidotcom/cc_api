@@ -5,7 +5,7 @@
  *      Author: spastor
  */
 
-#include "internal/ccapi_definitions.h"
+#include "ccapi_definitions.h"
 #include "connector_api.h"
 
 ccapi_data_t * ccapi_data;

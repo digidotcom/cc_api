@@ -5,9 +5,6 @@
  *      Author: spastor
  */
 
-#include "CppUTestExt/MockSupport.h"
-#include "CppUTest/CommandLineTestRunner.h"
-
 #include "mock_connector_api.h"
 
 static connector_handle_t connector_init_retval = NULL;

@@ -1,5 +1,4 @@
-#include "CppUTestExt/MockSupport.h"
-#include "internal/ccapi_definitions.h"
+#include "mocks/mock_ccimp_os.h"
 
 void Mock_ccimp_malloc_create(void)
 {
@@ -83,4 +82,3 @@ void * ccimp_malloc(size_t size)
 }
 
 }
-

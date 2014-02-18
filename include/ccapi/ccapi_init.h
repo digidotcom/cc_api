@@ -3,7 +3,7 @@
 
 #include "connector_api.h"
 
-#include "internal/ccapi_definitions.h"
+#include "ccimp/ccimp_types.h"
 
 typedef void * ccapi_device_request_service_t; /* STUB */
 typedef void * ccapi_firmware_service_t; /* STUB */

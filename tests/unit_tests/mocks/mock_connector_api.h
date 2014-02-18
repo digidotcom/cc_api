@@ -8,6 +8,9 @@
 #ifndef _MOCK_CONNECTOR_API_H_
 #define _MOCK_CONNECTOR_API_H_
 
+#include "CppUTestExt/MockSupport.h"
+#include "CppUTest/CommandLineTestRunner.h"
+
 extern "C" {
 #include "connector_api.h"
 }
