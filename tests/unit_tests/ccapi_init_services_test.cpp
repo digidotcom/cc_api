@@ -35,12 +35,12 @@ TEST_GROUP(ccapi_init_services_test)
 {
     void setup()
     {
-        void * malloc_for_ccapi_config = malloc(sizeof (ccapi_config_t));
+        void * malloc_for_ccapi_config = malloc(sizeof (ccapi_data_t));
         void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
         void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
         connector_handle_t handle = &handle; /* Not-NULL */
 
-        Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_config_t), malloc_for_ccapi_config);
+        Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_config);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
@@ -62,7 +62,7 @@ TEST(ccapi_init_services_test, testCliNotSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->cli_supported == CCAPI_FALSE);
+    CHECK(ccapi_data->config.cli_supported == CCAPI_FALSE);
 }
 
 TEST(ccapi_init_services_test, testCliSupported)
@@ -76,7 +76,7 @@ TEST(ccapi_init_services_test, testCliSupported)
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_INIT_ERROR_NONE);
-    CHECK(ccapi_config->cli_supported == CCAPI_TRUE);
+    CHECK(ccapi_data->config.cli_supported == CCAPI_TRUE);
 }
 
 TEST(ccapi_init_services_test, testReceiveSupported)
@@ -90,7 +90,7 @@ TEST(ccapi_init_services_test, testReceiveSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->receive_supported == CCAPI_TRUE);
+    CHECK(ccapi_data->config.receive_supported == CCAPI_TRUE);
 }
 
 TEST(ccapi_init_services_test, testReceiveNotSupported)
@@ -102,7 +102,7 @@ TEST(ccapi_init_services_test, testReceiveNotSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->receive_supported == CCAPI_FALSE);
+    CHECK(ccapi_data->config.receive_supported == CCAPI_FALSE);
 }
 
 TEST(ccapi_init_services_test, testFirmwareSupported)
@@ -116,7 +116,7 @@ TEST(ccapi_init_services_test, testFirmwareSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->firmware_supported == CCAPI_TRUE);
+    CHECK(ccapi_data->config.firmware_supported == CCAPI_TRUE);
 }
 
 TEST(ccapi_init_services_test, testFirmwareNotSupported)
@@ -128,7 +128,7 @@ TEST(ccapi_init_services_test, testFirmwareNotSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->firmware_supported == CCAPI_FALSE);
+    CHECK(ccapi_data->config.firmware_supported == CCAPI_FALSE);
 }
 
 TEST(ccapi_init_services_test, testRciSupported)
@@ -142,7 +142,7 @@ TEST(ccapi_init_services_test, testRciSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->rci_supported == CCAPI_TRUE);
+    CHECK(ccapi_data->config.rci_supported == CCAPI_TRUE);
 }
 
 TEST(ccapi_init_services_test, testRciNotSupported)
@@ -154,7 +154,7 @@ TEST(ccapi_init_services_test, testRciNotSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->rci_supported == CCAPI_FALSE);
+    CHECK(ccapi_data->config.rci_supported == CCAPI_FALSE);
 }
 
 TEST(ccapi_init_services_test, testFileSysSupported)
@@ -168,7 +168,7 @@ TEST(ccapi_init_services_test, testFileSysSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->filesystem_supported == CCAPI_TRUE);
+    CHECK(ccapi_data->config.filesystem_supported == CCAPI_TRUE);
 }
 
 TEST(ccapi_init_services_test, testFileSysNotSupported)
@@ -180,5 +180,5 @@ TEST(ccapi_init_services_test, testFileSysNotSupported)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_config->filesystem_supported == CCAPI_FALSE);
+    CHECK(ccapi_data->config.filesystem_supported == CCAPI_FALSE);
 }

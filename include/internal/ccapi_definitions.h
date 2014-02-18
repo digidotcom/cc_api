@@ -13,7 +13,7 @@
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
 
-extern ccapi_config_t * ccapi_config;
+extern ccapi_data_t * ccapi_data;
 
 extern void ccapi_connector_thread(void * const argument);
 extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data);

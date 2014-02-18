@@ -57,41 +57,41 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
-    ccapi_config = ccimp_malloc(sizeof *ccapi_config);
-    error = check_malloc(ccapi_config);
+    ccapi_data = ccimp_malloc(sizeof *ccapi_data);
+    error = check_malloc(ccapi_data);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
-    ccapi_config->vendor_id = start->vendor_id;
-    memcpy(ccapi_config->device_id, start->device_id, sizeof ccapi_config->device_id);
+    ccapi_data->config.vendor_id = start->vendor_id;
+    memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);
 
-    ccapi_config->device_type = ccimp_malloc(strlen(start->device_type) + 1);
-    error = check_malloc(ccapi_config->device_type);
+    ccapi_data->config.device_type = ccimp_malloc(strlen(start->device_type) + 1);
+    error = check_malloc(ccapi_data->config.device_type);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
-    strcpy(ccapi_config->device_type, start->device_type);
+    strcpy(ccapi_data->config.device_type, start->device_type);
 
-    ccapi_config->device_cloud_url = ccimp_malloc(strlen(start->device_cloud_url) + 1);
-    error = check_malloc(ccapi_config->device_cloud_url);
+    ccapi_data->config.device_cloud_url = ccimp_malloc(strlen(start->device_cloud_url) + 1);
+    error = check_malloc(ccapi_data->config.device_cloud_url);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
-    strcpy(ccapi_config->device_cloud_url, start->device_cloud_url);
+    strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
-    ccapi_config->cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_config->receive_supported = start->service.receive == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_config->firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_config->rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_config->filesystem_supported = start->service.file_system == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    ccapi_data->config.cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    ccapi_data->config.receive_supported = start->service.receive == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    ccapi_data->config.firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    ccapi_data->config.filesystem_supported = start->service.file_system == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
-    ccapi_connector_handle = connector_init(ccapi_connector_callback);
-    error = check_malloc(ccapi_connector_handle);
+    ccapi_data->connector_handle = connector_init(ccapi_connector_callback);
+    error = check_malloc(ccapi_data->connector_handle);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
     {
         ccimp_create_thread_info_t connector_thread_info = {0};
 
-        connector_thread_info.argument = ccapi_connector_handle;
+        connector_thread_info.argument = ccapi_data->connector_handle;
         connector_thread_info.thread_start = ccapi_connector_thread;
         connector_thread_info.thread_type = CCIMP_CONNECTOR_THREAD;
 

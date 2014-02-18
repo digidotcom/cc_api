@@ -42,4 +42,9 @@ typedef struct
     ccimp_thread_type_t thread_type;
 } ccimp_create_thread_info_t;
 
+typedef struct {
+    void * connector_handle;
+    ccapi_config_t config;
+} ccapi_data_t;
+
 #endif /* CCIMP_TYPES_H_ */

@@ -38,12 +38,12 @@ TEST_GROUP(ccapi_config_test)
     {
         ccapi_start_t start = {0};
         ccapi_init_error_t error;
-        void * malloc_for_ccapi_config = malloc(sizeof (ccapi_config_t));
+        void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
         void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
         void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
         connector_handle_t handle = &handle; /* Not-NULL */
 
-        Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_config_t), malloc_for_ccapi_config);
+        Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
@@ -70,7 +70,7 @@ TEST(ccapi_config_test, testDeviceID)
 
     request.config_request = connector_request_id_config_device_id;
     ccapi_connector_callback(connector_class_id_config, request, &device_id);
-    CHECK(memcmp(ccapi_config->device_id, device_id_buf, device_id.bytes_required) == 0);
+    CHECK(memcmp(ccapi_data->config.device_id, device_id_buf, device_id.bytes_required) == 0);
 }
 
 TEST(ccapi_config_test, testCloudURL)
@@ -80,8 +80,8 @@ TEST(ccapi_config_test, testCloudURL)
 
     request.config_request = connector_request_id_config_device_cloud_url;
     ccapi_connector_callback(connector_class_id_config, request, &device_cloud_url);
-    STRCMP_EQUAL(device_cloud_url.string, ccapi_config->device_cloud_url);
-    CHECK(strlen(ccapi_config->device_cloud_url) == device_cloud_url.length);
+    STRCMP_EQUAL(device_cloud_url.string, ccapi_data->config.device_cloud_url);
+    CHECK(strlen(ccapi_data->config.device_cloud_url) == device_cloud_url.length);
 }
 
 TEST(ccapi_config_test, testVendorID)
@@ -91,7 +91,7 @@ TEST(ccapi_config_test, testVendorID)
 
     request.config_request = connector_request_id_config_vendor_id;
     ccapi_connector_callback(connector_class_id_config, request, &vendor_id);
-    CHECK(vendor_id.id == ccapi_config->vendor_id);
+    CHECK(vendor_id.id == ccapi_data->config.vendor_id);
 }
 
 TEST(ccapi_config_test, testDeviceType)
@@ -101,8 +101,8 @@ TEST(ccapi_config_test, testDeviceType)
 
     request.config_request = connector_request_id_config_device_type;
     ccapi_connector_callback(connector_class_id_config, request, &device_type);
-    STRCMP_EQUAL(device_type.string, ccapi_config->device_type);
-    CHECK(strlen(ccapi_config->device_type) == device_type.length);
+    STRCMP_EQUAL(device_type.string, ccapi_data->config.device_type);
+    CHECK(strlen(ccapi_data->config.device_type) == device_type.length);
 }
 
 TEST(ccapi_config_test, testFirmwareSupport)

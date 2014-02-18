@@ -8,9 +8,7 @@
 #include "internal/ccapi_definitions.h"
 #include "connector_api.h"
 
-connector_handle_t ccapi_connector_handle;
-
-ccapi_config_t * ccapi_config;
+ccapi_data_t * ccapi_data;
 
 
 void ccapi_connector_thread(void * const argument)
@@ -31,45 +29,45 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_device_id:
             {
                 connector_config_pointer_data_t * device_id = data;
-                memcpy(device_id->data, ccapi_config->device_id, device_id->bytes_required);
+                memcpy(device_id->data, ccapi_data->config.device_id, device_id->bytes_required);
             }
             break;
         case connector_request_id_config_device_cloud_url:
             {
                 connector_config_pointer_string_t * device_cloud = data;
-                device_cloud->string = ccapi_config->device_cloud_url;
-                device_cloud->length = strlen(ccapi_config->device_cloud_url);
+                device_cloud->string = ccapi_data->config.device_cloud_url;
+                device_cloud->length = strlen(ccapi_data->config.device_cloud_url);
             }
             break;
         case connector_request_id_config_vendor_id:
             {
                 connector_config_vendor_id_t * vendor_id = data;
-                vendor_id->id = ccapi_config->vendor_id;
+                vendor_id->id = ccapi_data->config.vendor_id;
             }
             break;
         case connector_request_id_config_device_type:
             {
                 connector_config_pointer_string_t * device_type = data;
-                device_type->string = ccapi_config->device_type;
-                device_type->length = strlen(ccapi_config->device_type);
+                device_type->string = ccapi_data->config.device_type;
+                device_type->length = strlen(ccapi_data->config.device_type);
             }
             break;
         case connector_request_id_config_firmware_facility:
             {
                 connector_config_supported_t * firmware_supported = data;
-                firmware_supported->supported = ccapi_config->firmware_supported;
+                firmware_supported->supported = ccapi_data->config.firmware_supported;
             }
             break;
         case connector_request_id_config_file_system:
             {
                 connector_config_supported_t * filesystem_supported = data;
-                filesystem_supported->supported = ccapi_config->filesystem_supported;
+                filesystem_supported->supported = ccapi_data->config.filesystem_supported;
             }
             break;
         case connector_request_id_config_remote_configuration:
             {
                 connector_config_supported_t * rci_supported = data;
-                rci_supported->supported = ccapi_config->rci_supported;
+                rci_supported->supported = ccapi_data->config.rci_supported;
             }
             break;
         default:
