@@ -32,6 +32,7 @@ void ccapi_connector_run_thread(void * const argument)
         assert(status != connector_open_error);
     }
     assert(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+    local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 }
 
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data)

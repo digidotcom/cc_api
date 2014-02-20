@@ -29,8 +29,7 @@ typedef struct {
 typedef enum {
     CCAPI_THREAD_NOT_STARTED,
     CCAPI_THREAD_RUNNING,
-    CCAPI_THREAD_REQUEST_STOP,
-    CCAPI_THREAD_STOPPED
+    CCAPI_THREAD_REQUEST_STOP
 } ccapi_thread_status_t;
 
 typedef struct {

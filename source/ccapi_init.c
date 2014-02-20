@@ -105,9 +105,10 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
             goto done;
         }
 
-        do {
-            /* TODO Put a synch mechanism */
-        } while(ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING);
+        do 
+        {
+            /* TODO call ccimp_os_yield() when available */
+        } while(ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED);
 
     }
 done:
