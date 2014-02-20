@@ -50,6 +50,7 @@ TEST_GROUP(ccapi_config_test)
         Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), malloc_for_thread_connector_run);
 
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
+        Mock_connector_run_expectAndReturn(handle ,connector_success);
         Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
 
         fill_start_structure_with_good_parameters(&start);

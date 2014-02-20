@@ -33,12 +33,32 @@ connector_handle_t connector_init(connector_callback_t const callback)
     return connector_init_retval;
 }
 
+static connector_status_t connector_run_retval = connector_init_error;
+static connector_handle_t connector_run_expected = NULL;
+
+void Mock_connector_run_create(void)
+{
+    /* TODO, mock this */
+    return;
+}
+
+void Mock_connector_run_destroy(void)
+{
+    return;
+}
+
+void Mock_connector_run_expectAndReturn(connector_handle_t const handle, connector_status_t retval)
+{
+    connector_run_expected = handle;
+    connector_run_retval = retval;
+}
+
 connector_status_t connector_run(connector_handle_t const handle)
 {
-    assert(handle != NULL);
+    CHECK(handle == connector_run_expected);
     for(;;)
     {
 
     }
-    return connector_open_error;
+    return connector_run_retval;
 }

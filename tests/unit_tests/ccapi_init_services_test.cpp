@@ -45,6 +45,7 @@ TEST_GROUP(ccapi_init_services_test)
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
         Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), malloc_for_thread_connector_run);
+        Mock_connector_run_expectAndReturn(handle ,connector_success);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
 
         Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
