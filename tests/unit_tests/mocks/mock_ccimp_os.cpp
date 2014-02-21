@@ -83,4 +83,41 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
     return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
+ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time)
+{
+    static time_t start_system_up_time;
+    time_t present_time;
+
+    time(&present_time);
+
+    if (start_system_up_time == 0)
+       start_system_up_time = present_time;
+
+    present_time -= start_system_up_time;
+    system_up_time->sys_uptime = (unsigned long) present_time;
+
+    return CCIMP_STATUS_OK;
+}
+
+ccimp_status_t ccimp_os_yield(/*connector_status_t const * const status*/ void)
+{
+    int error;
+
+/*
+    if (*status == connector_idle)
+    {
+        unsigned int const timeout_in_microseconds =  100000;
+        usleep(timeout_in_microseconds);
+    }
+*/
+
+    error = sched_yield();
+    if (error)
+    {
+        /* In the Linux implementation this function always succeeds */
+        printf("app_os_yield: sched_yield failed with %d\n", error);
+    }
+
+    return CCIMP_STATUS_OK;
+}
 }
