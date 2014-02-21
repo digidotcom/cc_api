@@ -8,6 +8,8 @@
 #include "ccapi_definitions.h"
 #include "connector_api.h"
 
+char const ccapi_signature[] = "CCAPI_SIG"; /* TODO: CCAPI_SW_VERSION */
+
 ccapi_data_t * ccapi_data;
 
 void * ccapi_malloc(size_t size)
@@ -25,13 +27,37 @@ void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * local_ccapi_data = argument;
 
+    assert (local_ccapi_data != NULL);
+
+#if 1
+    if (local_ccapi_data->signature != ccapi_signature) 
+    {
+        /* local_ccapi_data is corrupted, it's likely the implementer 
+           made it wrong passing argument to the new thread.
+           We can only exit the thread and let the ccapi_start() function timeout.
+        */
+        return;
+    }
+#else
+    assert (local_ccapi_data->signature == ccapi_signature);
+#endif
     local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
     while (local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
     {
         connector_status_t const status = connector_run(local_ccapi_data->connector_handle);
-        assert(status != connector_open_error);
+        switch(status)
+        {
+            case connector_init_error:
+                /* It's very unlikely that we get this error as we have already verified ccapi_signature */
+                goto done;
+
+            default:
+                break;
+        }            
     }
     assert(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+
+done:
     local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 }
 

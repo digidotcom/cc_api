@@ -56,6 +56,10 @@ void Mock_connector_run_expectAndReturn(connector_handle_t const handle, connect
 connector_status_t connector_run(connector_handle_t const handle)
 {
     CHECK(handle == connector_run_expected);
+
+    if (connector_run_retval == connector_init_error)
+        return connector_init_error;
+
     for(;;)
     {
 

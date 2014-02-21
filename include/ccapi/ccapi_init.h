@@ -21,6 +21,7 @@ typedef enum {
     CCAPI_INIT_ERROR_INVALID_DEVICETYPE,
     CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_INIT_ERROR_THREAD_FAILED,
+    CCAPI_INIT_ERROR_RUN_INIT_FAILED,  /* Run thread got wrong argument */
     CCAPI_INIT_ERROR_COUNT
 } ccapi_init_error_t;
 

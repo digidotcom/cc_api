@@ -88,13 +88,15 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
+    ccapi_data->signature = ccapi_signature;
+
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
         if (error != CCAPI_INIT_ERROR_NONE)
             goto done;
 
-        ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+        ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_START;
         ccapi_data->thread.connector_run->ccimp_info.argument = ccapi_data;
         ccapi_data->thread.connector_run->ccimp_info.start = ccapi_connector_run_thread;
         ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_CONNECTOR_RUN;
@@ -105,11 +107,26 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
             goto done;
         }
 
-        do 
+        #define START_TIMETOUT 1
+        /* Check that the thread started in START_TIMETOUT seconds */
         {
-            /* TODO call ccimp_os_yield() when available */
-        } while(ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED);
+            ccimp_os_system_up_time_t system_up_time_struct = {0};
+            unsigned long start_time = 0; 
+            ccimp_os_get_system_time(&system_up_time_struct);
+            start_time = system_up_time_struct.sys_uptime;
+            do
+            {          
+                ccimp_os_yield();
+                ccimp_os_get_system_time(&system_up_time_struct);
+            } while ( (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START)
+                                        && ((system_up_time_struct.sys_uptime - start_time) < START_TIMETOUT));
+        }
 
+        if (ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING)
+        {
+            ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+            error = CCAPI_INIT_ERROR_RUN_INIT_FAILED;
+        }
     }
 done:
     return error;

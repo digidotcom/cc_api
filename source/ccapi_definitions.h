@@ -28,6 +28,7 @@ typedef struct {
 
 typedef enum {
     CCAPI_THREAD_NOT_STARTED,
+    CCAPI_THREAD_REQUEST_START,
     CCAPI_THREAD_RUNNING,
     CCAPI_THREAD_REQUEST_STOP
 } ccapi_thread_status_t;
@@ -38,6 +39,7 @@ typedef struct {
 } ccapi_thread_info_t;
 
 typedef struct {
+    char const * signature;
     void * connector_handle;
     ccapi_config_t config;
     struct {
@@ -46,6 +48,7 @@ typedef struct {
 } ccapi_data_t;
 
 extern ccapi_data_t * ccapi_data;
+extern char const ccapi_signature[];
 extern void ccapi_connector_run_thread(void * const argument);
 extern void * ccapi_malloc(size_t size);
 extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data);

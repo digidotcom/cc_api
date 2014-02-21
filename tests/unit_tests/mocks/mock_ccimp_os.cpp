@@ -68,9 +68,24 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
     mock_c()->actualCall("ccimp_create_thread");
-    if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == CCAPI_TRUE)
+    if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == 0)
     {
+        /* Don't create thread, return FALSE */
+        return CCAPI_FALSE;
+    }
+    else if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == 1)
+    {
+        /* Create thread correctly */
         ccimp_create_thread_real(create_thread_info);
+        return CCAPI_TRUE;
+    }
+    else if ((ccapi_bool_t)mock_c()->returnValue().value.intValue == 2)
+    {
+        /* Create thread but corrupting argument */
+        void * wrong_argument = &wrong_argument; /* Not NULL */
+        create_thread_info->argument = wrong_argument;
+        ccimp_create_thread_real(create_thread_info);
+        return CCAPI_TRUE;
     }
 
     return (ccapi_bool_t)mock_c()->returnValue().value.intValue;
