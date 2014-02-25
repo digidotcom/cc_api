@@ -10,6 +10,8 @@
 static connector_handle_t connector_init_retval = NULL;
 static connector_callback_t connector_init_expected = NULL;
 
+char * assert_buffer = NULL;
+
 void Mock_connector_init_create(void)
 {
     /* TODO, mock this */

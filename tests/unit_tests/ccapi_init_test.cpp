@@ -7,6 +7,8 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
+
+#include <unistd.h>
 }
 
 using namespace std;
@@ -33,6 +35,15 @@ static void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 
 TEST_GROUP(ccapi_init_test)
 {
+    void setup()
+    {
+        ASSERT_CLEAN()
+    }
+
+    void teardown()
+    {
+        ASSERT_CLEAN()
+    }
 };
 
 TEST(ccapi_init_test, testParamNULL)
@@ -301,12 +312,30 @@ TEST(ccapi_init_test, testStartThreadFail)
     free(malloc_for_ccapi_data);
 }
 
+static void * thread_wrapper(void * argument)
+{
+
+    ccapi_start((ccapi_start_t *)argument);
+
+    return NULL;
+}
+
+void aux_ccapi_start(void * argument)
+{
+    pthread_t pthread;
+    int ccode = pthread_create(&pthread, NULL, thread_wrapper, argument);
+
+    if (ccode != 0)
+    {
+        printf("aux_ccapi_start() error %d\n", ccode);
+    }
+}
+
 /* This test corrupts the argument passed to the layer2 run thread.
 */
 TEST(ccapi_init_test, testInitError)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
@@ -324,10 +353,14 @@ TEST(ccapi_init_test, testInitError)
     Mock_ccimp_create_thread_expectAndReturn(NULL, (ccapi_bool_t)2);
 
     fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_RUN_INIT_FAILED);
+    /* call ccapi_start in a sepatare thread as it won't return */
+    aux_ccapi_start(&start);
 
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED);
+    ASSERT_WAIT(500);
+    ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
+
+    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
 
@@ -359,9 +392,13 @@ TEST(ccapi_init_test, testInitError2)
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_RUN_INIT_FAILED);
+    CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED);
+    ASSERT_WAIT(500);
+    ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
+
+    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
 

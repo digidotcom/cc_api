@@ -29,36 +29,24 @@ void ccapi_connector_run_thread(void * const argument)
 
     assert (local_ccapi_data != NULL);
 
-#if 1
-    if (local_ccapi_data->signature != ccapi_signature) 
-    {
-        /* local_ccapi_data is corrupted, it's likely the implementer 
-           made it wrong passing argument to the new thread.
-           We can only exit the thread and let the ccapi_start() function timeout.
-        */
-        return;
-    }
-#else
-    assert (local_ccapi_data->signature == ccapi_signature);
-#endif
+    /* local_ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_CHECK ((local_ccapi_data->signature == ccapi_signature), "Bad ccapi_signature");
+
     local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
     while (local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
     {
         connector_status_t const status = connector_run(local_ccapi_data->connector_handle);
+
+        /* It's very unlikely that we get this error as we have already verified ccapi_signature */
+        ASSERT_CHECK ((status != connector_init_error), "Bad connector_signature");
+
         switch(status)
         {
-            case connector_init_error:
-                /* It's very unlikely that we get this error as we have already verified ccapi_signature */
-                goto done;
-
             default:
                 break;
         }            
     }
-    assert(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
-
-done:
-    local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+    ASSERT(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
 }
 
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data)

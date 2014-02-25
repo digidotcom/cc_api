@@ -107,26 +107,10 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
             goto done;
         }
 
-        #define START_TIMETOUT 1
-        /* Check that the thread started in START_TIMETOUT seconds */
-        {
-            ccimp_os_system_up_time_t system_up_time_struct = {0};
-            unsigned long start_time = 0; 
-            ccimp_os_get_system_time(&system_up_time_struct);
-            start_time = system_up_time_struct.sys_uptime;
-            do
-            {          
-                ccimp_os_yield();
-                ccimp_os_get_system_time(&system_up_time_struct);
-            } while ( (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START)
-                                        && ((system_up_time_struct.sys_uptime - start_time) < START_TIMETOUT));
-        }
-
-        if (ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING)
-        {
-            ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
-            error = CCAPI_INIT_ERROR_RUN_INIT_FAILED;
-        }
+        do
+        {          
+            ccimp_os_yield();
+        } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
 done:
     return error;

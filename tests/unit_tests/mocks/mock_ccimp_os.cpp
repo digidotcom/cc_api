@@ -38,12 +38,16 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 #include <pthread.h>
+#include <unistd.h>
 
 /******************** LINUX IMPLEMENTATION ********************/
 
 static void * thread_wrapper(void * argument)
 {
     ccimp_create_thread_info_t * create_thread_info = (ccimp_create_thread_info_t *)argument;
+
+    /* TODO: Introduce a random delay on thread start? */
+    /* usleep(300000); */
 
     create_thread_info->start(create_thread_info->argument);
 
