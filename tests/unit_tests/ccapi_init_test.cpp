@@ -231,7 +231,7 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     Mock_connector_run_expectAndReturn(handle ,connector_success);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
+    Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -267,7 +267,7 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), mem_for_thread_connector_run);
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_FALSE);
+    Mock_ccimp_create_thread_expectAndReturn(NULL, 1, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -298,7 +298,7 @@ TEST(ccapi_init_test, testStartThreadFail)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_FALSE);
+    Mock_ccimp_create_thread_expectAndReturn(NULL, 1, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -350,7 +350,7 @@ TEST(ccapi_init_test, testInitError)
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     Mock_connector_run_expectAndReturn(handle ,connector_success);
     /* corrupt the argument created by the handle */
-    Mock_ccimp_create_thread_expectAndReturn(NULL, (ccapi_bool_t)2);
+    Mock_ccimp_create_thread_expectAndReturn(NULL, 2, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     /* call ccapi_start in a sepatare thread as it won't return */
@@ -388,7 +388,7 @@ TEST(ccapi_init_test, testInitError2)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     Mock_connector_run_expectAndReturn(handle, connector_init_error);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
+    Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);

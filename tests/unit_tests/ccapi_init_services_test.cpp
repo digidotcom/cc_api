@@ -48,7 +48,7 @@ TEST_GROUP(ccapi_init_services_test)
         Mock_connector_run_expectAndReturn(handle ,connector_success);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
 
-        Mock_ccimp_create_thread_expectAndReturn(NULL, CCAPI_TRUE);
+        Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
     }
 
     void teardown()
