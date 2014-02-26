@@ -54,6 +54,9 @@ TEST_GROUP(ccapi_init_services_test)
     void teardown()
     {
         Mock_ccimp_malloc_destroy();
+        Mock_ccimp_create_thread_destroy();
+        Mock_connector_init_destroy();
+        Mock_connector_run_destroy();
     }
 };
 

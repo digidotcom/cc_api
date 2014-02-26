@@ -7,6 +7,7 @@ void Mock_ccimp_malloc_create(void)
 
 void Mock_ccimp_malloc_destroy(void)
 {
+    mock().checkExpectations();
     mock().clear();
 }
 
@@ -24,6 +25,7 @@ void Mock_ccimp_create_thread_create(void)
 
 void Mock_ccimp_create_thread_destroy(void)
 {
+    mock().checkExpectations();
     mock().clear();
 }
 

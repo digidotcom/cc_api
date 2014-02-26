@@ -20,6 +20,7 @@ void Mock_connector_init_create(void)
 
 void Mock_connector_init_destroy(void)
 {
+    mock().checkExpectations();
     return;
 }
 
@@ -46,6 +47,7 @@ void Mock_connector_run_create(void)
 
 void Mock_connector_run_destroy(void)
 {
+    mock().checkExpectations();
     return;
 }
 
