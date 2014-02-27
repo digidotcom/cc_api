@@ -7,6 +7,8 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
+
+#include <unistd.h>
 }
 
 using namespace std;
@@ -60,6 +62,7 @@ TEST_GROUP(ccapi_config_test)
 
     void teardown()
     {
+        usleep(100000); /* Let the threads be scheduled so we can check actual calls */
         Mock_ccimp_malloc_destroy();
         Mock_ccimp_create_thread_destroy();
         Mock_connector_init_destroy();

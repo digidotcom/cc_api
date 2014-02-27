@@ -239,6 +239,8 @@ TEST(ccapi_init_test, testStartOk)
     STRCMP_EQUAL(start.device_type, ccapi_data->config.device_type);
     STRCMP_EQUAL(start.device_cloud_url, ccapi_data->config.device_cloud_url);
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+
+    usleep(100000); /* Let the threads be scheduled so we can check actual calls */
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
     Mock_connector_init_destroy();
@@ -347,7 +349,6 @@ TEST(ccapi_init_test, testInitError)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-    Mock_connector_run_expectAndReturn(handle ,connector_success);
     /* corrupt the argument created by the handle */
     Mock_ccimp_create_thread_expectAndReturn(NULL, 2, CCAPI_FALSE);
 
@@ -363,7 +364,6 @@ TEST(ccapi_init_test, testInitError)
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
     Mock_connector_init_destroy();
-    Mock_connector_run_destroy();
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -400,6 +400,7 @@ TEST(ccapi_init_test, testInitError2)
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
+    usleep(100000); /* Let the threads be scheduled so we can check actual calls */
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_create_thread_destroy();
     Mock_connector_init_destroy();

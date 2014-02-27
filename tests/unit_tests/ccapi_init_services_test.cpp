@@ -7,6 +7,8 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
+
+#include <unistd.h>
 }
 
 using namespace std;
@@ -45,7 +47,7 @@ TEST_GROUP(ccapi_init_services_test)
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
         Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), malloc_for_thread_connector_run);
-        Mock_connector_run_expectAndReturn(handle ,connector_success);
+        Mock_connector_run_expectAndReturn(handle, connector_success);
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
 
         Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
@@ -53,6 +55,8 @@ TEST_GROUP(ccapi_init_services_test)
 
     void teardown()
     {
+        usleep(100000); /* Let the threads be scheduled so we can check actual calls */
+
         Mock_ccimp_malloc_destroy();
         Mock_ccimp_create_thread_destroy();
         Mock_connector_init_destroy();
