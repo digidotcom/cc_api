@@ -44,7 +44,13 @@ TEST_GROUP(ccapi_config_test)
         void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
         void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
         void * malloc_for_thread_connector_run = malloc(sizeof (ccapi_thread_info_t));
+        ccimp_create_thread_info_t expected_create_thread_connector_run;
         connector_handle_t handle = &handle; /* Not-NULL */
+
+        Mock_ccimp_malloc_create();
+        Mock_ccimp_create_thread_create();
+        Mock_connector_init_create();
+        Mock_connector_run_create();
 
         Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
         Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
@@ -52,8 +58,11 @@ TEST_GROUP(ccapi_config_test)
         Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), malloc_for_thread_connector_run);
 
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-        Mock_connector_run_expectAndReturn(handle ,connector_success);
-        Mock_ccimp_create_thread_expectAndReturn(NULL, 0,  CCAPI_TRUE);
+        Mock_connector_run_expectAndReturn(handle, connector_success);
+
+        expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+        expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+        Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 0,  CCAPI_TRUE);
 
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
@@ -63,10 +72,18 @@ TEST_GROUP(ccapi_config_test)
     void teardown()
     {
         usleep(100000); /* Let the threads be scheduled so we can check actual calls */
+
+        mock().checkExpectations();
+
         Mock_ccimp_malloc_destroy();
         Mock_ccimp_create_thread_destroy();
         Mock_connector_init_destroy();
         Mock_connector_run_destroy();
+
+        ASSERT_CLEAN()
+
+        mock().removeAllComparators();
+        mock().clear();
     }
 };
 

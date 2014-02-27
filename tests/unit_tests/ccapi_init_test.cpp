@@ -37,12 +37,25 @@ TEST_GROUP(ccapi_init_test)
 {
     void setup()
     {
-        ASSERT_CLEAN()
+        Mock_ccimp_malloc_create();
+        Mock_ccimp_create_thread_create();
+        Mock_connector_init_create();
+        Mock_connector_run_create();
     }
 
     void teardown()
     {
+        mock().checkExpectations();
+
+        Mock_ccimp_malloc_destroy();
+        Mock_ccimp_create_thread_destroy();
+        Mock_connector_init_destroy();
+        Mock_connector_run_destroy();
+
         ASSERT_CLEAN()
+
+        mock().removeAllComparators();
+        mock().clear();
     }
 };
 
@@ -219,6 +232,7 @@ TEST(ccapi_init_test, testStartOk)
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
     static ccimp_create_thread_info_t mem_for_thread_connector_run;
+    ccimp_create_thread_info_t expected_create_thread_connector_run;
 
     connector_handle_t handle = &handle; /* Not-NULL */
 
@@ -228,7 +242,11 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     Mock_connector_run_expectAndReturn(handle ,connector_success);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
+
+    expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    /* expected_create_thread_connector_run.start */
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 0, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -241,10 +259,6 @@ TEST(ccapi_init_test, testStartOk)
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     usleep(100000); /* Let the threads be scheduled so we can check actual calls */
-    Mock_ccimp_malloc_destroy();
-    Mock_ccimp_create_thread_destroy();
-    Mock_connector_init_destroy();
-    Mock_connector_run_destroy();
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -273,9 +287,6 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
 
-    Mock_ccimp_malloc_destroy();
-    Mock_connector_init_destroy();
-
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
     free(malloc_for_ccapi_data);
@@ -289,7 +300,7 @@ TEST(ccapi_init_test, testStartThreadFail)
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
     static ccimp_create_thread_info_t mem_for_thread_connector_run;
-
+    ccimp_create_thread_info_t expected_create_thread_connector_run;
     connector_handle_t handle = &handle; /* Not-NULL */
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
@@ -298,15 +309,14 @@ TEST(ccapi_init_test, testStartThreadFail)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, 1, CCAPI_FALSE);
+
+    expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 1, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_THREAD_FAILED);
-
-    Mock_ccimp_malloc_destroy();
-    Mock_ccimp_create_thread_destroy();
-    Mock_connector_init_destroy();
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -341,7 +351,7 @@ TEST(ccapi_init_test, testInitError)
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
     static ccimp_create_thread_info_t mem_for_thread_connector_run;
-
+    ccimp_create_thread_info_t expected_create_thread_connector_run;
     connector_handle_t handle = &handle; /* Not-NULL */
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
@@ -350,7 +360,10 @@ TEST(ccapi_init_test, testInitError)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     /* corrupt the argument created by the handle */
-    Mock_ccimp_create_thread_expectAndReturn(NULL, 2, CCAPI_FALSE);
+
+    expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 2, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     /* call ccapi_start in a sepatare thread as it won't return */
@@ -360,10 +373,6 @@ TEST(ccapi_init_test, testInitError)
     ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
-
-    Mock_ccimp_malloc_destroy();
-    Mock_ccimp_create_thread_destroy();
-    Mock_connector_init_destroy();
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -380,7 +389,7 @@ TEST(ccapi_init_test, testInitError2)
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
     static ccimp_create_thread_info_t mem_for_thread_connector_run;
-
+    ccimp_create_thread_info_t expected_create_thread_connector_run;
     connector_handle_t handle = &handle; /* Not-NULL */
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
@@ -389,7 +398,10 @@ TEST(ccapi_init_test, testInitError2)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     Mock_connector_run_expectAndReturn(handle, connector_init_error);
-    Mock_ccimp_create_thread_expectAndReturn(NULL, 0, CCAPI_TRUE);
+    
+    expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 0, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -401,10 +413,6 @@ TEST(ccapi_init_test, testInitError2)
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     usleep(100000); /* Let the threads be scheduled so we can check actual calls */
-    Mock_ccimp_malloc_destroy();
-    Mock_ccimp_create_thread_destroy();
-    Mock_connector_init_destroy();
-    Mock_connector_run_destroy();
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);

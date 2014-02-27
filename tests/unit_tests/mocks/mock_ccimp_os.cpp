@@ -7,8 +7,6 @@ void Mock_ccimp_malloc_create(void)
 
 void Mock_ccimp_malloc_destroy(void)
 {
-    mock().checkExpectations();
-    mock().clear();
 }
 
 void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval)
@@ -18,21 +16,43 @@ void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval)
             .andReturnValue(retval);
 }
 
+bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
+{
+    ccimp_create_thread_info_t * o1 = (ccimp_create_thread_info_t*)object1;
+    ccimp_create_thread_info_t * o2 = (ccimp_create_thread_info_t*)object2;
+    bool ret = 0;
+
+    if (o1 != NULL && o2 != NULL) 
+    {  
+        ret = ((o1->argument == o2->argument) && (o1->type == o2->type));
+        /* Not checking 'start' parameter */
+    }
+
+    return ret;
+}
+
+SimpleString ccimp_create_thread_info_t_ValueToString(void* object)
+{
+	return StringFrom(((ccimp_create_thread_info_t*)object)->type);
+}
+
 void Mock_ccimp_create_thread_create(void)
 {
+
+    static MockFunctionComparator comparator(ccimp_create_thread_info_t_IsEqual, ccimp_create_thread_info_t_ValueToString);
+    mock().installComparator("ccimp_create_thread_info_t", comparator);
+
     return;
 }
 
 void Mock_ccimp_create_thread_destroy(void)
 {
-    mock().checkExpectations();
-    mock().clear();
 }
 
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, uint8_t behavior, ccapi_bool_t retval)
 {
-    UNUSED_ARGUMENT(create_thread_info);
     mock().expectOneCall("ccimp_create_thread")
+            .withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info)
             .andReturnValue(retval);
 
     mock().setData("create_thread_behavior", behavior);
@@ -76,7 +96,7 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
     uint8_t create_thread_behavior;
-    mock_c()->actualCall("ccimp_create_thread");
+    mock_c()->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
     create_thread_behavior = mock().getData("create_thread_behavior").getIntValue();
 

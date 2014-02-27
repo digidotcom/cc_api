@@ -24,7 +24,7 @@
 
 extern char * assert_buffer;
 
-#define ASSERT_CHECK(cond, label)           ON_FALSE_DO_((cond), {printf("Asserted: %s\n", label); assert_buffer = label; while(1);})
+#define ASSERT_CHECK(cond, label)           ON_FALSE_DO_((cond), {/* printf("Asserted: %s\n", label); */ assert_buffer = label; while(1);})
 #define ASSERT_WAIT(timeout_ms)             { unsigned int loops= (timeout_ms * 2); while (assert_buffer == NULL && loops--) usleep(500); }
 #define ASSERT_IF_NOT_HIT_DO(label, code)   ON_FALSE_DO_(assert_buffer != NULL && (!strcmp(assert_buffer, label)), {printf("Didn't hit assert: %s\n", label); code;})
 #define ASSERT_CLEAN()                      assert_buffer = NULL;

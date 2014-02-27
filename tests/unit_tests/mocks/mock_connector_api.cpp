@@ -17,13 +17,11 @@ union vp2fp
 
 void Mock_connector_init_create(void)
 {
-    /* TODO, mock this */
     return;
 }
 
 void Mock_connector_init_destroy(void)
 {
-    mock().checkExpectations();
     return;
 }
 
@@ -47,13 +45,11 @@ connector_handle_t connector_init(connector_callback_t const callback)
 
 void Mock_connector_run_create(void)
 {
-    /* TODO, mock this */
     return;
 }
 
 void Mock_connector_run_destroy(void)
 {
-    mock().checkExpectations();
     return;
 }
 
