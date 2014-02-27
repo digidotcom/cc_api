@@ -20,7 +20,7 @@
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
-#if (defined UNIT_TESTING)
+#if (defined UNIT_TEST)
 
 extern char * assert_buffer;
 
