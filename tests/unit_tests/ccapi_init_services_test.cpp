@@ -46,17 +46,14 @@ TEST_GROUP(ccapi_init_services_test)
         mock("ccimp_malloc").ignoreOtherCalls();
 
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
-        Mock_connector_run_expectAndReturn(handle, connector_success);
     }
 
     void teardown()
     {
-        usleep(100000); /* Let the threads be scheduled so we can check actual calls */
-
-        mock().checkExpectations();
-
         Mock_connector_init_destroy();
         Mock_connector_run_destroy();
+
+        mock().checkExpectations();
 
         ASSERT_CLEAN()
 

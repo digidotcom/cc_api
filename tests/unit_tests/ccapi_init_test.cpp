@@ -45,12 +45,12 @@ TEST_GROUP(ccapi_init_test)
 
     void teardown()
     {
-        mock().checkExpectations();
-
         Mock_ccimp_malloc_destroy();
         Mock_ccimp_create_thread_destroy();
         Mock_connector_init_destroy();
         Mock_connector_run_destroy();
+
+        mock().checkExpectations();
 
         ASSERT_CLEAN()
 
@@ -258,8 +258,6 @@ TEST(ccapi_init_test, testStartOk)
     STRCMP_EQUAL(start.device_cloud_url, ccapi_data->config.device_cloud_url);
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
-    usleep(100000); /* Let the threads be scheduled so we can check actual calls */
-
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
     free(malloc_for_ccapi_data);
@@ -374,6 +372,10 @@ TEST(ccapi_init_test, testInitError)
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
 
+    /* Let aux_ccapi_start finish before freeing it's memory */
+    ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+    sched_yield();
+
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
     free(malloc_for_ccapi_data);
@@ -411,8 +413,6 @@ TEST(ccapi_init_test, testInitError2)
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
-
-    usleep(100000); /* Let the threads be scheduled so we can check actual calls */
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);

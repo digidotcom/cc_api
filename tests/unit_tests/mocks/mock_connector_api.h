@@ -15,6 +15,8 @@ extern "C" {
 #include "connector_api.h"
 }
 
+#define MOCK_CONNECTOR_RUN_ENABLED 1
+
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);
 void Mock_connector_init_expectAndReturn(connector_callback_t const callback, connector_handle_t retval);
