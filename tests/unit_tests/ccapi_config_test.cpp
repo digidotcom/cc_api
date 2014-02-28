@@ -41,14 +41,10 @@ TEST_GROUP(ccapi_config_test)
         ccapi_start_t start = {0};
         ccapi_init_error_t error;
 
-        connector_handle_t handle = &handle; /* Not-NULL */
-
         Mock_connector_init_create();
         Mock_connector_run_create();
 
         mock("ccimp_create_thread").ignoreOtherCalls();
-
-        Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
 
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);

@@ -8,7 +8,9 @@
 #include "mock_connector_api.h"
 #include <sched.h>
 
-char * assert_buffer = NULL;
+char * assert_buffer;
+
+static connector_handle_t global_handle;
 
 uint8_t thread_wait;
 
@@ -20,6 +22,8 @@ union vp2fp
 
 void Mock_connector_init_create(void)
 {
+    global_handle = NULL;
+
     return;
 }
 
@@ -35,15 +39,29 @@ void Mock_connector_init_expectAndReturn(connector_callback_t const callback, co
     mock("connector_init").expectOneCall("connector_init")
              .withParameter("callback", u.vp)
              .andReturnValue(retval);
+
+    mock("connector_init").setData("behavior", MOCK_CONNECTOR_INIT_ENABLED);
 }
 
 connector_handle_t connector_init(connector_callback_t const callback)
 {
     vp2fp u;
     u.fp = callback;
+    uint8_t behavior;
 
-    mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp); 
-    return mock("connector_init").returnValue().getPointerValue();
+    behavior = mock("connector_init").getData("behavior").getIntValue();
+
+    if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
+    {
+        mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp); 
+        global_handle = mock("connector_init").returnValue().getPointerValue();
+    }
+    else
+    {
+		global_handle = &global_handle; /* Not-NULL */
+    }
+
+    return global_handle;
 }
 
 void Mock_connector_run_create(void)

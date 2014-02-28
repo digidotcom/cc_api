@@ -37,14 +37,10 @@ TEST_GROUP(ccapi_init_services_test)
 {
     void setup()
     {
-        connector_handle_t handle = &handle; /* Not-NULL */
-
         Mock_connector_init_create();
         Mock_connector_run_create();
 
         mock("ccimp_create_thread").ignoreOtherCalls();
-
-        Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     }
 
     void teardown()
