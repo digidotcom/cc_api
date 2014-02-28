@@ -246,7 +246,7 @@ TEST(ccapi_init_test, testStartOk)
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     /* expected_create_thread_connector_run.start */
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 0, CCAPI_TRUE);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_DISABLED, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -312,7 +312,7 @@ TEST(ccapi_init_test, testStartThreadFail)
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 1, CCAPI_FALSE);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED1, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -363,7 +363,7 @@ TEST(ccapi_init_test, testInitError)
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 2, CCAPI_FALSE);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED2, CCAPI_FALSE);
 
     fill_start_structure_with_good_parameters(&start);
     /* call ccapi_start in a sepatare thread as it won't return */
@@ -401,7 +401,7 @@ TEST(ccapi_init_test, testInitError2)
     
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, 0, CCAPI_TRUE);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_DISABLED, CCAPI_TRUE);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);

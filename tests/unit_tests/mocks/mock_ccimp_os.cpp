@@ -52,13 +52,13 @@ void Mock_ccimp_create_thread_destroy(void)
 {
 }
 
-void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, uint8_t behavior, ccapi_bool_t retval)
+void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccapi_bool_t retval)
 {
     mock("ccimp_create_thread").expectOneCall("ccimp_create_thread")
             .withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info)
             .andReturnValue(retval);
 
-    mock("ccimp_create_thread").setData("create_thread_behavior", behavior);
+    mock("ccimp_create_thread").setData("behavior", behavior);
 }
 
 extern "C" {
@@ -99,23 +99,23 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
-    uint8_t create_thread_behavior;
+    uint8_t behavior;
     mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
-    create_thread_behavior = mock_scope_c("ccimp_create_thread")->getData("create_thread_behavior").value.intValue;
+    behavior = mock_scope_c("ccimp_create_thread")->getData("behavior").value.intValue;
 
-    if (create_thread_behavior == 0)
+    if (behavior == MOCK_THREAD_DISABLED)
     {
         /* Create thread correctly */
         ccimp_create_thread_real(create_thread_info);
         return CCAPI_TRUE;
     }
-    else if (create_thread_behavior == 1)
+    else if (behavior == MOCK_THREAD_ENABLED1)
     {
         /* Don't create thread, return FALSE */
         return CCAPI_FALSE;
     }
-    else if (create_thread_behavior == 2)
+    else if (behavior == MOCK_THREAD_ENABLED2)
     {
         /* Create thread but corrupting argument */
         void * wrong_argument = &wrong_argument; /* Not NULL */
