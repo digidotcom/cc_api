@@ -154,7 +154,6 @@ TEST(ccapi_init_test, testNoMemory)
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
-    Mock_ccimp_malloc_destroy();
 }
 
 TEST(ccapi_init_test, testDeviceTypeNoMemory)
@@ -171,7 +170,6 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
-    Mock_ccimp_malloc_destroy();
 
     free(malloc_for_ccapi_data);
 }
@@ -192,7 +190,6 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
-    Mock_ccimp_malloc_destroy();
 
     free(malloc_for_ccapi_data);
 }
@@ -201,14 +198,7 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_init_error_t error;
-    void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
-    void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
-    void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
     connector_handle_t handle = NULL;
-
-    Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
-    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
-    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
 
@@ -216,12 +206,6 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
-    Mock_ccimp_malloc_destroy();
-    Mock_connector_init_destroy();
-
-    free(malloc_for_device_cloud_url);
-    free(malloc_for_device_type);
-    free(malloc_for_ccapi_data);
 }
 
 TEST(ccapi_init_test, testStartOk)

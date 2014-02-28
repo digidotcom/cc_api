@@ -43,7 +43,6 @@ TEST_GROUP(ccapi_init_services_test)
         Mock_connector_run_create();
 
         mock("ccimp_create_thread").ignoreOtherCalls();
-        mock("ccimp_malloc").ignoreOtherCalls();
 
         Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
     }

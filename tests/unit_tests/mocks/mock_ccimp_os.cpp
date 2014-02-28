@@ -131,17 +131,17 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
 {
     uint8_t behavior;
 
-    mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
-
     behavior = mock_scope_c("ccimp_malloc")->getData("behavior").value.intValue;
     if (behavior == MOCK_MALLOC_ENABLED)
     {
+        mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
         malloc->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
     }
     else
     {
         /* Skip mocking, use default malloc implementation */
         malloc->ptr = calloc(1, malloc->size);
+        memset(malloc->ptr, 0xFF, malloc->size); /* Try to catch hidden problems */
     }
     return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
