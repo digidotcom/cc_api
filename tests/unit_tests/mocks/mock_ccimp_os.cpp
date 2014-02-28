@@ -16,7 +16,7 @@ void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval)
             .andReturnValue(retval);
 
     /* If we are calling expectations, then override default malloc */
-    mock("ccimp_malloc").setData("malloc_behavior", 1);
+    mock("ccimp_malloc").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
 bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
@@ -129,19 +129,19 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
 {
-    uint8_t malloc_behavior;
+    uint8_t behavior;
 
     mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
 
-    malloc_behavior = mock_scope_c("ccimp_malloc")->getData("malloc_behavior").value.intValue;
-    if (malloc_behavior == 0)
+    behavior = mock_scope_c("ccimp_malloc")->getData("behavior").value.intValue;
+    if (behavior == MOCK_MALLOC_ENABLED)
     {
-        /* Skip mocking, use default malloc implementation */
-        malloc->ptr = calloc(1, malloc->size);
+        malloc->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
     }
     else
     {
-        malloc->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
+        /* Skip mocking, use default malloc implementation */
+        malloc->ptr = calloc(1, malloc->size);
     }
     return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }

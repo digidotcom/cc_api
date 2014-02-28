@@ -15,6 +15,8 @@ extern "C" {
 #include "ccimp/ccimp_os.h"
 }
 
+#define MOCK_MALLOC_ENABLED 1
+
 void Mock_ccimp_malloc_create(void);
 void Mock_ccimp_malloc_destroy(void);
 void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval);
