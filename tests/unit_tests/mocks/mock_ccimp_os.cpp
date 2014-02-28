@@ -11,9 +11,12 @@ void Mock_ccimp_malloc_destroy(void)
 
 void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval)
 {
-    mock().expectOneCall("ccimp_malloc")
+    mock("ccimp_malloc").expectOneCall("ccimp_malloc")
             .withParameter("size", (int)expect)
             .andReturnValue(retval);
+
+    /* If we are calling expectations, then override default malloc */
+    mock("ccimp_malloc").setData("malloc_behavior", 1);
 }
 
 bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
@@ -51,16 +54,17 @@ void Mock_ccimp_create_thread_destroy(void)
 
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, uint8_t behavior, ccapi_bool_t retval)
 {
-    mock().expectOneCall("ccimp_create_thread")
+    mock("ccimp_create_thread").expectOneCall("ccimp_create_thread")
             .withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info)
             .andReturnValue(retval);
 
-    mock().setData("create_thread_behavior", behavior);
+    mock("ccimp_create_thread").setData("create_thread_behavior", behavior);
 }
 
 extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
+#include <malloc.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -96,9 +100,9 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
     uint8_t create_thread_behavior;
-    mock_c()->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+    mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
-    create_thread_behavior = mock().getData("create_thread_behavior").getIntValue();
+    create_thread_behavior = mock_scope_c("ccimp_create_thread")->getData("create_thread_behavior").value.intValue;
 
     if (create_thread_behavior == 0)
     {
@@ -120,13 +124,25 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
         return CCAPI_TRUE;
     }
 
-    return (ccapi_bool_t)mock_c()->returnValue().value.intValue;
+    return (ccapi_bool_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
 }
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
 {
-    mock_c()->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
-    malloc->ptr = mock_c()->returnValue().value.pointerValue;
+    uint8_t malloc_behavior;
+
+    mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
+
+    malloc_behavior = mock_scope_c("ccimp_malloc")->getData("malloc_behavior").value.intValue;
+    if (malloc_behavior == 0)
+    {
+        /* Skip mocking, use default malloc implementation */
+        malloc->ptr = calloc(1, malloc->size);
+    }
+    else
+    {
+        malloc->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
+    }
     return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
