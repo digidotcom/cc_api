@@ -39,8 +39,6 @@ TEST_GROUP(ccapi_init_services_test)
     {
         Mock_connector_init_create();
         Mock_connector_run_create();
-
-        mock("ccimp_create_thread").ignoreOtherCalls();
     }
 
     void teardown()

@@ -100,23 +100,36 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
     uint8_t behavior;
-    mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
     behavior = mock_scope_c("ccimp_create_thread")->getData("behavior").value.intValue;
 
     if (behavior == MOCK_THREAD_DISABLED)
     {
+        /* Do not report actualCall */
+
+        /* Create thread correctly */
+        ccimp_create_thread_real(create_thread_info);
+        return CCAPI_TRUE;
+    }
+    else if (behavior == MOCK_THREAD_ENABLED0)
+    {
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+
         /* Create thread correctly */
         ccimp_create_thread_real(create_thread_info);
         return CCAPI_TRUE;
     }
     else if (behavior == MOCK_THREAD_ENABLED1)
     {
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+
         /* Don't create thread, return FALSE */
         return CCAPI_FALSE;
     }
     else if (behavior == MOCK_THREAD_ENABLED2)
     {
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+
         /* Create thread but corrupting argument */
         void * wrong_argument = &wrong_argument; /* Not NULL */
         create_thread_info->argument = wrong_argument;

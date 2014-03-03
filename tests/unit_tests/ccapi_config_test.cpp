@@ -44,8 +44,6 @@ TEST_GROUP(ccapi_config_test)
         Mock_connector_init_create();
         Mock_connector_run_create();
 
-        mock("ccimp_create_thread").ignoreOtherCalls();
-
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_INIT_ERROR_NONE);
