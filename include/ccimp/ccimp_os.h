@@ -39,7 +39,7 @@ typedef struct {
 */
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc);
-ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
+ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield(/*connector_status_t const * const status*/ void);

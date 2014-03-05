@@ -30,6 +30,6 @@ void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval);
 
 void Mock_ccimp_create_thread_create(void);
 void Mock_ccimp_create_thread_destroy(void);
-void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccapi_bool_t retval);
+void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
 
 #endif

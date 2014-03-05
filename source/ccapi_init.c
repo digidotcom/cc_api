@@ -101,7 +101,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
         ccapi_data->thread.connector_run->ccimp_info.start = ccapi_connector_run_thread;
         ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_CONNECTOR_RUN;
 
-        if (ccimp_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCAPI_TRUE)
+        if (ccimp_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCIMP_STATUS_OK)
         {
             error = CCAPI_INIT_ERROR_THREAD_FAILED;
             goto done;

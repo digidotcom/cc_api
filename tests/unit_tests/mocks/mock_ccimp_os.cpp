@@ -52,7 +52,7 @@ void Mock_ccimp_create_thread_destroy(void)
 {
 }
 
-void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccapi_bool_t retval)
+void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval)
 {
     mock("ccimp_create_thread").expectOneCall("ccimp_create_thread")
             .withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info)
@@ -97,7 +97,7 @@ ccapi_bool_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_
 }
 /***********************************************************/
 
-ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
+ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {
     uint8_t behavior;
 
@@ -109,7 +109,7 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
 
         /* Create thread correctly */
         ccimp_create_thread_real(create_thread_info);
-        return CCAPI_TRUE;
+        return CCIMP_STATUS_OK;
     }
     else if (behavior == MOCK_THREAD_ENABLED0)
     {
@@ -117,14 +117,14 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
 
         /* Create thread correctly */
         ccimp_create_thread_real(create_thread_info);
-        return CCAPI_TRUE;
+        return CCIMP_STATUS_OK;
     }
     else if (behavior == MOCK_THREAD_ENABLED1)
     {
         mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Don't create thread, return FALSE */
-        return CCAPI_FALSE;
+        return CCIMP_STATUS_ABORT;
     }
     else if (behavior == MOCK_THREAD_ENABLED2)
     {
@@ -134,10 +134,10 @@ ccapi_bool_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info
         void * wrong_argument = &wrong_argument; /* Not NULL */
         create_thread_info->argument = wrong_argument;
         ccimp_create_thread_real(create_thread_info);
-        return CCAPI_TRUE;
+        return CCIMP_STATUS_OK;
     }
 
-    return (ccapi_bool_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
+    return (ccimp_status_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
 }
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
