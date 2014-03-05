@@ -175,7 +175,7 @@ ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_yield(/*connector_status_t const * const status*/ void)
+ccimp_status_t ccimp_os_yield(void)
 {
     int error;
 
