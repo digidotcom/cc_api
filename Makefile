@@ -14,14 +14,15 @@ CPP = g++
 CC = gcc
 
 # Target Platform
-CONNECTOR_DIR = ./source/cc_ansic
+CCAPI_SOURCE_DIR = ./source
+CCAPI_INCLUDE = ./include
+CONNECTOR_DIR = $(CCAPI_SOURCE_DIR)/cc_ansic
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
-CCAPI_INCLUDE = ./include
-CCAPI_SOURCE_DIR = ./source/
+
 TEST_DIR = ./tests/unit_tests
 MOCKS_DIR = ./tests/unit_tests/mocks
-CCIMP_SOURCE_DIR = ./tests/ccimp/
+CCIMP_SOURCE_DIR = ./tests/ccimp
 
 # CFLAG Definition
 CFLAGS += $(DFLAGS)
@@ -39,11 +40,14 @@ CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
 CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
 CFLAGS += -g -O0
 
-# Target output to generate.
-CSRCS = $(CCAPI_SOURCE_DIR)/ccapi_init.c $(CCAPI_SOURCE_DIR)/ccapi.c 
-CSRCS += $(CCIMP_SOURCE_DIR)/ccimp_os.c
-CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp
-CPPSRCS += $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
+CCAPI_SOURCES = $(wildcard $(CCAPI_SOURCE_DIR)/*.c)
+CCIMP_SOURCES = $(wildcard $(CCIMP_SOURCE_DIR)/*.c) 
+TESTS_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
+MOCKS_SOURCES = $(wildcard $(MOCKS_DIR)/*.cpp)
+
+CSRCS = $(CCAPI_SOURCES) $(CCIMP_SOURCES) 
+
+CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt -lpthread
@@ -69,11 +73,11 @@ test: $(COBJS) $(CPPOBJS)
 	./$@
 
 .cpp.o:
-	$(CPP) -DUNIT_TEST $(CFLAGS) -c $^ -o $@
+	$(CPP) -DUNIT_TEST $(CFLAGS) -c $< -o $@
 
 .c.o:
-	$(CC) -DUNIT_TEST $(CCFLAGS) -c $^ -o $@
+	$(CC) -DUNIT_TEST $(CCFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
-	-rm -f *.o $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/*.map $(TEST_DIR)/*.o $(MOCKS_DIR)/*.o  $(MOCKS_DIR)/*.map $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map
+	-rm -f $(COBJS) $(CPPOBJS)
