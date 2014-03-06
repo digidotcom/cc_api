@@ -6,7 +6,7 @@
  */
 
 #include "mock_connector_api.h"
-#include <sched.h>
+#include "mock_ccimp_os.h"
 
 char * assert_buffer;
 
@@ -75,7 +75,7 @@ void Mock_connector_run_destroy(void)
     /* Make sure that if the thread has been scheduled, the mock signalization is done */
     while(thread_wait)
     {
-        sched_yield();
+        ccimp_os_yield_real();
     }
     return;
 }

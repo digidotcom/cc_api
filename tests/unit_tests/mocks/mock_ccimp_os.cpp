@@ -1,4 +1,4 @@
-#include "mocks/mock_ccimp_os.h"
+#include "mock_ccimp_os.h"
 
 void Mock_ccimp_malloc_create(void)
 {
@@ -64,9 +64,6 @@ void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const
 extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
-#include <malloc.h>
-#include <pthread.h>
-#include <unistd.h>
 
 ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
 {

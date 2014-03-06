@@ -7,8 +7,6 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
-
-#include <unistd.h>
 }
 
 using namespace std;
@@ -343,7 +341,7 @@ TEST(ccapi_init_test, testInitError)
     /* call ccapi_start in a sepatare thread as it won't return */
     aux_ccapi_start(&start);
 
-    ASSERT_WAIT(500);
+    ASSERT_WAIT(1);
     ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
@@ -385,7 +383,7 @@ TEST(ccapi_init_test, testInitError2)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    ASSERT_WAIT(500);
+    ASSERT_WAIT(01);
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
 
     CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);

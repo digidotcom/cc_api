@@ -18,6 +18,19 @@ extern "C" {
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
 
+#define ASSERT_WAIT(timeout_sec)            { ccimp_os_system_up_time_t system_up_time; \
+                                              unsigned long time_end; \
+                                              ccimp_os_get_system_time(&system_up_time); \
+                                              time_end= (system_up_time.sys_uptime + timeout_sec); \
+                                              do \
+                                              { \
+                                                  ccimp_os_get_system_time(&system_up_time); \
+                                              } while (assert_buffer == NULL && system_up_time.sys_uptime <= time_end); \
+                                            }
+#define ASSERT_IF_NOT_HIT_DO(label, code)   ON_FALSE_DO_(assert_buffer != NULL && (!strcmp(assert_buffer, label)), {printf("Didn't hit assert: %s\n", label); code;})
+#define ASSERT_CLEAN()                      assert_buffer = NULL;
+
+
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);
 void Mock_connector_init_expectAndReturn(connector_callback_t const callback, connector_handle_t retval);

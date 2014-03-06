@@ -7,8 +7,6 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
-
-#include <unistd.h>
 }
 
 using namespace std;
