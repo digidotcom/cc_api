@@ -21,6 +21,7 @@ CCAPI_INCLUDE = ./include
 CCAPI_SOURCE_DIR = ./source/
 TEST_DIR = ./tests/unit_tests
 MOCKS_DIR = ./tests/unit_tests/mocks
+CCIMP_SOURCE_DIR = ./tests/ccimp/
 
 # CFLAG Definition
 CFLAGS += $(DFLAGS)
@@ -40,7 +41,9 @@ CFLAGS += -g -O0
 
 # Target output to generate.
 CSRCS = $(CCAPI_SOURCE_DIR)/ccapi_init.c $(CCAPI_SOURCE_DIR)/ccapi.c 
-CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
+CSRCS += $(CCIMP_SOURCE_DIR)/ccimp_os.c
+CPPSRCS = testrunner.cpp $(TEST_DIR)/ccapi_init_test.cpp $(TEST_DIR)/ccapi_config_test.cpp $(TEST_DIR)/ccapi_init_services_test.cpp
+CPPSRCS += $(MOCKS_DIR)/mock_ccimp_os.cpp $(MOCKS_DIR)/mock_connector_api.cpp
 
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt -lpthread
@@ -73,4 +76,4 @@ test: $(COBJS) $(CPPOBJS)
 
 .PHONY: clean
 clean:
-	-rm -f $(EXEC_NAME) *.o *.map $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/*.map $(TEST_DIR)/*.o $(MOCKS_DIR)/*.o  $(MOCKS_DIR)/*.map $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map
+	-rm -f *.o $(TEST_DIR)/*.o $(TEST_DIR)/*.map $(TEST_DIR)/*.map $(TEST_DIR)/*.o $(MOCKS_DIR)/*.o  $(MOCKS_DIR)/*.map $(CCAPI_SOURCE_DIR)/*.o $(CCAPI_SOURCE_DIR)/*.map

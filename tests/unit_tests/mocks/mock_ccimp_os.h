@@ -32,4 +32,11 @@ void Mock_ccimp_create_thread_create(void);
 void Mock_ccimp_create_thread_destroy(void);
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
 
+extern "C" {
+ccimp_status_t ccimp_malloc_real(ccimp_malloc_t * malloc);
+ccimp_status_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_thread_info);
+ccimp_status_t ccimp_os_get_system_time_real(ccimp_os_system_up_time_t * const system_up_time);
+ccimp_status_t ccimp_os_yield_real(void);
+}
+
 #endif
