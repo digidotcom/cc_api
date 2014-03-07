@@ -8,15 +8,13 @@
 #ifndef _CCAPI_DEFINITIONS_H_
 #define _CCAPI_DEFINITIONS_H_
 
+#include "ccapi_connector_config.h"
+#include "custom/custom_debug.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
 #include "connector_api.h"
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
-
-
-/* TODO: Get from ccimp_debug */
-#define ASSERT(cond)        assert(cond)
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
@@ -51,6 +49,19 @@ typedef struct {
     ccapi_thread_status_t status;
 } ccapi_thread_info_t;
 
+typedef enum {
+    LEVEL_INFO,
+    LEVEL_WARNING,
+    LEVEL_ERROR
+} ccapi_debug_level_t;
+
+typedef enum {
+    ZONE_LAYER1     = 1,
+    ZONE_START_STOP = 2,
+    ZONE_TRANSPORT  = 4,
+    ZONE_SEND_DATA  = 8
+} ccapi_debug_zones_t;
+
 typedef struct {
     char const * signature;
     void * connector_handle;
@@ -58,6 +69,8 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
+    ccapi_debug_zones_t dbg_zones;
+    ccapi_debug_level_t dbg_level;
 } ccapi_data_t;
 
 extern ccapi_data_t * ccapi_data;
@@ -65,5 +78,7 @@ extern char const ccapi_signature[];
 extern void ccapi_connector_run_thread(void * const argument);
 extern void * ccapi_malloc(size_t size);
 extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data);
+
+extern void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...);
 
 #endif

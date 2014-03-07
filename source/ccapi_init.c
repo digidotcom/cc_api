@@ -62,6 +62,10 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
+    /* TODO: Set dbg zone/level at start? */
+    ccapi_data->dbg_level = LEVEL_WARNING;
+    ccapi_data->dbg_zones = ZONE_LAYER1 | ZONE_START_STOP | ZONE_TRANSPORT /*| ZONE_SEND_DATA */;
+
     ccapi_data->config.vendor_id = start->vendor_id;
     memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);
 
@@ -113,5 +117,8 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
 done:
+    ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error);
+
+
     return error;
 }
