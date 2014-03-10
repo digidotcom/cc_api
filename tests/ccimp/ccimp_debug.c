@@ -12,7 +12,6 @@
 #if (defined CCAPI_DEBUG)
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 
 void ccimp_debug_printf(char const * const message)
 {
