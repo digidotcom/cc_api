@@ -132,10 +132,19 @@ void debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, va_list a
 {
     char formatted_string[250];
 
-    /* Go to the safe side, if we can't reach the zones/level info, just print it */
-    if (ccapi_data != NULL) 
-    {
 
+    if (ccapi_data == NULL) 
+	{
+        /* We can't reach the zones/level info:
+         *     - For production code, just print it 
+         *     - For unit testing, skip
+         */    
+#if (defined UNIT_TEST)
+        return;
+#endif
+	}
+    else
+    {
         /* Evaluate level */
         if (level < ccapi_data->dbg_level)
             return;
