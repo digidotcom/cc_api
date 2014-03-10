@@ -18,11 +18,17 @@
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
+#if (defined CCAPI_DEBUG)
+#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
+#else
+#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {code})
+#endif
+
 #if (defined UNIT_TEST)
 extern char * assert_buffer;
-#define ASSERT_CHECK(cond, label)           ON_FALSE_DO_((cond), {assert_buffer = label; while(1);})
+#define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {assert_buffer = message; goto label;})
 #else
-#define ASSERT_CHECK(cond, label)           ON_FALSE_DO_((cond), {ASSERT(cond);})
+#define ASSERT_GOTO(cond, message, label)   ON_ASSERT_DO_((cond), {goto label;}, {})
 #endif
 
 typedef struct {
