@@ -105,6 +105,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
     }
     return status;
 }
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data)
 {
     connector_callback_status_t status = connector_callback_error;
@@ -121,3 +122,58 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 
     return status;
 }
+
+#if (defined CCAPI_DEBUG)
+/* TODO: Can we do this? It's done for RCI*/
+#include <stdarg.h>
+
+void debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, va_list args, char const * const format)
+{
+    char formatted_string[250];
+
+    /* Go to the safe side, if we can't reach the zones/level info, just print it */
+    if (ccapi_data != NULL) 
+    {
+
+        /* Evaluate level */
+        if (level < ccapi_data->dbg_level)
+            return;
+
+        /* zone */
+        if (!(zone & ccapi_data->dbg_zones))
+            return;
+    }
+
+    /* TODO: Call connector_snprintf so we check buffer size */
+    vsprintf(formatted_string, format, args);
+    va_end(args);
+
+    ccimp_debug_printf(formatted_string);
+}
+
+void connector_debug_printf(char const * const format, ...)
+{
+    va_list args;
+    
+    va_start(args, format);
+    debug_printf(ZONE_LAYER1, LEVEL_ERROR, args, format);
+    va_end(args);
+}
+
+
+void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...)
+{
+    va_list args;
+    
+    va_start(args, format);
+    debug_printf(zone, level, args, format);
+    va_end(args);
+}
+#else
+void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...)
+{  
+    (void)zone;
+    (void)level;
+    (void)format;
+}
+#endif /* (defined CCAPI_DEBUG) */
