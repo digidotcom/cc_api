@@ -190,6 +190,7 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
 
     free(malloc_for_ccapi_data);
+    free(malloc_for_device_type);
 }
 
 TEST(ccapi_init_test, testConnectorInitNoMemory)
