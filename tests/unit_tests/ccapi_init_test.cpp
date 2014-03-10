@@ -229,7 +229,7 @@ TEST(ccapi_init_test, testStartOk)
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     /* expected_create_thread_connector_run.start */
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED0, CCIMP_STATUS_OK);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -286,7 +286,7 @@ TEST(ccapi_init_test, testStartThreadFail)
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED1, CCIMP_STATUS_ABORT);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, CCIMP_STATUS_ABORT);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -316,9 +316,9 @@ void aux_ccapi_start(void * argument)
     }
 }
 
-/* This test corrupts the argument passed to the layer2 run thread.
+/* This test corrupts the argument passed to the layer2 run thread so ccapi_signature check fails.
 */
-TEST(ccapi_init_test, testInitError)
+TEST(ccapi_init_test, testInitError_bad_ccapi_signature)
 {
     ccapi_start_t start = {0};
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
@@ -336,7 +336,7 @@ TEST(ccapi_init_test, testInitError)
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED2, CCIMP_STATUS_ABORT);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT, CCIMP_STATUS_ABORT);
 
     fill_start_structure_with_good_parameters(&start);
     /* call ccapi_start in a sepatare thread as it won't return */
@@ -358,7 +358,7 @@ TEST(ccapi_init_test, testInitError)
 
 /* This test makes layer1 run thread return connector_init_error.
 */
-TEST(ccapi_init_test, testInitError2)
+TEST(ccapi_init_test, testInitError_bad_connector_signature)
 {
     ccapi_start_t start = {0};
     ccapi_init_error_t error;
@@ -378,7 +378,7 @@ TEST(ccapi_init_test, testInitError2)
     
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
-    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED0, CCIMP_STATUS_OK);
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);

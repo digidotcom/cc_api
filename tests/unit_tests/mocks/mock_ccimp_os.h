@@ -18,10 +18,10 @@ extern "C" {
 #define MOCK_MALLOC_ENABLED 1	/* Mock disabled. Do malloc normally */
 
 typedef enum {
-    MOCK_THREAD_DISABLED,    /* Mock disabled. Create thread normally */
-    MOCK_THREAD_ENABLED0,    /* Mock enabled. Create thread normally */
-    MOCK_THREAD_ENABLED1,    /* Mock enabled. Don't create thread, return FALSE */
-    MOCK_THREAD_ENABLED2     /* Mock enabled. Create thread but corrupting argument */
+    MOCK_THREAD_DISABLED,                   /* Mock disabled. Create thread normally */
+    MOCK_THREAD_ENABLED_NORMAL,             /* Mock enabled. Create thread normally */
+    MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, /* Mock enabled. Don't create thread, return FALSE */
+    MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT   /* Mock enabled. Create thread but corrupting argument */
 } mock_thread_bahavior_t;
 
 void Mock_ccimp_malloc_create(void);

@@ -78,21 +78,21 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_in
         /* Create thread correctly */
         return ccimp_create_thread_real(create_thread_info);
     }
-    else if (behavior == MOCK_THREAD_ENABLED0)
+    else if (behavior == MOCK_THREAD_ENABLED_NORMAL)
     {
         mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Create thread correctly */
         return ccimp_create_thread_real(create_thread_info);
     }
-    else if (behavior == MOCK_THREAD_ENABLED1)
+    else if (behavior == MOCK_THREAD_ENABLED_DONT_CREATE_THREAD)
     {
         mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Don't create thread, return FALSE */
         return CCIMP_STATUS_ABORT;
     }
-    else if (behavior == MOCK_THREAD_ENABLED2)
+    else if (behavior == MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT)
     {
         mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
