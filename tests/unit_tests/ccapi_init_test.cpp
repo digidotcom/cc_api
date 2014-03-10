@@ -316,6 +316,46 @@ void aux_ccapi_start(void * argument)
     }
 }
 
+/* This test sets to null the argument passed to the layer2 run thread.
+*/
+TEST(ccapi_init_test, testInitError_thread_null_pointer)
+{
+    ccapi_start_t start = {0};
+    void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
+    void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
+    void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
+    static ccimp_create_thread_info_t mem_for_thread_connector_run;
+    ccimp_create_thread_info_t expected_create_thread_connector_run;
+
+    Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
+    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
+    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
+    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
+
+    /* corrupt the argument created by the handle */
+
+    expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED3_ARGUMENT_NULL, CCIMP_STATUS_OK);
+
+    fill_start_structure_with_good_parameters(&start);
+    /* call ccapi_start in a sepatare thread as it won't return */
+    aux_ccapi_start(&start);
+
+    ASSERT_WAIT(1);
+    ASSERT_IF_NOT_HIT_DO ("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", FAIL_TEST("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN not hitted"));
+
+    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+
+    /* Let aux_ccapi_start finish before freeing it's memory */
+    ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+    sched_yield();
+
+    free(malloc_for_device_cloud_url);
+    free(malloc_for_device_type);
+    free(malloc_for_ccapi_data);
+}
+
 /* This test corrupts the argument passed to the layer2 run thread so ccapi_signature check fails.
 */
 TEST(ccapi_init_test, testInitError_bad_ccapi_signature)

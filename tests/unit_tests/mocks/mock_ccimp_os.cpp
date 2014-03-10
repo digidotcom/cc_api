@@ -101,6 +101,14 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_in
         create_thread_info->argument = wrong_argument;
         return ccimp_create_thread_real(create_thread_info);
     }
+    else if (behavior == MOCK_THREAD_ENABLED3_ARGUMENT_NULL)
+    {
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+
+        /* Create thread setting argument to NULL */
+        create_thread_info->argument = NULL;
+        return ccimp_create_thread_real(create_thread_info);
+    }
 
     return (ccimp_status_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
 }

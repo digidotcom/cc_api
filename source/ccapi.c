@@ -27,9 +27,8 @@ void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * local_ccapi_data = argument;
 
-    assert (local_ccapi_data != NULL);
-
     /* local_ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_CHECK ((local_ccapi_data != NULL), "NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN");
     ASSERT_CHECK ((local_ccapi_data->signature == ccapi_signature), "Bad ccapi_signature");
 
     local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;

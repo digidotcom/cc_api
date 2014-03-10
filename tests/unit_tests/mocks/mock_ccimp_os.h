@@ -21,7 +21,8 @@ typedef enum {
     MOCK_THREAD_DISABLED,                   /* Mock disabled. Create thread normally */
     MOCK_THREAD_ENABLED_NORMAL,             /* Mock enabled. Create thread normally */
     MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, /* Mock enabled. Don't create thread, return FALSE */
-    MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT   /* Mock enabled. Create thread but corrupting argument */
+    MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT,  /* Mock enabled. Create thread but corrupting argument */
+    MOCK_THREAD_ENABLED3_ARGUMENT_NULL      /* Mock enabled. Create thread setting argument to NULL */
 } mock_thread_bahavior_t;
 
 void Mock_ccimp_malloc_create(void);
