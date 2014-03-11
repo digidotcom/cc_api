@@ -7,6 +7,10 @@
 
 #include "custom/custom_connector_config.h"
 
+#ifdef UNIT_TEST
+#define ccimp_debug_printf       ccimp_debug_printf_real
+#endif
+
 /******************** LINUX IMPLEMENTATION ********************/
 
 #if (defined CCAPI_DEBUG)

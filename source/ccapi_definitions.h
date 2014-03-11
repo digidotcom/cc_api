@@ -9,6 +9,7 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
+#include "ccapi/ccapi_debug.h"
 #include "custom/custom_debug.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
@@ -54,19 +55,6 @@ typedef struct {
     ccimp_create_thread_info_t ccimp_info;
     ccapi_thread_status_t status;
 } ccapi_thread_info_t;
-
-typedef enum {
-    LEVEL_INFO,
-    LEVEL_WARNING,
-    LEVEL_ERROR
-} ccapi_debug_level_t;
-
-typedef enum {
-    ZONE_LAYER1     = 1,
-    ZONE_START_STOP = 2,
-    ZONE_TRANSPORT  = 4,
-    ZONE_SEND_DATA  = 8
-} ccapi_debug_zones_t;
 
 typedef struct {
     char const * signature;
