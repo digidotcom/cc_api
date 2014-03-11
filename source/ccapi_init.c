@@ -62,6 +62,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
+#if (defined CCAPI_DEBUG)
     {
         ccapi_config_debug_error_t config_debug_error;
         config_debug_error = ccapi_config_debug(start->debug.init_zones, start->debug.init_level);
@@ -71,6 +72,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
             goto done;
         }
     }
+#endif
 
     ccapi_data->config.vendor_id = start->vendor_id;
     memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);

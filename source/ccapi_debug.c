@@ -56,16 +56,7 @@ void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, cha
     debug_printf(zone, level, args, format);
     va_end(args);
 }
-#else
-void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...)
-{  
-    (void)zone;
-    (void)level;
-    (void)format;
-}
-#endif /* (defined CCAPI_DEBUG) */
 
-/* TODO: Put it under CCAPI_DEBUG? */
 ccapi_config_debug_error_t ccapi_config_debug(ccapi_debug_zones_t zones, ccapi_debug_level_t level)
 {
     if (ccapi_data == NULL)
@@ -82,3 +73,12 @@ ccapi_config_debug_error_t ccapi_config_debug(ccapi_debug_zones_t zones, ccapi_d
 
     return CCAPI_CONFIG_DEBUG_ERROR_NONE;
 }
+#else
+void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...)
+{  
+    (void)zone;
+    (void)level;
+    (void)format;
+}
+#endif /* (defined CCAPI_DEBUG) */
+

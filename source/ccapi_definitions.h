@@ -63,8 +63,10 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
+#if (defined CCAPI_DEBUG)
     ccapi_debug_zones_t dbg_zones;
     ccapi_debug_level_t dbg_level;
+#endif
 } ccapi_data_t;
 
 extern ccapi_data_t * ccapi_data;
