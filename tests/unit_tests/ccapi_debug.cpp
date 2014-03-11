@@ -55,6 +55,7 @@ TEST_GROUP(ccapi_debug_test)
     }
 };
 
+#if (defined CCAPI_DEBUG)
 /* Testing ccapi_start() debug configuration */
 TEST(ccapi_debug_test, testDbgStartZoneNotEnabled)
 {
@@ -328,3 +329,21 @@ TEST(ccapi_debug_test, testDbgLayer1VariableArgument)
 
     connector_debug_printf("hello testDbgLayer1VariableArgument int=%d, float=%f\n", test_int, test_float);
 }
+#else
+/* CCAPI_DEBUG is not defined. Check that nothing happens */
+TEST(ccapi_debug_test, testDbgDefineDisabled)
+{
+    ccapi_init_error_t error;
+    ccapi_start_t start = {0};
+    fill_start_structure_with_good_parameters(&start);
+
+    start.debug.init_zones = ZONE_ALL;
+    start.debug.init_level = LEVEL_INFO;
+
+    /* Manually enable the mock to check that nothing is called */
+    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    error = ccapi_start(&start);
+    CHECK(error == CCAPI_INIT_ERROR_NONE);
+}
+#endif

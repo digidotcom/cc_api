@@ -19,6 +19,7 @@ void Mock_ccimp_debug_expect(char const * const message)
 }
 
 extern "C" {
+#if (defined CCAPI_DEBUG)
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
@@ -38,5 +39,5 @@ void ccimp_debug_printf(char const * const message)
     }
     return;
 }
-
+#endif
 }

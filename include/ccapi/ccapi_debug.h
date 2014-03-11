@@ -21,7 +21,7 @@ typedef enum {
     ZONE_START_STOP = 2,
     ZONE_TRANSPORT  = 4,
     ZONE_SEND_DATA  = 8,
-    ZONE_ALL        = (ZONE_SEND_DATA << 1) - 1
+    ZONE_ALL        = ((ZONE_SEND_DATA << 1) - 1)
 } ccapi_debug_zones_t;
 
 typedef enum {
