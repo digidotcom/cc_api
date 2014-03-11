@@ -29,6 +29,7 @@ void Mock_connector_init_create(void)
 
 void Mock_connector_init_destroy(void)
 {
+    mock("connector_init").checkExpectations();
     return;
 }
 
@@ -77,6 +78,7 @@ void Mock_connector_run_destroy(void)
     {
         ccimp_os_yield_real();
     }
+    mock("connector_run").checkExpectations();
     return;
 }
 

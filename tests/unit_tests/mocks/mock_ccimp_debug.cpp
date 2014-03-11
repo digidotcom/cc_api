@@ -1,21 +1,27 @@
 #include "mock_ccimp_debug.h"
 
-void Mock_ccimp_debug_create(void)
+#define MOCK_DEBUG_ENABLED 1    /* Mock disabled. Do printf normally */
+
+void Mock_ccimp_debug_printf_create(void)
 {
     return;
 }
 
-void Mock_ccimp_debug_destroy(void)
+void Mock_ccimp_debug_printf_destroy(void)
 {
+    mock("ccimp_debug_printf").checkExpectations();
 }
 
-void Mock_ccimp_debug_expect(char const * const message)
+void Mock_ccimp_debug_printf_expect(char const * const message)
 {
-    mock("ccimp_debug").expectOneCall("ccimp_debug")
-            .withParameter("message", message);
-
     /* If we are calling expectations, then override default implementation */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+    mock("ccimp_debug_printf").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    if (strcmp(message, CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL) != 0)
+    {
+        mock("ccimp_debug_printf").expectOneCall("ccimp_debug_printf")
+                    .withParameter("message", message);
+    }
 }
 
 extern "C" {
@@ -27,10 +33,10 @@ void ccimp_debug_printf(char const * const message)
 {
     uint8_t behavior;
 
-    behavior = mock_scope_c("ccimp_debug")->getData("behavior").value.intValue;
+    behavior = mock_scope_c("ccimp_debug_printf")->getData("behavior").value.intValue;
     if (behavior == MOCK_DEBUG_ENABLED)
     {
-        mock_scope_c("ccimp_debug")->actualCall("ccimp_debug")->withStringParameters("message", message);
+        mock_scope_c("ccimp_debug_printf")->actualCall("ccimp_debug_printf")->withStringParameters("message", message);
     }
     else
     {

@@ -1,7 +1,5 @@
 #include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTestExt/MockSupport.h"
-#include "mocks/mock_ccimp_os.h"
-#include "mocks/mock_connector_api.h"
+#include "mocks/mocks.h"
 
 extern "C" {
 #include "ccapi/ccapi.h"
@@ -39,8 +37,7 @@ TEST_GROUP(ccapi_config_test)
         ccapi_start_t start = {0};
         ccapi_init_error_t error;
 
-        Mock_connector_init_create();
-        Mock_connector_run_create();
+        Mock_create_all();
 
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
@@ -49,15 +46,7 @@ TEST_GROUP(ccapi_config_test)
 
     void teardown()
     {
-        Mock_connector_init_destroy();
-        Mock_connector_run_destroy();
-
-        mock().checkExpectations();
-
-        ASSERT_CLEAN()
-
-        mock().removeAllComparators();
-        mock().clear();
+        Mock_destroy_all();
     }
 };
 

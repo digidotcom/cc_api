@@ -28,7 +28,7 @@ extern "C" {
                                               } while (assert_buffer == NULL && system_up_time.sys_uptime <= time_end); \
                                             }
 #define ASSERT_IF_NOT_HIT_DO(label, code)   ON_FALSE_DO_(assert_buffer != NULL && (!strcmp(assert_buffer, label)), {printf("Didn't hit assert: %s\n", label); code;})
-#define ASSERT_CLEAN()                      assert_buffer = NULL;
+#define ASSERT_CLEAN()                      assert_buffer = NULL
 
 
 void Mock_connector_init_create(void);

@@ -15,11 +15,11 @@ extern "C" {
 #include "custom/custom_debug.h"
 }
 
-#define MOCK_DEBUG_ENABLED 1	/* Mock disabled. Do printf normally */
+#define CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL   "_MOCK_DOESNT_EXPECT_A_CALL_"
 
-void Mock_ccimp_debug_create(void);
-void Mock_ccimp_debug_destroy(void);
-void Mock_ccimp_debug_expect(char const * const message);
+void Mock_ccimp_debug_printf_create(void);
+void Mock_ccimp_debug_printf_destroy(void);
+void Mock_ccimp_debug_printf_expect(char const * const message);
 
 extern "C" {
 void ccimp_debug_printf_real(char const * const message);

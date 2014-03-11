@@ -1,7 +1,6 @@
 #include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTestExt/MockSupport.h"
-#include "mocks/mock_ccimp_debug.h"
-#include "mocks/mock_connector_api.h"
+#include "mocks/mocks.h"
+
 extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
@@ -35,21 +34,14 @@ TEST_GROUP(ccapi_debug_test)
 {
     void setup()
     {
-        Mock_connector_run_create();
+        Mock_create_all();
     }
 
     void teardown()
     {
-        Mock_connector_run_destroy();
+        Mock_destroy_all();
 
-        mock().checkExpectations();
-
-        ASSERT_CLEAN()
-
-        mock().removeAllComparators();
-        mock().clear();
-
-        /* Manually cleaning ccapi_data while we don't have a ccapi_stop() function */
+        /* TODO: Remove this when ccapi_stop() is implemented. Cleaning ccapi_data */
         free(ccapi_data);
         ccapi_data = NULL;
     }
@@ -66,8 +58,8 @@ TEST(ccapi_debug_test, testDbgStartZoneNotEnabled)
     start.debug.init_zones = ZONE_NONE;
     start.debug.init_level = LEVEL_INFO;
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -82,8 +74,8 @@ TEST(ccapi_debug_test, testDbgStartLevelNotEnabled)
     start.debug.init_zones = ZONE_ALL;
     start.debug.init_level = LEVEL_ERROR;
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -98,7 +90,7 @@ TEST(ccapi_debug_test, testDbgStartZoneAndLevelEnabled)
     start.debug.init_zones = ZONE_START_STOP;
     start.debug.init_level = LEVEL_INFO;
 
-    Mock_ccimp_debug_expect("ccapi_start ret 0\n");
+    Mock_ccimp_debug_printf_expect("ccapi_start ret 0\n");
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -113,7 +105,7 @@ TEST(ccapi_debug_test, testDbgStartZoneAndLevelEnabledALL)
     start.debug.init_zones = ZONE_ALL;
     start.debug.init_level = LEVEL_INFO;
 
-    Mock_ccimp_debug_expect("ccapi_start ret 0\n");
+    Mock_ccimp_debug_printf_expect("ccapi_start ret 0\n");
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -128,8 +120,8 @@ TEST(ccapi_debug_test, testDbgStartZoneError)
     start.debug.init_zones = (ccapi_debug_zones_t)(ZONE_ALL + 1);
     start.debug.init_level = LEVEL_INFO;
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_INVALID_DEBUG_CONFIG);
@@ -144,8 +136,8 @@ TEST(ccapi_debug_test, testDbgStartLevelError)
     start.debug.init_zones = ZONE_ALL;
     start.debug.init_level = LEVEL_COUNT;
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_INVALID_DEBUG_CONFIG);
@@ -159,8 +151,8 @@ TEST(ccapi_debug_test, testDbgConfigErrorNotStarted)
     config_debug_error = ccapi_config_debug(ZONE_ALL, LEVEL_INFO);
     CHECK(config_debug_error == CCAPI_CONFIG_DEBUG_ERROR_NOT_STARTED);
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "hello testDbgConfigErrorNotStarted\n");
 }
@@ -180,8 +172,8 @@ TEST(ccapi_debug_test, testDbgConfigErrorInvalidZones)
     config_debug_error = ccapi_config_debug((ccapi_debug_zones_t)(ZONE_ALL + 1), LEVEL_INFO);
     CHECK(config_debug_error == CCAPI_CONFIG_DEBUG_ERROR_INVALID_ZONES);
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "hello testDbgConfigErrorInvalidZones\n");
 }
@@ -201,8 +193,7 @@ TEST(ccapi_debug_test, testDbgConfigErrorInvalidLevel)
     config_debug_error = ccapi_config_debug(ZONE_ALL, LEVEL_COUNT);
     CHECK(config_debug_error == CCAPI_CONFIG_DEBUG_ERROR_INVALID_LEVEL);
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "hello testDbgConfigErrorInvalidZones\n");
 }
@@ -222,7 +213,7 @@ TEST(ccapi_debug_test, testDbgConfigZoneAndLevelEnabled)
     config_debug_error = ccapi_config_debug(ZONE_SEND_DATA, LEVEL_INFO);
     CHECK(config_debug_error == CCAPI_CONFIG_DEBUG_ERROR_NONE);
 
-    Mock_ccimp_debug_expect("hello testDbgStartZoneAndLevelEnabled\n");
+    Mock_ccimp_debug_printf_expect("hello testDbgStartZoneAndLevelEnabled\n");
 
     ccapi_debug_printf(ZONE_SEND_DATA, LEVEL_INFO, "hello testDbgStartZoneAndLevelEnabled\n");
 }
@@ -242,8 +233,7 @@ TEST(ccapi_debug_test, testDbgConfigZoneAndLevelDisabled)
     config_debug_error = ccapi_config_debug(ZONE_NONE, LEVEL_INFO);
     CHECK(config_debug_error == CCAPI_CONFIG_DEBUG_ERROR_NONE);
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     ccapi_debug_printf(ZONE_SEND_DATA, LEVEL_INFO, "hello testDbgStartZoneAndLevelEnabled\n");
 }
@@ -266,7 +256,7 @@ TEST(ccapi_debug_test, testDbgVariableArgument)
 
     sprintf(test_buffer, "hello testDbgVariableArgument int=%d, float=%f\n", test_int, test_float);
 
-    Mock_ccimp_debug_expect(test_buffer);
+    Mock_ccimp_debug_printf_expect(test_buffer);
 
     ccapi_debug_printf(ZONE_SEND_DATA, LEVEL_INFO, "hello testDbgVariableArgument int=%d, float=%f\n", test_int, test_float);
 }
@@ -281,7 +271,7 @@ TEST(ccapi_debug_test, testDbgLayer1ZoneEnabled)
     start.debug.init_zones = ZONE_LAYER1;
     start.debug.init_level = LEVEL_INFO;
 
-    Mock_ccimp_debug_expect("hello testDbgLayer1ZoneEnabled\n");
+    Mock_ccimp_debug_printf_expect("hello testDbgLayer1ZoneEnabled\n");
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -298,8 +288,7 @@ TEST(ccapi_debug_test, testDbgLayer1ZoneDisabled)
     start.debug.init_zones = ZONE_NONE;
     start.debug.init_level = LEVEL_INFO;
 
-    /* Manually enable the mock to check that nothing is called */
-    mock("ccimp_debug").setData("behavior", MOCK_DEBUG_ENABLED);
+    Mock_ccimp_debug_printf_expect(CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL);
 
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
@@ -313,7 +302,7 @@ TEST(ccapi_debug_test, testDbgLayer1VariableArgument)
     ccapi_start_t start = {0};
     int test_int = 33;
     float test_float = 1.67;
-    char test_buffer[100];
+    static char test_buffer[100];
 
     fill_start_structure_with_good_parameters(&start);
 
@@ -325,7 +314,7 @@ TEST(ccapi_debug_test, testDbgLayer1VariableArgument)
 
     sprintf(test_buffer, "hello testDbgLayer1VariableArgument int=%d, float=%f\n", test_int, test_float);
 
-    Mock_ccimp_debug_expect(test_buffer);
+    Mock_ccimp_debug_printf_expect(test_buffer);
 
     connector_debug_printf("hello testDbgLayer1VariableArgument int=%d, float=%f\n", test_int, test_float);
 }
