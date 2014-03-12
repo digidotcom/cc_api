@@ -25,7 +25,7 @@ void Mock_ccimp_debug_printf_expect(char const * const message)
 }
 
 extern "C" {
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 

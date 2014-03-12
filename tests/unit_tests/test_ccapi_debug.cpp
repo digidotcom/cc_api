@@ -47,7 +47,7 @@ TEST_GROUP(ccapi_debug_test)
     }
 };
 
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
 /* Testing ccapi_start() debug configuration */
 TEST(ccapi_debug_test, testDbgStartZoneNotEnabled)
 {

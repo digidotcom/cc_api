@@ -1,8 +1,7 @@
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 
-#if (defined CCAPI_DEBUG)
-/* TODO: Can we do this? It's done for RCI*/
+#if (defined CCIMP_DEBUG_ENABLED)
 #include <stdarg.h>
 
 void debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, va_list args, char const * const format)
@@ -80,5 +79,5 @@ void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, cha
     (void)level;
     (void)format;
 }
-#endif /* (defined CCAPI_DEBUG) */
+#endif /* (defined CCIMP_DEBUG_ENABLED) */
 

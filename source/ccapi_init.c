@@ -62,7 +62,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
     {
         ccapi_config_debug_error_t config_debug_error;
         config_debug_error = ccapi_config_debug(start->debug.init_zones, start->debug.init_level);

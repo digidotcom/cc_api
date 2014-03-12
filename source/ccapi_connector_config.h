@@ -10,8 +10,8 @@
 
 #include "custom/custom_connector_config.h"
 
-/* if implementer does not define CCAPI_DEBUG, there won't be debugging in any layer */
-#ifdef CCAPI_DEBUG
+/* if implementer does not define CCIMP_DEBUG_ENABLED, there won't be debugging in any layer */
+#ifdef CCIMP_DEBUG_ENABLED
 #define CONNECTOR_DEBUG
 #endif
 

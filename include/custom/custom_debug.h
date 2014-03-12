@@ -10,7 +10,7 @@
 
 #include "custom/custom_connector_config.h"
 
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
 /**
  * Debug output from Cloud Connector, Writes a formatted string to stdout
  * This function behaves exactly as printf.

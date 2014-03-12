@@ -13,7 +13,7 @@
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
 #include <stdio.h>
 #include <stdlib.h>
 

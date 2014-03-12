@@ -19,7 +19,7 @@
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
 #define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
 #else
 #define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {code})
@@ -63,7 +63,7 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
-#if (defined CCAPI_DEBUG)
+#if (defined CCIMP_DEBUG_ENABLED)
     ccapi_debug_zones_t dbg_zones;
     ccapi_debug_level_t dbg_level;
 #endif
