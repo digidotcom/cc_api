@@ -43,7 +43,7 @@ void connector_debug_printf(char const * const format, ...)
     va_list args;
     
     va_start(args, format);
-    debug_printf(ZONE_LAYER1, LEVEL_ERROR, args, format);
+    debug_printf(ZONE_LAYER1, LEVEL_COUNT-1, args, format);
     va_end(args);
 }
 
