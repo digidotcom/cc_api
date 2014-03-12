@@ -21,11 +21,11 @@
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
 {
-    malloc->ptr = calloc(1, malloc->size);
+    malloc_info->ptr = malloc(malloc_info->size);
 
-    return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
+    return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
 static void * thread_wrapper(void * argument)

@@ -115,23 +115,23 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_in
     return (ccimp_status_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc)
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
 {
     uint8_t behavior;
 
     behavior = mock_scope_c("ccimp_malloc")->getData("behavior").value.intValue;
     if (behavior == MOCK_MALLOC_ENABLED)
     {
-        mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc->size);
-        malloc->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
+        mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc_info->size);
+        malloc_info->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
     }
     else
     {
         /* Skip mocking, use default malloc implementation */
-        ccimp_malloc_real(malloc);
-        memset(malloc->ptr, 0xFF, malloc->size); /* Try to catch hidden problems */
+        ccimp_malloc_real(malloc_info);
+        memset(malloc_info->ptr, 0xFF, malloc_info->size); /* Try to catch hidden problems */
     }
-    return malloc->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
+    return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time)

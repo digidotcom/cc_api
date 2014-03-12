@@ -14,13 +14,13 @@ ccapi_data_t * ccapi_data;
 
 void * ccapi_malloc(size_t size)
 {
-    ccimp_malloc_t malloc_struct;
+    ccimp_malloc_t malloc_info;
     ccimp_status_t status;
 
-    malloc_struct.size = size;
-    status = ccimp_malloc(&malloc_struct);
+    malloc_info.size = size;
+    status = ccimp_malloc(&malloc_info);
 
-    return status == CCIMP_STATUS_OK ? malloc_struct.ptr : NULL;
+    return status == CCIMP_STATUS_OK ? malloc_info.ptr : NULL;
 }
 
 void ccapi_connector_run_thread(void * const argument)
