@@ -141,6 +141,7 @@ ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system
 
 ccimp_status_t ccimp_os_yield(void)
 {
+    pthread_testcancel();
     return ccimp_os_yield_real();
 }
 }

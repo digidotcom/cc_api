@@ -290,7 +290,7 @@ static void * thread_wrapper(void * argument)
     return NULL;
 }
 
-void aux_ccapi_start(void * argument)
+pthread_t aux_ccapi_start(void * argument)
 {
     pthread_t pthread;
     int ccode = pthread_create(&pthread, NULL, thread_wrapper, argument);
@@ -299,6 +299,29 @@ void aux_ccapi_start(void * argument)
     {
         printf("aux_ccapi_start() error %d\n", ccode);
     }
+
+    return pthread;
+}
+
+int stop_aux_thread(pthread_t pthread)
+{
+    int error;
+
+    error = pthread_cancel(pthread);
+    if (error < 0)
+    {
+        printf("pthread_cancel failed with %d\n", error);
+        goto done;
+    }
+
+    error = pthread_join(pthread, NULL);
+    if (error < 0)
+    {
+        printf("pthread_cancel failed with %d\n", error);
+        goto done;
+    }
+done:
+    return error;
 }
 
 /* This test sets to null the argument passed to the layer2 run thread.
@@ -324,18 +347,15 @@ TEST(ccapi_init_test, testInitError_thread_null_pointer)
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED3_ARGUMENT_NULL, CCIMP_STATUS_OK);
 
     fill_start_structure_with_good_parameters(&start);
-    /* call ccapi_start in a sepatare thread as it won't return */
-    aux_ccapi_start(&start);
+    {
+        /* call ccapi_start in a sepatare thread as it won't return */
+        pthread_t const aux_thread = aux_ccapi_start(&start);
 
-    ASSERT_WAIT(1);
-    ASSERT_IF_NOT_HIT_DO ("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", FAIL_TEST("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN not hitted"));
+        ASSERT_WAIT(1);
+        ASSERT_IF_NOT_HIT_DO ("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", FAIL_TEST("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN not hitted"));
 
-    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
-
-    /* Let aux_ccapi_start finish before freeing it's memory */
-    ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
-    sched_yield();
-
+        stop_aux_thread(aux_thread);
+    }
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
     free(malloc_for_ccapi_data);
@@ -364,17 +384,16 @@ TEST(ccapi_init_test, testInitError_bad_ccapi_signature)
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED2_ARGUMENT_CORRUPT, CCIMP_STATUS_ABORT);
 
     fill_start_structure_with_good_parameters(&start);
-    /* call ccapi_start in a sepatare thread as it won't return */
-    aux_ccapi_start(&start);
+    {
+        /* call ccapi_start in a sepatare thread as it won't return */
+        pthread_t const aux_thread = aux_ccapi_start(&start);
 
-    ASSERT_WAIT(1);
-    ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
+        ASSERT_WAIT(1);
+        ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
 
-    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
-
-    /* Let aux_ccapi_start finish before freeing it's memory */
-    ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
-    sched_yield();
+        CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+        stop_aux_thread(aux_thread);
+    }
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
