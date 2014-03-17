@@ -127,7 +127,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
 done:
     /* TODO: Free when error !! */
 
-    ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error);
+    /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
 
     return error;
 }

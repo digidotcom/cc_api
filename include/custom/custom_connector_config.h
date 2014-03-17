@@ -28,7 +28,7 @@
 #define CCIMP_FLOATING_POINT_SUPPORTED
 
 /* Debugging */
-#define CCIMP_DEBUG_ENABLED
+/* #define CCIMP_DEBUG_ENABLED */
 
 #define CCIMP_HAS_STDINT_HEADER /* TODO: Exist? */
 
