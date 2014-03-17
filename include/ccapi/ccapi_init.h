@@ -13,17 +13,17 @@ typedef void * ccapi_cli_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
 
 typedef enum {
-    CCAPI_INIT_ERROR_NONE,
-    CCAPI_INIT_ERROR_NULL_PARAMETER,
-    CCAPI_INIT_ERROR_INVALID_DEBUG_CONFIG,
-    CCAPI_INIT_ERROR_INVALID_VENDORID,
-    CCAPI_INIT_ERROR_INVALID_DEVICEID,
-    CCAPI_INIT_ERROR_INVALID_URL,
-    CCAPI_INIT_ERROR_INVALID_DEVICETYPE,
-    CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY,
-    CCAPI_INIT_ERROR_THREAD_FAILED,
-    CCAPI_INIT_ERROR_COUNT
-} ccapi_init_error_t;
+    CCAPI_START_ERROR_NONE,
+    CCAPI_START_ERROR_NULL_PARAMETER,
+    CCAPI_START_ERROR_INVALID_DEBUG_CONFIG,
+    CCAPI_START_ERROR_INVALID_VENDORID,
+    CCAPI_START_ERROR_INVALID_DEVICEID,
+    CCAPI_START_ERROR_INVALID_URL,
+    CCAPI_START_ERROR_INVALID_DEVICETYPE,
+    CCAPI_START_ERROR_INSUFFICIENT_MEMORY,
+    CCAPI_START_ERROR_THREAD_FAILED,
+    CCAPI_START_ERROR_COUNT
+} ccapi_start_error_t;
 
 typedef struct {
         uint32_t vendor_id;
@@ -45,6 +45,6 @@ typedef struct {
 } ccapi_start_t;
 
 
-ccapi_init_error_t ccapi_start(ccapi_start_t const * const start);
+ccapi_start_error_t ccapi_start(ccapi_start_t const * const start);
 
 #endif

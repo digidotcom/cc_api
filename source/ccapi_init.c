@@ -2,32 +2,32 @@
 #include "ccimp/ccimp_os.h"
 #include "ccapi_definitions.h"
 
-static ccapi_init_error_t check_params(ccapi_start_t const * const start)
+static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
-    ccapi_init_error_t error = CCAPI_INIT_ERROR_NONE;
+    ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     uint8_t invalid_device_id[DEVICE_ID_LENGTH] = {0x00};
 
     if (start->vendor_id == 0x00)
     {
-        error = CCAPI_INIT_ERROR_INVALID_VENDORID;
+        error = CCAPI_START_ERROR_INVALID_VENDORID;
         goto done;
     }
 
     if (memcmp(start->device_id, invalid_device_id, sizeof invalid_device_id) == 0)
     {
-        error = CCAPI_INIT_ERROR_INVALID_DEVICEID;
+        error = CCAPI_START_ERROR_INVALID_DEVICEID;
         goto done;
     }
 
     if (start->device_cloud_url == NULL || start->device_cloud_url[0] == '\0')
     {
-        error = CCAPI_INIT_ERROR_INVALID_URL;
+        error = CCAPI_START_ERROR_INVALID_URL;
         goto done;
     }
 
     if (start->device_type == NULL || start->device_type[0] == '\0')
     {
-        error = CCAPI_INIT_ERROR_INVALID_DEVICETYPE;
+        error = CCAPI_START_ERROR_INVALID_DEVICETYPE;
         goto done;
     }
 
@@ -35,26 +35,26 @@ done:
     return error;
 }
 
-static ccapi_init_error_t check_malloc(void * p)
+static ccapi_start_error_t check_malloc(void * p)
 {
     if (p == NULL)
-        return CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY;
+        return CCAPI_START_ERROR_INSUFFICIENT_MEMORY;
     else
-        return CCAPI_INIT_ERROR_NONE;
+        return CCAPI_START_ERROR_NONE;
 }
 
-ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const * const start)
+ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const * const start)
 {
-    ccapi_init_error_t error = CCAPI_INIT_ERROR_NONE;
+    ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
 
     if (start == NULL)
     {
-        error = CCAPI_INIT_ERROR_NULL_PARAMETER;
+        error = CCAPI_START_ERROR_NULL_PARAMETER;
         goto done;
     }
 
     error = check_params(start);
-    if (error != CCAPI_INIT_ERROR_NONE)
+    if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
 #if (defined CCIMP_DEBUG_ENABLED)
@@ -63,7 +63,7 @@ ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const *
         config_debug_error = ccapi_config_debug(start->debug.init_zones, start->debug.init_level);
         if (config_debug_error != CCAPI_CONFIG_DEBUG_ERROR_NONE)
         {
-            error = CCAPI_INIT_ERROR_INVALID_DEBUG_CONFIG;
+            error = CCAPI_START_ERROR_INVALID_DEBUG_CONFIG;
             goto done;
         }
     }
@@ -74,13 +74,13 @@ ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const *
 
     ccapi_data->config.device_type = ccapi_malloc(strlen(start->device_type) + 1);
     error = check_malloc(ccapi_data->config.device_type);
-    if (error != CCAPI_INIT_ERROR_NONE)
+    if (error != CCAPI_START_ERROR_NONE)
         goto done;
     strcpy(ccapi_data->config.device_type, start->device_type);
 
     ccapi_data->config.device_cloud_url = ccapi_malloc(strlen(start->device_cloud_url) + 1);
     error = check_malloc(ccapi_data->config.device_cloud_url);
-    if (error != CCAPI_INIT_ERROR_NONE)
+    if (error != CCAPI_START_ERROR_NONE)
         goto done;
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
@@ -92,7 +92,7 @@ ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const *
 
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
     error = check_malloc(ccapi_data->connector_handle);
-    if (error != CCAPI_INIT_ERROR_NONE)
+    if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
     ccapi_data->signature = ccapi_signature;
@@ -100,7 +100,7 @@ ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const *
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
-        if (error != CCAPI_INIT_ERROR_NONE)
+        if (error != CCAPI_START_ERROR_NONE)
             goto done;
 
         ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_START;
@@ -110,7 +110,7 @@ ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const *
 
         if (ccimp_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_INIT_ERROR_THREAD_FAILED;
+            error = CCAPI_START_ERROR_THREAD_FAILED;
             goto done;
         }
 
@@ -127,13 +127,13 @@ done:
     return error;
 }
 
-ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
+ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
-	ccapi_init_error_t error;
+	ccapi_start_error_t error;
 
 	ccapi_data_single_instance = ccapi_malloc(sizeof *ccapi_data_single_instance);
     error = check_malloc(ccapi_data_single_instance);
-    if (error != CCAPI_INIT_ERROR_NONE)
+    if (error != CCAPI_START_ERROR_NONE)
         goto done;
     error = ccxapi_start(ccapi_data_single_instance, start);
 done:
