@@ -44,90 +44,90 @@ TEST_GROUP(ccapi_init_test)
 
 TEST(ccapi_init_test, testParamNULL)
 {
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     ccapi_start_t * start = NULL;
 
     error = ccapi_start(start);
-    CHECK(error == CCAPI_INIT_ERROR_NULL_PARAMETER);
+    CHECK(error == CCAPI_START_ERROR_NULL_PARAMETER);
 }
 
 TEST(ccapi_init_test, testVendorIdZero)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     start.vendor_id = 0;
     error = ccapi_start(&start);
 
-    CHECK_EQUAL(error, CCAPI_INIT_ERROR_INVALID_VENDORID);
+    CHECK_EQUAL(error, CCAPI_START_ERROR_INVALID_VENDORID);
 }
 
 TEST(ccapi_init_test, testInvalidDeviceId)
 {
     uint8_t device_id[DEVICE_ID_LENGTH] = {0};
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     memcpy(start.device_id, device_id, sizeof start.device_id);
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INVALID_DEVICEID);
+    CHECK(error == CCAPI_START_ERROR_INVALID_DEVICEID);
 }
 
 TEST(ccapi_init_test, testNullDeviceCloudURL)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     start.device_cloud_url = NULL;
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INVALID_URL);
+    CHECK(error == CCAPI_START_ERROR_INVALID_URL);
 }
 
 TEST(ccapi_init_test, testInvalidDeviceCloudURL)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     start.device_cloud_url = "";
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INVALID_URL);
+    CHECK(error == CCAPI_START_ERROR_INVALID_URL);
 }
 
 TEST(ccapi_init_test, testNullDeviceType)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     start.device_type = NULL;
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INVALID_DEVICETYPE);
+    CHECK(error == CCAPI_START_ERROR_INVALID_DEVICETYPE);
 }
 
 TEST(ccapi_init_test, testInvalidDeviceType)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
 
     fill_start_structure_with_good_parameters(&start);
     start.device_type = "";
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INVALID_DEVICETYPE);
+    CHECK(error == CCAPI_START_ERROR_INVALID_DEVICETYPE);
 }
 
 TEST(ccapi_init_test, testNoMemory)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data = NULL;
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
@@ -136,13 +136,13 @@ TEST(ccapi_init_test, testNoMemory)
 
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
+    CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
 TEST(ccapi_init_test, testDeviceTypeNoMemory)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = NULL;
 
@@ -152,7 +152,7 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
+    CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 
     free(malloc_for_ccapi_data);
 }
@@ -160,7 +160,7 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
 TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = NULL;
@@ -172,7 +172,7 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
+    CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 
     free(malloc_for_ccapi_data);
     free(malloc_for_device_type);
@@ -181,22 +181,21 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
 TEST(ccapi_init_test, testConnectorInitNoMemory)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     connector_handle_t handle = NULL;
 
-    printf("   SP: %s: Calling with ccapi_data_single_instance = %p\n", __FUNCTION__, (void *)ccapi_data_single_instance);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
-    CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
+    CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
 TEST(ccapi_init_test, testStartOk)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
@@ -219,7 +218,7 @@ TEST(ccapi_init_test, testStartOk)
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_NONE);
+    CHECK(error == CCAPI_START_ERROR_NONE);
 
     CHECK(start.vendor_id == ccapi_data_single_instance->config.vendor_id);
     CHECK(memcmp(start.device_id, ccapi_data_single_instance->config.device_id, sizeof start.device_id) == 0);
@@ -235,7 +234,7 @@ TEST(ccapi_init_test, testStartOk)
 TEST(ccapi_init_test, testStartThreadNoMemory)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data= malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
@@ -248,7 +247,7 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_INSUFFICIENT_MEMORY);
+    CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -258,7 +257,7 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
 TEST(ccapi_init_test, testStartThreadFail)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data= malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
@@ -276,7 +275,7 @@ TEST(ccapi_init_test, testStartThreadFail)
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_THREAD_FAILED);
+    CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -387,7 +386,7 @@ TEST(ccapi_init_test, testInitError_bad_ccapi_signature)
 TEST(ccapi_init_test, testInitError_bad_connector_signature)
 {
     ccapi_start_t start = {0};
-    ccapi_init_error_t error;
+    ccapi_start_error_t error;
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
     void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
     void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
@@ -408,7 +407,7 @@ TEST(ccapi_init_test, testInitError_bad_connector_signature)
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
-    CHECK(error == CCAPI_INIT_ERROR_NONE);
+    CHECK(error == CCAPI_START_ERROR_NONE);
 
     ASSERT_WAIT(01);
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));

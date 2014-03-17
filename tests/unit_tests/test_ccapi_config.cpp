@@ -35,13 +35,13 @@ TEST_GROUP(ccapi_config_test)
     void setup()
     {
         ccapi_start_t start = {0};
-        ccapi_init_error_t error;
+        ccapi_start_error_t error;
 
         Mock_create_all();
 
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
-        CHECK(error == CCAPI_INIT_ERROR_NONE);
+        CHECK(error == CCAPI_START_ERROR_NONE);
     }
 
     void teardown()
