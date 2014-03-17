@@ -43,7 +43,7 @@ static ccapi_init_error_t check_malloc(void * p)
         return CCAPI_INIT_ERROR_NONE;
 }
 
-ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
+ccapi_init_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const * const start)
 {
     ccapi_init_error_t error = CCAPI_INIT_ERROR_NONE;
 
@@ -54,11 +54,6 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     }
 
     error = check_params(start);
-    if (error != CCAPI_INIT_ERROR_NONE)
-        goto done;
-
-    ccapi_data = ccapi_malloc(sizeof *ccapi_data);
-    error = check_malloc(ccapi_data);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
 
@@ -95,7 +90,7 @@ ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
     ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.filesystem_supported = start->service.file_system == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
-    ccapi_data->connector_handle = connector_init(ccapi_connector_callback);
+    ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
     error = check_malloc(ccapi_data->connector_handle);
     if (error != CCAPI_INIT_ERROR_NONE)
         goto done;
@@ -130,4 +125,17 @@ done:
     /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
 
     return error;
+}
+
+ccapi_init_error_t ccapi_start(ccapi_start_t const * const start)
+{
+	ccapi_init_error_t error;
+
+	ccapi_data_single_instance = ccapi_malloc(sizeof *ccapi_data_single_instance);
+    error = check_malloc(ccapi_data_single_instance);
+    if (error != CCAPI_INIT_ERROR_NONE)
+        goto done;
+    error = ccxapi_start(ccapi_data_single_instance, start);
+done:
+	return error;
 }

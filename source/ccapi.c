@@ -10,7 +10,7 @@
 
 char const ccapi_signature[] = "CCAPI_SIG"; /* TODO: CCAPI_SW_VERSION */
 
-ccapi_data_t * ccapi_data;
+ccapi_data_t * ccapi_data_single_instance;
 
 void * ccapi_malloc(size_t size)
 {
@@ -50,7 +50,7 @@ done:
     return;
 }
 
-connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data)
+connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t status = connector_callback_continue;
 
@@ -107,14 +107,15 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
     return status;
 }
 
-connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data)
+connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
     connector_callback_status_t status = connector_callback_error;
+    ccapi_data_t * ccapi_data = context;
 
     switch (class_id)
     {
         case connector_class_id_config:
-            status = ccapi_config_handler(request_id.config_request, data);
+            status = ccapi_config_handler(request_id.config_request, data, ccapi_data);
             break;
         default:
             assert(0);
