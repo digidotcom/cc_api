@@ -17,7 +17,7 @@ uint8_t thread_wait;
 union vp2fp 
 {
     void* vp;
-    connector_callback_status_t (*fp)(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data);
+    connector_callback_status_t (*fp)(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 };
 
 void Mock_connector_init_create(void)
@@ -33,10 +33,13 @@ void Mock_connector_init_destroy(void)
     return;
 }
 
-void Mock_connector_init_expectAndReturn(connector_callback_t const callback, connector_handle_t retval)
+/* context is ignored because its value is allocated by ccapi_start() and is not available from test context */
+void Mock_connector_init_expectAndReturn(connector_callback_t const callback, connector_handle_t retval, void * const context)
 {
     vp2fp u;
     u.fp = callback;
+    UNUSED_ARGUMENT(context);
+
     mock("connector_init").expectOneCall("connector_init")
              .withParameter("callback", u.vp)
              .andReturnValue(retval);
@@ -44,17 +47,19 @@ void Mock_connector_init_expectAndReturn(connector_callback_t const callback, co
     mock("connector_init").setData("behavior", MOCK_CONNECTOR_INIT_ENABLED);
 }
 
-connector_handle_t connector_init(connector_callback_t const callback)
+connector_handle_t connector_init(connector_callback_t const callback, void * context)
 {
     vp2fp u;
     u.fp = callback;
     uint8_t behavior;
 
+    UNUSED_ARGUMENT(context);
+
     behavior = mock("connector_init").getData("behavior").getIntValue();
 
     if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
     {
-        mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp); 
+        mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp);
         global_handle = mock("connector_init").returnValue().getPointerValue();
     }
     else

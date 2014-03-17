@@ -184,7 +184,8 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
     ccapi_init_error_t error;
     connector_handle_t handle = NULL;
 
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
+    printf("   SP: %s: Calling with ccapi_data_single_instance = %p\n", __FUNCTION__, (void *)ccapi_data_single_instance);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -208,7 +209,7 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
     Mock_connector_run_expectAndReturn(handle ,connector_success);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
@@ -220,11 +221,11 @@ TEST(ccapi_init_test, testStartOk)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_INIT_ERROR_NONE);
 
-    CHECK(start.vendor_id == ccapi_data->config.vendor_id);
-    CHECK(memcmp(start.device_id, ccapi_data->config.device_id, sizeof start.device_id) == 0);
-    STRCMP_EQUAL(start.device_type, ccapi_data->config.device_type);
-    STRCMP_EQUAL(start.device_cloud_url, ccapi_data->config.device_cloud_url);
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK(start.vendor_id == ccapi_data_single_instance->config.vendor_id);
+    CHECK(memcmp(start.device_id, ccapi_data_single_instance->config.device_id, sizeof start.device_id) == 0);
+    STRCMP_EQUAL(start.device_type, ccapi_data_single_instance->config.device_type);
+    STRCMP_EQUAL(start.device_cloud_url, ccapi_data_single_instance->config.device_cloud_url);
+    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
@@ -330,10 +331,10 @@ TEST(ccapi_init_test, testInitError_thread_null_pointer)
     ASSERT_WAIT(1);
     ASSERT_IF_NOT_HIT_DO ("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", FAIL_TEST("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN not hitted"));
 
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
 
     /* Let aux_ccapi_start finish before freeing it's memory */
-    ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+    ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
     sched_yield();
 
     free(malloc_for_device_cloud_url);
@@ -370,10 +371,10 @@ TEST(ccapi_init_test, testInitError_bad_ccapi_signature)
     ASSERT_WAIT(1);
     ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
 
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
 
     /* Let aux_ccapi_start finish before freeing it's memory */
-    ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
+    ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
     sched_yield();
 
     free(malloc_for_device_cloud_url);
@@ -398,7 +399,7 @@ TEST(ccapi_init_test, testInitError_bad_connector_signature)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
     Mock_connector_run_expectAndReturn(handle, connector_init_error);
     
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
@@ -412,7 +413,7 @@ TEST(ccapi_init_test, testInitError_bad_connector_signature)
     ASSERT_WAIT(01);
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
 
-    CHECK(ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);

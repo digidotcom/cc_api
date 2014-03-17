@@ -59,8 +59,8 @@ TEST(ccapi_config_test, testDeviceID)
     device_id.data = device_id_buf;
 
     request.config_request = connector_request_id_config_device_id;
-    ccapi_connector_callback(connector_class_id_config, request, &device_id);
-    CHECK(memcmp(ccapi_data->config.device_id, device_id_buf, device_id.bytes_required) == 0);
+    ccapi_connector_callback(connector_class_id_config, request, &device_id, ccapi_data_single_instance);
+    CHECK(memcmp(ccapi_data_single_instance->config.device_id, device_id_buf, device_id.bytes_required) == 0);
 }
 
 TEST(ccapi_config_test, testCloudURL)
@@ -69,9 +69,9 @@ TEST(ccapi_config_test, testCloudURL)
     connector_config_pointer_string_t device_cloud_url = {0};
 
     request.config_request = connector_request_id_config_device_cloud_url;
-    ccapi_connector_callback(connector_class_id_config, request, &device_cloud_url);
-    STRCMP_EQUAL(device_cloud_url.string, ccapi_data->config.device_cloud_url);
-    CHECK(strlen(ccapi_data->config.device_cloud_url) == device_cloud_url.length);
+    ccapi_connector_callback(connector_class_id_config, request, &device_cloud_url, ccapi_data_single_instance);
+    STRCMP_EQUAL(device_cloud_url.string, ccapi_data_single_instance->config.device_cloud_url);
+    CHECK(strlen(ccapi_data_single_instance->config.device_cloud_url) == device_cloud_url.length);
 }
 
 TEST(ccapi_config_test, testVendorID)
@@ -80,8 +80,8 @@ TEST(ccapi_config_test, testVendorID)
     connector_config_vendor_id_t vendor_id = {0};
 
     request.config_request = connector_request_id_config_vendor_id;
-    ccapi_connector_callback(connector_class_id_config, request, &vendor_id);
-    CHECK(vendor_id.id == ccapi_data->config.vendor_id);
+    ccapi_connector_callback(connector_class_id_config, request, &vendor_id, ccapi_data_single_instance);
+    CHECK(vendor_id.id == ccapi_data_single_instance->config.vendor_id);
 }
 
 TEST(ccapi_config_test, testDeviceType)
@@ -90,9 +90,9 @@ TEST(ccapi_config_test, testDeviceType)
     connector_config_pointer_string_t device_type = {0};
 
     request.config_request = connector_request_id_config_device_type;
-    ccapi_connector_callback(connector_class_id_config, request, &device_type);
-    STRCMP_EQUAL(device_type.string, ccapi_data->config.device_type);
-    CHECK(strlen(ccapi_data->config.device_type) == device_type.length);
+    ccapi_connector_callback(connector_class_id_config, request, &device_type, ccapi_data_single_instance);
+    STRCMP_EQUAL(device_type.string, ccapi_data_single_instance->config.device_type);
+    CHECK(strlen(ccapi_data_single_instance->config.device_type) == device_type.length);
 }
 
 TEST(ccapi_config_test, testFirmwareSupport)
@@ -101,7 +101,7 @@ TEST(ccapi_config_test, testFirmwareSupport)
     connector_config_supported_t firmware_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_firmware_facility;
-    ccapi_connector_callback(connector_class_id_config, request, &firmware_supported);
+    ccapi_connector_callback(connector_class_id_config, request, &firmware_supported, ccapi_data_single_instance);
     CHECK(firmware_supported.supported == connector_false);
 }
 
@@ -111,7 +111,7 @@ TEST(ccapi_config_test, testFileSystemSupport)
     connector_config_supported_t filesystem_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_file_system;
-    ccapi_connector_callback(connector_class_id_config, request, &filesystem_supported);
+    ccapi_connector_callback(connector_class_id_config, request, &filesystem_supported, ccapi_data_single_instance);
     CHECK(filesystem_supported.supported == connector_false);
 }
 
@@ -121,6 +121,6 @@ TEST(ccapi_config_test, testRCISupport)
     connector_config_supported_t rci_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_remote_configuration;
-    ccapi_connector_callback(connector_class_id_config, request, &rci_supported);
+    ccapi_connector_callback(connector_class_id_config, request, &rci_supported, ccapi_data_single_instance);
     CHECK(rci_supported.supported == connector_false);
 }
