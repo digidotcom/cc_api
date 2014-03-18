@@ -70,65 +70,37 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     return global_handle;
 }
 
+
+static connector_status_t connector_run_retval = connector_idle;
+
 void Mock_connector_run_create(void)
 {
-    thread_wait = 0;
+    connector_run_retval = connector_idle;
     return;
 }
 
 void Mock_connector_run_destroy(void)
 {
-    /* Make sure that if the thread has been scheduled, the mock signalization is done */
-    while(thread_wait)
-    {
-        ccimp_os_yield_real();
-    }
-    mock("connector_run").checkExpectations();
     return;
 }
 
-void Mock_connector_run_expectAndReturn(connector_handle_t const handle, connector_status_t retval)
+void Mock_connector_run_returnInNextLoop(connector_status_t retval)
 {
-    mock("connector_run").expectOneCall("connector_run")
-             .withParameter("handle", handle)
-             .andReturnValue(retval);
-
-    mock("connector_run").setData("behavior", MOCK_CONNECTOR_RUN_ENABLED);
+    connector_run_retval = retval;
 }
 
 connector_status_t connector_run(connector_handle_t const handle)
 {
-    uint8_t behavior;
-    connector_status_t ret_value;
-    
-    thread_wait = 1;
+    UNUSED_ARGUMENT(handle);
 
-    behavior = mock("connector_run").getData("behavior").getIntValue();
-
-
-    if (behavior == MOCK_CONNECTOR_RUN_ENABLED)
-    {
-        mock("connector_run").actualCall("connector_run").withParameter("handle", handle);
-
-        ret_value = (connector_status_t)mock("connector_run").returnValue().getIntValue();
-        if ((connector_status_t)ret_value == connector_init_error)
+    do {
+        if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
         {
-            thread_wait = 0;
-            return connector_init_error;
+            ccimp_os_yield();
         }
-    }
-    else
-    {
-        ret_value = connector_success;
-    }
+    } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
 
-    thread_wait = 0;
-
-    for(;;)
-    {
-
-    }
-    return ret_value;
+    return connector_run_retval;
 }
 
 void Mock_connector_initiate_action_create(void)
@@ -146,7 +118,7 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
     mock("connector_initiate_action").expectOneCall("connector_initiate_action")
              .withParameter("handle", handle)
              .withParameter("request", request)
-             .withParameter("data", request_data)
+             .withParameter("request_data", request_data)
              .andReturnValue(retval);
 }
 
@@ -156,6 +128,12 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
             .withParameter("handle", handle)
             .withParameter("request", request)
             .withParameter("request_data", (void *)request_data);
+
+    if (request == connector_initiate_terminate)
+    {
+        ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+        Mock_connector_run_returnInNextLoop(connector_device_terminated);
+    }
 
     return (connector_status_t)mock("connector_initiate_action").returnValue().getIntValue();
 
