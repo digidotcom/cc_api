@@ -122,6 +122,60 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * ccapi_data, ccapi_stop_t behavior)
     UNUSED_ARGUMENT(behavior);
     if (ccapi_data == NULL || strcmp(ccapi_data->signature, ccapi_signature) != 0 || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
         goto done;
+    {
+        connector_status_t connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_terminate, NULL);
+        switch(connector_status)
+        {
+        case connector_success:
+            error = CCAPI_STOP_ERROR_NONE;
+            break;
+        case connector_init_error:
+            break;
+        case connector_invalid_data_size:
+            break;
+        case connector_invalid_data_range:
+            break;
+        case connector_invalid_data:
+            break;
+        case connector_keepalive_error:
+            break;
+        case connector_bad_version:
+            break;
+        case connector_device_terminated:
+            break;
+        case connector_service_busy:
+            break;
+        case connector_invalid_response:
+            break;
+        case connector_no_resource:
+            break;
+        case connector_unavailable:
+            break;
+        case connector_idle:
+            break;
+        case connector_working:
+            break;
+        case connector_pending:
+            break;
+        case connector_active:
+            break;
+        case connector_abort:
+            break;
+        case connector_device_error:
+            break;
+        case connector_exceed_timeout:
+            break;
+        case connector_invalid_payload_packet:
+            break;
+        case connector_open_error:
+            break;
+        }
+    }
+
+    do {
+        ccimp_os_yield();
+    } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
+
 done:
     return error;
 }

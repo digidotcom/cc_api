@@ -46,6 +46,8 @@ void ccapi_connector_run_thread(void * const argument)
         }            
     }
     ASSERT(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+
+    local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 done:
     return;
 }
@@ -124,4 +126,3 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 
     return status;
 }
-
