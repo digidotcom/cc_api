@@ -32,6 +32,4 @@ typedef enum {
     CCAPI_CONFIG_DEBUG_ERROR_COUNT
 } ccapi_config_debug_error_t;
 
-ccapi_config_debug_error_t ccapi_config_debug(ccapi_debug_zones_t zones, ccapi_debug_level_t level);
-
 #endif

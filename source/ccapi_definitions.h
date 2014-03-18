@@ -20,9 +20,9 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
+#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
 #else
-#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {code})
+#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {code})
 #endif
 
 #if (defined UNIT_TEST)

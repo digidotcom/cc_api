@@ -57,18 +57,6 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const 
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
-#if (defined CCIMP_DEBUG_ENABLED)
-    {
-        ccapi_config_debug_error_t config_debug_error;
-        config_debug_error = ccapi_config_debug(start->debug.init_zones, start->debug.init_level);
-        if (config_debug_error != CCAPI_CONFIG_DEBUG_ERROR_NONE)
-        {
-            error = CCAPI_START_ERROR_INVALID_DEBUG_CONFIG;
-            goto done;
-        }
-    }
-#endif
-
     ccapi_data->config.vendor_id = start->vendor_id;
     memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);
 
