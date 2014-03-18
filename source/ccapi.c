@@ -23,6 +23,15 @@ void * ccapi_malloc(size_t size)
     return status == CCIMP_STATUS_OK ? malloc_info.ptr : NULL;
 }
 
+ccimp_status_t ccapi_free(void * ptr)
+{
+    ccimp_free_t free_info;
+
+    free_info.ptr = ptr;
+
+    return ccimp_free(&free_info);
+}
+
 void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * local_ccapi_data = argument;

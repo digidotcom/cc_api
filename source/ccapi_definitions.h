@@ -73,6 +73,7 @@ extern ccapi_data_t * ccapi_data_single_instance;
 extern char const ccapi_signature[];
 extern void ccapi_connector_run_thread(void * const argument);
 extern void * ccapi_malloc(size_t size);
+extern ccimp_status_t ccapi_free(void * ptr);
 extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
 #if (defined CCIMP_DEBUG_ENABLED)
