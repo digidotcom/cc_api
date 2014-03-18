@@ -136,5 +136,4 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
     }
 
     return (connector_status_t)mock("connector_initiate_action").returnValue().getIntValue();
-
 }

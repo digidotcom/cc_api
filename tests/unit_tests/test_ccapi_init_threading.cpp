@@ -116,7 +116,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadConnectorSignature)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
-    Mock_connector_run_expectAndReturn(handle, connector_init_error);
+    Mock_connector_run_returnInNextLoop(connector_init_error);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
