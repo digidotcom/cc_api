@@ -113,7 +113,7 @@ TEST(ccapi_init_test, testNoMemory)
     void * malloc_for_ccapi_data = NULL;
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
-
+    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
     fill_start_structure_with_good_parameters(&start);
 
     error = ccapi_start(&start);
@@ -131,12 +131,13 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
 
+    /* No need to call free on malloc_for_device_type because the malloc failed */
+    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
+
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
-
-    free(malloc_for_ccapi_data);
 }
 
 TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
@@ -151,13 +152,14 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
 
+    /* No need to call free on malloc_for_device_cloud_url because the malloc failed */
+    Mock_ccimp_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
+
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
-
-    free(malloc_for_ccapi_data);
-    free(malloc_for_device_type);
 }
 
 TEST(ccapi_init_test, testConnectorInitNoMemory)
@@ -190,6 +192,8 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
+    Mock_ccimp_free_notExpected();
+
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
     Mock_connector_run_returnInNextLoop(connector_success);
 
@@ -207,10 +211,6 @@ TEST(ccapi_init_test, testStartOk)
     STRCMP_EQUAL(start.device_type, ccapi_data_single_instance->config.device_type);
     STRCMP_EQUAL(start.device_cloud_url, ccapi_data_single_instance->config.device_cloud_url);
     CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
-
-    free(malloc_for_device_cloud_url);
-    free(malloc_for_device_type);
-    free(malloc_for_ccapi_data);
 }
 
 TEST(ccapi_init_test, testStartThreadNoMemory)
@@ -227,13 +227,14 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), mem_for_thread_connector_run);
 
+    /* No need to call free on mem_for_thread_connector_run because the malloc failed */
+    Mock_ccimp_free_expectAndReturn(malloc_for_device_cloud_url, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
+
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
-
-    free(malloc_for_device_cloud_url);
-    free(malloc_for_device_type);
-    free(malloc_for_ccapi_data);
 }
 
 TEST(ccapi_init_test, testStartThreadFail)
@@ -251,6 +252,11 @@ TEST(ccapi_init_test, testStartThreadFail)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
 
+    Mock_ccimp_free_expectAndReturn(&mem_for_thread_connector_run, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_device_cloud_url, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
+
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, CCIMP_STATUS_ABORT);
@@ -258,8 +264,4 @@ TEST(ccapi_init_test, testStartThreadFail)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
-
-    free(malloc_for_device_cloud_url);
-    free(malloc_for_device_type);
-    free(malloc_for_ccapi_data);
 }

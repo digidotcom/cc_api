@@ -35,6 +35,29 @@ done:
     return error;
 }
 
+static void free_ccapi_data_internal_resources(ccapi_data_t * ccapi_data)
+{
+    ASSERT(ccapi_data != NULL);
+
+    if (ccapi_data->config.device_type != NULL)
+    {
+        ccapi_free(ccapi_data->config.device_type);
+        ccapi_data->config.device_type = NULL;
+    }
+
+    if (ccapi_data->config.device_cloud_url != NULL)
+    {
+        ccapi_free(ccapi_data->config.device_cloud_url);
+        ccapi_data->config.device_cloud_url = NULL;
+    }
+
+    if (ccapi_data->thread.connector_run != NULL)
+    {
+        ccapi_free(ccapi_data->thread.connector_run);
+        ccapi_data->thread.connector_run = NULL;
+    }
+}
+
 static ccapi_start_error_t check_malloc(void * p)
 {
     if (p == NULL)
@@ -108,8 +131,10 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const 
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
 done:
-    /* TODO: Free when error !! */
-
+    if (error != CCAPI_START_ERROR_NONE)
+    {
+        free_ccapi_data_internal_resources(ccapi_data);
+    }
     /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
 
     return error;
@@ -177,6 +202,10 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * ccapi_data, ccapi_stop_t behavior)
     } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
 
 done:
+    if (error == CCAPI_STOP_ERROR_NONE)
+    {
+        free_ccapi_data_internal_resources(ccapi_data);
+    }
     return error;
 }
 
@@ -188,12 +217,32 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
     error = check_malloc(ccapi_data_single_instance);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
+
+    ccapi_data_single_instance->config.device_type = NULL;
+    ccapi_data_single_instance->config.device_cloud_url = NULL;
+    ccapi_data_single_instance->thread.connector_run = NULL;
+
     error = ccxapi_start(ccapi_data_single_instance, start);
+
 done:
+    if (error != CCAPI_START_ERROR_NONE)
+    {
+        ccapi_free(ccapi_data_single_instance);
+        ccapi_data_single_instance = NULL;
+    }
+
 	return error;
 }
 
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior)
 {
-    return ccxapi_stop(ccapi_data_single_instance, behavior);
+    ccapi_stop_error_t error;
+
+    error = ccxapi_stop(ccapi_data_single_instance, behavior);
+    if (error == CCAPI_STOP_ERROR_NONE)
+    {
+        ccapi_free(ccapi_data_single_instance);
+    }
+
+    return error;
 }

@@ -37,6 +37,7 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
+    Mock_ccimp_free_notExpected();
 
     /* corrupt the argument created by the handle */
 
@@ -74,6 +75,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadCcapiSignature)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
+    Mock_ccimp_free_notExpected();
 
     /* corrupt the argument created by the handle */
 
@@ -115,6 +117,8 @@ TEST(ccapi_init_threading_test, testInitErrorBadConnectorSignature)
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
+    Mock_ccimp_free_notExpected();
+
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
     Mock_connector_run_returnInNextLoop(connector_init_error);
 
