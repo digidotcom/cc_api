@@ -20,6 +20,41 @@ void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval)
     mock("ccimp_malloc").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
+void Mock_ccimp_free_create(void)
+{
+    return;
+}
+
+void Mock_ccimp_free_destroy(void)
+{
+    mock("ccimp_free").checkExpectations();
+}
+
+void Mock_ccimp_free_expectAndReturn(void * ptr, ccimp_status_t retval)
+{
+    /* Pass a NULL pointer if you don't know beforehand the value */
+    if (ptr != NULL)
+    {
+        mock("ccimp_free").expectOneCall("ccimp_free")
+            .withParameter("ptr", (void *)ptr)
+            .andReturnValue((int)retval);
+
+        mock("ccimp_free").setData("behavior", MOCK_FREE_ENABLED_CHECK_PARAMETER);
+    }
+    else
+    {
+        mock("ccimp_free").expectOneCall("ccimp_free")
+            .andReturnValue((int)retval);
+
+        mock("ccimp_free").setData("behavior", MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER);
+    }
+}
+
+void Mock_ccimp_free_notExpected(void)
+{
+    mock("ccimp_free").setData("behavior", MOCK_FREE_ENABLED_NOT_EXPECTED);
+}
+
 bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
 {
     ccimp_create_thread_info_t * o1 = (ccimp_create_thread_info_t*)object1;
@@ -132,6 +167,34 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
         memset(malloc_info->ptr, 0xFF, malloc_info->size); /* Try to catch hidden problems */
     }
     return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
+}
+
+ccimp_status_t ccimp_free(ccimp_free_t * free_info)
+{
+    uint8_t behavior;
+    ccimp_status_t retval = CCIMP_STATUS_OK;
+
+    behavior = mock_scope_c("ccimp_free")->getData("behavior").value.intValue;
+    if (behavior == MOCK_FREE_ENABLED_CHECK_PARAMETER)
+    {
+        mock_scope_c("ccimp_free")->actualCall("ccimp_free")->withPointerParameters("ptr", free_info->ptr);
+        retval = (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
+    }
+    else if (behavior == MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER)
+    {
+        mock_scope_c("ccimp_free")->actualCall("ccimp_free");
+        retval =  (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
+    }
+    else if (behavior == MOCK_FREE_ENABLED_NOT_EXPECTED)
+    {
+        mock_scope_c("ccimp_free")->actualCall("ccimp_free");
+    }
+    else
+    {
+        ccimp_free_real(free_info);
+    }
+
+    return retval;
 }
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time)

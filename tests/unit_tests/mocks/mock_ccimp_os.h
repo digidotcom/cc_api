@@ -17,6 +17,10 @@ extern "C" {
 
 #define MOCK_MALLOC_ENABLED 1	/* Mock disabled. Do malloc normally */
 
+#define MOCK_FREE_ENABLED_CHECK_PARAMETER       1
+#define MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER  2
+#define MOCK_FREE_ENABLED_NOT_EXPECTED          3
+
 typedef enum {
     MOCK_THREAD_DISABLED,                   /* Mock disabled. Create thread normally */
     MOCK_THREAD_ENABLED_NORMAL,             /* Mock enabled. Create thread normally */
@@ -29,12 +33,19 @@ void Mock_ccimp_malloc_create(void);
 void Mock_ccimp_malloc_destroy(void);
 void Mock_ccimp_malloc_expectAndReturn(size_t expect, void * retval);
 
+
+void Mock_ccimp_free_create(void);
+void Mock_ccimp_free_destroy(void);
+void Mock_ccimp_free_expectAndReturn(void * ptr, ccimp_status_t retval);
+void Mock_ccimp_free_notExpected(void);
+
 void Mock_ccimp_create_thread_create(void);
 void Mock_ccimp_create_thread_destroy(void);
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
 
 extern "C" {
 ccimp_status_t ccimp_malloc_real(ccimp_malloc_t * malloc_info);
+ccimp_status_t ccimp_free_real(ccimp_free_t * free_info);
 ccimp_status_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_thread_info);
 ccimp_status_t ccimp_os_get_system_time_real(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield_real(void);
