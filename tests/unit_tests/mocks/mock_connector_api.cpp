@@ -130,3 +130,33 @@ connector_status_t connector_run(connector_handle_t const handle)
     }
     return ret_value;
 }
+
+void Mock_connector_initiate_action_create(void)
+{
+    return;
+}
+
+void Mock_connector_initiate_action_destroy(void)
+{
+    mock("connector_initiate_action").checkExpectations();
+}
+
+void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, connector_initiate_request_t request, void * request_data, connector_status_t retval)
+{
+    mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+             .withParameter("handle", handle)
+             .withParameter("request", request)
+             .withParameter("data", request_data)
+             .andReturnValue(retval);
+}
+
+connector_status_t connector_initiate_action(connector_handle_t const handle, connector_initiate_request_t const request, void const * const request_data)
+{
+    mock("connector_initiate_action").actualCall("connector_initiate_action")
+            .withParameter("handle", handle)
+            .withParameter("request", request)
+            .withParameter("request_data", (void *)request_data);
+
+    return (connector_status_t)mock("connector_initiate_action").returnValue().getIntValue();
+
+}
