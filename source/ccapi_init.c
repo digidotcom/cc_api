@@ -115,6 +115,17 @@ done:
     return error;
 }
 
+ccapi_stop_error_t ccxapi_stop(ccapi_data_t * ccapi_data, ccapi_stop_t behavior)
+{
+    ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
+
+    UNUSED_ARGUMENT(behavior);
+    if (ccapi_data == NULL || strcmp(ccapi_data->signature, ccapi_signature) != 0 || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+        goto done;
+done:
+    return error;
+}
+
 ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
@@ -126,4 +137,9 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
     error = ccxapi_start(ccapi_data_single_instance, start);
 done:
 	return error;
+}
+
+ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior)
+{
+    return ccxapi_stop(ccapi_data_single_instance, behavior);
 }
