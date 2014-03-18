@@ -15,6 +15,7 @@ void Mock_create_all()
     Mock_ccimp_create_thread_create();
     Mock_connector_init_create();
     Mock_connector_run_create();
+    Mock_connector_init_create();
 }
 
 void Mock_destroy_all()
@@ -25,6 +26,7 @@ void Mock_destroy_all()
     Mock_ccimp_create_thread_destroy();
     Mock_connector_init_destroy();
     Mock_connector_run_destroy();
+    Mock_connector_init_destroy();
     ASSERT_CLEAN();
     mock().removeAllComparators();
     mock().clear();
