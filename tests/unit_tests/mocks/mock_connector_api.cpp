@@ -131,7 +131,9 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 
     if (request == connector_initiate_terminate)
     {
-        ccapi_data_single_instance->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+        ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+
+        (*spy_ccapi_data)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
         Mock_connector_run_returnInNextLoop(connector_device_terminated);
     }
 

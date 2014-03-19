@@ -10,7 +10,7 @@
 
 char const ccapi_signature[] = "CCAPI_SIG"; /* TODO: CCAPI_SW_VERSION */
 
-ccapi_data_t * ccapi_data_single_instance;
+ccapi_handle_t * ccapi_data_single_instance = NULL;
 
 void * ccapi_malloc(size_t size)
 {

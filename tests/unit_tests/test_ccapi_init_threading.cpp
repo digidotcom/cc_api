@@ -11,6 +11,8 @@ extern "C" {
 
 using namespace std;
 
+static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+
 TEST_GROUP(ccapi_init_threading_test)
 {
     void setup()
@@ -91,7 +93,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadCcapiSignature)
         ASSERT_WAIT(1);
         ASSERT_IF_NOT_HIT_DO ("Bad ccapi_signature", FAIL_TEST("Bad ccapi_signature not hitted"));
 
-        CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+        CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
         stop_aux_thread(aux_thread);
     }
 
@@ -119,7 +121,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadConnectorSignature)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_ccimp_free_notExpected();
 
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
     Mock_connector_run_returnInNextLoop(connector_init_error);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
@@ -133,7 +135,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadConnectorSignature)
     ASSERT_WAIT(01);
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
 
-    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);

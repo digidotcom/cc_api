@@ -53,17 +53,17 @@ static ccapi_start_error_t check_malloc(void const * const p)
 }
 
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
-ccapi_start_error_t ccxapi_start(ccapi_data_t * * const p_ccapi_data, ccapi_start_t const * const start)
+ccapi_start_error_t ccxapi_start(ccapi_handle_t * * const p_ccapi_data, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data;
 
-    *p_ccapi_data = ccapi_malloc(sizeof *ccapi_data_single_instance);
+    *p_ccapi_data = ccapi_malloc(sizeof (ccapi_data_t));
     error = check_malloc(*p_ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
-    ccapi_data = *p_ccapi_data;
+    ccapi_data = (ccapi_data_t *) *p_ccapi_data;
 
     ccapi_data->config.device_type = NULL;
     ccapi_data->config.device_cloud_url = NULL;
@@ -140,8 +140,9 @@ done:
     return error;
 }
 
-ccapi_stop_error_t ccxapi_stop(ccapi_data_t * ccapi_data, ccapi_stop_t behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_handle_t * ccapi_handle, ccapi_stop_t behavior)
 {
+    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
     UNUSED_ARGUMENT(behavior);

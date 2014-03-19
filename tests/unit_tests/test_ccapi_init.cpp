@@ -11,6 +11,8 @@ extern "C" {
 
 using namespace std;
 
+static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+
 TEST_GROUP(ccapi_init_test)
 {
     void setup()
@@ -168,7 +170,7 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
     ccapi_start_error_t error;
     connector_handle_t handle = NULL;
 
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
 
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
@@ -194,7 +196,7 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_ccimp_free_notExpected();
 
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
     Mock_connector_run_returnInNextLoop(connector_success);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
@@ -206,11 +208,11 @@ TEST(ccapi_init_test, testStartOk)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
-    CHECK(start.vendor_id == ccapi_data_single_instance->config.vendor_id);
-    CHECK(memcmp(start.device_id, ccapi_data_single_instance->config.device_id, sizeof start.device_id) == 0);
-    STRCMP_EQUAL(start.device_type, ccapi_data_single_instance->config.device_type);
-    STRCMP_EQUAL(start.device_cloud_url, ccapi_data_single_instance->config.device_cloud_url);
-    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK(start.vendor_id == (*spy_ccapi_data)->config.vendor_id);
+    CHECK(memcmp(start.device_id, (*spy_ccapi_data)->config.device_id, sizeof start.device_id) == 0);
+    STRCMP_EQUAL(start.device_type, (*spy_ccapi_data)->config.device_type);
+    STRCMP_EQUAL(start.device_cloud_url, (*spy_ccapi_data)->config.device_cloud_url);
+    CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 }
 
 TEST(ccapi_init_test, testStartThreadNoMemory)

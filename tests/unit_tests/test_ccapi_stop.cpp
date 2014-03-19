@@ -16,6 +16,8 @@ extern "C" {
 
 #include "test_helper_functions.h"
 
+static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+
 TEST_GROUP(ccapi_stop_test)
 {
     void setup()
@@ -84,7 +86,7 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     Mock_ccimp_free_expectAndReturn(&mem_for_thread_connector_run, CCIMP_STATUS_OK);
     Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop_error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
@@ -102,7 +104,7 @@ TEST(ccapi_stop_test, testCcapiStopImmediately)
 
     CHECK_EQUAL(start_error, CCAPI_START_ERROR_NONE);
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
