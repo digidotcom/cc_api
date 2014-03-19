@@ -155,17 +155,24 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
     uint8_t behavior;
 
     behavior = mock_scope_c("ccimp_malloc")->getData("behavior").value.intValue;
-    if (behavior == MOCK_MALLOC_ENABLED)
+    switch(behavior)
     {
-        mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc_info->size);
-        malloc_info->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
+        case MOCK_MALLOC_ENABLED:
+        {
+            mock_scope_c("ccimp_malloc")->actualCall("ccimp_malloc")->withIntParameters("size", malloc_info->size);
+            malloc_info->ptr = mock_scope_c("ccimp_malloc")->returnValue().value.pointerValue;
+            break;
+        }
+        case MOCK_MALLOC_DISABLED:
+        default:
+        {
+            /* Skip mocking, use default malloc implementation */
+            ccimp_malloc_real(malloc_info);
+            memset(malloc_info->ptr, 0xFF, malloc_info->size); /* Try to catch hidden problems */
+            break;
+        }
     }
-    else
-    {
-        /* Skip mocking, use default malloc implementation */
-        ccimp_malloc_real(malloc_info);
-        memset(malloc_info->ptr, 0xFF, malloc_info->size); /* Try to catch hidden problems */
-    }
+
     return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
@@ -175,23 +182,30 @@ ccimp_status_t ccimp_free(ccimp_free_t * free_info)
     ccimp_status_t retval = CCIMP_STATUS_OK;
 
     behavior = mock_scope_c("ccimp_free")->getData("behavior").value.intValue;
-    if (behavior == MOCK_FREE_ENABLED_CHECK_PARAMETER)
+    switch(behavior)
     {
-        mock_scope_c("ccimp_free")->actualCall("ccimp_free")->withPointerParameters("ptr", free_info->ptr);
-        retval = (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
-    }
-    else if (behavior == MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER)
-    {
-        mock_scope_c("ccimp_free")->actualCall("ccimp_free");
-        retval =  (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
-    }
-    else if (behavior == MOCK_FREE_ENABLED_NOT_EXPECTED)
-    {
-        mock_scope_c("ccimp_free")->actualCall("ccimp_free");
-    }
-    else
-    {
-        ccimp_free_real(free_info);
+        case MOCK_FREE_ENABLED_CHECK_PARAMETER:
+        {
+            mock_scope_c("ccimp_free")->actualCall("ccimp_free")->withPointerParameters("ptr", free_info->ptr);
+            retval = (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
+            break;
+        }
+        case MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER:
+        {
+            mock_scope_c("ccimp_free")->actualCall("ccimp_free");
+            retval =  (ccimp_status_t)mock_scope_c("ccimp_free")->returnValue().value.intValue;
+            break;
+        }
+        case MOCK_FREE_ENABLED_NOT_EXPECTED:
+        {
+            mock_scope_c("ccimp_free")->actualCall("ccimp_free");
+            break;
+        }
+        default:
+        {
+            ccimp_free_real(free_info);
+            break;
+        }
     }
 
     return retval;

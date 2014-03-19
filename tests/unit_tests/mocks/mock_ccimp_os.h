@@ -15,11 +15,17 @@ extern "C" {
 #include "ccimp/ccimp_os.h"
 }
 
-#define MOCK_MALLOC_ENABLED 1	/* Mock disabled. Do malloc normally */
+enum {
+    MOCK_MALLOC_DISABLED,
+    MOCK_MALLOC_ENABLED	/* Mock disabled. Do malloc normally */
+};
 
-#define MOCK_FREE_ENABLED_CHECK_PARAMETER       1
-#define MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER  2
-#define MOCK_FREE_ENABLED_NOT_EXPECTED          3
+enum {
+    MOCK_FREE_DISABLED,
+    MOCK_FREE_ENABLED_CHECK_PARAMETER,
+    MOCK_FREE_ENABLED_DONT_CHECK_PARAMETER,
+    MOCK_FREE_ENABLED_NOT_EXPECTED
+};
 
 typedef enum {
     MOCK_THREAD_DISABLED,                   /* Mock disabled. Create thread normally */
