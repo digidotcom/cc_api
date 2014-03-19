@@ -113,7 +113,7 @@ TEST(ccapi_init_test, testNoMemory)
     void * malloc_for_ccapi_data = NULL;
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
-    Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
+    Mock_ccimp_free_notExpected();
     fill_start_structure_with_good_parameters(&start);
 
     error = ccapi_start(&start);
