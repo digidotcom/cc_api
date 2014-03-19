@@ -35,22 +35,13 @@ done:
     return error;
 }
 
-static void deallocate_and_set_to_null(void * * const ptr)
-{
-    if (*ptr != NULL)
-    {
-        ccapi_free(*ptr);
-        *ptr = NULL;
-    }
-}
-
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
     ASSERT(ccapi_data != NULL);
 
-    deallocate_and_set_to_null( (void *) &ccapi_data->config.device_type);
-    deallocate_and_set_to_null( (void *) &ccapi_data->config.device_cloud_url);
-    deallocate_and_set_to_null( (void *) &ccapi_data->thread.connector_run);
+    reset_heap_ptr(&ccapi_data->config.device_type);
+    reset_heap_ptr(&ccapi_data->config.device_cloud_url);
+    reset_heap_ptr(&ccapi_data->thread.connector_run);
 }
 
 static ccapi_start_error_t check_malloc(void const * const p)
@@ -142,7 +133,7 @@ done:
     if (error != CCAPI_START_ERROR_NONE)
     {
         free_ccapi_data_internal_resources(ccapi_data);
-        deallocate_and_set_to_null((void *)p_ccapi_data);
+        reset_heap_ptr(p_ccapi_data);
     }
     /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
 
@@ -231,7 +222,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 
     if (error != CCAPI_START_ERROR_NONE)
     {
-        deallocate_and_set_to_null( (void *) &ccapi_data_single_instance);
+        reset_heap_ptr(&ccapi_data_single_instance);
     }
 
 done:

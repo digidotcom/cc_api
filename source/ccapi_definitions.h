@@ -32,6 +32,8 @@ extern char * assert_buffer;
 #define ASSERT_GOTO(cond, message, label)   ON_ASSERT_DO_((cond), {goto label;}, {})
 #endif
 
+#define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
+
 typedef struct {
     uint32_t vendor_id;
     uint8_t device_id[DEVICE_ID_LENGTH];
