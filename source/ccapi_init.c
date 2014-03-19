@@ -61,9 +61,22 @@ static ccapi_start_error_t check_malloc(void const * const p)
         return CCAPI_START_ERROR_NONE;
 }
 
-ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const * const start)
+/* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
+ccapi_start_error_t ccxapi_start(ccapi_data_t * * const p_ccapi_data, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
+    ccapi_data_t * ccapi_data;
+
+    *p_ccapi_data = ccapi_malloc(sizeof *ccapi_data_single_instance);
+    error = check_malloc(*p_ccapi_data);
+    if (error != CCAPI_START_ERROR_NONE)
+        goto done;
+
+    ccapi_data = *p_ccapi_data;
+
+    ccapi_data->config.device_type = NULL;
+    ccapi_data->config.device_cloud_url = NULL;
+    ccapi_data->thread.connector_run = NULL;
 
     if (start == NULL)
     {
@@ -121,7 +134,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const 
         }
 
         do
-        {          
+        {
             ccimp_os_yield();
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
@@ -129,6 +142,7 @@ done:
     if (error != CCAPI_START_ERROR_NONE)
     {
         free_ccapi_data_internal_resources(ccapi_data);
+        deallocate_and_set_to_null((void *)p_ccapi_data);
     }
     /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
 
@@ -208,18 +222,8 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-	ccapi_data_single_instance = ccapi_malloc(sizeof *ccapi_data_single_instance);
-    error = check_malloc(ccapi_data_single_instance);
-    if (error != CCAPI_START_ERROR_NONE)
-        goto done;
+    error = ccxapi_start(&ccapi_data_single_instance, start);
 
-    ccapi_data_single_instance->config.device_type = NULL;
-    ccapi_data_single_instance->config.device_cloud_url = NULL;
-    ccapi_data_single_instance->thread.connector_run = NULL;
-
-    error = ccxapi_start(ccapi_data_single_instance, start);
-
-done:
     if (error != CCAPI_START_ERROR_NONE)
     {
         deallocate_and_set_to_null( (void *) &ccapi_data_single_instance);
@@ -236,6 +240,7 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior)
     if (error == CCAPI_STOP_ERROR_NONE)
     {
         ccapi_free(ccapi_data_single_instance);
+        ccapi_data_single_instance = NULL;
     }
 
     return error;
