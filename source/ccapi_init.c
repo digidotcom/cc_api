@@ -140,9 +140,9 @@ done:
     return error;
 }
 
-ccapi_stop_error_t ccxapi_stop(ccapi_handle_t * ccapi_handle, ccapi_stop_t behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_handle_t * * const ccapi_handle, ccapi_stop_t behavior)
 {
-    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
+    ccapi_data_t * ccapi_data = (ccapi_data_t *) *ccapi_handle;
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
     UNUSED_ARGUMENT(behavior);
@@ -206,6 +206,7 @@ done:
     if (error == CCAPI_STOP_ERROR_NONE)
     {
         free_ccapi_data_internal_resources(ccapi_data);
+        reset_heap_ptr(ccapi_handle);
     }
     return error;
 }
@@ -232,14 +233,5 @@ done:
 
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior)
 {
-    ccapi_stop_error_t error;
-
-    error = ccxapi_stop(ccapi_data_single_instance, behavior);
-    if (error == CCAPI_STOP_ERROR_NONE)
-    {
-        ccapi_free(ccapi_data_single_instance);
-        ccapi_data_single_instance = NULL;
-    }
-
-    return error;
+    return ccxapi_stop(&ccapi_data_single_instance, behavior);;
 }
