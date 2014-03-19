@@ -21,6 +21,14 @@ void Mock_create_all()
 
 void Mock_destroy_all()
 {
+    if (ccapi_data_single_instance != NULL)
+    {
+        /* Dear developer: If you want to call free on this pointer,
+         * know that it leads to race conditions making TEST(ccapi_init_test, testDeviceTypeNoMemory) fail
+         * once in ~100 iterations. Don't say I didn't tell you! Good luck! =)
+         */
+        ccapi_data_single_instance = NULL;
+    }
     Mock_ccimp_create_thread_destroy();
     Mock_ccimp_debug_printf_destroy();
     Mock_ccimp_malloc_destroy();

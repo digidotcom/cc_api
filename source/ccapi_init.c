@@ -222,6 +222,11 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
+	if (ccapi_data_single_instance != NULL)
+	{
+	    error = CCAPI_START_ERROR_ALREADY_STARTED;
+	    goto done;
+	}
     error = ccxapi_start(&ccapi_data_single_instance, start);
 
     if (error != CCAPI_START_ERROR_NONE)
@@ -229,6 +234,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         deallocate_and_set_to_null( (void *) &ccapi_data_single_instance);
     }
 
+done:
 	return error;
 }
 

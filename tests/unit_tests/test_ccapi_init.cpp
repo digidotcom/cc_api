@@ -265,3 +265,19 @@ TEST(ccapi_init_test, testStartThreadFail)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
 }
+
+TEST(ccapi_init_test, testStartTwiceFails)
+{
+    ccapi_start_error_t start_error;
+    ccapi_start_t start = {0};
+
+    fill_start_structure_with_good_parameters(&start);
+
+    start_error = ccapi_start(&start);
+
+    CHECK_EQUAL(start_error, CCAPI_START_ERROR_NONE);
+
+    start_error = ccapi_start(&start);
+
+    CHECK_EQUAL(start_error, CCAPI_START_ERROR_ALREADY_STARTED);
+}
