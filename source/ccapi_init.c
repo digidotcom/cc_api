@@ -35,7 +35,16 @@ done:
     return error;
 }
 
-static ccapi_start_error_t check_malloc(void * p)
+static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
+{
+    ASSERT(ccapi_data != NULL);
+
+    reset_heap_ptr(&ccapi_data->config.device_type);
+    reset_heap_ptr(&ccapi_data->config.device_cloud_url);
+    reset_heap_ptr(&ccapi_data->thread.connector_run);
+}
+
+static ccapi_start_error_t check_malloc(void const * const p)
 {
     if (p == NULL)
         return CCAPI_START_ERROR_INSUFFICIENT_MEMORY;
@@ -43,9 +52,22 @@ static ccapi_start_error_t check_malloc(void * p)
         return CCAPI_START_ERROR_NONE;
 }
 
-ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const * const start)
+/* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
+ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
+    ccapi_data_t * ccapi_data;
+
+    ccapi_data = ccapi_malloc(sizeof *ccapi_data);
+    *ccapi_handle = (ccapi_handle_t)ccapi_data;
+
+    error = check_malloc(ccapi_data);
+    if (error != CCAPI_START_ERROR_NONE)
+        goto done;
+
+    ccapi_data->config.device_type = NULL;
+    ccapi_data->config.device_cloud_url = NULL;
+    ccapi_data->thread.connector_run = NULL;
 
     if (start == NULL)
     {
@@ -56,18 +78,6 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const 
     error = check_params(start);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
-
-#if (defined CCIMP_DEBUG_ENABLED)
-    {
-        ccapi_config_debug_error_t config_debug_error;
-        config_debug_error = ccapi_config_debug(start->debug.init_zones, start->debug.init_level);
-        if (config_debug_error != CCAPI_CONFIG_DEBUG_ERROR_NONE)
-        {
-            error = CCAPI_START_ERROR_INVALID_DEBUG_CONFIG;
-            goto done;
-        }
-    }
-#endif
 
     ccapi_data->config.vendor_id = start->vendor_id;
     memcpy(ccapi_data->config.device_id, start->device_id, sizeof ccapi_data->config.device_id);
@@ -115,14 +125,89 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * ccapi_data, ccapi_start_t const 
         }
 
         do
-        {          
+        {
             ccimp_os_yield();
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
 done:
-    /* TODO: Free when error !! */
-
+    if (error != CCAPI_START_ERROR_NONE && ccapi_data != NULL)
+    {
+        free_ccapi_data_internal_resources(ccapi_data);
+        ccapi_free(ccapi_data);
+    }
     /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
+
+    return error;
+}
+
+ccapi_stop_error_t ccxapi_stop(ccapi_handle_t ccapi_handle, ccapi_stop_t behavior)
+{
+    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
+    ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
+
+    UNUSED_ARGUMENT(behavior);
+    if (ccapi_data == NULL || ccapi_data->signature != ccapi_signature || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+        goto done;
+    {
+        connector_status_t connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_terminate, NULL);
+        switch(connector_status)
+        {
+        case connector_success:
+            error = CCAPI_STOP_ERROR_NONE;
+            break;
+        case connector_init_error:
+            break;
+        case connector_invalid_data_size:
+            break;
+        case connector_invalid_data_range:
+            break;
+        case connector_invalid_data:
+            break;
+        case connector_keepalive_error:
+            break;
+        case connector_bad_version:
+            break;
+        case connector_device_terminated:
+            break;
+        case connector_service_busy:
+            break;
+        case connector_invalid_response:
+            break;
+        case connector_no_resource:
+            break;
+        case connector_unavailable:
+            break;
+        case connector_idle:
+            break;
+        case connector_working:
+            break;
+        case connector_pending:
+            break;
+        case connector_active:
+            break;
+        case connector_abort:
+            break;
+        case connector_device_error:
+            break;
+        case connector_exceed_timeout:
+            break;
+        case connector_invalid_payload_packet:
+            break;
+        case connector_open_error:
+            break;
+        }
+    }
+
+    do {
+        ccimp_os_yield();
+    } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
+
+done:
+    if (error == CCAPI_STOP_ERROR_NONE)
+    {
+        free_ccapi_data_internal_resources(ccapi_data);
+        ccapi_free(ccapi_data);
+    }
 
     return error;
 }
@@ -131,11 +216,30 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-	ccapi_data_single_instance = ccapi_malloc(sizeof *ccapi_data_single_instance);
-    error = check_malloc(ccapi_data_single_instance);
+	if (ccapi_data_single_instance != NULL)
+	{
+	    error = CCAPI_START_ERROR_ALREADY_STARTED;
+	    goto done;
+	}
+    error = ccxapi_start(&ccapi_data_single_instance, start);
+
     if (error != CCAPI_START_ERROR_NONE)
-        goto done;
-    error = ccxapi_start(ccapi_data_single_instance, start);
+    {
+        ccapi_data_single_instance = NULL;
+    }
+
 done:
 	return error;
+}
+
+ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior)
+{
+    ccapi_stop_error_t error;
+    error = ccxapi_stop(ccapi_data_single_instance, behavior);
+    if (error != CCAPI_STOP_ERROR_NONE)
+    {
+        ccapi_data_single_instance = NULL;
+    }
+
+    return error;
 }

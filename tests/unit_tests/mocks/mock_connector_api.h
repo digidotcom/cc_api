@@ -37,6 +37,10 @@ void Mock_connector_init_expectAndReturn(connector_callback_t const callback, co
 
 void Mock_connector_run_create(void);
 void Mock_connector_run_destroy(void);
-void Mock_connector_run_expectAndReturn(connector_handle_t const handle, connector_status_t retval);
+void Mock_connector_run_returnInNextLoop(connector_status_t retval);
+
+void Mock_connector_initiate_action_create(void);
+void Mock_connector_initiate_action_destroy(void);
+void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, connector_initiate_request_t request, void * request_data, connector_status_t retval);
 
 #endif /* MOCK_CONNECTOR_API_H_ */

@@ -7,28 +7,11 @@ extern "C" {
 #include "ccimp/ccimp_os.h"
 }
 
+#include "test_helper_functions.h"
+
 using namespace std;
 
-#define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
-
-static void fill_start_structure_with_good_parameters(ccapi_start_t * start)
-{
-    uint8_t device_id[DEVICE_ID_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
-    char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
-    char const * const device_type = DEVICE_TYPE_STRING;
-    start->vendor_id = 0x12345678; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
-    memcpy(start->device_id, device_id, sizeof start->device_id);
-    start->device_cloud_url = device_cloud_url;
-    start->device_type = device_type;
-
-    start->service.cli = NULL;
-    start->service.receive = NULL;
-    start->service.file_system = NULL;
-    start->service.firmware = NULL;
-    start->service.rci = NULL;
-}
-
+static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
 
 TEST_GROUP(ccapi_config_test)
 {
@@ -59,8 +42,8 @@ TEST(ccapi_config_test, testDeviceID)
     device_id.data = device_id_buf;
 
     request.config_request = connector_request_id_config_device_id;
-    ccapi_connector_callback(connector_class_id_config, request, &device_id, ccapi_data_single_instance);
-    CHECK(memcmp(ccapi_data_single_instance->config.device_id, device_id_buf, device_id.bytes_required) == 0);
+    ccapi_connector_callback(connector_class_id_config, request, &device_id, (*spy_ccapi_data));
+    CHECK(memcmp((*spy_ccapi_data)->config.device_id, device_id_buf, device_id.bytes_required) == 0);
 }
 
 TEST(ccapi_config_test, testCloudURL)
@@ -69,9 +52,9 @@ TEST(ccapi_config_test, testCloudURL)
     connector_config_pointer_string_t device_cloud_url = {0};
 
     request.config_request = connector_request_id_config_device_cloud_url;
-    ccapi_connector_callback(connector_class_id_config, request, &device_cloud_url, ccapi_data_single_instance);
-    STRCMP_EQUAL(device_cloud_url.string, ccapi_data_single_instance->config.device_cloud_url);
-    CHECK(strlen(ccapi_data_single_instance->config.device_cloud_url) == device_cloud_url.length);
+    ccapi_connector_callback(connector_class_id_config, request, &device_cloud_url, (*spy_ccapi_data));
+    STRCMP_EQUAL(device_cloud_url.string, (*spy_ccapi_data)->config.device_cloud_url);
+    CHECK(strlen((*spy_ccapi_data)->config.device_cloud_url) == device_cloud_url.length);
 }
 
 TEST(ccapi_config_test, testVendorID)
@@ -80,8 +63,8 @@ TEST(ccapi_config_test, testVendorID)
     connector_config_vendor_id_t vendor_id = {0};
 
     request.config_request = connector_request_id_config_vendor_id;
-    ccapi_connector_callback(connector_class_id_config, request, &vendor_id, ccapi_data_single_instance);
-    CHECK(vendor_id.id == ccapi_data_single_instance->config.vendor_id);
+    ccapi_connector_callback(connector_class_id_config, request, &vendor_id, (*spy_ccapi_data));
+    CHECK(vendor_id.id == (*spy_ccapi_data)->config.vendor_id);
 }
 
 TEST(ccapi_config_test, testDeviceType)
@@ -90,9 +73,9 @@ TEST(ccapi_config_test, testDeviceType)
     connector_config_pointer_string_t device_type = {0};
 
     request.config_request = connector_request_id_config_device_type;
-    ccapi_connector_callback(connector_class_id_config, request, &device_type, ccapi_data_single_instance);
-    STRCMP_EQUAL(device_type.string, ccapi_data_single_instance->config.device_type);
-    CHECK(strlen(ccapi_data_single_instance->config.device_type) == device_type.length);
+    ccapi_connector_callback(connector_class_id_config, request, &device_type, (*spy_ccapi_data));
+    STRCMP_EQUAL(device_type.string, (*spy_ccapi_data)->config.device_type);
+    CHECK(strlen((*spy_ccapi_data)->config.device_type) == device_type.length);
 }
 
 TEST(ccapi_config_test, testFirmwareSupport)
@@ -101,7 +84,7 @@ TEST(ccapi_config_test, testFirmwareSupport)
     connector_config_supported_t firmware_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_firmware_facility;
-    ccapi_connector_callback(connector_class_id_config, request, &firmware_supported, ccapi_data_single_instance);
+    ccapi_connector_callback(connector_class_id_config, request, &firmware_supported, (*spy_ccapi_data));
     CHECK(firmware_supported.supported == connector_false);
 }
 
@@ -111,7 +94,7 @@ TEST(ccapi_config_test, testFileSystemSupport)
     connector_config_supported_t filesystem_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_file_system;
-    ccapi_connector_callback(connector_class_id_config, request, &filesystem_supported, ccapi_data_single_instance);
+    ccapi_connector_callback(connector_class_id_config, request, &filesystem_supported, (*spy_ccapi_data));
     CHECK(filesystem_supported.supported == connector_false);
 }
 
@@ -121,6 +104,6 @@ TEST(ccapi_config_test, testRCISupport)
     connector_config_supported_t rci_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
 
     request.config_request = connector_request_id_config_remote_configuration;
-    ccapi_connector_callback(connector_class_id_config, request, &rci_supported, ccapi_data_single_instance);
+    ccapi_connector_callback(connector_class_id_config, request, &rci_supported, (*spy_ccapi_data));
     CHECK(rci_supported.supported == connector_false);
 }

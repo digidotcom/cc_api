@@ -29,10 +29,16 @@ typedef struct {
 } ccimp_malloc_t;
 
 typedef struct {
+    void * ptr;
+} ccimp_free_t;
+
+typedef struct {
     unsigned long sys_uptime;
 } ccimp_os_system_up_time_t;
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info);
+ccimp_status_t ccimp_free(ccimp_free_t * free_info);
+
 ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time);

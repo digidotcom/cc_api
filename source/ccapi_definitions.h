@@ -20,9 +20,9 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
+#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
 #else
-#define ON_ASSERT_DO_(cond, code, output)   ON_FALSE_DO_((cond), {code})
+#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {code})
 #endif
 
 #if (defined UNIT_TEST)
@@ -31,6 +31,8 @@ extern char * assert_buffer;
 #else
 #define ASSERT_GOTO(cond, message, label)   ON_ASSERT_DO_((cond), {goto label;}, {})
 #endif
+
+#define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
 
 typedef struct {
     uint32_t vendor_id;
@@ -69,11 +71,15 @@ typedef struct {
 #endif
 } ccapi_data_t;
 
-extern ccapi_data_t * ccapi_data_single_instance;
+typedef struct ccapi_handle * ccapi_handle_t;
+
+extern ccapi_handle_t ccapi_data_single_instance;
 extern char const ccapi_signature[];
-extern void ccapi_connector_run_thread(void * const argument);
-extern void * ccapi_malloc(size_t size);
-extern connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
+
+void ccapi_connector_run_thread(void * const argument);
+void * ccapi_malloc(size_t size);
+ccimp_status_t ccapi_free(void * ptr);
+connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
 #if (defined CCIMP_DEBUG_ENABLED)
 extern void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...);

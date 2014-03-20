@@ -10,7 +10,7 @@
 
 char const ccapi_signature[] = "CCAPI_SIG"; /* TODO: CCAPI_SW_VERSION */
 
-ccapi_data_t * ccapi_data_single_instance;
+ccapi_handle_t ccapi_data_single_instance = NULL;
 
 void * ccapi_malloc(size_t size)
 {
@@ -23,18 +23,27 @@ void * ccapi_malloc(size_t size)
     return status == CCIMP_STATUS_OK ? malloc_info.ptr : NULL;
 }
 
+ccimp_status_t ccapi_free(void * ptr)
+{
+    ccimp_free_t free_info;
+
+    free_info.ptr = ptr;
+
+    return ccimp_free(&free_info);
+}
+
 void ccapi_connector_run_thread(void * const argument)
 {
-    ccapi_data_t * local_ccapi_data = argument;
+    ccapi_data_t * ccapi_data = argument;
 
-    /* local_ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
-    ASSERT_GOTO ((local_ccapi_data != NULL), "NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", done);
-    ASSERT_GOTO ((local_ccapi_data->signature == ccapi_signature), "Bad ccapi_signature", done);
+    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_GOTO ((ccapi_data != NULL), "NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", done);
+    ASSERT_GOTO ((ccapi_data->signature == ccapi_signature), "Bad ccapi_signature", done);
 
-    local_ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
-    while (local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
+    ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
+    while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
     {
-        connector_status_t const status = connector_run(local_ccapi_data->connector_handle);
+        connector_status_t const status = connector_run(ccapi_data->connector_handle);
 
         /* It's very unlikely that we get this error as we have already verified ccapi_signature */
         ASSERT_GOTO ((status != connector_init_error), "Bad connector_signature", done);
@@ -45,7 +54,9 @@ void ccapi_connector_run_thread(void * const argument)
                 break;
         }            
     }
-    ASSERT(local_ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+    ASSERT(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+
+    ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 done:
     return;
 }
@@ -124,4 +135,3 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 
     return status;
 }
-

@@ -22,8 +22,19 @@ typedef enum {
     CCAPI_START_ERROR_INVALID_DEVICETYPE,
     CCAPI_START_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_START_ERROR_THREAD_FAILED,
+    CCAPI_START_ERROR_ALREADY_STARTED,
     CCAPI_START_ERROR_COUNT
 } ccapi_start_error_t;
+
+typedef enum {
+    CCAPI_STOP_ERROR_NONE,
+    CCAPI_STOP_ERROR_NOT_STARTED
+} ccapi_stop_error_t;
+
+typedef enum {
+    CCAPI_STOP_GRACEFULLY,
+    CCAPI_STOP_IMMEDIATELY
+} ccapi_stop_t;
 
 typedef struct {
         uint32_t vendor_id;
@@ -46,5 +57,5 @@ typedef struct {
 
 
 ccapi_start_error_t ccapi_start(ccapi_start_t const * const start);
-
+ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior);
 #endif
