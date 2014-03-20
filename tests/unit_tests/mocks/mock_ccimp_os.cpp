@@ -1,3 +1,5 @@
+#include <pthread.h>
+
 #include "mock_ccimp_os.h"
 
 void Mock_ccimp_malloc_create(void)
