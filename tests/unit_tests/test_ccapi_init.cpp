@@ -266,14 +266,39 @@ TEST(ccapi_init_test, testStartThreadFail)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
+
+    return pthread;
+}
+
+int stop_aux_thread(pthread_t pthread)
+{
+    int error;
+
+    error = pthread_cancel(pthread);
+    if (error < 0)
+    {
+        printf("pthread_cancel failed with %d\n", error);
+        goto done;
+    }
+
+    error = pthread_join(pthread, NULL);
+    if (error < 0)
+    {
+        printf("pthread_cancel failed with %d\n", error);
+        goto done;
+    }
+done:
+    return error;
 }
 
 TEST(ccapi_init_test, testStartTwiceFails)
+    {
 {
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
 
     fill_start_structure_with_good_parameters(&start);
+    {
 
     start_error = ccapi_start(&start);
 
