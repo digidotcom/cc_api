@@ -73,7 +73,7 @@ typedef struct {
 
 typedef struct ccapi_handle * ccapi_handle_t;
 
-extern ccapi_handle_t * ccapi_data_single_instance;
+extern ccapi_handle_t ccapi_data_single_instance;
 extern char const ccapi_signature[];
 extern void ccapi_connector_run_thread(void * const argument);
 extern void * ccapi_malloc(size_t size);
