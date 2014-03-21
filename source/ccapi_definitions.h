@@ -76,8 +76,6 @@ void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
-#if (defined CCIMP_DEBUG_ENABLED)
 void ccapi_debug_line(char const * const format, ...);
 void ccapi_debug_print_buffer(char const * const label, void const * const buffer, size_t const length);
-#endif
 #endif

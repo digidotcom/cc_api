@@ -46,4 +46,6 @@ void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list
 #define ASSERT(cond)
 #endif
 
+#define debug_t void *
+
 #endif /* CCIMP_DEBUG_H_ */
