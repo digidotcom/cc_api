@@ -13,13 +13,7 @@
 #if (defined CCIMP_DEBUG_ENABLED)
 
 #include <stdarg.h>
-
-typedef enum {
-    debug_beg,
-    debug_mid,
-    debug_end,
-    debug_all
-} ccimp_debug_t;
+#include "connector_debug.h"
 
 /**
  * Debug output from Cloud Connector, Writes a formatted string to stdout, expanding the format
@@ -41,7 +35,7 @@ typedef enum {
  *      connector_debug_vprintf(debug_end, "", args);
  *
  */
-void ccimp_debug_vprintf(ccimp_debug_t const debug, char const * const format, va_list args);
+void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args);
 
 /**
  *  Verify that the condition is true, otherwise halt the program.

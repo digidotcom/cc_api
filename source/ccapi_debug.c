@@ -8,7 +8,7 @@
        - categories
 */
 
-void connector_debug_vprintf(ccimp_debug_t const debug, char const * const format, va_list args)
+void connector_debug_vprintf(debug_t const debug, char const * const format, va_list args)
 {
     /* TODO: Macro */
     ccimp_debug_vprintf(debug, format, args);

@@ -12,7 +12,7 @@ void Mock_ccimp_debug_printf_destroy(void)
     mock("ccimp_debug_vprintf").checkExpectations();
 }
 
-void Mock_ccimp_debug_vprintf_expect(ccimp_debug_t const debug, char const * const format, va_list args)
+void Mock_ccimp_debug_vprintf_expect(debug_t const debug, char const * const format, va_list args)
 {
     /* If we are calling expectations, then override default implementation */
     mock("ccimp_debug_vprintf").setData("behavior", MOCK_DEBUG_ENABLED);
@@ -29,7 +29,7 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
-void ccimp_debug_vprintf(ccimp_debug_t const debug, char const * const format, va_list args)
+void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args)
 {
     uint8_t behavior;
 

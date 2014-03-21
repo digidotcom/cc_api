@@ -22,7 +22,7 @@ void Mock_ccimp_debug_printf_destroy(void);
 void Mock_ccimp_debug_printf_expect(char const * const message);
 
 extern "C" {
-void ccimp_debug_vprintf_real(ccimp_debug_t const debug, char const * const format, va_list args);
+void ccimp_debug_vprintf_real(debug_t const debug, char const * const format, va_list args);
 }
 
 #endif
