@@ -135,7 +135,7 @@ done:
         ccapi_free(ccapi_data);
     }
 
-    ccapi_debug_line("ccapi_start ret %d\n", error);
+    ccapi_debug_line("ccapi_start ret %d", error);
 
     return error;
 }

@@ -19,7 +19,7 @@ extern "C" {
 
 void Mock_ccimp_debug_printf_create(void);
 void Mock_ccimp_debug_printf_destroy(void);
-void Mock_ccimp_debug_printf_expect(char const * const message);
+void Mock_ccimp_debug_vprintf_expect(debug_t const debug, char const * const buffer);
 
 extern "C" {
 void ccimp_debug_vprintf_real(debug_t const debug, char const * const format, va_list args);

@@ -12,15 +12,15 @@ void Mock_ccimp_debug_printf_destroy(void)
     mock("ccimp_debug_vprintf").checkExpectations();
 }
 
-void Mock_ccimp_debug_vprintf_expect(debug_t const debug, char const * const format, va_list args)
+void Mock_ccimp_debug_vprintf_expect(debug_t const debug, char const * const buffer)
 {
     /* If we are calling expectations, then override default implementation */
     mock("ccimp_debug_vprintf").setData("behavior", MOCK_DEBUG_ENABLED);
 
-    if (strcmp(format, CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL) != 0)
+    if (strcmp(buffer, CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL) != 0)
     {
         mock("ccimp_debug_vprintf").expectOneCall("ccimp_debug_vprintf")
-                    .withParameter("debug", debug).withParameter("format", format).withParameter("args", args);
+                    .withParameter("debug", debug).withParameter("buffer", buffer);
     }
 }
 
@@ -36,8 +36,11 @@ void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list
     behavior = mock_scope_c("ccimp_debug_vprintf")->getData("behavior").value.intValue;
     if (behavior == MOCK_DEBUG_ENABLED)
     {
+        char buffer[500];
+        vsnprintf(buffer, sizeof(buffer), format, args);   
+
         mock_scope_c("ccimp_debug_vprintf")->actualCall("ccimp_debug_vprintf")
-        		->withIntParameters("debug", debug)->withStringParameters("format", format)->withStringParameters("args", args);
+              ->withIntParameters("debug", debug)->withStringParameters("buffer", buffer);
     }
     else
     {
