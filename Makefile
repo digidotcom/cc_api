@@ -52,7 +52,6 @@ CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt -lpthread
 
-CFLAGS += -DCONNECTOR_HAVE_STDINT_HEADER
 CCFLAGS += $(CFLAGS) -std=c89
 
 # Generated Sample Executable Name.
