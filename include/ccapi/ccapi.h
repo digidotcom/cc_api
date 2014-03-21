@@ -8,7 +8,6 @@
 #ifndef _CCAPI_H_
 #define _CCAPI_H_
 
-#include "ccapi/ccapi_debug.h"
 #include "ccapi/ccapi_init.h"
 
 #endif

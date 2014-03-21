@@ -1,5 +1,4 @@
 #include "ccapi/ccapi.h"
-#include "ccimp/ccimp_os.h"
 #include "ccapi_definitions.h"
 
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
@@ -135,7 +134,8 @@ done:
         free_ccapi_data_internal_resources(ccapi_data);
         ccapi_free(ccapi_data);
     }
-    /* ccapi_debug_printf(ZONE_START_STOP, LEVEL_INFO, "ccapi_start ret %d\n", error); */
+
+    ccapi_debug_line("ccapi_start ret %d\n", error);
 
     return error;
 }

@@ -9,7 +9,6 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
-#include "ccapi/ccapi_debug.h"
 #include "custom/custom_debug.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
@@ -65,10 +64,6 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
-#if (defined CCIMP_DEBUG_ENABLED)
-    ccapi_debug_zones_t dbg_zones;
-    ccapi_debug_level_t dbg_level;
-#endif
 } ccapi_data_t;
 
 typedef struct ccapi_handle * ccapi_handle_t;
@@ -82,6 +77,7 @@ ccimp_status_t ccapi_free(void * ptr);
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
 #if (defined CCIMP_DEBUG_ENABLED)
-extern void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...);
+void ccapi_debug_line(char const * const format, ...);
+void ccapi_debug_print_buffer(char const * const label, void const * const buffer, size_t const length);
 #endif
 #endif

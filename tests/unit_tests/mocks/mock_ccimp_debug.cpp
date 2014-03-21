@@ -9,18 +9,18 @@ void Mock_ccimp_debug_printf_create(void)
 
 void Mock_ccimp_debug_printf_destroy(void)
 {
-    mock("ccimp_debug_printf").checkExpectations();
+    mock("ccimp_debug_vprintf").checkExpectations();
 }
 
-void Mock_ccimp_debug_printf_expect(char const * const message)
+void Mock_ccimp_debug_vprintf_expect(ccimp_debug_t const debug, char const * const format, va_list args)
 {
     /* If we are calling expectations, then override default implementation */
-    mock("ccimp_debug_printf").setData("behavior", MOCK_DEBUG_ENABLED);
+    mock("ccimp_debug_vprintf").setData("behavior", MOCK_DEBUG_ENABLED);
 
-    if (strcmp(message, CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL) != 0)
+    if (strcmp(format, CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL) != 0)
     {
-        mock("ccimp_debug_printf").expectOneCall("ccimp_debug_printf")
-                    .withParameter("message", message);
+        mock("ccimp_debug_vprintf").expectOneCall("ccimp_debug_vprintf")
+                    .withParameter("debug", debug).withParameter("format", format).withParameter("args", args);
     }
 }
 
@@ -29,19 +29,20 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
-void ccimp_debug_printf(char const * const message)
+void ccimp_debug_vprintf(ccimp_debug_t const debug, char const * const format, va_list args)
 {
     uint8_t behavior;
 
-    behavior = mock_scope_c("ccimp_debug_printf")->getData("behavior").value.intValue;
+    behavior = mock_scope_c("ccimp_debug_vprintf")->getData("behavior").value.intValue;
     if (behavior == MOCK_DEBUG_ENABLED)
     {
-        mock_scope_c("ccimp_debug_printf")->actualCall("ccimp_debug_printf")->withStringParameters("message", message);
+        mock_scope_c("ccimp_debug_vprintf")->actualCall("ccimp_debug_vprintf")
+        		->withIntParameters("debug", debug)->withStringParameters("format", format)->withStringParameters("args", args);
     }
     else
     {
-        /* Skip mocking, use default implementation */
-        ccimp_debug_printf_real(message);
+        /* Skip mocking, but we won't call real implementation... not to bother. May change when we have zones */
+        /* ccimp_debug_vprintf_real(debug, format, args); */
     }
     return;
 }
