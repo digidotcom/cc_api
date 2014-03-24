@@ -6,7 +6,7 @@
  */
 
 #include "custom/custom_connector_config.h"
-#include "custom/custom_debug.h"
+#include "ccimp/ccimp_debug.h"
 
 #ifdef UNIT_TEST
 #define ccimp_debug_vprintf       ccimp_debug_vprintf_real

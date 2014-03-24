@@ -9,7 +9,7 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
-#include "custom/custom_debug.h"
+#include "ccimp/ccimp_debug.h"
 #include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"

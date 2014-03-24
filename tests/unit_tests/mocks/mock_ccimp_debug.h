@@ -12,7 +12,7 @@
 
 extern "C" {
 #include "ccapi_definitions.h"
-#include "custom/custom_debug.h"
+#include "ccimp/ccimp_debug.h"
 }
 
 #define CCIMP_DEBUG_PRINTF_DOESNT_EXPECT_A_CALL   "_MOCK_DOESNT_EXPECT_A_CALL_"
