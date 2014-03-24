@@ -20,7 +20,7 @@ extern char * assert_buffer;
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-#if (defined CCIMP_DEBUG_ENABLED)
+#if (defined CCIMP_LOGGING_ENABLED)
 ccimp_status_t ccimp_hal_halt(char const * const message)
 {
 #if (defined UNIT_TEST)

@@ -9,7 +9,7 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
-#include "ccimp/ccimp_debug.h"
+#include "ccimp/ccimp_logging.h"
 #include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
@@ -19,7 +19,7 @@
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
-#if (defined CCIMP_DEBUG_ENABLED)
+#if (defined CCIMP_LOGGING_ENABLED)
 #define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {ccimp_hal_halt(message); goto label;})
 #else
 #define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {goto label;})
@@ -70,6 +70,6 @@ void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
-void ccapi_debug_line(char const * const format, ...);
-void ccapi_debug_print_buffer(char const * const label, void const * const buffer, size_t const length);
+void ccapi_logging_line(char const * const format, ...);
+void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
 #endif

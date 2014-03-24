@@ -1,24 +1,24 @@
 /*
- * ccimp_debug.c
+ * ccimp_logging.c
  *
  *  Created on: Mar 7, 2014
  *      Author: hbujanda
  */
 
 #include "custom/custom_connector_config.h"
-#include "ccimp/ccimp_debug.h"
+#include "ccimp/ccimp_logging.h"
 
 #ifdef UNIT_TEST
-#define ccimp_debug_vprintf       ccimp_debug_vprintf_real
+#define ccimp_hal_logging_vprintf       ccimp_hal_logging_vprintf_real
 #endif
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-#if (defined CCIMP_DEBUG_ENABLED)
+#if (defined CCIMP_LOGGING_ENABLED)
 #include <stdio.h>
 #include <stdlib.h>
 
-void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args)
+void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, va_list args)
 {
     if ((debug == debug_all) || (debug == debug_beg))
     {

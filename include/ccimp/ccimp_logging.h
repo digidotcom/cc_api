@@ -1,22 +1,22 @@
 /*
- * ccimp_debug.h
+ * ccimp_logging.h
  *
  *  Created on: Mar 6, 2014
  *      Author: hbujanda
  */
 
-#ifndef CCIMP_DEBUG_H_
-#define CCIMP_DEBUG_H_
+#ifndef CCIMP_LOGGING_H_
+#define CCIMP_LOGGING_H_
 
 #include "custom/custom_connector_config.h"
 
-#if (defined CCIMP_DEBUG_ENABLED)
+#if (defined CCIMP_LOGGING_ENABLED)
 
 #include <stdarg.h>
 #include "connector_debug.h"
 
 /**
- * Debug output from Cloud Connector, Writes a formatted string to stdout, expanding the format
+ * Logging output from Cloud Connector, Writes a formatted string to stdout, expanding the format
  * tags with the value of the argument list arg.  This function behaves exactly as
  * vprintf() except an additional argument is passed indicating which part of the line is represented.
  *
@@ -31,11 +31,11 @@
  *
  * debug_all: The full message is contained in this one call. Equivalent to calling:
  *
- *      ccimp_debug_vprintf(debug_beg, format, args);
- *      ccimp_debug_vprintf(debug_end, "", args);
+ *      ccimp_hal_logging_vprintf(debug_beg, format, args);
+ *      ccimp_hal_logging_vprintf(debug_end, "", args);
  *
  */
-void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args);
+void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, va_list args);
 
 #else
 
@@ -43,4 +43,4 @@ void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list
 
 #endif
 
-#endif /* CCIMP_DEBUG_H_ */
+#endif /* CCIMP_LOGGING_H_ */

@@ -115,8 +115,8 @@
 #define CONNECTOR_HAVE_STDINT_HEADER
 #endif
 
-/* Debugging */
-#ifdef CCIMP_DEBUG_ENABLED
+/* Logging */
+#ifdef CCIMP_LOGGING_ENABLED
 #define CONNECTOR_DEBUG
 #endif
 
