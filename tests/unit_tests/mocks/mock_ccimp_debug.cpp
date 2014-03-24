@@ -50,4 +50,17 @@ void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list
     return;
 }
 #endif
+
+#if (defined CCIMP_DEBUG_ENABLED)
+ccimp_status_t ccimp_hal_assertion_hit(char const * const message)
+{
+    return ccimp_hal_assertion_hit_real(message);
+}
+#endif
+
+/* TODO: Move to mock_ccimp_reset.cpp */
+ccimp_status_t ccimp_hal_reset(void)
+{
+    return ccimp_hal_reset_real();
+}
 }

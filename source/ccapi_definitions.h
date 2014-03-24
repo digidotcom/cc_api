@@ -10,6 +10,7 @@
 
 #include "ccapi_connector_config.h"
 #include "custom/custom_debug.h"
+#include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
 #include "connector_api.h"
@@ -19,16 +20,9 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
+#define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {ccimp_hal_assertion_hit(message); goto label;})
 #else
-#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {code})
-#endif
-
-#if (defined UNIT_TEST)
-extern char * assert_buffer;
-#define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {assert_buffer = message; goto label;})
-#else
-#define ASSERT_GOTO(cond, message, label)   ON_ASSERT_DO_((cond), {goto label;}, {})
+#define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {goto label;})
 #endif
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)

@@ -36,11 +36,13 @@ done:
 
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
-    ASSERT(ccapi_data != NULL);
+    ASSERT_GOTO (ccapi_data != NULL, "Bad ccapi_data", done);
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
     reset_heap_ptr(&ccapi_data->thread.connector_run);
+done:
+    return; 
 }
 
 static ccapi_start_error_t check_malloc(void const * const p)

@@ -54,7 +54,7 @@ void ccapi_connector_run_thread(void * const argument)
                 break;
         }            
     }
-    ASSERT(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP);
+    ASSERT_GOTO (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, "Bad connector_run->status", done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 done:

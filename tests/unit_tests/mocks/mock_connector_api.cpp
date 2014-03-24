@@ -8,8 +8,6 @@
 #include "mock_connector_api.h"
 #include "mock_ccimp_os.h"
 
-char * assert_buffer;
-
 static connector_handle_t global_handle;
 
 uint8_t thread_wait;

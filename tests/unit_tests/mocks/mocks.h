@@ -15,4 +15,8 @@
 void Mock_create_all(void);
 void Mock_destroy_all(void);
 
+extern "C" {
+extern char * assert_buffer;
+}
+
 #endif /* MOCKS_H_ */

@@ -23,6 +23,10 @@ void Mock_ccimp_debug_vprintf_expect(debug_t const debug, char const * const buf
 
 extern "C" {
 void ccimp_debug_vprintf_real(debug_t const debug, char const * const format, va_list args);
+
+/* TODO: Move to mock_ccimp_reset.cpp */
+ccimp_status_t ccimp_hal_assertion_hit_real(char const * const message);
+ccimp_status_t ccimp_hal_reset_real(void);
 }
 
 #endif

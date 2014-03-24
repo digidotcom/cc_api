@@ -43,3 +43,6 @@ void Mock_destroy_all()
     mock().clear();
 }
 
+extern "C" {
+char * assert_buffer;
+}

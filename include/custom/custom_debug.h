@@ -37,13 +37,7 @@
  */
 void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args);
 
-/**
- *  Verify that the condition is true, otherwise halt the program.
- */
-#define ASSERT(cond)        assert(cond)
-
 #else
-#define ASSERT(cond)
 
 #define debug_t void *
 
