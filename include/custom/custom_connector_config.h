@@ -29,8 +29,8 @@
 
 #define CCIMP_HAS_STDINT_HEADER
 
-/* Logging */
-#define CCIMP_LOGGING_ENABLED
+/* Debugging (Logging / Halt) */
+#define CCIMP_DEBUG_ENABLED
 
 /* Limits */
 #define CCIMP_FILE_SYSTEM_MAX_PATH_LENGTH   256

@@ -1,7 +1,7 @@
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 
 /* TODO:
        - Locks to avoid mixing messages
@@ -73,5 +73,5 @@ void ccapi_logging_print_buffer(char const * const label, void const * const buf
     (void)buffer;
     (void)length;
 }
-#endif /* (defined CCIMP_LOGGING_ENABLED) */
+#endif /* (defined CCIMP_DEBUG_ENABLED) */
 

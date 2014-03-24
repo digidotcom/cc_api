@@ -14,7 +14,7 @@
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 #include <stdio.h>
 #include <stdlib.h>
 

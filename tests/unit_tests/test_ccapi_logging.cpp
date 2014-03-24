@@ -23,7 +23,7 @@ TEST_GROUP(ccapi_logging_test)
     }
 };
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 
 TEST(ccapi_logging_test, layer2_args0)
 {

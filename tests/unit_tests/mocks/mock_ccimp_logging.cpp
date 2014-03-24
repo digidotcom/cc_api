@@ -26,7 +26,7 @@ void Mock_ccimp_hal_logging_vprintf_expect(debug_t const debug, char const * con
 }
 
 extern "C" {
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
@@ -55,7 +55,7 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
 }
 #endif
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 ccimp_status_t ccimp_hal_halt(void)
 {
     /* We don't want real implementation */

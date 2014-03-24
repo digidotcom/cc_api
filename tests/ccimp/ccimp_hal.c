@@ -18,7 +18,7 @@
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 ccimp_status_t ccimp_hal_halt()
 {
     printf("ccimp_hal_halt!!!!\n");

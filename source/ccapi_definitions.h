@@ -19,7 +19,7 @@
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 #define ASSERT_GOTO(cond, label)   ON_FALSE_DO_((cond), {ccimp_hal_halt(); goto label;})
 #else
 #define ASSERT_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})

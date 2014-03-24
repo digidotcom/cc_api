@@ -10,7 +10,7 @@
 
 #include "custom/custom_connector_config.h"
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 
 #include <stdarg.h>
 #include "connector_debug.h"

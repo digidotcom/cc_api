@@ -10,7 +10,7 @@
 
 #include "ccimp/ccimp_types.h"
 
-#if (defined CCIMP_LOGGING_ENABLED)
+#if (defined CCIMP_DEBUG_ENABLED)
 ccimp_status_t ccimp_hal_halt(void);
 #endif
 
