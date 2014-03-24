@@ -12,8 +12,8 @@
 #include <sys/reboot.h>
 
 #ifdef UNIT_TEST
-#define ccimp_hal_assertion_hit       ccimp_hal_assertion_hit_real
-#define ccimp_hal_reset               ccimp_hal_reset_real
+#define ccimp_hal_halt       ccimp_hal_halt_real
+#define ccimp_hal_reset      ccimp_hal_reset_real
 
 extern char * assert_buffer;
 #endif
@@ -21,14 +21,14 @@ extern char * assert_buffer;
 /******************** LINUX IMPLEMENTATION ********************/
 
 #if (defined CCIMP_DEBUG_ENABLED)
-ccimp_status_t ccimp_hal_assertion_hit(char const * const message)
+ccimp_status_t ccimp_hal_halt(char const * const message)
 {
 #if (defined UNIT_TEST)
 
     assert_buffer = (char *)message;
 #else
 
-    printf("ccimp_hal_assertion_hit: %s!!!!\n", message);
+    printf("ccimp_hal_halt: %s!!!!\n", message);
 
     assert(0);
 
