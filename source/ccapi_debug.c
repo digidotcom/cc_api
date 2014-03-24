@@ -10,7 +10,7 @@
 
 void connector_debug_vprintf(debug_t const debug, char const * const format, va_list args)
 {
-    /* TODO: Macro */
+    /* TODO: Macro in ccapi_definitions.h? */
     ccimp_debug_vprintf(debug, format, args);
 }
 

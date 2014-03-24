@@ -31,8 +31,8 @@
  *
  * debug_all: The full message is contained in this one call. Equivalent to calling:
  *
- *      connector_debug_vprintf(debug_beg, format, args);
- *      connector_debug_vprintf(debug_end, "", args);
+ *      ccimp_debug_vprintf(debug_beg, format, args);
+ *      ccimp_debug_vprintf(debug_end, "", args);
  *
  */
 void ccimp_debug_vprintf(debug_t const debug, char const * const format, va_list args);
