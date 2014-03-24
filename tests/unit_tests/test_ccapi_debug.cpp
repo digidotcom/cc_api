@@ -4,6 +4,7 @@
 extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
+}
 
 #include "test_helper_functions.h"
 
@@ -24,39 +25,87 @@ TEST_GROUP(ccapi_debug_test)
 
 #if (defined CCIMP_DEBUG_ENABLED)
 
-TEST(ccapi_debug_test, testDbg_args0)
+TEST(ccapi_debug_test, layer2_args0)
 {
 	debug_t debug;
 
     debug = debug_all;
 
-	Mock_ccimp_debug_vprintf_expect(debug, "testDbg_args0");
+	Mock_ccimp_debug_vprintf_expect(debug, "layer2_args0");
 
-    ccapi_debug_line("testDbg_args0");
+    ccapi_debug_line("layer2_args0");
 }
 
-TEST(ccapi_debug_test, testDbg_args1)
+TEST(ccapi_debug_test, layer2_args1)
 {
 	debug_t debug;
 
     debug = debug_all;
 
-	Mock_ccimp_debug_vprintf_expect(debug, "testDbg_args1 33");
+	Mock_ccimp_debug_vprintf_expect(debug, "layer2_args1 33");
 
-    ccapi_debug_line("testDbg_args1 %d", 33);
+    ccapi_debug_line("layer2_args1 %d", 33);
 }
 
-TEST(ccapi_debug_test, testDbg_args2)
+TEST(ccapi_debug_test, layer2_args2)
 {
 	debug_t debug;
 
     debug = debug_all;
 
-	Mock_ccimp_debug_vprintf_expect(debug, "testDbg_args2 34 0.25");
+	Mock_ccimp_debug_vprintf_expect(debug, "layer2_args2 34 0.25");
 
-    ccapi_debug_line("testDbg_args2 %d %.2f", 34, 0.25);
+    ccapi_debug_line("layer2_args2 %d %.2f", 34, 0.25);
 }
 
+#define CALL_DEBUG_VPRINTF(type, format) \
+    do \
+    { \
+        va_list args; \
+ \
+        va_start(args, (format)); \
+        connector_debug_vprintf((type), (format), args); \
+        va_end(args); \
+    } \
+    while (0)
+
+static void connector_debug_line(char const * const format, ...)
+{
+    CALL_DEBUG_VPRINTF(debug_all, format);
+}
+
+TEST(ccapi_debug_test, layer1_args0)
+{
+	debug_t debug;
+
+    debug = debug_all;
+
+	Mock_ccimp_debug_vprintf_expect(debug, "layer1_args0");
+
+    connector_debug_line("layer1_args0");
+}
+
+TEST(ccapi_debug_test, layer1_args1)
+{
+	debug_t debug;
+
+    debug = debug_all;
+
+	Mock_ccimp_debug_vprintf_expect(debug, "layer1_args1 33");
+
+    ccapi_debug_line("layer1_args1 %d", 33);
+}
+
+TEST(ccapi_debug_test, layer1_args2)
+{
+	debug_t debug;
+
+    debug = debug_all;
+
+	Mock_ccimp_debug_vprintf_expect(debug, "layer1_args2 34 0.25");
+
+    ccapi_debug_line("layer1_args2 %d %.2f", 34, 0.25);
+}
 
 #else
 /* CCAPI_DEBUG is not defined. Check that nothing happens */
