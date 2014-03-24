@@ -14,26 +14,18 @@
 #ifdef UNIT_TEST
 #define ccimp_hal_halt       ccimp_hal_halt_real
 #define ccimp_hal_reset      ccimp_hal_reset_real
-
-extern char * assert_buffer;
 #endif
 
 /******************** LINUX IMPLEMENTATION ********************/
 
 #if (defined CCIMP_LOGGING_ENABLED)
-ccimp_status_t ccimp_hal_halt(char const * const message)
+ccimp_status_t ccimp_hal_halt()
 {
-#if (defined UNIT_TEST)
-
-    assert_buffer = (char *)message;
-#else
-
-    printf("ccimp_hal_halt: %s!!!!\n", message);
+    printf("ccimp_hal_halt!!!!\n");
 
     assert(0);
 
     /* Should not get here */
-#endif
 
     return CCIMP_STATUS_OK;
 }

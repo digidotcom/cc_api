@@ -37,8 +37,10 @@ void ccapi_connector_run_thread(void * const argument)
     ccapi_data_t * ccapi_data = argument;
 
     /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
-    ASSERT_GOTO ((ccapi_data != NULL), "NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", done);
-    ASSERT_GOTO ((ccapi_data->signature == ccapi_signature), "Bad ccapi_signature", done);
+    ccapi_logging_line( "FATAL: NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN");
+    ASSERT_GOTO ((ccapi_data != NULL), done);
+    ccapi_logging_line( "FATAL: Bad ccapi_signature");
+    ASSERT_GOTO ((ccapi_data->signature == ccapi_signature), done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
@@ -46,7 +48,8 @@ void ccapi_connector_run_thread(void * const argument)
         connector_status_t const status = connector_run(ccapi_data->connector_handle);
 
         /* It's very unlikely that we get this error as we have already verified ccapi_signature */
-        ASSERT_GOTO ((status != connector_init_error), "Bad connector_signature", done);
+        ccapi_logging_line( "FATAL: Bad connector_signature");
+        ASSERT_GOTO ((status != connector_init_error), done);
 
         switch(status)
         {
@@ -54,7 +57,8 @@ void ccapi_connector_run_thread(void * const argument)
                 break;
         }            
     }
-    ASSERT_GOTO (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, "Bad connector_run->status", done);
+    ccapi_logging_line( "FATAL: Bad connector_run->status");
+    ASSERT_GOTO (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 done:

@@ -1,3 +1,4 @@
+#include "mocks.h"
 #include "mock_ccimp_logging.h"
 
 #define MOCK_LOGGING_ENABLED 1    /* Mock disabled. Do printf normally */
@@ -44,7 +45,10 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
     }
     else
     {
-        /* Skip mocking, but we won't call real implementation... not to bother. May change when we have zones */
+        /* TODO: This will change when we have proper zones */
+        if (!strncmp(format, "FATAL: ",7))
+            assert_buffer = (char *)&format[7];
+            
         /* ccimp_hal_logging_vprintf_real(debug, format, args); */
     }
     return;
@@ -52,9 +56,11 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
 #endif
 
 #if (defined CCIMP_LOGGING_ENABLED)
-ccimp_status_t ccimp_hal_halt(char const * const message)
+ccimp_status_t ccimp_hal_halt(void)
 {
-    return ccimp_hal_halt_real(message);
+    /* We don't want real implementation */
+    /* return ccimp_hal_halt_real(); */
+    return CCIMP_STATUS_OK;
 }
 #endif
 

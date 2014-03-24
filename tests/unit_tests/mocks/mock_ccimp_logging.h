@@ -23,7 +23,7 @@ void Mock_ccimp_hal_logging_vprintf_expect(debug_t const debug, char const * con
 
 extern "C" {
 void ccimp_hal_logging_vprintf_real(debug_t const debug, char const * const format, va_list args);
-ccimp_status_t ccimp_hal_halt_real(char const * const message);
+ccimp_status_t ccimp_hal_halt_real(void);
 
 /* TODO: Move to mock_ccimp_reset.cpp */
 ccimp_status_t ccimp_hal_reset_real(void);
