@@ -20,9 +20,14 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ASSERT_GOTO(cond, label)   ON_FALSE_DO_((cond), {ccimp_hal_halt(); goto label;})
+#define ASSERT_MSG_GOTO(cond, message, label)   ON_FALSE_DO_((cond), \
+                                                   { \
+                                                       ccapi_logging_line(TMP_FATAL_PREFIX, message); \
+                                                       ccimp_hal_halt(); \
+                                                       goto label; \
+                                                   })
 #else
-#define ASSERT_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})
+#define ASSERT_MSG_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})
 #endif
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)

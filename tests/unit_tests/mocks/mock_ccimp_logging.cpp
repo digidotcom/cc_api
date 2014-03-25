@@ -46,8 +46,8 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
     else
     {
         /* TODO: This will change when we have proper zones */
-        if (!strncmp(format, "FATAL: ",7))
-            assert_buffer = (char *)&format[7];
+        if (!strncmp(format, TMP_FATAL_PREFIX, TMP_FATAL_PREFIX_LEN))
+            assert_buffer = va_arg( args, char * );
             
         /* ccimp_hal_logging_vprintf_real(debug, format, args); */
     }

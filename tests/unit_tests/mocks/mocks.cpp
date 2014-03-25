@@ -8,6 +8,8 @@
 
 #include "mocks.h"
 
+char * assert_buffer;
+
 void Mock_create_all()
 {
     Mock_ccimp_logging_printf_create();
@@ -41,8 +43,4 @@ void Mock_destroy_all()
     mock().removeAllComparators();
     mock().checkExpectations();
     mock().clear();
-}
-
-extern "C" {
-char * assert_buffer;
 }

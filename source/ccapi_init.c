@@ -36,8 +36,7 @@ done:
 
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
-    ccapi_logging_line( "FATAL: Bad ccapi_data");
-    ASSERT_GOTO (ccapi_data != NULL, done);
+    ASSERT_MSG_GOTO (ccapi_data != NULL, "Bad ccapi_data", done);
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
