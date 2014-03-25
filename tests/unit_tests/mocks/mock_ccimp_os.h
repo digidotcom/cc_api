@@ -51,6 +51,7 @@ void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const
 extern "C" {
 ccimp_status_t ccimp_malloc_real(ccimp_malloc_t * malloc_info);
 ccimp_status_t ccimp_free_real(ccimp_free_t * free_info);
+ccimp_status_t ccimp_realloc_real(ccimp_realloc_t * free_info);
 ccimp_status_t ccimp_create_thread_real(ccimp_create_thread_info_t * const create_thread_info);
 ccimp_status_t ccimp_os_get_system_time_real(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield_real(void);
