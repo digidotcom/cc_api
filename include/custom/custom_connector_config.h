@@ -29,7 +29,7 @@
 
 #define CCIMP_HAS_STDINT_HEADER
 
-/* Debugging */
+/* Debugging (Logging / Halt) */
 #define CCIMP_DEBUG_ENABLED
 
 /* Limits */

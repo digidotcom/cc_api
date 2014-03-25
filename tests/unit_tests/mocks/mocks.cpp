@@ -8,9 +8,11 @@
 
 #include "mocks.h"
 
+char * assert_buffer;
+
 void Mock_create_all()
 {
-    Mock_ccimp_debug_printf_create();
+    Mock_ccimp_logging_printf_create();
     Mock_ccimp_malloc_create();
     Mock_ccimp_free_create();
     Mock_ccimp_create_thread_create();
@@ -30,7 +32,7 @@ void Mock_destroy_all()
         ccapi_data_single_instance = NULL;
     }
     Mock_ccimp_create_thread_destroy();
-    Mock_ccimp_debug_printf_destroy();
+    Mock_ccimp_logging_printf_destroy();
     Mock_ccimp_malloc_destroy();
     Mock_ccimp_free_destroy();
     Mock_ccimp_create_thread_destroy();
@@ -42,4 +44,3 @@ void Mock_destroy_all()
     mock().checkExpectations();
     mock().clear();
 }
-

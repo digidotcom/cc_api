@@ -4,7 +4,6 @@
 extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
-#include "ccimp/ccimp_os.h"
 }
 
 #include "test_helper_functions.h"

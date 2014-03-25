@@ -15,7 +15,6 @@ typedef void * ccapi_status_callback_t; /* STUB */
 typedef enum {
     CCAPI_START_ERROR_NONE,
     CCAPI_START_ERROR_NULL_PARAMETER,
-    CCAPI_START_ERROR_INVALID_DEBUG_CONFIG,
     CCAPI_START_ERROR_INVALID_VENDORID,
     CCAPI_START_ERROR_INVALID_DEVICEID,
     CCAPI_START_ERROR_INVALID_URL,
@@ -49,12 +48,7 @@ typedef struct {
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
         } service;
-        struct {
-                ccapi_debug_zones_t init_zones;
-                ccapi_debug_level_t init_level;
-        } debug;
 } ccapi_start_t;
-
 
 ccapi_start_error_t ccapi_start(ccapi_start_t const * const start);
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t behavior);

@@ -9,8 +9,8 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
-#include "ccapi/ccapi_debug.h"
-#include "custom/custom_debug.h"
+#include "ccimp/ccimp_logging.h"
+#include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
 #include "connector_api.h"
@@ -20,16 +20,14 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {ASSERT(cond); code;})
+#define ASSERT_MSG_GOTO(cond, message, label)   ON_FALSE_DO_((cond), \
+                                                   { \
+                                                       ccapi_logging_line(TMP_FATAL_PREFIX, message); \
+                                                       ccimp_hal_halt(); \
+                                                       goto label; \
+                                                   })
 #else
-#define ON_ASSERT_DO_(cond, code)   ON_FALSE_DO_((cond), {code})
-#endif
-
-#if (defined UNIT_TEST)
-extern char * assert_buffer;
-#define ASSERT_GOTO(cond, message, label)   ON_FALSE_DO_((cond), {assert_buffer = message; goto label;})
-#else
-#define ASSERT_GOTO(cond, message, label)   ON_ASSERT_DO_((cond), {goto label;}, {})
+#define ASSERT_MSG_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})
 #endif
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
@@ -65,10 +63,6 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
-#if (defined CCIMP_DEBUG_ENABLED)
-    ccapi_debug_zones_t dbg_zones;
-    ccapi_debug_level_t dbg_level;
-#endif
 } ccapi_data_t;
 
 typedef struct ccapi_handle * ccapi_handle_t;
@@ -81,7 +75,6 @@ void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
-#if (defined CCIMP_DEBUG_ENABLED)
-extern void ccapi_debug_printf(ccapi_debug_zones_t zone, ccapi_debug_level_t level, char const * const format, ...);
-#endif
+void ccapi_logging_line(char const * const format, ...);
+void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
 #endif

@@ -4,7 +4,6 @@
 extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
-#include "ccimp/ccimp_os.h"
 }
 
 #include "test_helper_functions.h"
@@ -132,7 +131,7 @@ TEST(ccapi_init_threading_test, testInitErrorBadConnectorSignature)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
-    ASSERT_WAIT(01);
+    ASSERT_WAIT(1);
     ASSERT_IF_NOT_HIT_DO ("Bad connector_signature", FAIL_TEST("Bad connector_signature not hitted"));
 
     CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_RUNNING);
