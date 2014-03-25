@@ -106,8 +106,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
-    ccapi_data->signature = ccapi_signature;
-
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
@@ -148,7 +146,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t ccapi_handle, ccapi_stop_t behavio
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
     UNUSED_ARGUMENT(behavior);
-    if (ccapi_data == NULL || ccapi_data->signature != ccapi_signature || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+    if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
         goto done;
     {
         connector_status_t connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_terminate, NULL);
