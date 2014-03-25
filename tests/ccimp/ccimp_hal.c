@@ -33,8 +33,6 @@ ccimp_status_t ccimp_hal_halt()
 
 ccimp_status_t ccimp_hal_reset(void)
 {
-    printf("ccimp_hal_reset!!!!\n");
-
     /* Note: we must be running as the superuser to reboot the system */
     sync();
     reboot(LINUX_REBOOT_CMD_RESTART);
