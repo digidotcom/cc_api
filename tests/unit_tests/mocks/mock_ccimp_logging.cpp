@@ -34,6 +34,40 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
 {
     uint8_t behavior;
 
+    static debug_t latest_debug = debug_all;
+
+    bool err = 0;  
+
+    switch(debug)
+    {
+        case debug_beg:
+            if (latest_debug == debug_beg || latest_debug == debug_mid)
+                err = 1;
+            break;
+        case debug_mid:
+            if (latest_debug == debug_end || latest_debug == debug_all)
+                err = 1;
+            break;
+        case debug_end:
+            if (/*latest_debug == debug_beg ||*/ latest_debug == debug_all)
+                err = 1;
+            break;
+        case debug_all:
+            if (latest_debug == debug_beg || latest_debug == debug_mid)
+                err = 1;
+            break;
+    }
+
+    if (err)
+    {
+        printf("ERROR: latest_debug=%d, debug=%d\n", latest_debug, debug );
+
+        /* Just send an unexpected call so the test fails */
+        mock_scope_c("ccimp_hal_logging_vprintf")->actualCall("ccimp_hal_logging_vprintf")
+              ->withIntParameters("err", 1);
+    }
+    latest_debug = debug;
+
     behavior = mock_scope_c("ccimp_hal_logging_vprintf")->getData("behavior").value.intValue;
     if (behavior == MOCK_LOGGING_ENABLED)
     {

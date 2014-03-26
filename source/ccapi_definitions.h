@@ -67,10 +67,13 @@ typedef struct {
 typedef struct ccapi_handle * ccapi_handle_t;
 
 extern ccapi_handle_t ccapi_data_single_instance;
+extern void * logging_syncr;
 
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
+ccimp_status_t ccapi_syncr_release(void * syncr_object);
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 
 void ccapi_logging_line(char const * const format, ...);

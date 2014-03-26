@@ -14,7 +14,15 @@ TEST_GROUP(ccapi_logging_test)
 {
     void setup()
     {
+        /* We need to start at least one instance of the connector so syncr object is created */
+        ccapi_start_t start = {0};
+        ccapi_start_error_t error;
+
         Mock_create_all();
+
+        fill_start_structure_with_good_parameters(&start);
+        error = ccapi_start(&start);
+        CHECK(error == CCAPI_START_ERROR_NONE);
     }
 
     void teardown()
@@ -56,6 +64,56 @@ TEST(ccapi_logging_test, layer2_args2)
 	Mock_ccimp_hal_logging_vprintf_expect(debug, "layer2_args2 34 0.25");
 
     ccapi_logging_line("layer2_args2 %d %.2f", 34, 0.25);
+}
+
+static void * thread_logging(void * argument)
+{
+    #define BUF_SIZE 256*4
+    int buffer[BUF_SIZE];
+    int i;
+
+    for(i= 0; i < BUF_SIZE; i++)
+        buffer[i]= i;
+    
+    ccapi_logging_print_buffer((char*)argument, buffer, BUF_SIZE);
+
+    return NULL;
+}
+
+pthread_t create_thread_logging(void * argument)
+{
+    pthread_t pthread;
+    int ccode = pthread_create(&pthread, NULL, thread_logging, argument);
+
+    if (ccode != 0)
+    {
+        printf("create_thread_logging() error %d\n", ccode);
+    }
+
+    return pthread;
+}
+
+
+TEST(ccapi_logging_test, layer2_syncr)
+{
+    #define NUM_THREADS 10
+    pthread_t thread_h[NUM_THREADS];
+    char* thread_str[NUM_THREADS];
+    char thread_str_pattern[] = "thread %d:";
+    int i;
+
+    for(i= 0; i < NUM_THREADS; i++)
+    {
+        thread_str[i]= (char*)malloc(sizeof(thread_str_pattern));
+        sprintf(thread_str[i], thread_str_pattern, i);
+
+        thread_h[i] = create_thread_logging(thread_str[i]);
+    }
+
+    for(i= 0; i < NUM_THREADS; i++)
+    {
+        pthread_join(thread_h[i], NULL);
+    }
 }
 
 #define CALL_DEBUG_VPRINTF(type, format) \

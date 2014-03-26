@@ -66,6 +66,16 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
+    /* Initialize one single time for all connector instances the logging syncr object */
+    if (logging_syncr == NULL)
+    {
+        ccimp_os_syncr_create_t create_data;
+    
+        if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK &&
+                         ccapi_syncr_release(create_data.syncr_object) == CCIMP_STATUS_OK)
+            logging_syncr = create_data.syncr_object;
+    }
+
     ccapi_data->config.device_type = NULL;
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;

@@ -30,6 +30,15 @@ ccimp_status_t ccapi_free(void * ptr)
     return ccimp_free(&free_info);
 }
 
+ccimp_status_t ccapi_syncr_release(void * syncr_object)
+{
+    ccimp_os_syncr_release_t release_data;
+
+    release_data.syncr_object = syncr_object;
+        
+    return ccimp_os_syncr_release(&release_data);
+}
+
 void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * ccapi_data = argument;
