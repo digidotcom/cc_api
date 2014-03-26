@@ -97,7 +97,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_device_id:
             {
                 connector_config_pointer_data_t * device_id = data;
-                memcpy(device_id->data, ccapi_data->config.device_id, device_id->bytes_required);
+                device_id->data = ccapi_data->config.device_id;
             }
             break;
         case connector_request_id_config_device_cloud_url:

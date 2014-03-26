@@ -35,14 +35,12 @@ TEST_GROUP(ccapi_config_test)
 TEST(ccapi_config_test, testDeviceID)
 {
     connector_request_id_t request;
-    uint8_t device_id_buf[DEVICE_ID_LENGTH] = {0};
     connector_config_pointer_data_t device_id = {NULL, DEVICE_ID_LENGTH};
 
-    device_id.data = device_id_buf;
 
     request.config_request = connector_request_id_config_device_id;
     ccapi_connector_callback(connector_class_id_config, request, &device_id, (*spy_ccapi_data));
-    CHECK(memcmp((*spy_ccapi_data)->config.device_id, device_id_buf, device_id.bytes_required) == 0);
+    CHECK_EQUAL(device_id.data, (*spy_ccapi_data)->config.device_id);
 }
 
 TEST(ccapi_config_test, testCloudURL)
