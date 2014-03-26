@@ -70,15 +70,20 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
 
 
 static connector_status_t connector_run_retval = connector_idle;
+static connector_bool_t kill_ccapi_thread = connector_false;
 
 void Mock_connector_run_create(void)
 {
     connector_run_retval = connector_idle;
+    kill_ccapi_thread = connector_false;
+
     return;
 }
 
 void Mock_connector_run_destroy(void)
 {
+    kill_ccapi_thread = connector_true;
+
     return;
 }
 
@@ -95,6 +100,10 @@ connector_status_t connector_run(connector_handle_t const handle)
         if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
         {
             ccimp_os_yield();
+        }
+        if (kill_ccapi_thread == connector_true)
+        {
+            pthread_exit(NULL);
         }
     } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
 
