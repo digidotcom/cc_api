@@ -128,9 +128,11 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             }
             break;
         default:
-            assert(0);
+            status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_config_handler()", done);
             break;
     }
+done:
     return status;
 }
 
@@ -205,7 +207,6 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             status = ccapi_os_handler(request_id.os_request, data, ccapi_data);
             break;
         default:
-            ASSERT(connector_false);
             status = connector_callback_unrecognized;
             ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_connector_callback()", done);
             break;
