@@ -81,7 +81,11 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
     {
         /* TODO: This will change when we have proper zones */
         if (!strncmp(format, TMP_FATAL_PREFIX, TMP_FATAL_PREFIX_LEN))
-            assert_buffer = va_arg( args, char * );
+        {
+            va_list assert_args;
+            va_copy(assert_args, args);
+            assert_buffer = va_arg( assert_args, char * );
+        }
             
         /* ccimp_hal_logging_vprintf_real(debug, format, args); */
     }

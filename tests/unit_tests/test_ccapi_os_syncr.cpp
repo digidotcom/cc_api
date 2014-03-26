@@ -118,11 +118,10 @@ TEST(ccapi_os_syncr_test, AdquireClearsObjectAutomatically)
     CHECK(adquire_data.acquired == CCAPI_FALSE);
 }
 
-#if 0
 /* This test fails as linux semaphores don't support max count.
    TODO: Should we delete that limitation?
  */
-TEST(ccapi_os_syncr_test, ReleaseMaxCountIs1)
+IGNORE_TEST(ccapi_os_syncr_test, ReleaseMaxCountIs1)
 {
     ccimp_os_syncr_adquire_t adquire_data;
     ccimp_os_syncr_release_t release_data;
@@ -154,5 +153,4 @@ TEST(ccapi_os_syncr_test, ReleaseMaxCountIs1)
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(adquire_data.acquired == CCAPI_FALSE);
 }
-#endif
 
