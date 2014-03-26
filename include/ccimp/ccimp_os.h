@@ -10,6 +10,12 @@
 
 #include "ccimp/ccimp_types.h"
 
+#if (defined CCAPI_CONST_PROTECTION_UNLOCK)
+#define CONST
+#else
+#define CONST   const
+#endif
+
 typedef void (* ccimp_thread_start_t) (void * const argument);
 
 typedef enum {
@@ -24,7 +30,7 @@ typedef struct
 } ccimp_create_thread_info_t;
 
 typedef struct {
-    size_t size;
+    size_t CONST size;
     void * ptr;
 } ccimp_malloc_t;
 
@@ -33,8 +39,8 @@ typedef struct {
 } ccimp_free_t;
 
 typedef struct {
-    size_t old_size;
-    size_t new_size;
+    size_t CONST old_size;
+    size_t CONST new_size;
     void * ptr;
 } ccimp_realloc_t;
 
@@ -50,17 +56,17 @@ typedef struct {
 } ccimp_os_syncr_create_t;
 
 typedef struct {
-    void * /*CONST*/ syncr_object;
-    unsigned long /*CONST*/ timeout_ms;
+    void * CONST syncr_object;
+    unsigned long CONST timeout_ms;
     ccapi_bool_t acquired;
 } ccimp_os_syncr_adquire_t;
 
 typedef struct {
-    void * /*CONST*/ syncr_object;
+    void * CONST syncr_object;
 } ccimp_os_syncr_release_t;
 
 typedef struct {
-    void * /*CONST*/ syncr_object;
+    void * CONST syncr_object;
 } ccimp_os_syncr_destroy_t;
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info);
