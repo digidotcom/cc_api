@@ -204,6 +204,11 @@ ccimp_status_t ccimp_free(ccimp_free_t * free_info)
     return retval;
 }
 
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info)
+{
+    return ccimp_realloc_real(realloc_info);
+}
+
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time)
 {
     return ccimp_os_get_system_time_real(system_up_time);

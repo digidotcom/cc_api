@@ -66,6 +66,26 @@ done:
     return;
 }
 
+static connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status)
+{
+    connector_callback_status_t callback_status;
+
+    switch(ccimp_status)
+    {
+        case CCIMP_STATUS_ABORT:
+            callback_status = connector_callback_abort;
+            break;
+        case CCIMP_STATUS_OK:
+            callback_status = connector_callback_continue;
+            break;
+        case CCIMP_STATUS_BUSY:
+            callback_status = connector_callback_busy;
+            break;
+    }
+
+    return callback_status;
+}
+
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t config_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t status = connector_callback_continue;
@@ -117,11 +137,70 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             }
             break;
         default:
-            assert(0);
+            status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_config_handler()", done);
             break;
     }
+done:
     return status;
 }
+
+connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_ABORT;
+
+    UNUSED_ARGUMENT(ccapi_data);
+    switch (os_request) {
+        case connector_request_id_os_malloc:
+        {
+            ccimp_malloc_t * malloc_data = data;
+
+            ccimp_status = ccimp_malloc(malloc_data);
+            break;
+        }
+
+        case connector_request_id_os_free:
+        {
+            ccimp_free_t * free_data = data;
+
+            ccimp_status = ccimp_free(free_data);
+            break;
+        }
+
+        case connector_request_id_os_yield:
+        {
+            ccimp_status = ccimp_os_yield();
+            break;
+        }
+
+        case connector_request_id_os_system_up_time:
+        {
+            ccimp_os_system_up_time_t * system_uptime = data;
+
+            ccimp_status = ccimp_os_get_system_time(system_uptime);
+            break;
+        }
+
+        case connector_request_id_os_reboot:
+        {
+            ccimp_status = ccimp_hal_reset();
+            break;
+        }
+
+        case connector_request_id_os_realloc:
+        {
+            ccimp_realloc_t * realloc_info = data;
+            ccimp_status = ccimp_realloc(realloc_info);
+            break;
+        }
+    }
+
+    connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
+
+    return connector_status;
+}
+
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
@@ -133,10 +212,15 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
         case connector_class_id_config:
             status = ccapi_config_handler(request_id.config_request, data, ccapi_data);
             break;
+        case connector_class_id_operating_system:
+            status = ccapi_os_handler(request_id.os_request, data, ccapi_data);
+            break;
         default:
-            assert(0);
+            status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_connector_callback()", done);
             break;
     }
 
+done:
     return status;
 }

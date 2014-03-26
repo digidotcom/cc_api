@@ -33,6 +33,12 @@ typedef struct {
 } ccimp_free_t;
 
 typedef struct {
+    size_t old_size;
+    size_t new_size;
+    void * ptr;
+} ccimp_realloc_t;
+
+typedef struct {
     unsigned long sys_uptime;
 } ccimp_os_system_up_time_t;
 
@@ -59,6 +65,7 @@ typedef struct {
 
 ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info);
 ccimp_status_t ccimp_free(ccimp_free_t * free_info);
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info);
 
 ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 

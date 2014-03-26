@@ -17,6 +17,7 @@
 #ifdef UNIT_TEST
 #define ccimp_malloc             ccimp_malloc_real
 #define ccimp_free               ccimp_free_real
+#define ccimp_realloc            ccimp_realloc_real
 #define ccimp_create_thread      ccimp_create_thread_real
 #define ccimp_os_get_system_time ccimp_os_get_system_time_real
 #define ccimp_os_yield           ccimp_os_yield_real
@@ -38,6 +39,19 @@ ccimp_status_t ccimp_free(ccimp_free_t * free_info)
     free(free_info->ptr);
 
     return CCIMP_STATUS_OK;
+}
+
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info)
+{
+    ccimp_status_t status = CCIMP_STATUS_OK;
+
+    realloc_info->ptr = realloc(realloc_info->ptr, realloc_info->new_size);
+    if (realloc_info->ptr == NULL)
+    {
+        status = CCIMP_STATUS_ABORT;
+    }
+
+    return status;
 }
 
 static void * thread_wrapper(void * argument)
