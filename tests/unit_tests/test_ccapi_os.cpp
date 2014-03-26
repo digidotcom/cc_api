@@ -117,8 +117,11 @@ TEST(ccapi_os_test, testRealloc)
     connector_callback_status_t status;
     void * pointer_to_be_reallocated = malloc(512);
     connector_os_realloc_t realloc_info = {512, 1024, pointer_to_be_reallocated};
+    uint8_t aux_buffer[1024] = {'A'};
 
+    memcpy(realloc_info.ptr, aux_buffer, 512);
     request.os_request = connector_request_id_os_realloc;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &realloc_info, *spy_ccapi_data);
     CHECK(status == connector_callback_continue);
+    memcpy(realloc_info.ptr, aux_buffer, 1024); /* If realloc is not done, this would throw a SIGSEV */
 }
