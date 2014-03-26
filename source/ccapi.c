@@ -5,6 +5,8 @@
  *      Author: spastor
  */
 
+#define CCAPI_CONST_PROTECTION_UNLOCK
+
 #include "ccapi_definitions.h"
 #include "connector_api.h"
 
