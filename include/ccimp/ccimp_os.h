@@ -69,9 +69,9 @@ typedef struct {
     void * CONST syncr_object;
 } ccimp_os_syncr_destroy_t;
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info);
-ccimp_status_t ccimp_free(ccimp_free_t * free_info);
-ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info);
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info);
+ccimp_status_t ccimp_free(ccimp_free_t * const free_info);
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info);
 
 ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 

@@ -27,21 +27,21 @@
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info)
 {
     malloc_info->ptr = malloc(malloc_info->size);
 
     return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_free(ccimp_free_t * free_info)
+ccimp_status_t ccimp_free(ccimp_free_t * const free_info)
 {
     free(free_info->ptr);
 
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info)
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
 
