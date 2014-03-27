@@ -6,6 +6,9 @@
  */
 
 #include "CppUTest/CommandLineTestRunner.h"
+
+#define CCAPI_CONST_PROTECTION_UNLOCK
+
 #include "mocks/mocks.h"
 
 extern "C" {

@@ -1,5 +1,7 @@
 #include <pthread.h>
 
+#define CCAPI_CONST_PROTECTION_UNLOCK
+
 #include "mock_ccimp_os.h"
 
 void Mock_ccimp_malloc_create(void)
@@ -143,7 +145,7 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_in
     return (ccimp_status_t)mock_scope_c("ccimp_create_thread")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
+ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info)
 {
     uint8_t behavior;
 
@@ -169,7 +171,7 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * malloc_info)
     return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_free(ccimp_free_t * free_info)
+ccimp_status_t ccimp_free(ccimp_free_t * const free_info)
 {
     uint8_t behavior;
     ccimp_status_t retval = CCIMP_STATUS_OK;
@@ -204,7 +206,7 @@ ccimp_status_t ccimp_free(ccimp_free_t * free_info)
     return retval;
 }
 
-ccimp_status_t ccimp_realloc(ccimp_realloc_t * realloc_info)
+ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info)
 {
     return ccimp_realloc_real(realloc_info);
 }

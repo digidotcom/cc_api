@@ -24,9 +24,9 @@ typedef enum {
 
 typedef struct
 {
-    ccimp_thread_type_t type;
-    ccimp_thread_start_t start;
-    void * argument;
+    ccimp_thread_type_t CONST type;
+    ccimp_thread_start_t CONST start;
+    void * CONST argument;
 } ccimp_create_thread_info_t;
 
 typedef struct {
@@ -35,7 +35,7 @@ typedef struct {
 } ccimp_malloc_t;
 
 typedef struct {
-    void * ptr;
+    void * CONST ptr;
 } ccimp_free_t;
 
 typedef struct {
