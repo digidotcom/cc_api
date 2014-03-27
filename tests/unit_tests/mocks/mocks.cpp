@@ -10,7 +10,6 @@
 
 char * assert_buffer;
 char * assert_file;
-char * assert_function;
 
 void Mock_create_all()
 {

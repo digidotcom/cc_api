@@ -29,7 +29,7 @@ extern "C" {
                                             }
 #define ASSERT_IF_NOT_HIT_DO(label, file, function, code) \
                        ON_FALSE_DO_(assert_buffer != NULL && \
-                                    (!strcmp(assert_buffer, label) && (!strcmp(assert_file, file)) && (!strcmp(assert_function, function))) \
+                                    (!strcmp(assert_buffer, label) && (!strcmp(assert_file, file))) \
                                     , {printf("Didn't hit assert: %s\n", label); code;})
 #define ASSERT_CLEAN()                      assert_buffer = NULL
 

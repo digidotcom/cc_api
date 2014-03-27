@@ -18,7 +18,6 @@ void Mock_destroy_all(void);
 extern "C" {
 extern char * assert_buffer;
 extern char * assert_file;
-extern char * assert_function;
 }
 
 #endif /* MOCKS_H_ */
