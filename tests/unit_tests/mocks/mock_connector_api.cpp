@@ -7,6 +7,7 @@
 
 #include "mock_connector_api.h"
 #include "mock_ccimp_os.h"
+#include <pthread.h>
 
 static connector_handle_t global_handle;
 
