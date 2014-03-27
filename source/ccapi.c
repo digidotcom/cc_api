@@ -203,6 +203,63 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
     return connector_status;
 }
 
+connector_callback_status_t ccapi_network_handler(connector_request_id_network_t network_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_ABORT;
+
+    UNUSED_ARGUMENT(ccapi_data);
+    UNUSED_ARGUMENT(data);
+    switch (network_request)
+    {
+        case connector_request_id_network_open:
+        {
+            ccimp_network_open_t * open_data = data;
+
+            ccimp_status = ccimp_network_tcp_open(open_data);
+            break;
+        }
+
+        case connector_request_id_network_send:
+        {
+            ccimp_network_send_t * send_data = data;
+
+            ccimp_status = ccimp_network_tcp_send(send_data);
+            break;
+        }
+
+        case connector_request_id_network_receive:
+        {
+            ccimp_network_receive_t * receive_data = data;
+
+            ccimp_status = ccimp_network_tcp_receive(receive_data);
+            break;
+        }
+
+        case connector_request_id_network_close:
+        {
+            connector_network_close_t * connector_close_data = data;
+            ccimp_network_close_t close_data;
+
+            close_data.handle = connector_close_data->handle;
+            ccimp_status = ccimp_network_tcp_close(&close_data);
+            /* TODO: Check connector_close_status_t and decide if reconnect or not */
+            connector_close_data->reconnect = connector_false;
+            break;
+        }
+
+        default:
+        {
+            ccimp_status = CCIMP_STATUS_ABORT;
+            break;
+        }
+    }
+
+    connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
+
+    return connector_status;
+}
+
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
@@ -216,6 +273,9 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             break;
         case connector_class_id_operating_system:
             status = ccapi_os_handler(request_id.os_request, data, ccapi_data);
+            break;
+        case connector_class_id_network_tcp:
+            status = ccapi_network_handler(request_id.network_request, data, ccapi_data);
             break;
         default:
             status = connector_callback_unrecognized;
