@@ -20,12 +20,12 @@
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
 #if (defined CCIMP_DEBUG_ENABLED)
-#define ASSERT_MSG_GOTO(cond, message, label)   ON_FALSE_DO_((cond), \
-                                                   { \
-                                                       ccapi_logging_line(TMP_FATAL_PREFIX, message); \
-                                                       ccimp_hal_halt(); \
-                                                       goto label; \
-                                                   })
+#define ASSERT_MSG_GOTO(cond, label)   ON_FALSE_DO_((cond), \
+                                           { \
+                                               ccapi_logging_line(TMP_FATAL_PREFIX "Following condition '%s' failed in file '%s' function '%s' line %d", #cond, __FILE__, __FUNCTION__, __LINE__); \
+                                               ccimp_hal_halt(); \
+                                               goto label; \
+                                           })
 #else
 #define ASSERT_MSG_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})
 #endif

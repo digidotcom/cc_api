@@ -46,14 +46,14 @@ void ccapi_connector_run_thread(void * const argument)
     ccapi_data_t * ccapi_data = argument;
 
     /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
-    ASSERT_MSG_GOTO(ccapi_data != NULL, "NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", done);
+    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_RUNNING)
     {
         connector_status_t const status = connector_run(ccapi_data->connector_handle);
 
-        ASSERT_MSG_GOTO(status != connector_init_error, "connector_run ret connector_init_error", done);
+        ASSERT_MSG_GOTO(status != connector_init_error, done);
 
         switch(status)
         {
@@ -61,7 +61,7 @@ void ccapi_connector_run_thread(void * const argument)
                 break;
         }            
     }
-    ASSERT_MSG_GOTO(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, "Bad connector_run->status", done);
+    ASSERT_MSG_GOTO(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
 done:
@@ -140,7 +140,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             break;
         default:
             status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_config_handler()", done);
+            ASSERT_MSG_GOTO(0, done);
             break;
     }
 done:
@@ -219,7 +219,7 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             break;
         default:
             status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0,"Unrecognized request in ccapi_connector_callback()", done);
+            ASSERT_MSG_GOTO(0, done);
             break;
     }
 

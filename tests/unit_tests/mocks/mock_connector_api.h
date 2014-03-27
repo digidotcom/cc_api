@@ -27,7 +27,10 @@ extern "C" {
                                                   ccimp_os_get_system_time(&system_up_time); \
                                               } while (assert_buffer == NULL && system_up_time.sys_uptime <= time_end); \
                                             }
-#define ASSERT_IF_NOT_HIT_DO(label, code)   ON_FALSE_DO_(assert_buffer != NULL && (!strcmp(assert_buffer, label)), {printf("Didn't hit assert: %s\n", label); code;})
+#define ASSERT_IF_NOT_HIT_DO(label, file, function, code) \
+                       ON_FALSE_DO_(assert_buffer != NULL && \
+                                    (!strcmp(assert_buffer, label) && (!strcmp(assert_file, file)) && (!strcmp(assert_function, function))) \
+                                    , {printf("Didn't hit assert: %s\n", label); code;})
 #define ASSERT_CLEAN()                      assert_buffer = NULL
 
 

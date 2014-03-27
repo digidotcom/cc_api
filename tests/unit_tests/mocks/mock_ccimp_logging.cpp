@@ -85,6 +85,8 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
             va_list assert_args;
             va_copy(assert_args, args);
             assert_buffer = va_arg( assert_args, char * );
+            assert_file = va_arg( assert_args, char * );
+            assert_function = va_arg( assert_args, char * );
         }
             
         /* ccimp_hal_logging_vprintf_real(debug, format, args); */

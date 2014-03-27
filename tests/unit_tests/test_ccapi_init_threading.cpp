@@ -52,7 +52,8 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
         pthread_t const aux_thread = aux_ccapi_start(&start);
 
         ASSERT_WAIT(1);
-        ASSERT_IF_NOT_HIT_DO ("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN", FAIL_TEST("NULL Pointer on CCIMP_THREAD_CONNECTOR_RUN not hitted"));
+        ASSERT_IF_NOT_HIT_DO ("ccapi_data != NULL", "source/ccapi.c", "ccapi_connector_run_thread", 
+                                                          FAIL_TEST("'ccapi_data != NULL' not hitted"));
 
         stop_aux_thread(aux_thread);
     }
@@ -92,7 +93,8 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     CHECK(error == CCAPI_START_ERROR_NONE);
 
     ASSERT_WAIT(1);
-    ASSERT_IF_NOT_HIT_DO ("connector_run ret connector_init_error", FAIL_TEST("connector_run ret connector_init_error not hitted"));
+    ASSERT_IF_NOT_HIT_DO ("status != connector_init_error", "source/ccapi.c", "ccapi_connector_run_thread", 
+                                                     FAIL_TEST("'status != connector_init_error' not hitted"));
 
     CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
