@@ -140,10 +140,25 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
 done:
-    if (error != CCAPI_START_ERROR_NONE && ccapi_data != NULL)
+    switch (error)
     {
-        free_ccapi_data_internal_resources(ccapi_data);
-        ccapi_free(ccapi_data);
+        case CCAPI_START_ERROR_NONE:
+            break;
+        case CCAPI_START_ERROR_NULL_PARAMETER:
+        case CCAPI_START_ERROR_INVALID_VENDORID:
+        case CCAPI_START_ERROR_INVALID_DEVICEID:
+        case CCAPI_START_ERROR_INVALID_URL:
+        case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
+        case CCAPI_START_ERROR_THREAD_FAILED:
+        case CCAPI_START_ERROR_ALREADY_STARTED:
+        case CCAPI_START_ERROR_COUNT:
+            if (ccapi_data != NULL)
+            {
+                free_ccapi_data_internal_resources(ccapi_data);
+                ccapi_free(ccapi_data);
+            }
+            break;
     }
 
     ccapi_logging_line("ccapi_start ret %d", error);
@@ -214,10 +229,14 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
 
 done:
-    if (error == CCAPI_STOP_ERROR_NONE)
+    switch (error)
     {
-        free_ccapi_data_internal_resources(ccapi_data);
-        ccapi_free(ccapi_data);
+        case CCAPI_STOP_ERROR_NONE:
+            free_ccapi_data_internal_resources(ccapi_data);
+            ccapi_free(ccapi_data);
+            break;
+        case CCAPI_STOP_ERROR_NOT_STARTED:
+            break;
     }
 
     return error;
@@ -234,9 +253,21 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 	}
     error = ccxapi_start(&ccapi_data_single_instance, start);
 
-    if (error != CCAPI_START_ERROR_NONE)
+    switch (error)
     {
-        ccapi_data_single_instance = NULL;
+        case CCAPI_START_ERROR_NONE:
+            break;
+        case CCAPI_START_ERROR_NULL_PARAMETER:
+        case CCAPI_START_ERROR_INVALID_VENDORID:
+        case CCAPI_START_ERROR_INVALID_DEVICEID:
+        case CCAPI_START_ERROR_INVALID_URL:
+        case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
+        case CCAPI_START_ERROR_THREAD_FAILED:
+        case CCAPI_START_ERROR_ALREADY_STARTED:
+        case CCAPI_START_ERROR_COUNT:
+            ccapi_data_single_instance = NULL;
+            break;
     }
 
 done:
@@ -246,10 +277,15 @@ done:
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error;
+
     error = ccxapi_stop(ccapi_data_single_instance, behavior);
-    if (error == CCAPI_STOP_ERROR_NONE)
+    switch (error)
     {
-        ccapi_data_single_instance = NULL;
+        case CCAPI_STOP_ERROR_NONE:
+            ccapi_data_single_instance = NULL;
+            break;
+        case CCAPI_STOP_ERROR_NOT_STARTED:
+            break;
     }
 
     return error;

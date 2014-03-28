@@ -19,7 +19,14 @@ void * ccapi_malloc(size_t size)
     malloc_info.size = size;
     status = ccimp_malloc(&malloc_info);
 
-    return status == CCIMP_STATUS_OK ? malloc_info.ptr : NULL;
+    switch (status)
+    {
+        case CCIMP_STATUS_OK:
+            return malloc_info.ptr;
+        case CCIMP_STATUS_ABORT:
+        case CCIMP_STATUS_BUSY:
+            return NULL;
+    }
 }
 
 ccimp_status_t ccapi_free(void * ptr)
@@ -211,7 +218,6 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
     ccimp_status_t ccimp_status = CCIMP_STATUS_ABORT;
 
     UNUSED_ARGUMENT(ccapi_data);
-    UNUSED_ARGUMENT(data);
     switch (network_request)
     {
         case connector_request_id_network_open:
