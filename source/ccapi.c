@@ -25,8 +25,9 @@ void * ccapi_malloc(size_t size)
             return malloc_info.ptr;
         case CCIMP_STATUS_ABORT:
         case CCIMP_STATUS_BUSY:
-            return NULL;
+            break;
     }
+    return NULL;
 }
 
 ccimp_status_t ccapi_free(void * ptr)
