@@ -8,7 +8,6 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
-#include "connector_api.h"
 
 ccapi_handle_t ccapi_data_single_instance = NULL;
 
@@ -70,7 +69,7 @@ done:
 
 static connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status)
 {
-    connector_callback_status_t callback_status;
+    connector_callback_status_t callback_status = connector_callback_abort;
 
     switch(ccimp_status)
     {

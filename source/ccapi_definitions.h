@@ -9,9 +9,9 @@
 #define _CCAPI_DEFINITIONS_H_
 
 #include "ccapi_connector_config.h"
-#include "ccimp/ccimp_logging.h"
+#include "ccapi/ccapi.h"
 #include "ccimp/ccimp_hal.h"
-#include "ccimp/ccimp_types.h"
+#include "ccimp/ccimp_logging.h"
 #include "ccimp/ccimp_os.h"
 #include "ccimp/ccimp_network.h"
 #include "connector_api.h"

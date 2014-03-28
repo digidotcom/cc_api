@@ -4,8 +4,7 @@
  *  Created on: Mar 27, 2014
  *      Author: hbujanda
  */
-
-#include "ccapi_definitions.h"
+#include "ccimp/ccimp_hal.h"
 
 #include <unistd.h>
 #include <linux/reboot.h>
@@ -19,7 +18,7 @@
 /******************** LINUX IMPLEMENTATION ********************/
 
 #if (defined CCIMP_DEBUG_ENABLED)
-ccimp_status_t ccimp_hal_halt()
+ccimp_status_t ccimp_hal_halt(void)
 {
     printf("ccimp_hal_halt!!!!\n");
 

@@ -4,8 +4,6 @@
  *  Created on: Mar 5, 2014
  *      Author: hbujanda
  */
-
-#include "ccapi_definitions.h"
 #include "ccimp/ccimp_os.h"
 
 #include <malloc.h>
