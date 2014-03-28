@@ -16,7 +16,7 @@ ccimp_status_t ccapi_logging_lock_acquire(void)
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t status = CCIMP_STATUS_ABORT;
     
-    if (logging_syncr)
+    if (logging_syncr != NULL)
     {
         acquire_data.syncr_object = logging_syncr;
         acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
@@ -32,7 +32,7 @@ ccimp_status_t ccapi_logging_lock_release(void)
     ccimp_os_syncr_release_t release_data;
     ccimp_status_t status = CCIMP_STATUS_ABORT;
     
-    if (logging_syncr)
+    if (logging_syncr != NULL)
     {
         release_data.syncr_object = logging_syncr;
 
