@@ -70,7 +70,7 @@ done:
 
 static connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status)
 {
-    connector_callback_status_t callback_status;
+    connector_callback_status_t callback_status = connector_callback_abort;
 
     switch(ccimp_status)
     {

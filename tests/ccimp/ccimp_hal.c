@@ -19,7 +19,7 @@
 /******************** LINUX IMPLEMENTATION ********************/
 
 #if (defined CCIMP_DEBUG_ENABLED)
-ccimp_status_t ccimp_hal_halt()
+ccimp_status_t ccimp_hal_halt(void)
 {
     printf("ccimp_hal_halt!!!!\n");
 

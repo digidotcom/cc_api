@@ -248,7 +248,7 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error;
     error = ccxapi_stop(ccapi_data_single_instance, behavior);
-    if (error != CCAPI_STOP_ERROR_NONE)
+    if (error == CCAPI_STOP_ERROR_NONE)
     {
         ccapi_data_single_instance = NULL;
     }
