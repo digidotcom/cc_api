@@ -39,7 +39,7 @@ CFLAGS +=-std=c99
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE 
 # Include Public Header Files.
-CFLAGS += -I. -I$(CC_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR) -I$(CCAPI_PRIVATE_DIR)
+CFLAGS += -I. -I$(CC_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR)
 # Include Platform Header Files.
 CFLAGS += -I$(PLATFORM_DIR)
 
@@ -56,7 +56,7 @@ APP_SRCS = main.c
 CC_PRIVATE_SRCS = $(CC_PRIVATE_DIR)/connector_api.c
 CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c
 PLATFORM_SRCS = $(PLATFORM_DIR)/ccimp_os.c $(PLATFORM_DIR)/ccimp_logging.c $(PLATFORM_DIR)/ccimp_hal.c 
-SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS)  $(CCAPI_PRIVATE_SRCS)
+SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
 
 # Libraries to Link
 LIBS = -lc -lz -lpthread -lrt 
