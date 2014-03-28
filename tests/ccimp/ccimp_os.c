@@ -123,7 +123,7 @@ ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
     return status;
 }
 
-ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
+ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
 {
     struct timespec ts = { 0 };
     int s;
@@ -133,14 +133,14 @@ ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
 
     data->acquired = CCAPI_FALSE;
 
-    if (data->timeout_ms == OS_SYNCR_ADQUIRE_NOWAIT)
+    if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT)
     {
-        ccapi_logging_line_info("ccimp_os_syncr_adquire: about to call sem_trywait()\n");
+        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_trywait()\n");
         s = sem_trywait(sem);
     }
-    else if (data->timeout_ms == OS_SYNCR_ADQUIRE_INFINITE)
+    else if (data->timeout_ms == OS_SYNCR_ACQUIRE_INFINITE)
     {
-        ccapi_logging_line_info("ccimp_os_syncr_adquire: about to call sem_wait()\n");
+        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_wait()\n");
         s = sem_wait(sem);
     }
     else
@@ -148,7 +148,7 @@ ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
         /* Calculate relative interval as current time plus number of milliseconds requested */
         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
         {
-            printf("ccimp_os_syncr_adquire: clock_gettime error\n");
+            printf("ccimp_os_syncr_acquire: clock_gettime error\n");
             return CCIMP_STATUS_ABORT;
         }
 
@@ -165,7 +165,7 @@ ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
             ts.tv_nsec %= NSEC_ROLL_OVER;
         }
 
-        ccapi_logging_line_info("ccimp_os_syncr_adquire: about to call sem_timedwait()\n");
+        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_timedwait()\n");
         s = sem_timedwait(sem, &ts);
     }
 
@@ -174,11 +174,11 @@ ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
     {
         if (errno == ETIMEDOUT)
         {
-            ccapi_logging_line_info("ccimp_os_syncr_adquire: timed out\n");
+            ccapi_logging_line_info("ccimp_os_syncr_acquire: timed out\n");
         }
-        else if (data->timeout_ms == OS_SYNCR_ADQUIRE_NOWAIT && errno == EAGAIN)
+        else if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT && errno == EAGAIN)
         {
-            ccapi_logging_line_info("ccimp_os_syncr_adquire: not signaled\n");            
+            ccapi_logging_line_info("ccimp_os_syncr_acquire: not signaled\n");
         }
         else
         {
@@ -188,7 +188,7 @@ ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data)
     } 
     else
     {
-        ccapi_logging_line_info("ccimp_os_syncr_adquire: got it\n");
+        ccapi_logging_line_info("ccimp_os_syncr_acquire: got it\n");
         data->acquired = CCAPI_TRUE;
     }
 

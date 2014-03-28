@@ -48,8 +48,8 @@ typedef struct {
     unsigned long sys_uptime;
 } ccimp_os_system_up_time_t;
 
-#define OS_SYNCR_ADQUIRE_NOWAIT             ((unsigned long) 0)
-#define OS_SYNCR_ADQUIRE_INFINITE           ((unsigned long)-1)
+#define OS_SYNCR_ACQUIRE_NOWAIT             ((unsigned long) 0)
+#define OS_SYNCR_ACQUIRE_INFINITE           ((unsigned long)-1)
 
 typedef struct {
     void * syncr_object;
@@ -59,7 +59,7 @@ typedef struct {
     void * CONST syncr_object;
     unsigned long CONST timeout_ms;
     ccapi_bool_t acquired;
-} ccimp_os_syncr_adquire_t;
+} ccimp_os_syncr_acquire_t;
 
 typedef struct {
     void * CONST syncr_object;
@@ -79,7 +79,7 @@ ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system
 ccimp_status_t ccimp_os_yield(void);
 
 ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data);
-ccimp_status_t ccimp_os_syncr_adquire(ccimp_os_syncr_adquire_t * const data);
+ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data);
 ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t const * const data);
 ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t const * const data);
 
