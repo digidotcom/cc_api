@@ -1,7 +1,6 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
-#include "ccapi/ccapi.h"
 
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {

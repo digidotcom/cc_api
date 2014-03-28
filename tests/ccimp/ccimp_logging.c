@@ -4,8 +4,6 @@
  *  Created on: Mar 7, 2014
  *      Author: hbujanda
  */
-
-#include "custom/custom_connector_config.h"
 #include "ccimp/ccimp_logging.h"
 
 #ifdef UNIT_TEST

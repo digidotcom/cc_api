@@ -4,8 +4,7 @@
  *  Created on: Mar 27, 2014
  *      Author: hbujanda
  */
-
-#include "ccapi_definitions.h"
+#include "ccimp/ccimp_hal.h"
 
 #include <unistd.h>
 #include <linux/reboot.h>

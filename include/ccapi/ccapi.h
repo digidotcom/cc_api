@@ -8,6 +8,7 @@
 #ifndef _CCAPI_H_
 #define _CCAPI_H_
 
+#include "ccimp/ccimp_types.h"
 #include "ccapi/ccapi_init.h"
 
 #endif

@@ -8,6 +8,7 @@
 #ifndef CCIMP_HAL_H_
 #define CCIMP_HAL_H_
 
+#include "custom/custom_connector_config.h"
 #include "ccimp/ccimp_types.h"
 
 #if (defined CCIMP_DEBUG_ENABLED)

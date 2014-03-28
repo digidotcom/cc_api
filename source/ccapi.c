@@ -8,7 +8,6 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
-#include "connector_api.h"
 
 ccapi_handle_t ccapi_data_single_instance = NULL;
 
