@@ -203,28 +203,28 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
-ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * open_data)
+ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const open_data)
 {
     mock_scope_c("ccimp_network_tcp_open")->actualCall("ccimp_network_tcp_open")->withParameterOfType("ccimp_network_open_t", "open_data", (void *)open_data);
 
     return (ccimp_status_t)mock_scope_c("ccimp_network_tcp_open")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_network_tcp_send(ccimp_network_send_t * send_data)
+ccimp_status_t ccimp_network_tcp_send(ccimp_network_send_t * const send_data)
 {
     mock_scope_c("ccimp_network_tcp_send")->actualCall("ccimp_network_tcp_send")->withParameterOfType("ccimp_network_send_t", "send_data", (void *)send_data);
 
     return (ccimp_status_t)mock_scope_c("ccimp_network_tcp_send")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * receive_data)
+ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * const receive_data)
 {
     mock_scope_c("ccimp_network_tcp_receive")->actualCall("ccimp_network_tcp_receive")->withParameterOfType("ccimp_network_receive_t", "receive_data", (void *)receive_data);
 
     return (ccimp_status_t)mock_scope_c("ccimp_network_tcp_receive")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * close_data)
+ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const close_data)
 {
     mock_scope_c("ccimp_network_tcp_close")->actualCall("ccimp_network_tcp_close")->withParameterOfType("ccimp_network_close_t", "close_data", (void *)close_data);
 

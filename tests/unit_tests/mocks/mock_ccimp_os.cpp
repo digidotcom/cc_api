@@ -106,7 +106,7 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
-ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * create_thread_info)
+ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info)
 {
     uint8_t behavior;
 

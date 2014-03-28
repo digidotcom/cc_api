@@ -1,5 +1,5 @@
-#include "ccapi_definitions.h"
 #include "ccimp/ccimp_network.h"
+#include "ccimp/ccimp_os.h"
 
 #ifdef UNIT_TEST
 #define ccimp_network_tcp_open       ccimp_network_tcp_open_real
@@ -33,7 +33,9 @@ ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const data)
         printf("network_tcp_close: close() failed, fd %d, errno %d\n", *fd, errno);
     }
     else
+    {
         printf("network_tcp_close: fd %d\n", *fd);
+    }
 
     *fd = -1;
 

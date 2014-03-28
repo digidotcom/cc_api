@@ -29,9 +29,9 @@ TEST_GROUP(ccapi_tcp_test)
 TEST(ccapi_tcp_test, testTcpOpen)
 {
     connector_request_id_t request;
-    connector_network_open_t connector_open_data = {"login.etherios.com", NULL};
+    connector_network_open_t connector_open_data = {{"login.etherios.com"}, NULL};
     connector_callback_status_t status;
-    ccimp_network_open_t ccimp_open_data = {"login.etherios.com", NULL};
+    ccimp_network_open_t ccimp_open_data = {{"login.etherios.com"}, NULL};
 
     Mock_ccimp_network_tcp_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
 

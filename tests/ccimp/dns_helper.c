@@ -1,6 +1,5 @@
-
-#include "ccapi_definitions.h"
 #include "ccimp/ccimp_network.h"
+#include "ccimp/ccimp_os.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
