@@ -37,11 +37,13 @@ TEST(ccapi_stop_test, testCcapiNotStarted)
 {
     ccapi_stop_error_t error;
 
+    CHECK((*spy_ccapi_data) == NULL);
     error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(error == CCAPI_STOP_ERROR_NOT_STARTED);
 
     error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK(error == CCAPI_STOP_ERROR_NOT_STARTED);
+    CHECK((*spy_ccapi_data) == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStartedBadly)
@@ -59,6 +61,7 @@ TEST(ccapi_stop_test, testCcapiStartedBadly)
 
     stop_error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NOT_STARTED);
+    CHECK((*spy_ccapi_data) == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStopGracefully)
@@ -92,6 +95,7 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
 
     stop_error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+    CHECK((*spy_ccapi_data) == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStopImmediately)
@@ -110,4 +114,5 @@ TEST(ccapi_stop_test, testCcapiStopImmediately)
 
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+    CHECK((*spy_ccapi_data) == NULL);
 }
