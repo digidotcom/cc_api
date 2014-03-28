@@ -9,6 +9,7 @@
  * Digi International Inc. 11001 Bren Road East, Minnetonka, MN 55343
  * =======================================================================
  */
+#include <stdio.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"

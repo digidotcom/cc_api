@@ -1,6 +1,7 @@
 #include "ccimp/ccimp_network.h"
 #include "ccimp/ccimp_os.h"
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>

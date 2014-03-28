@@ -5,6 +5,7 @@
  *      Author: spastor
  */
 
+#include <stdio.h>
 #include <pthread.h>
 #include "test_helper_functions.h"
 

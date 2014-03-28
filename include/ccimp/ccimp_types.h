@@ -8,8 +8,7 @@
 #ifndef CCIMP_TYPES_H_
 #define CCIMP_TYPES_H_
 
-#include "connector_config.h"
-#include "connector_types.h"
+#include "custom/custom_ccimp_types.h"
 
 #define DEVICE_ID_LENGTH    16
 
