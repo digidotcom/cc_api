@@ -1,13 +1,3 @@
-/*
- * ccapi_connector_config.h
- *
- *  Created on: Mar 6, 2014
- *      Author: hbujanda
- */
-
-#ifndef _CCAPI_CONNECTOR_CONFIG_H_
-#define _CCAPI_CONNECTOR_CONFIG_H_
-
 #include "custom/custom_connector_config.h"
 
 /* +++ Layer2 Digi Controlled defines +++ */
@@ -151,5 +141,3 @@
 #endif
 
 /* --- Match Layer2 User Controlled defines to Layer1 defines --- */
-
-#endif /* _CCAPI_CONNECTOR_CONFIG_H_ */
