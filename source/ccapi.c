@@ -56,9 +56,12 @@ void ccapi_connector_run_thread(void * const argument)
 
         switch(status)
         {
+            case connector_device_terminated:
+                ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                break;
             default:
                 break;
-        }            
+        }
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, done);
 
