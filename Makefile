@@ -17,6 +17,7 @@ CC = gcc
 CCAPI_SOURCE_DIR = ./source
 CCAPI_INCLUDE = ./include
 CONNECTOR_DIR = $(CCAPI_SOURCE_DIR)/cc_ansic
+CUSTOM_CONNECTOR_INCLUDE = $(CCAPI_SOURCE_DIR)/cc_ansic_custom_inlcudes
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 
@@ -37,7 +38,7 @@ CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -W
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
 # Include Public Header Files.
-CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
+CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CUSTOM_CONNECTOR_INCLUDE) -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
 CFLAGS += -g -O0
 
 CCAPI_SOURCES = $(wildcard $(CCAPI_SOURCE_DIR)/*.c)
@@ -69,7 +70,6 @@ CPPOBJS = $(CPPSRCS:.cpp=.o)
 
 test: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
-	./$@
 
 .cpp.o:
 	$(CPP) -DUNIT_TEST $(CFLAGS) -c $< -o $@

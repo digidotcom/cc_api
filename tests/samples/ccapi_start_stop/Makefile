@@ -17,6 +17,8 @@ CC_PRIVATE_DIR=../../../source/cc_ansic/private
 CCAPI_PRIVATE_DIR=../../../source
 # Locate of Public Include Header Files.
 CC_PUBLIC_HEADER_DIR=../../../source/cc_ansic/public/include
+CUSTOM_CC_PUBLIC_HEADER_DIR=../../../source//cc_ansic_custom_inlcudes
+
 CCAPI_PUBLIC_HEADER_DIR=../../../include
 # Location of Platform Src Code.
 PLATFORM_DIR=../../ccimp
@@ -39,17 +41,12 @@ CFLAGS +=-std=c99
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE 
 # Include Public Header Files.
-CFLAGS += -I. -I$(CC_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR)
+CFLAGS += -I. -I$(CUSTOM_CC_PUBLIC_HEADER_DIR) -I$(CC_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR)
 # Include Platform Header Files.
 CFLAGS += -I$(PLATFORM_DIR)
 
 
-ifeq ($(DEBUG),true)
 CFLAGS += -g -O0 -DDEBUG
-else
-# Optimize for Size
-CFLAGS += -Os
-endif
 
 # Target output to generate.
 APP_SRCS = main.c
