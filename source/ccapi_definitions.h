@@ -13,6 +13,7 @@
 #include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_types.h"
 #include "ccimp/ccimp_os.h"
+#include "ccimp/ccimp_network.h"
 #include "connector_api.h"
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
