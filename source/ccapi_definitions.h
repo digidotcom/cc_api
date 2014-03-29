@@ -8,7 +8,7 @@
 #ifndef _CCAPI_DEFINITIONS_H_
 #define _CCAPI_DEFINITIONS_H_
 
-#include "ccapi_connector_config.h"
+#include "connector_config.h"
 #include "ccapi/ccapi.h"
 #include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_logging.h"

@@ -6,6 +6,7 @@
  */
 #include "ccimp/ccimp_hal.h"
 
+#include <stdio.h>
 #include <unistd.h>
 #include <linux/reboot.h>
 #include <sys/reboot.h>
