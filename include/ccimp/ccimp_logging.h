@@ -8,7 +8,7 @@
 #ifndef CCIMP_LOGGING_H_
 #define CCIMP_LOGGING_H_
 
-#include "custom/custom_connector_config.h"
+#include "ccimp/ccimp_types.h"
 
 #if (defined CCIMP_DEBUG_ENABLED)
 

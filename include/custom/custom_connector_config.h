@@ -1,5 +1,5 @@
 /*
- * ccapi_connector_config.h
+ * custom_connector_config.h
  *
  *  Created on: Mar 6, 2014
  *      Author: hbujanda
