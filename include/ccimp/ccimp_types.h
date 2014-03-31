@@ -11,6 +11,9 @@
 #include "custom/custom_ccimp_types.h"
 
 #define DEVICE_ID_LENGTH    16
+#define MAC_ADDR_LENGTH     6
+#define IPV4_LENGTH         4
+#define IPV6_LENGTH         16
 
 typedef enum {
     CCAPI_FALSE,
