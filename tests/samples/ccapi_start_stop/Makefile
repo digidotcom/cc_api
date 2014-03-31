@@ -13,18 +13,18 @@
 CC = gcc
 
 # Location of Private Connector Code.
-CC_PRIVATE_DIR=../../../source/cc_ansic/private
+CCFSM_PRIVATE_DIR=../../../source/cc_ansic/private
 CCAPI_PRIVATE_DIR=../../../source
 # Locate of Public Include Header Files.
-CC_PUBLIC_HEADER_DIR=../../../source/cc_ansic/public/include
-CUSTOM_CC_PUBLIC_HEADER_DIR=../../../source//cc_ansic_custom_inlcudes
-
+CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic/public/include
 CCAPI_PUBLIC_HEADER_DIR=../../../include
+CUSTOM_CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic_custom_inlcudes
+
 # Location of Platform Src Code.
 PLATFORM_DIR=../../ccimp
 
 # Resolves where to find Source files.
-vpath $(CC_PRIVATE_DIR)/%.c
+vpath $(CCFSM_PRIVATE_DIR)/%.c
 vpath $(PLATFORM_DIR)/%.c
 
 # CFLAG Definition
@@ -41,7 +41,7 @@ CFLAGS +=-std=c99
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE 
 # Include Public Header Files.
-CFLAGS += -I. -I$(CUSTOM_CC_PUBLIC_HEADER_DIR) -I$(CC_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR)
+CFLAGS += -I. -I$(CUSTOM_CCFSM_PUBLIC_HEADER_DIR) -I$(CCFSM_PUBLIC_HEADER_DIR) -I$(CCAPI_PUBLIC_HEADER_DIR)
 # Include Platform Header Files.
 CFLAGS += -I$(PLATFORM_DIR)
 
@@ -50,7 +50,7 @@ CFLAGS += -g -O0 -DDEBUG
 
 # Target output to generate.
 APP_SRCS = main.c
-CC_PRIVATE_SRCS = $(CC_PRIVATE_DIR)/connector_api.c
+CC_PRIVATE_SRCS = $(CCFSM_PRIVATE_DIR)/connector_api.c
 CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c
 PLATFORM_SRCS = $(PLATFORM_DIR)/ccimp_os.c $(PLATFORM_DIR)/ccimp_logging.c $(PLATFORM_DIR)/ccimp_hal.c $(PLATFORM_DIR)/ccimp_network_tcp.c $(PLATFORM_DIR)/dns_helper.c
 SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
