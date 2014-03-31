@@ -63,6 +63,9 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
     } thread;
+    struct {
+        ccapi_tcp_info_t * tcp;
+    } transport;
 } ccapi_data_t;
 
 typedef struct ccapi_handle * ccapi_handle_t;
