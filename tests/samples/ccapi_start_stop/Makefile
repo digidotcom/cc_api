@@ -18,7 +18,7 @@ CCAPI_PRIVATE_DIR=../../../source
 # Locate of Public Include Header Files.
 CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic/public/include
 CCAPI_PUBLIC_HEADER_DIR=../../../include
-CUSTOM_CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic_custom_inlcudes
+CUSTOM_CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic_custom_include
 
 # Location of Platform Src Code.
 PLATFORM_DIR=../../ccimp

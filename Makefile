@@ -17,7 +17,7 @@ CC = gcc
 CCAPI_SOURCE_DIR = ./source
 CCAPI_INCLUDE = ./include
 CONNECTOR_DIR = $(CCAPI_SOURCE_DIR)/cc_ansic
-CUSTOM_CONNECTOR_INCLUDE = $(CCAPI_SOURCE_DIR)/cc_ansic_custom_inlcudes
+CUSTOM_CONNECTOR_INCLUDE = $(CCAPI_SOURCE_DIR)/cc_ansic_custom_include
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 
