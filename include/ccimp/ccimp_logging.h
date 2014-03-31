@@ -38,6 +38,7 @@
 void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, va_list args);
 
 /* Temporary while we don't have zones */
+#define TMP_INFO_PREFIX        "INFO: "
 #define TMP_FATAL_PREFIX       "FATAL: "
 #define TMP_FATAL_PREFIX_LEN   (sizeof TMP_FATAL_PREFIX - 1)
 

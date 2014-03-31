@@ -102,6 +102,8 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
 {
     connector_callback_status_t status = connector_callback_continue;
 
+    ccapi_logging_line(TMP_INFO_PREFIX "ccapi_config_handler: config_request %d", config_request);
+
     switch (config_request)
     {
         case connector_request_id_config_device_id:
