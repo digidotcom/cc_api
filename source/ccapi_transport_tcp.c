@@ -1,15 +1,15 @@
 #include "ccapi_definitions.h"
 #include "ccapi/ccapi_transport_tcp.h"
 
-static int check_keepalives(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
+static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
 {
-    int retval = 0;
+    ccapi_bool_t retval = CCAPI_TRUE;
 
     if (tcp_start->keepalives.rx != 0)
     {
         if (tcp_start->keepalives.rx > CCAPI_KEEPALIVES_RX_MAX || tcp_start->keepalives.rx < CCAPI_KEEPALIVES_RX_MIN)
         {
-            retval = -1;
+            retval = CCAPI_FALSE;
             goto done;
         }
     }
@@ -18,7 +18,7 @@ static int check_keepalives(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
     {
         if (tcp_start->keepalives.tx > CCAPI_KEEPALIVES_TX_MAX || tcp_start->keepalives.tx < CCAPI_KEEPALIVES_TX_MIN)
         {
-            retval = -1;
+            retval = CCAPI_FALSE;
             goto done;
         }
     }
@@ -27,28 +27,33 @@ static int check_keepalives(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
     {
         if (tcp_start->keepalives.wait_count > CCAPI_KEEPALIVES_WCNT_MAX || tcp_start->keepalives.wait_count < CCAPI_KEEPALIVES_WCNT_MIN)
         {
-            retval = -1;
+            retval = CCAPI_FALSE;
             goto done;
         }
     }
 
 done:
-    if (retval != 0)
+    switch(retval)
     {
-        ccapi_logging_line("ccxapi_start_transport_tcp: invalid keepalive configuration");
-        *error = CCAPI_TCP_START_ERROR_KEEPALIVES;
-    }
-    else
-    {
-        *error = CCAPI_TCP_START_ERROR_NONE;
+        case CCAPI_FALSE:
+        {
+            ccapi_logging_line("ccxapi_start_transport_tcp: invalid keepalive configuration");
+            *error = CCAPI_TCP_START_ERROR_KEEPALIVES;
+            break;
+        }
+        case CCAPI_TRUE:
+        {
+            *error = CCAPI_TCP_START_ERROR_NONE;
+            break;
+        }
     }
 
     return retval;
 }
 
-static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
+static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
 {
-    int retval = 0;
+    ccapi_bool_t retval = CCAPI_TRUE;
 
     switch (tcp_start->connection.type)
     {
@@ -58,7 +63,7 @@ static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
 
             if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
             {
-                retval = -1;
+                retval = CCAPI_FALSE;
                 *error = CCAPI_TCP_START_ERROR_INVALID_MAC;
                 goto done;
             }
@@ -73,7 +78,7 @@ static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv4");
                         *error = CCAPI_TCP_START_ERROR_IP;
-                        retval = -1;
+                        retval = CCAPI_FALSE;
                         goto done;
                     }
                     break;
@@ -86,7 +91,7 @@ static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv6");
                         *error = CCAPI_TCP_START_ERROR_IP;
-                        retval = -1;
+                        retval = CCAPI_FALSE;
                         goto done;
                     }
                     break;
@@ -100,7 +105,7 @@ static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
             {
                 ccapi_logging_line("ccxapi_start_transport_tcp: invalid Phone number");
                 *error = CCAPI_TCP_START_ERROR_PHONE;
-                retval = -1;
+                retval = CCAPI_FALSE;
                 goto done;
             }
         }
@@ -110,17 +115,17 @@ done:
     return retval;
 }
 
-static int check_malloc(void * ptr, ccapi_tcp_start_error_t * const error)
+static ccapi_bool_t valid_malloc(void * ptr, ccapi_tcp_start_error_t * const error)
 {
     if (ptr == NULL)
     {
         *error = CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY;
-        return -1;
+        return CCAPI_FALSE;
     }
     else
     {
         *error = CCAPI_TCP_START_ERROR_NONE;
-        return 0;
+        return CCAPI_TRUE;
     }
 }
 
@@ -148,8 +153,7 @@ static int copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const *
     if (source->connection.info.wan.phone_number != NULL)
     {
         dest->connection.info.wan.phone_number = ccapi_malloc(strlen(source->connection.info.wan.phone_number) + 1);
-        retval = check_malloc(dest->connection.info.wan.phone_number, error);
-        if (retval != 0)
+        if (!valid_malloc(dest->connection.info.wan.phone_number, error))
         {
             goto done;
         }
@@ -181,8 +185,7 @@ static int copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const dest, ccapi_
     if (source->connection.password != NULL)
     {
         dest->connection.password = ccapi_malloc(strlen(source->connection.password) + 1);
-        retval = check_malloc(dest->connection.password, error);
-        if (retval != 0)
+        if (!valid_malloc(dest->connection.password, error))
         {
             goto done;
         }
@@ -227,17 +230,17 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_handle_t const ccapi_ha
     }
 
     ccapi_data->transport.tcp = ccapi_malloc(sizeof *ccapi_data->transport.tcp);
-    if (check_malloc(ccapi_data->transport.tcp, &error) != 0)
+    if (!valid_malloc(ccapi_data->transport.tcp, &error))
     {
         goto done;
     }
 
-    if (check_keepalives(tcp_start, &error) != 0)
+    if (!valid_keepalives(tcp_start, &error))
     {
         goto done;
     }
 
-    if (check_connection(tcp_start, &error) != 0)
+    if (!valid_connection(tcp_start, &error))
     {
         goto done;
     }
