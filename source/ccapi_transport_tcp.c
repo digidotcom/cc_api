@@ -250,6 +250,40 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_handle_t const ccapi_ha
         goto done;
     }
 
+    {
+        connector_transport_t transport = connector_transport_tcp;
+        connector_status_t const connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_transport_start, &transport);
+        switch (connector_status)
+        {
+            case connector_success:
+                break;
+            case connector_init_error:
+            case connector_invalid_data:
+            case connector_service_busy:
+                error = CCAPI_TCP_START_ERROR_INIT;
+                break;
+            case connector_invalid_data_size:
+            case connector_invalid_data_range:
+            case connector_keepalive_error:
+            case connector_bad_version:
+            case connector_device_terminated:
+            case connector_invalid_response:
+            case connector_no_resource:
+            case connector_unavailable:
+            case connector_idle:
+            case connector_working:
+            case connector_pending:
+            case connector_active:
+            case connector_abort:
+            case connector_device_error:
+            case connector_exceed_timeout:
+            case connector_invalid_payload_packet:
+            case connector_open_error:
+                error = CCAPI_TCP_START_ERROR_INIT;
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+    }
 done:
     return error;
 }
