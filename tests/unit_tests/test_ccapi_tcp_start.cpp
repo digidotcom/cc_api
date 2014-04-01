@@ -111,10 +111,12 @@ TEST(ccapi_tcp_start_test, testBadIP)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
+    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = NULL;
+    tcp_start.connection.info.lan.ip.address.ipv4 = 0;
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_IP, error);
@@ -128,19 +130,17 @@ TEST(ccapi_tcp_start_test, testLANIpv4)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
-    uint8_t ipv4[IPV4_LENGTH] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = ipv4;
+    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(ipv4 != (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address);
-    CHECK(memcmp(ipv4, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address, sizeof ipv4) == 0);
+    CHECK(ipv4 == (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4);
     CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
@@ -153,14 +153,12 @@ TEST(ccapi_tcp_start_test, testLANIpv6)
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV6;
-    tcp_start.connection.info.lan.ip.address = ipv6;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv6, ipv6, sizeof ipv6);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(ipv6 != (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address);
-    CHECK(memcmp(ipv6, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address, sizeof ipv6) == 0);
+    CHECK(memcmp(ipv6, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6, sizeof ipv6) == 0);
     CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
@@ -169,11 +167,11 @@ TEST(ccapi_tcp_start_test, testLANZeroMAC)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
     uint8_t mac[MAC_ADDR_LENGTH] = {0}; /* 000000:000000 */
-    uint8_t ipv4[IPV4_LENGTH] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = ipv4;
+    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -185,13 +183,13 @@ TEST(ccapi_tcp_start_test, testPassword)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint8_t ipv4[IPV4_LENGTH] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
 
     tcp_start.connection.password = password;
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = ipv4;
+    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -300,7 +298,7 @@ TEST(ccapi_tcp_start_test, testPasswordNoMemory)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint8_t ipv4[IPV4_LENGTH] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
     void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));
     void * malloc_for_password = NULL;
@@ -308,59 +306,11 @@ TEST(ccapi_tcp_start_test, testPasswordNoMemory)
     tcp_start.connection.password = password;
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = ipv4;
+    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
 
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
     Mock_ccimp_malloc_expectAndReturn(sizeof password, malloc_for_password);
-    error = ccapi_start_transport_tcp(&tcp_start);
-    CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
-}
-
-TEST(ccapi_tcp_start_test, testIpv4NoMemory)
-{
-    ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint8_t ipv4[IPV4_LENGTH] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
-    char password[] = "Hello, World!";
-    void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));
-    void * malloc_for_password = malloc(sizeof password);
-    void * malloc_for_ip = NULL;
-
-    tcp_start.connection.password = password;
-    tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-    tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
-
-    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
-    Mock_ccimp_malloc_expectAndReturn(sizeof password, malloc_for_password);
-    Mock_ccimp_malloc_expectAndReturn(sizeof ipv4, malloc_for_ip);
-    error = ccapi_start_transport_tcp(&tcp_start);
-    CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
-}
-
-TEST(ccapi_tcp_start_test, testIpv6NoMemory)
-{
-    ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint8_t ipv6[IPV6_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
-    char password[] = "Hello, World!";
-    void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));
-    void * malloc_for_password = malloc(sizeof password);
-    void * malloc_for_ip = NULL;
-
-    tcp_start.connection.password = password;
-    tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-    tcp_start.connection.info.lan.ip.type = CCAPI_IPV6;
-    tcp_start.connection.info.lan.ip.address = ipv6;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
-
-    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
-    Mock_ccimp_malloc_expectAndReturn(sizeof password, malloc_for_password);
-    Mock_ccimp_malloc_expectAndReturn(sizeof ipv6, malloc_for_ip);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
