@@ -33,7 +33,7 @@ TEST(ccapi_tcp_start_with_no_ccapi, testNotStarted)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_CCAPI_STOPPED, error);
 }
 
-TEST_GROUP(ccapi_tcp_start_test)
+TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
 {
     void setup()
     {
@@ -57,7 +57,7 @@ TEST_GROUP(ccapi_tcp_start_test)
     }
 };
 
-TEST(ccapi_tcp_start_test, testNullPointer)
+TEST(ccapi_tcp_start_sanity_checks_test, testNullPointer)
 {
     ccapi_tcp_start_error_t error;
 
@@ -65,7 +65,7 @@ TEST(ccapi_tcp_start_test, testNullPointer)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NULL_POINTER, error);
 }
 
-TEST(ccapi_tcp_start_test, testBadKeepalivesRx)
+TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesRx)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -79,7 +79,7 @@ TEST(ccapi_tcp_start_test, testBadKeepalivesRx)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_test, testBadKeepalivesTx)
+TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesTx)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -93,7 +93,7 @@ TEST(ccapi_tcp_start_test, testBadKeepalivesTx)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_test, testBadKeepalivesWaitCount)
+TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesWaitCount)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -107,7 +107,7 @@ TEST(ccapi_tcp_start_test, testBadKeepalivesWaitCount)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_test, testBadIP)
+TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -126,7 +126,7 @@ TEST(ccapi_tcp_start_test, testBadIP)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_IP, error);
 }
 
-TEST(ccapi_tcp_start_test, testLANIpv4)
+TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -144,7 +144,7 @@ TEST(ccapi_tcp_start_test, testLANIpv4)
     CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
-TEST(ccapi_tcp_start_test, testLANIpv6)
+TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -162,7 +162,7 @@ TEST(ccapi_tcp_start_test, testLANIpv6)
     CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
-TEST(ccapi_tcp_start_test, testLANZeroMAC)
+TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -178,7 +178,7 @@ TEST(ccapi_tcp_start_test, testLANZeroMAC)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INVALID_MAC, error);
 }
 
-TEST(ccapi_tcp_start_test, testPassword)
+TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -199,7 +199,7 @@ TEST(ccapi_tcp_start_test, testPassword)
     STRCMP_EQUAL(tcp_start.connection.password, (*spy_ccapi_data)->transport.tcp->connection.password);
 }
 
-TEST(ccapi_tcp_start_test, testWAN)
+TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -217,7 +217,7 @@ TEST(ccapi_tcp_start_test, testWAN)
     STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
 }
 
-TEST(ccapi_tcp_start_test, testWANEmptyPhone)
+TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -235,7 +235,7 @@ TEST(ccapi_tcp_start_test, testWANEmptyPhone)
     STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
 }
 
-TEST(ccapi_tcp_start_test, testWANPhoneNull)
+TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -248,7 +248,7 @@ TEST(ccapi_tcp_start_test, testWANPhoneNull)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_PHONE, error);
 }
 
-TEST(ccapi_tcp_start_test, testKeepaliveDefaults)
+TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -266,7 +266,7 @@ TEST(ccapi_tcp_start_test, testKeepaliveDefaults)
     CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, (*spy_ccapi_data)->transport.tcp->keepalives.wait_count);
 }
 
-TEST(ccapi_tcp_start_test, testMaxSessions)
+TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -282,7 +282,7 @@ TEST(ccapi_tcp_start_test, testMaxSessions)
     CHECK_EQUAL(tcp_start.connection.max_transactions, (*spy_ccapi_data)->transport.tcp->connection.max_transactions);
 }
 
-TEST(ccapi_tcp_start_test, testTcpInfoNoMemory)
+TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -293,7 +293,7 @@ TEST(ccapi_tcp_start_test, testTcpInfoNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-TEST(ccapi_tcp_start_test, testPasswordNoMemory)
+TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -315,7 +315,7 @@ TEST(ccapi_tcp_start_test, testPasswordNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-TEST(ccapi_tcp_start_test, testPhoneNoMemory)
+TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
@@ -345,7 +345,7 @@ void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
     return;
 }
 
-TEST(ccapi_tcp_start_test, testCallbacksAreCopied)
+TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {0};
