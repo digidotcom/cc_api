@@ -111,8 +111,35 @@ connector_status_t connector_run(connector_handle_t const handle)
     return connector_run_retval;
 }
 
+/* * * * * * * * * * connector_initiate_action() * * * * * * * * * */
+SimpleString connector_transport_t_ValueToString(void* object)
+{
+    UNUSED_ARGUMENT(object);
+    return "connector_transport_t";
+}
+
+bool connector_transport_t_IsEqual(void * object1, void * object2)
+{
+    connector_transport_t * connector_transport_1 = (connector_transport_t *)object1;
+    connector_transport_t * connector_transport_2 = (connector_transport_t *)object2;
+
+    if (connector_transport_1 == connector_transport_2)
+        return true;
+
+    if (connector_transport_1 == NULL || connector_transport_2 == NULL)
+        return false;
+
+    if (*connector_transport_1 != *connector_transport_2)
+        return false;
+
+    return true;
+}
+
 void Mock_connector_initiate_action_create(void)
 {
+    static MockFunctionComparator connector_transport_t_comparator(connector_transport_t_IsEqual, connector_transport_t_ValueToString);
+    mock().installComparator("connector_transport_t", connector_transport_t_comparator);
+
     return;
 }
 
@@ -123,27 +150,69 @@ void Mock_connector_initiate_action_destroy(void)
 
 void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, connector_initiate_request_t request, void * request_data, connector_status_t retval)
 {
-    mock("connector_initiate_action").expectOneCall("connector_initiate_action")
-             .withParameter("handle", handle)
-             .withParameter("request", request)
-             .withParameter("request_data", request_data)
-             .andReturnValue(retval);
+    switch (request)
+    {
+        case connector_initiate_transport_start:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_transport_t", "request_data", request_data)
+                     .andReturnValue(retval);
+            break;
+        case connector_initiate_transport_stop:
+        case connector_initiate_send_data:
+#ifdef CONNECTOR_SHORT_MESSAGE
+        case connector_initiate_ping_request:
+        case connector_initiate_session_cancel:
+        case connector_initiate_session_cancel_all:
+#endif
+        case connector_initiate_terminate:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameter("request_data", request_data)
+                     .andReturnValue(retval);
+            break;
+    }
+
 }
 
 connector_status_t connector_initiate_action(connector_handle_t const handle, connector_initiate_request_t const request, void const * const request_data)
 {
-    mock("connector_initiate_action").actualCall("connector_initiate_action")
-            .withParameter("handle", handle)
-            .withParameter("request", request)
-            .withParameter("request_data", (void *)request_data);
-
-    if (request == connector_initiate_terminate)
+    switch (request)
     {
-        ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+        case connector_initiate_transport_start:
+        {
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_transport_t", "request_data", (void *)request_data);
+            break;
+        }
+        case connector_initiate_terminate:
+        {
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameter("request_data", (void *)request_data);
 
-        (*spy_ccapi_data)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
-        Mock_connector_run_returnInNextLoop(connector_device_terminated);
+            ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+
+            (*spy_ccapi_data)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+            Mock_connector_run_returnInNextLoop(connector_device_terminated);
+            break;
+        }
+        case connector_initiate_transport_stop:
+        case connector_initiate_send_data:
+#ifdef CONNECTOR_SHORT_MESSAGE
+        case connector_initiate_ping_request:
+        case connector_initiate_session_cancel:
+        case connector_initiate_session_cancel_all:
+#endif
+            break;
+
     }
+
 
     return (connector_status_t)mock("connector_initiate_action").returnValue().getIntValue();
 }
