@@ -54,20 +54,43 @@ static int check_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_
     {
         case CCAPI_CONNECTION_LAN:
         {
-            uint8_t invalid_mac[MAC_ADDR_LENGTH] = {0};
+            uint8_t const invalid_mac[MAC_ADDR_LENGTH] = {0};
 
-            if (tcp_start->connection.info.lan.ip.address == NULL)
-            {
-                ccapi_logging_line("ccxapi_start_transport_tcp: invalid IP");
-                *error = CCAPI_TCP_START_ERROR_IP;
-                retval = -1;
-                goto done;
-            }
-            else if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
+            if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
             {
                 retval = -1;
                 *error = CCAPI_TCP_START_ERROR_INVALID_MAC;
                 goto done;
+            }
+
+            switch(tcp_start->connection.info.lan.ip.type)
+            {
+                case CCAPI_IPV4:
+                {
+                    uint32_t const invalid_ipv4 = 0;
+
+                    if (tcp_start->connection.info.lan.ip.address.ipv4 == invalid_ipv4)
+                    {
+                        ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv4");
+                        *error = CCAPI_TCP_START_ERROR_IP;
+                        retval = -1;
+                        goto done;
+                    }
+                    break;
+                }
+                case CCAPI_IPV6:
+                {
+                    uint8_t const invalid_ipv6[IPV6_LENGTH] = {0};
+
+                    if (memcmp(tcp_start->connection.info.lan.ip.address.ipv6, invalid_ipv6, sizeof invalid_ipv6) == 0)
+                    {
+                        ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv6");
+                        *error = CCAPI_TCP_START_ERROR_IP;
+                        retval = -1;
+                        goto done;
+                    }
+                    break;
+                }
             }
             break;
         }
@@ -101,35 +124,21 @@ static int check_malloc(void * ptr, ccapi_tcp_start_error_t * const error)
     }
 }
 
-static int copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
+static void copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source)
 {
-    int retval = 0;
-    size_t ip_size = 0;
-
     switch(source->connection.info.lan.ip.type)
     {
         case CCAPI_IPV4:
         {
-            ip_size = IPV4_LENGTH;
+            dest->connection.info.lan.ip.address.ipv4 = source->connection.info.lan.ip.address.ipv4;
             break;
         }
         case CCAPI_IPV6:
         {
-            ip_size = IPV6_LENGTH;
+            memcpy(dest->connection.info.lan.ip.address.ipv6, dest->connection.info.lan.ip.address.ipv6, sizeof dest->connection.info.lan.ip.address.ipv6);
             break;
         }
     }
-
-    dest->connection.info.lan.ip.address = ccapi_malloc(ip_size);
-    retval = check_malloc(dest->connection.info.lan.ip.address, error);
-    if (retval != 0)
-    {
-        goto done;
-    }
-    memcpy(dest->connection.info.lan.ip.address, source->connection.info.lan.ip.address, ip_size);
-
-done:
-    return retval;
 }
 
 static int copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
@@ -184,11 +193,7 @@ static int copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const dest, ccapi_
     {
         case CCAPI_CONNECTION_LAN:
         {
-            retval = copy_lan_info(dest, source, error);
-            if (retval != 0)
-            {
-                goto done;
-            }
+            copy_lan_info(dest, source);
             break;
         }
         case CCAPI_CONNECTION_WAN:
