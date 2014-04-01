@@ -19,7 +19,7 @@ void Mock_create_all()
     Mock_ccimp_create_thread_create();
     Mock_connector_init_create();
     Mock_connector_run_create();
-    Mock_connector_init_create();
+    Mock_connector_initiate_action_create();
     Mock_ccimp_network_tcp_open_create();
     Mock_ccimp_network_tcp_send_create();
     Mock_ccimp_network_tcp_receive_create();
@@ -43,7 +43,7 @@ void Mock_destroy_all()
     Mock_ccimp_create_thread_destroy();
     Mock_connector_init_destroy();
     Mock_connector_run_destroy();
-    Mock_connector_init_destroy();
+    Mock_connector_initiate_action_destroy();
     Mock_ccimp_network_tcp_open_destroy();
     Mock_ccimp_network_tcp_send_destroy();
     Mock_ccimp_network_tcp_receive_destroy();
