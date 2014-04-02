@@ -94,6 +94,7 @@ TEST(ccapi_os_test, testSystemUptime)
     connector_os_system_up_time_t uptime;
     connector_callback_status_t status;
 
+    Mock_ccimp_os_get_system_time_return(0);
     request.os_request = connector_request_id_os_system_up_time;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &uptime, *spy_ccapi_data);
     CHECK(status == connector_callback_continue);
