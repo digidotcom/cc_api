@@ -158,8 +158,8 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(memcmp(ipv4, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4, sizeof ipv4) == 0);
-    CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
+    CHECK(memcmp(ipv4, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv4, sizeof ipv4) == 0);
+    CHECK(memcmp(mac, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
@@ -179,8 +179,8 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(memcmp(ipv6, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6, sizeof ipv6) == 0);
-    CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
+    CHECK(memcmp(ipv6, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv6, sizeof ipv6) == 0);
+    CHECK(memcmp(mac, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
@@ -219,8 +219,8 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
     /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.password != (*spy_ccapi_data)->transport.tcp->connection.password);
-    STRCMP_EQUAL(tcp_start.connection.password, (*spy_ccapi_data)->transport.tcp->connection.password);
+    CHECK(tcp_start.connection.password != (*spy_ccapi_data)->transport_tcp.info->connection.password);
+    STRCMP_EQUAL(tcp_start.connection.password, (*spy_ccapi_data)->transport_tcp.info->connection.password);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
@@ -238,10 +238,10 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport.tcp->connection.info.wan.link_speed);
+    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.link_speed);
     /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
-    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
+    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
+    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
@@ -259,10 +259,10 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport.tcp->connection.info.wan.link_speed);
+    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.link_speed);
     /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
-    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number);
+    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
+    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
@@ -293,10 +293,10 @@ TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.connection.type, (*spy_ccapi_data)->transport.tcp->connection.type);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_RX_DEFAULT, (*spy_ccapi_data)->transport.tcp->keepalives.rx);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_TX_DEFAULT, (*spy_ccapi_data)->transport.tcp->keepalives.tx);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, (*spy_ccapi_data)->transport.tcp->keepalives.wait_count);
+    CHECK_EQUAL(tcp_start.connection.type, (*spy_ccapi_data)->transport_tcp.info->connection.type);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_RX_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.rx);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_TX_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.tx);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.wait_count);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
@@ -315,7 +315,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.connection.max_transactions, (*spy_ccapi_data)->transport.tcp->connection.max_transactions);
+    CHECK_EQUAL(tcp_start.connection.max_transactions, (*spy_ccapi_data)->transport_tcp.info->connection.max_transactions);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
@@ -390,6 +390,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
     ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
+    tcp_start.connection.timeout = 10;
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
@@ -402,6 +403,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.callback.close, (*spy_ccapi_data)->transport.tcp->callback.close);
-    CHECK_EQUAL(tcp_start.callback.keepalive, (*spy_ccapi_data)->transport.tcp->callback.keepalive);
+    CHECK_EQUAL(tcp_start.callback.close, (*spy_ccapi_data)->transport_tcp.info->callback.close);
+    CHECK_EQUAL(tcp_start.callback.keepalive, (*spy_ccapi_data)->transport_tcp.info->callback.keepalive);
+    CHECK_EQUAL(tcp_start.connection.timeout, (*spy_ccapi_data)->transport_tcp.info->connection.timeout);
 }
