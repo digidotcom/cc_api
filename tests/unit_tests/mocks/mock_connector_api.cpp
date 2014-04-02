@@ -100,7 +100,7 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     }
     else
     {
-        return (connector_handle_t)rand();
+        return malloc(sizeof (int)); /* Return a different pointer each time. */
     } 
 }
 
