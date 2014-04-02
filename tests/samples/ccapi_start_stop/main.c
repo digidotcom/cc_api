@@ -20,7 +20,7 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     uint8_t device_id[DEVICE_ID_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
-    start->vendor_id = 0x12345678; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
+    start->vendor_id = 0x030000DB; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
     start->device_cloud_url = device_cloud_url;
     start->device_type = device_type;
@@ -50,31 +50,6 @@ int main (void)
     {
         printf("ccapi_start error %d\n", start_error);
     }
-
-{
-    ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start;
-    char phone_number[] = "+54-3644-421921";
-
-    memset(&tcp_start, 0x00, sizeof tcp_start);
-    tcp_start.connection.type = CCAPI_CONNECTION_WAN;
-    tcp_start.connection.info.wan.phone_number = phone_number;
-    tcp_start.connection.info.wan.link_speed = 115200;
-
-    tcp_start.callback.close = NULL;
-    tcp_start.callback.keepalive = NULL;
-
-    error = ccapi_start_transport_tcp(&tcp_start);
-    if (error != CCAPI_TCP_START_ERROR_NONE)
-    {
-        printf("ccapi_start_transport_tcp failed with %d\n", error);
-    }
-    else
-    {
-        for(;;);
-    }
-}
-
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
 
     if (stop_error == CCAPI_STOP_ERROR_NONE)
