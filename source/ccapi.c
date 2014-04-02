@@ -152,8 +152,8 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             break;
         case connector_request_id_config_data_service:
             {
-                connector_config_supported_t * rci_supported = data;
-                rci_supported->supported = connector_true;
+                connector_config_supported_t * data_service_supported = data;
+                data_service_supported->supported = connector_true;
             }
             break;
         case connector_request_id_config_connection_type:
