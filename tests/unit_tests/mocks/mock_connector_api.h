@@ -34,6 +34,9 @@ typedef struct  {
     ccapi_handle_t ccapi_handle;
     connector_handle_t connector_handle;
     connector_status_t connector_run_retval;
+    struct {
+        ccapi_bool_t init_transport;
+    } connector_initiate_transport_start_info;
 } mock_connector_api_info_t;
 
 mock_connector_api_info_t * alloc_mock_connector_api_info(void);

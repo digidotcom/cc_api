@@ -211,6 +211,9 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
 
 connector_status_t connector_initiate_action(connector_handle_t const handle, connector_initiate_request_t const request, void const * const request_data)
 {
+    mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
+    ccapi_data_t * ccapi_data = (ccapi_data_t *)mock_info->ccapi_handle;
+
     switch (request)
     {
         case connector_initiate_transport_start:
@@ -219,6 +222,12 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("handle", handle)
                     .withParameter("request", request)
                     .withParameterOfType("connector_transport_t", "request_data", (void *)request_data);
+            if (mock_info->connector_initiate_transport_start_info.init_transport)
+            {
+                 connector_request_id_t request_id;
+                 request_id.status_request = connector_request_id_status_tcp;
+                 ccapi_connector_callback(connector_class_id_status, request_id, NULL, (void *)ccapi_data);
+            }
             break;
         }
         case connector_initiate_terminate:
@@ -228,12 +237,10 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameter("request_data", (void *)request_data);
 
-            mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
-
             if (mock_info && mock_info->ccapi_handle != NULL)
             {
                 /* printf("terminate: handle=%p\n",(void*)handle); */
-                ((ccapi_data_t *)mock_info->ccapi_handle)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
                 mock_info->connector_run_retval = connector_device_terminated;
             }
 
