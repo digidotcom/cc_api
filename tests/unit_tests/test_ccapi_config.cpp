@@ -164,7 +164,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
         tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;
@@ -275,8 +275,8 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         tcp_start.connection.max_transactions = 10;
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV6;
-        memcpy(tcp_start.connection.info.lan.ip.address.ipv6, ipv6, sizeof ipv6);
-        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+        memcpy(tcp_start.connection.info.lan.ip.address.ipv6, ipv6, sizeof tcp_start.connection.info.lan.ip.address.ipv6);
+        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;

@@ -99,7 +99,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
@@ -132,7 +132,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;

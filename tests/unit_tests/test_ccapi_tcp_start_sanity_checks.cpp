@@ -130,7 +130,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = 0;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_IP, error);
@@ -150,7 +150,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
@@ -170,8 +170,8 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV6;
-    memcpy(tcp_start.connection.info.lan.ip.address.ipv6, ipv6, sizeof ipv6);
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv6, ipv6, sizeof tcp_start.connection.info.lan.ip.address.ipv6);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
@@ -192,7 +192,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INVALID_MAC, error);
@@ -210,7 +210,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
@@ -342,7 +342,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
     tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
-    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof mac);
+    memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
