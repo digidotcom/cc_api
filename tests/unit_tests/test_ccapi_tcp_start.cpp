@@ -42,6 +42,7 @@ TEST_GROUP(ccapi_tcp_start_test)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
     }
 
     void teardown()

@@ -160,6 +160,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -266,6 +267,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -414,6 +416,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
