@@ -126,10 +126,11 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t invalid_ipv4[] = {0x00, 0x00, 0x00, 0x00};
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address.ipv4 = 0;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, invalid_ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -144,12 +145,12 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
@@ -157,7 +158,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(ipv4 == (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4);
+    CHECK(memcmp(ipv4, (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4, sizeof ipv4) == 0);
     CHECK(memcmp(mac, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
@@ -187,11 +188,11 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* 000000:000000 */
-    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -203,13 +204,13 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     char password[] = "Hello, World!";
 
     tcp_start.connection.password = password;
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
@@ -333,7 +334,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     char password[] = "Hello, World!";
     void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));
     void * malloc_for_password = NULL;
@@ -341,7 +342,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
     tcp_start.connection.password = password;
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
+    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;

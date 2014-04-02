@@ -144,7 +144,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         ccapi_start_error_t error;
         ccapi_tcp_start_error_t tcp_start_error;
         ccapi_tcp_info_t tcp_start = {{0}};
-        uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
+        uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
         uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
         connector_transport_t connector_transport = connector_transport_tcp;
 
@@ -163,7 +163,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-        tcp_start.connection.info.lan.ip.address.ipv4 = ipv4;
+        memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
         memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
         tcp_start.callback.close = NULL;
