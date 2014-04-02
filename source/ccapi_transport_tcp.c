@@ -253,6 +253,8 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+
     {
         connector_transport_t transport = connector_transport_tcp;
         connector_status_t const connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_transport_start, &transport);
@@ -285,6 +287,41 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
                 error = CCAPI_TCP_START_ERROR_INIT;
                 ASSERT_MSG_GOTO(0, done);
                 break;
+        }
+    }
+
+    {
+        ccapi_bool_t const wait_forever = tcp_start->connection.timeout ? CCAPI_FALSE : CCAPI_TRUE;
+
+        if (wait_forever)
+        {
+            do {
+                ccimp_os_yield();
+            } while (!ccapi_data->transport_tcp.connected);
+        }
+        else
+        {
+            ccapi_bool_t timeout = CCAPI_FALSE;
+            ccimp_os_system_up_time_t time_start;
+            ccimp_os_system_up_time_t end_time;
+
+            ccimp_os_get_system_time(&time_start);
+            end_time.sys_uptime = wait_forever ? 0 : time_start.sys_uptime + tcp_start->connection.timeout;
+            do {
+                ccimp_os_system_up_time_t system_uptime;
+
+                ccimp_os_get_system_time(&system_uptime);
+                if (system_uptime.sys_uptime > end_time.sys_uptime)
+                {
+                    timeout = CCAPI_TRUE;
+                }
+            } while (!ccapi_data->transport_tcp.connected && !timeout);
+
+            if (timeout)
+            {
+                error = CCAPI_TCP_START_ERROR_TIMEOUT;
+                goto done;
+            }
         }
     }
 done:

@@ -362,6 +362,24 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
     return connector_status;
 }
 
+connector_callback_status_t ccapi_status_handler(connector_request_id_status_t status_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_continue;
+
+    UNUSED_ARGUMENT(ccapi_data);
+    UNUSED_ARGUMENT(data);
+
+    switch (status_request)
+    {
+    case connector_request_id_status_tcp:
+        ccapi_data->transport_tcp.connected = CCAPI_TRUE;
+        break;
+    case connector_request_id_status_stop_completed:
+        break;
+    }
+
+    return connector_status;
+}
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
@@ -378,6 +396,9 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             break;
         case connector_class_id_network_tcp:
             status = ccapi_network_handler(request_id.network_request, data, ccapi_data);
+            break;
+        case connector_class_id_status:
+            status = ccapi_status_handler(request_id.status_request, data, ccapi_data);
             break;
         default:
             status = connector_callback_unrecognized;
