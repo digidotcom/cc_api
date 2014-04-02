@@ -43,7 +43,6 @@ done:
         }
         case CCAPI_TRUE:
         {
-            *error = CCAPI_TCP_START_ERROR_NONE;
             break;
         }
     }
@@ -124,13 +123,15 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_tcp_start_error_t * const err
     }
     else
     {
-        *error = CCAPI_TCP_START_ERROR_NONE;
         return CCAPI_TRUE;
     }
 }
 
-static void copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source)
+static ccapi_bool_t copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
 {
+    ccapi_bool_t success = CCAPI_TRUE;
+
+    UNUSED_ARGUMENT(error);
     switch(source->connection.info.lan.ip.type)
     {
         case CCAPI_IPV4:
@@ -144,30 +145,32 @@ static void copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const 
             break;
         }
     }
+
+    return success;
 }
 
-static int copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
+static ccapi_bool_t copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
 {
-    int retval = 0;
+    ccapi_bool_t success = CCAPI_TRUE;
 
     if (source->connection.info.wan.phone_number != NULL)
     {
         dest->connection.info.wan.phone_number = ccapi_malloc(strlen(source->connection.info.wan.phone_number) + 1);
         if (!valid_malloc(dest->connection.info.wan.phone_number, error))
         {
-            retval = -1;
+            success = CCAPI_FALSE;
             goto done;
         }
         strcpy(dest->connection.info.wan.phone_number, source->connection.info.wan.phone_number);
     }
 
 done:
-    return retval;
+    return success;
 }
 
-static int copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
+static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
 {
-    int retval = 0;
+    ccapi_bool_t success = CCAPI_TRUE;
     *dest = *source; /* Strings and pointers to buffer need to be copied manually to allocated spaces. */
 
     if (dest->keepalives.rx == 0)
@@ -197,17 +200,17 @@ static int copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const dest, ccapi_
     {
         case CCAPI_CONNECTION_LAN:
         {
-            copy_lan_info(dest, source);
+            success = copy_lan_info(dest, source, error);
             break;
         }
         case CCAPI_CONNECTION_WAN:
         {
-            retval = copy_wan_info(dest, source, error);
+            success = copy_wan_info(dest, source, error);
             break;
         }
     }
 done:
-    return retval;
+    return success;
 }
 
 ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_info_t const * const tcp_start)
@@ -245,7 +248,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    if (copy_ccapi_tcp_info_t_structure(ccapi_data->transport.tcp, tcp_start, &error) != 0)
+    if (copy_ccapi_tcp_info_t_structure(ccapi_data->transport.tcp, tcp_start, &error) != CCAPI_TRUE)
     {
         goto done;
     }
