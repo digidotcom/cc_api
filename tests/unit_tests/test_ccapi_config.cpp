@@ -12,8 +12,11 @@ using namespace std;
 
 static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
 
-TEST_GROUP(ccapi_config_test)
+TEST_GROUP(ccapi_config_test_basic)
 {
+    mock_connector_api_info_t * mock_info; 
+    ccapi_data_t * ccapi_data;
+
     void setup()
     {
         ccapi_start_t start = {0};
@@ -21,23 +24,32 @@ TEST_GROUP(ccapi_config_test)
 
         Mock_create_all();
 
+        mock_info = alloc_mock_connector_api_info();
+        CHECK(mock_info != NULL);
+
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data = *spy_ccapi_data;
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_info->connector_handle = ccapi_data->connector_handle;
     }
 
     void teardown()
     {
         ccapi_stop_error_t stop_error;
-
-        Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+
+        free_mock_connector_api_info(mock_info);
+
         Mock_destroy_all();
     }
 };
 
-TEST(ccapi_config_test, testDeviceID)
+TEST(ccapi_config_test_basic, testDeviceID)
 {
     connector_request_id_t request;
     connector_config_pointer_data_t device_id = {NULL, DEVICE_ID_LENGTH};
@@ -48,7 +60,7 @@ TEST(ccapi_config_test, testDeviceID)
     CHECK_EQUAL(device_id.data, (*spy_ccapi_data)->config.device_id);
 }
 
-TEST(ccapi_config_test, testCloudURL)
+TEST(ccapi_config_test_basic, testCloudURL)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t device_cloud_url = {0};
@@ -59,7 +71,7 @@ TEST(ccapi_config_test, testCloudURL)
     CHECK(strlen((*spy_ccapi_data)->config.device_cloud_url) == device_cloud_url.length);
 }
 
-TEST(ccapi_config_test, testVendorID)
+TEST(ccapi_config_test_basic, testVendorID)
 {
     connector_request_id_t request;
     connector_config_vendor_id_t vendor_id = {0};
@@ -69,7 +81,7 @@ TEST(ccapi_config_test, testVendorID)
     CHECK(vendor_id.id == (*spy_ccapi_data)->config.vendor_id);
 }
 
-TEST(ccapi_config_test, testDeviceType)
+TEST(ccapi_config_test_basic, testDeviceType)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t device_type = {0};
@@ -80,7 +92,7 @@ TEST(ccapi_config_test, testDeviceType)
     CHECK(strlen((*spy_ccapi_data)->config.device_type) == device_type.length);
 }
 
-TEST(ccapi_config_test, testFirmwareSupport)
+TEST(ccapi_config_test_basic, testFirmwareSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t firmware_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -90,7 +102,7 @@ TEST(ccapi_config_test, testFirmwareSupport)
     CHECK(firmware_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test, testFileSystemSupport)
+TEST(ccapi_config_test_basic, testFileSystemSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t filesystem_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -100,7 +112,7 @@ TEST(ccapi_config_test, testFileSystemSupport)
     CHECK(filesystem_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test, testRCISupport)
+TEST(ccapi_config_test_basic, testRCISupport)
 {
     connector_request_id_t request;
     connector_config_supported_t rci_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -110,7 +122,7 @@ TEST(ccapi_config_test, testRCISupport)
     CHECK(rci_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test, testDataServiceSupport)
+TEST(ccapi_config_test_basic, testDataServiceSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t dataservice_supported = {connector_false}; /* Set to the opposite to test that it actually worked */
@@ -122,6 +134,9 @@ TEST(ccapi_config_test, testDataServiceSupport)
 
 TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 {
+    mock_connector_api_info_t * mock_info; 
+    ccapi_data_t * ccapi_data;
+
     /* This groups starts with LAN and IPv4, No password */
     void setup()
     {
@@ -135,9 +150,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 
         Mock_create_all();
 
+        mock_info = alloc_mock_connector_api_info();
+        CHECK(mock_info != NULL);
+
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data = *spy_ccapi_data;
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_info->connector_handle = ccapi_data->connector_handle;
 
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -147,7 +169,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;
 
-        Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
         tcp_start_error = ccapi_start_transport_tcp(&tcp_start);
         CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_start_error);
     }
@@ -159,6 +181,9 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+
+        free_mock_connector_api_info(mock_info);
+
         Mock_destroy_all();
     }
 };
@@ -214,6 +239,9 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testIdVerificationSimple)
 
 TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
 {
+    mock_connector_api_info_t * mock_info; 
+    ccapi_data_t * ccapi_data;
+
     /* This groups starts with LAN and IPv6, Password enabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
     {
@@ -228,9 +256,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
 
         Mock_create_all();
 
+        mock_info = alloc_mock_connector_api_info();
+        CHECK(mock_info != NULL);
+
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data = *spy_ccapi_data;
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_info->connector_handle = ccapi_data->connector_handle;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -246,7 +281,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;
 
-        Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
         tcp_error = ccapi_start_transport_tcp(&tcp_start);
         CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_error);
     }
@@ -258,6 +293,9 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+
+        free_mock_connector_api_info(mock_info);
+
         Mock_destroy_all();
     }
 };
@@ -351,6 +389,9 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testWcKeepalives)
 
 TEST_GROUP(ccapi_config_test_tcp_start_WAN)
 {
+    mock_connector_api_info_t * mock_info; 
+    ccapi_data_t * ccapi_data;
+
     /* This groups starts with WAN, linkspeed = 1000 and phone number != "", password disabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
     {
@@ -362,9 +403,17 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         char phone_number[] = "+34 941 27 00 60";
         Mock_create_all();
 
+        mock_info = alloc_mock_connector_api_info();
+        CHECK(mock_info != NULL);
+
         fill_start_structure_with_good_parameters(&start);
+
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data = *spy_ccapi_data;
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_info->connector_handle = ccapi_data->connector_handle;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -378,7 +427,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;
 
-        Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
         tcp_error = ccapi_start_transport_tcp(&tcp_start);
         CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_error);
     }
@@ -390,6 +439,9 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+
+        free_mock_connector_api_info(mock_info);
+
         Mock_destroy_all();
     }
 };

@@ -9,9 +9,46 @@
 #include "mock_ccimp_os.h"
 #include <pthread.h>
 
-static connector_handle_t global_handle;
+mock_connector_api_info_t mock_info[MAX_INFO];
 
 uint8_t thread_wait;
+
+mock_connector_api_info_t * alloc_mock_connector_api_info(void)
+{
+    size_t i;
+
+    for (i = 0; i < MAX_INFO; i++)
+    {
+        if (mock_info[i].used == connector_false)
+        {
+            mock_info[i].used = connector_true;
+            mock_info[i].connector_run_retval = connector_idle;
+
+            return &mock_info[i];
+        }
+    }
+
+    return NULL;
+}
+
+mock_connector_api_info_t * get_mock_connector_api_info(connector_handle_t connector_handle)
+{
+    size_t i;
+
+    for (i = 0; i < MAX_INFO; i++)
+    {
+        if (mock_info[i].used == connector_true && mock_info[i].connector_handle == connector_handle)
+            return &mock_info[i];
+    }
+
+    return NULL;
+}
+
+void free_mock_connector_api_info(mock_connector_api_info_t * mock_info)
+{
+    mock_info->ccapi_handle = NULL;
+    mock_info->used = connector_false;
+}
 
 union vp2fp 
 {
@@ -21,7 +58,7 @@ union vp2fp
 
 void Mock_connector_init_create(void)
 {
-    global_handle = NULL;
+    memset(mock_info, 0, sizeof(mock_info));
 
     return;
 }
@@ -59,23 +96,18 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
     {
         mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp);
-        global_handle = mock("connector_init").returnValue().getPointerValue();
+        return mock("connector_init").returnValue().getPointerValue();
     }
     else
     {
-		global_handle = &global_handle; /* Not-NULL */
-    }
-
-    return global_handle;
+        return (connector_handle_t)rand();
+    } 
 }
 
-
-static connector_status_t connector_run_retval = connector_idle;
 static connector_bool_t kill_ccapi_thread = connector_false;
 
 void Mock_connector_run_create(void)
 {
-    connector_run_retval = connector_idle;
     kill_ccapi_thread = connector_false;
 
     return;
@@ -88,16 +120,15 @@ void Mock_connector_run_destroy(void)
     return;
 }
 
-void Mock_connector_run_returnInNextLoop(connector_status_t retval)
-{
-    connector_run_retval = retval;
-}
-
 connector_status_t connector_run(connector_handle_t const handle)
 {
-    UNUSED_ARGUMENT(handle);
+    connector_status_t connector_run_retval;
 
+    /* printf("+connector_run: handle=%p\n",(void*)handle);	*/
     do {
+        mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
+        connector_run_retval = mock_info != NULL? mock_info->connector_run_retval:connector_idle;
+
         if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
         {
             ccimp_os_yield();
@@ -107,6 +138,7 @@ connector_status_t connector_run(connector_handle_t const handle)
             pthread_exit(NULL);
         }
     } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
+    /* printf("-connector_run: handle=%p\n",(void*)handle); */
 
     return connector_run_retval;
 }
@@ -196,10 +228,15 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameter("request_data", (void *)request_data);
 
-            ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+            mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
 
-            (*spy_ccapi_data)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
-            Mock_connector_run_returnInNextLoop(connector_device_terminated);
+            if (mock_info && mock_info->ccapi_handle != NULL)
+            {
+                /* printf("terminate: handle=%p\n",(void*)handle); */
+                ((ccapi_data_t *)mock_info->ccapi_handle)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                mock_info->connector_run_retval = connector_device_terminated;
+            }
+
             break;
         }
         case connector_initiate_transport_stop:
