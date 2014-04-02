@@ -13,6 +13,7 @@
 
 extern "C" {
 #include "connector_api.h"
+#include "ccxapi/ccxapi.h"
 }
 
 #define MOCK_CONNECTOR_INIT_ENABLED 1
@@ -33,6 +34,18 @@ extern "C" {
                                     , {printf("Didn't hit assert: %s\n", label); code;})
 #define ASSERT_CLEAN()                      assert_buffer = NULL
 
+#define MAX_INFO 10
+
+typedef struct  {
+    connector_bool_t used;
+    ccapi_handle_t ccapi_handle;
+    connector_handle_t connector_handle;
+    connector_status_t connector_run_retval;
+} mock_connector_api_info_t;
+
+mock_connector_api_info_t * alloc_mock_connector_api_info(void);
+mock_connector_api_info_t * get_mock_connector_api_info(connector_handle_t connector_handle);
+void free_mock_connector_api_info(mock_connector_api_info_t * mock_info);
 
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);
@@ -40,7 +53,6 @@ void Mock_connector_init_expectAndReturn(connector_callback_t const callback, co
 
 void Mock_connector_run_create(void);
 void Mock_connector_run_destroy(void);
-void Mock_connector_run_returnInNextLoop(connector_status_t retval);
 
 void Mock_connector_initiate_action_create(void);
 void Mock_connector_initiate_action_destroy(void);

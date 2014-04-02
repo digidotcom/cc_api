@@ -209,10 +209,9 @@ done:
     return retval;
 }
 
-ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_handle_t const ccapi_handle, ccapi_tcp_info_t const * const tcp_start)
+ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_info_t const * const tcp_start)
 {
     ccapi_tcp_start_error_t error = CCAPI_TCP_START_ERROR_NONE;
-    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
 
     if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
     {
