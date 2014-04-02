@@ -145,3 +145,31 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 }
+
+TEST(ccapi_tcp_start_test, testTCPConnectionTimeout)
+{
+    ccapi_tcp_start_error_t error;
+    ccapi_tcp_info_t tcp_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+
+    tcp_start.connection.type = CCAPI_CONNECTION_WAN;
+    tcp_start.connection.info.wan.phone_number = phone_number;
+    tcp_start.connection.info.wan.link_speed = 115200;
+
+    tcp_start.callback.close = ccapi_tcp_close_cb;
+    tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
+    tcp_start.connection.timeout = 10;
+    mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+
+    connector_transport_t connector_transport = connector_transport_tcp;
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    Mock_ccimp_os_get_system_time_return(0); /* Start time */
+    Mock_ccimp_os_get_system_time_return(5);
+    Mock_ccimp_os_get_system_time_return(10);
+    Mock_ccimp_os_get_system_time_return(15);
+
+    error = ccapi_start_transport_tcp(&tcp_start);
+    CHECK_EQUAL(CCAPI_TCP_START_ERROR_TIMEOUT, error);
+    CHECK_EQUAL(tcp_start.connection.timeout, ccapi_data->transport_tcp.info->connection.timeout);
+}
