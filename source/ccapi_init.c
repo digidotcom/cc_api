@@ -166,9 +166,8 @@ done:
     return error;
 }
 
-ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_handle, ccapi_stop_t const behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t const behavior)
 {
-    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
     UNUSED_ARGUMENT(behavior);
