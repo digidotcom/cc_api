@@ -60,9 +60,10 @@ typedef struct {
     } keepalives;
 
     struct {
-        uint8_t max_transactions; /* connector_request_id_config_max_transaction */
+        uint8_t max_transactions;
         char * password;
         ccapi_connection_type_t type;
+        uint8_t timeout;
         union {
             struct {
                 uint32_t link_speed;
