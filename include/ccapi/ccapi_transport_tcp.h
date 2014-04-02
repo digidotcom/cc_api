@@ -39,7 +39,7 @@ typedef enum {
 typedef struct {
     union {
         uint32_t ipv4;
-        uint8_t ipv6[IPV6_LENGTH];
+        uint8_t ipv6[CCAPI_IPV6_LENGTH];
     } address;
     ccapi_ip_address_type_t type;
 } ccapi_ip_address_t;
@@ -71,7 +71,7 @@ typedef struct {
 
             struct {
                 ccapi_ip_address_t ip;
-                uint8_t mac_address[MAC_ADDR_LENGTH];
+                uint8_t mac_address[CCAPI_MAC_ADDR_LENGTH];
             } lan;
         } info;
     } connection;

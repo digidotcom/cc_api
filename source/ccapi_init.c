@@ -5,7 +5,7 @@
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
-    uint8_t invalid_device_id[DEVICE_ID_LENGTH] = {0x00};
+    uint8_t invalid_device_id[CCAPI_DEVICE_ID_LENGTH] = {0x00};
 
     if (start->vendor_id == 0x00)
     {

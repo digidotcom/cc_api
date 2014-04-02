@@ -33,7 +33,7 @@ typedef enum {
 
 typedef struct {
         uint32_t vendor_id;
-        uint8_t device_id[DEVICE_ID_LENGTH];
+        uint8_t device_id[CCAPI_DEVICE_ID_LENGTH];
         char const * device_type;
         char const * device_cloud_url;         /* Shared for TCP and UDP transports, meaningless for SMS */
         ccapi_status_callback_t status_callback;
