@@ -25,7 +25,7 @@ TEST_GROUP(ccapi_tcp_start_with_no_ccapi) {};
 TEST(ccapi_tcp_start_with_no_ccapi, testNotStarted)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
 
     IGNORE_ALL_LEAKS_IN_TEST(); /* TODO: if CCAPI is not started it detects memory leaks */
 
@@ -68,7 +68,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testNullPointer)
 TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesRx)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
 
     tcp_start.keepalives.rx = CCAPI_KEEPALIVES_RX_MAX + 1;
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -82,7 +82,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesRx)
 TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesTx)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
 
     tcp_start.keepalives.tx = CCAPI_KEEPALIVES_TX_MAX + 1;
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -96,7 +96,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesTx)
 TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesWaitCount)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
 
     tcp_start.keepalives.wait_count = CCAPI_KEEPALIVES_WCNT_MAX + 1;
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -110,7 +110,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesWaitCount)
 TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
@@ -129,7 +129,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
 TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
@@ -150,7 +150,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
 TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t ipv6[IPV6_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
@@ -171,7 +171,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[MAC_ADDR_LENGTH] = {0}; /* 000000:000000 */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
 
@@ -187,7 +187,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
 TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
@@ -211,7 +211,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
 TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
@@ -232,7 +232,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
 TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
@@ -253,7 +253,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
 TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
     tcp_start.connection.info.wan.phone_number = NULL;
@@ -266,7 +266,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
 TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
@@ -287,7 +287,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
 TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
@@ -306,7 +306,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
 TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     void * malloc_for_ccapi_tcp = NULL;
 
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
@@ -317,7 +317,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
 TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
@@ -342,7 +342,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
 TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
     void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));
     void * malloc_for_phone = NULL;
@@ -375,7 +375,7 @@ static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;

@@ -128,7 +128,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
         ccapi_tcp_start_error_t tcp_start_error;
-        ccapi_tcp_info_t tcp_start = {0};
+        ccapi_tcp_info_t tcp_start = {{0}};
         uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
         uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
         connector_transport_t connector_transport = connector_transport_tcp;
@@ -220,7 +220,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
         ccapi_tcp_start_error_t tcp_error;
-        ccapi_tcp_info_t tcp_start = {0};
+        ccapi_tcp_info_t tcp_start = {{0}};
         uint8_t ipv6[IPV6_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
         uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
         connector_transport_t connector_transport = connector_transport_tcp;
@@ -357,7 +357,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
         ccapi_tcp_start_error_t tcp_error;
-        ccapi_tcp_info_t tcp_start = {0};
+        ccapi_tcp_info_t tcp_start = {{0}};
         connector_transport_t connector_transport = connector_transport_tcp;
         char phone_number[] = "+34 941 27 00 60";
         Mock_create_all();

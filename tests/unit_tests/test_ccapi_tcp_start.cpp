@@ -58,7 +58,7 @@ void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
@@ -78,7 +78,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
 TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
@@ -111,7 +111,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
 TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
 {
     ccapi_tcp_start_error_t error;
-    ccapi_tcp_info_t tcp_start = {0};
+    ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
