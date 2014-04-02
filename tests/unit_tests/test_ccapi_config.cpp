@@ -52,7 +52,7 @@ TEST_GROUP(ccapi_config_test_basic)
 TEST(ccapi_config_test_basic, testDeviceID)
 {
     connector_request_id_t request;
-    connector_config_pointer_data_t device_id = {NULL, DEVICE_ID_LENGTH};
+    connector_config_pointer_data_t device_id = {NULL, sizeof (*spy_ccapi_data)->config.device_id};
 
 
     request.config_request = connector_request_id_config_device_id;
@@ -145,7 +145,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         ccapi_tcp_start_error_t tcp_start_error;
         ccapi_tcp_info_t tcp_start = {{0}};
         uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
-        uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
         connector_transport_t connector_transport = connector_transport_tcp;
 
         Mock_create_all();
@@ -203,13 +203,13 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigConnectionType)
 TEST(ccapi_config_test_tcp_start_LAN_1, testConfigMAC)
 {
     connector_request_id_t request;
-    connector_config_pointer_data_t connector_mac_addr = {NULL, MAC_ADDR_LENGTH};
+    connector_config_pointer_data_t connector_mac_addr = {NULL, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address};
     connector_callback_status_t callback_status;
 
     request.config_request = connector_request_id_config_mac_addr;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_mac_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(0, memcmp(connector_mac_addr.data, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, MAC_ADDR_LENGTH));
+    CHECK_EQUAL(0, memcmp(connector_mac_addr.data, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
@@ -222,7 +222,7 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_ip_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
     CHECK_EQUAL(connector_ip_address_ipv4, connector_ip_addr.ip_address_type);
-    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4, IPV4_LENGTH));
+    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_1, testIdVerificationSimple)
@@ -249,8 +249,8 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         ccapi_start_error_t error;
         ccapi_tcp_start_error_t tcp_error;
         ccapi_tcp_info_t tcp_start = {{0}};
-        uint8_t ipv6[IPV6_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
-        uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+        uint8_t ipv6[] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
+        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
         connector_transport_t connector_transport = connector_transport_tcp;
         char password[] = "CCAPI Rules!";
 
@@ -310,7 +310,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testConfigIPv6)
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_ip_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
     CHECK_EQUAL(connector_ip_address_ipv6, connector_ip_addr.ip_address_type);
-    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6, IPV6_LENGTH));
+    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testIdVerificationPassword)

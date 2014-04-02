@@ -51,7 +51,7 @@ TEST(ccapi_init_test, testVendorIdZero)
 
 TEST(ccapi_init_test, testInvalidDeviceId)
 {
-    uint8_t device_id[DEVICE_ID_LENGTH] = {0};
+    uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 

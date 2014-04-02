@@ -125,7 +125,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -145,7 +145,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -165,8 +165,8 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint8_t ipv6[IPV6_LENGTH] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t ipv6[] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV6;
@@ -186,7 +186,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0}; /* 000000:000000 */
+    uint8_t mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* 000000:000000 */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
@@ -202,7 +202,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
 
@@ -332,7 +332,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
     char password[] = "Hello, World!";
     void * malloc_for_ccapi_tcp = malloc(sizeof (ccapi_tcp_info_t));

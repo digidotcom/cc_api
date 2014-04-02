@@ -94,7 +94,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -127,7 +127,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     uint32_t ipv4 = 0xC0A80101; /* 192.168.1.1 */
-    uint8_t mac[MAC_ADDR_LENGTH] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
     tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
