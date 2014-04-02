@@ -58,7 +58,19 @@ static ccapi_start_error_t check_malloc(void const * const p)
 ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
-    ccapi_data_t * ccapi_data;
+    ccapi_data_t * ccapi_data = NULL;
+
+    if (ccapi_handle == NULL)
+    {
+        error = CCAPI_START_ERROR_NULL_PARAMETER;
+        goto done;
+    }
+
+    if (*ccapi_handle != NULL)
+    {
+        error = CCAPI_START_ERROR_ALREADY_STARTED;
+        goto done;
+    }
 
     ccapi_data = ccapi_malloc(sizeof *ccapi_data);
     *ccapi_handle = ccapi_data;
@@ -245,11 +257,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-	if (ccapi_data_single_instance != NULL)
-	{
-	    error = CCAPI_START_ERROR_ALREADY_STARTED;
-	    goto done;
-	}
     error = ccxapi_start(&ccapi_data_single_instance, start);
 
     switch (error)
@@ -269,7 +276,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
             break;
     }
 
-done:
 	return error;
 }
 

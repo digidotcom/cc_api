@@ -2,8 +2,6 @@
 
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
-#include <unistd.h>
-
 #include "mocks/mocks.h"
 
 extern "C" {
@@ -35,6 +33,33 @@ TEST_GROUP(ccxapi_test)
     }
 };
 
+TEST(ccxapi_test, testNULLHandle)
+{
+    ccapi_start_t start = {0};
+    ccapi_start_error_t error;
+
+    fill_start_structure_with_good_parameters(&start);
+    error = ccxapi_start(NULL, &start);
+
+    CHECK_EQUAL(error, CCAPI_START_ERROR_NULL_PARAMETER);
+}
+
+TEST(ccxapi_test, testStartTwiceSameHandlerFails)
+{
+    ccapi_start_error_t start_error;
+    ccapi_start_t start = {0};
+    ccapi_handle_t ccapi_handle = NULL;
+
+    fill_start_structure_with_good_parameters(&start);
+
+    start_error = ccxapi_start(&ccapi_handle, &start);
+
+    CHECK_EQUAL(start_error, CCAPI_START_ERROR_NONE);
+
+    start_error = ccxapi_start(&ccapi_handle, &start);
+
+    CHECK_EQUAL(start_error, CCAPI_START_ERROR_ALREADY_STARTED);
+}
 
 TEST(ccxapi_test, testStartOneInstance)
 {
@@ -56,8 +81,6 @@ TEST(ccxapi_test, testStartOneInstance)
     CHECK(start1_error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_handle1 != NULL);
     CHECK(*spy_ccapi_data == NULL);
-
-    /* sleep(5); */
 
     ccapi_data = (ccapi_data_t *)ccapi_handle1;
     mock_info1->ccapi_handle = ccapi_handle1;
@@ -113,8 +136,6 @@ TEST(ccxapi_test, testStartTwoInstances)
     CHECK(*spy_ccapi_data == NULL);
 
     CHECK(ccapi_handle1 != ccapi_handle2);
-
-    /* sleep(5); */
 
     ccapi_data = (ccapi_data_t *)ccapi_handle1;
     mock_info1->ccapi_handle = ccapi_handle1;
