@@ -19,15 +19,8 @@ extern "C" {
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
 
-#define ASSERT_WAIT(timeout_sec)            { ccimp_os_system_up_time_t system_up_time; \
-                                              unsigned long time_end; \
-                                              ccimp_os_get_system_time(&system_up_time); \
-                                              time_end= (system_up_time.sys_uptime + timeout_sec); \
-                                              do \
-                                              { \
-                                                  ccimp_os_get_system_time(&system_up_time); \
-                                              } while (assert_buffer == NULL && system_up_time.sys_uptime <= time_end); \
-                                            }
+#define WAIT_FOR_ASSERT()   {do ccimp_os_yield(); while (assert_buffer == NULL);}
+
 #define ASSERT_IF_NOT_HIT_DO(label, file, function, code) \
                        ON_FALSE_DO_(assert_buffer != NULL && \
                                     (!strcmp(assert_buffer, label) && (!strcmp(assert_file, file))) \
