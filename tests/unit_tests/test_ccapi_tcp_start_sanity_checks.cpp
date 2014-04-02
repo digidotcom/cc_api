@@ -55,6 +55,7 @@ TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
     }
 
     void teardown()
@@ -390,7 +391,6 @@ TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
     ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
-    tcp_start.connection.timeout = 10;
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
@@ -405,5 +405,4 @@ TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
     CHECK_EQUAL(tcp_start.callback.close, (*spy_ccapi_data)->transport_tcp.info->callback.close);
     CHECK_EQUAL(tcp_start.callback.keepalive, (*spy_ccapi_data)->transport_tcp.info->callback.keepalive);
-    CHECK_EQUAL(tcp_start.connection.timeout, (*spy_ccapi_data)->transport_tcp.info->connection.timeout);
 }
