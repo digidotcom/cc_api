@@ -35,7 +35,7 @@
 
 typedef struct {
     uint32_t vendor_id;
-    uint8_t device_id[CCAPI_DEVICE_ID_LENGTH];
+    uint8_t device_id[16];
     char * device_type;
     char * device_cloud_url;
     ccapi_bool_t cli_supported;

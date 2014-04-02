@@ -10,11 +10,6 @@
 
 #include "custom/custom_ccimp_types.h"
 
-#define CCAPI_DEVICE_ID_LENGTH    16
-#define CCAPI_MAC_ADDR_LENGTH     6
-#define CCAPI_IPV4_LENGTH         4
-#define CCAPI_IPV6_LENGTH         16
-
 typedef enum {
     CCAPI_FALSE,
     CCAPI_TRUE

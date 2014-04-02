@@ -58,7 +58,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
     {
         case CCAPI_CONNECTION_LAN:
         {
-            uint8_t const invalid_mac[CCAPI_MAC_ADDR_LENGTH] = {0};
+            uint8_t const invalid_mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
             if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
             {
@@ -71,7 +71,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
             {
                 case CCAPI_IPV4:
                 {
-                    uint8_t const invalid_ipv4[CCAPI_IPV4_LENGTH] = {0};
+                    uint8_t const invalid_ipv4[] = {0x00, 0x00, 0x00, 0x00};
 
                     if (memcmp(tcp_start->connection.info.lan.ip.address.ipv4, invalid_ipv4, sizeof tcp_start->connection.info.lan.ip.address.ipv4) == 0)
                     {
@@ -84,7 +84,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
                 }
                 case CCAPI_IPV6:
                 {
-                    uint8_t const invalid_ipv6[CCAPI_IPV6_LENGTH] = {0};
+                    uint8_t const invalid_ipv6[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
                     if (memcmp(tcp_start->connection.info.lan.ip.address.ipv6, invalid_ipv6, sizeof tcp_start->connection.info.lan.ip.address.ipv6) == 0)
                     {
