@@ -71,9 +71,9 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
             {
                 case CCAPI_IPV4:
                 {
-                    uint32_t const invalid_ipv4 = 0;
+                    uint8_t const invalid_ipv4[CCAPI_IPV4_LENGTH] = {0};
 
-                    if (tcp_start->connection.info.lan.ip.address.ipv4 == invalid_ipv4)
+                    if (memcmp(tcp_start->connection.info.lan.ip.address.ipv4, invalid_ipv4, sizeof tcp_start->connection.info.lan.ip.address.ipv4) == 0)
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv4");
                         *error = CCAPI_TCP_START_ERROR_IP;
@@ -86,7 +86,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
                 {
                     uint8_t const invalid_ipv6[CCAPI_IPV6_LENGTH] = {0};
 
-                    if (memcmp(tcp_start->connection.info.lan.ip.address.ipv6, invalid_ipv6, sizeof invalid_ipv6) == 0)
+                    if (memcmp(tcp_start->connection.info.lan.ip.address.ipv6, invalid_ipv6, sizeof tcp_start->connection.info.lan.ip.address.ipv6) == 0)
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv6");
                         *error = CCAPI_TCP_START_ERROR_IP;
@@ -136,7 +136,7 @@ static ccapi_bool_t copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_
     {
         case CCAPI_IPV4:
         {
-            dest->connection.info.lan.ip.address.ipv4 = source->connection.info.lan.ip.address.ipv4;
+            memcpy(dest->connection.info.lan.ip.address.ipv4, dest->connection.info.lan.ip.address.ipv4, sizeof dest->connection.info.lan.ip.address.ipv4);
             break;
         }
         case CCAPI_IPV6:
