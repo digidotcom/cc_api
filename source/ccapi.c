@@ -192,14 +192,9 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_identity_verification:
             {
                 connector_config_identity_verification_t * id_verification = data;
-                if (ccapi_data->transport.tcp->connection.password == NULL)
-                {
-                    id_verification->type = connector_identity_verification_simple;
-                }
-                else
-                {
-                    id_verification->type = connector_identity_verification_password;
-                }
+                int const has_password = ccapi_data->transport.tcp->connection.password != NULL;
+
+                id_verification->type = has_password ? connector_identity_verification_password : connector_identity_verification_simple;
             }
             break;
         case connector_request_id_config_password:
