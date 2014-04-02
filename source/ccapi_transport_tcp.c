@@ -3,13 +3,13 @@
 
 static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
 {
-    ccapi_bool_t retval = CCAPI_TRUE;
+    ccapi_bool_t success = CCAPI_TRUE;
 
     if (tcp_start->keepalives.rx != 0)
     {
         if (tcp_start->keepalives.rx > CCAPI_KEEPALIVES_RX_MAX || tcp_start->keepalives.rx < CCAPI_KEEPALIVES_RX_MIN)
         {
-            retval = CCAPI_FALSE;
+            success = CCAPI_FALSE;
             goto done;
         }
     }
@@ -18,7 +18,7 @@ static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, c
     {
         if (tcp_start->keepalives.tx > CCAPI_KEEPALIVES_TX_MAX || tcp_start->keepalives.tx < CCAPI_KEEPALIVES_TX_MIN)
         {
-            retval = CCAPI_FALSE;
+            success = CCAPI_FALSE;
             goto done;
         }
     }
@@ -27,13 +27,13 @@ static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, c
     {
         if (tcp_start->keepalives.wait_count > CCAPI_KEEPALIVES_WCNT_MAX || tcp_start->keepalives.wait_count < CCAPI_KEEPALIVES_WCNT_MIN)
         {
-            retval = CCAPI_FALSE;
+            success = CCAPI_FALSE;
             goto done;
         }
     }
 
 done:
-    switch(retval)
+    switch(success)
     {
         case CCAPI_FALSE:
         {
@@ -48,12 +48,12 @@ done:
         }
     }
 
-    return retval;
+    return success;
 }
 
 static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, ccapi_tcp_start_error_t * const error)
 {
-    ccapi_bool_t retval = CCAPI_TRUE;
+    ccapi_bool_t success = CCAPI_TRUE;
 
     switch (tcp_start->connection.type)
     {
@@ -63,7 +63,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
 
             if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
             {
-                retval = CCAPI_FALSE;
+                success = CCAPI_FALSE;
                 *error = CCAPI_TCP_START_ERROR_INVALID_MAC;
                 goto done;
             }
@@ -78,7 +78,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv4");
                         *error = CCAPI_TCP_START_ERROR_IP;
-                        retval = CCAPI_FALSE;
+                        success = CCAPI_FALSE;
                         goto done;
                     }
                     break;
@@ -91,7 +91,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
                     {
                         ccapi_logging_line("ccxapi_start_transport_tcp: invalid IPv6");
                         *error = CCAPI_TCP_START_ERROR_IP;
-                        retval = CCAPI_FALSE;
+                        success = CCAPI_FALSE;
                         goto done;
                     }
                     break;
@@ -105,14 +105,14 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
             {
                 ccapi_logging_line("ccxapi_start_transport_tcp: invalid Phone number");
                 *error = CCAPI_TCP_START_ERROR_PHONE;
-                retval = CCAPI_FALSE;
+                success = CCAPI_FALSE;
                 goto done;
             }
         }
             break;
     }
 done:
-    return retval;
+    return success;
 }
 
 static ccapi_bool_t valid_malloc(void * ptr, ccapi_tcp_start_error_t * const error)
