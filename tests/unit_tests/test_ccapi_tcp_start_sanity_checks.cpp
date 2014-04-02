@@ -366,9 +366,6 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
 
-    connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
-
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
     Mock_ccimp_malloc_expectAndReturn(sizeof phone_number, malloc_for_phone);
     error = ccapi_start_transport_tcp(&tcp_start);

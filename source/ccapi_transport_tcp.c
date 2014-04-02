@@ -155,6 +155,7 @@ static int copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const *
         dest->connection.info.wan.phone_number = ccapi_malloc(strlen(source->connection.info.wan.phone_number) + 1);
         if (!valid_malloc(dest->connection.info.wan.phone_number, error))
         {
+            retval = -1;
             goto done;
         }
         strcpy(dest->connection.info.wan.phone_number, source->connection.info.wan.phone_number);
