@@ -159,31 +159,31 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_connection_type:
             {
                 connector_config_connection_type_t * connection_type = data;
-                connection_type->type = ccapi_data->transport.tcp->connection.type;
+                connection_type->type = ccapi_data->transport_tcp.info->connection.type;
             }
             break;
         case connector_request_id_config_mac_addr:
             {
                 connector_config_pointer_data_t * mac_addr = data;
-                mac_addr->data = ccapi_data->transport.tcp->connection.info.lan.mac_address;
+                mac_addr->data = ccapi_data->transport_tcp.info->connection.info.lan.mac_address;
             }
             break;
         case connector_request_id_config_ip_addr:
             {
                 connector_config_ip_address_t * ip_addr = data;
-                switch(ccapi_data->transport.tcp->connection.info.lan.ip.type)
+                switch(ccapi_data->transport_tcp.info->connection.info.lan.ip.type)
                 {
                     case CCAPI_IPV4:
                     {
                         ip_addr->ip_address_type = connector_ip_address_ipv4;
                         /* TODO: would this work in a big-endian machine? */
-                        ip_addr->address = (uint8_t *)&ccapi_data->transport.tcp->connection.info.lan.ip.address.ipv4;
+                        ip_addr->address = (uint8_t *)&ccapi_data->transport_tcp.info->connection.info.lan.ip.address.ipv4;
                         break;
                     }
                     case CCAPI_IPV6:
                     {
                         ip_addr->ip_address_type = connector_ip_address_ipv6;
-                        ip_addr->address = ccapi_data->transport.tcp->connection.info.lan.ip.address.ipv6;
+                        ip_addr->address = ccapi_data->transport_tcp.info->connection.info.lan.ip.address.ipv6;
                         break;
                     }
                 }
@@ -192,7 +192,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_identity_verification:
             {
                 connector_config_identity_verification_t * id_verification = data;
-                int const has_password = ccapi_data->transport.tcp->connection.password != NULL;
+                int const has_password = ccapi_data->transport_tcp.info->connection.password != NULL;
 
                 id_verification->type = has_password ? connector_identity_verification_password : connector_identity_verification_simple;
             }
@@ -200,45 +200,45 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_password:
             {
                 connector_config_pointer_string_t * password = data;
-                password->string = ccapi_data->transport.tcp->connection.password;
+                password->string = ccapi_data->transport_tcp.info->connection.password;
                 password->length = strlen(password->string);
             }
             break;
         case connector_request_id_config_max_transaction:
             {
                 connector_config_max_transaction_t * max_transaction = data;
-                max_transaction->count = ccapi_data->transport.tcp->connection.max_transactions;
+                max_transaction->count = ccapi_data->transport_tcp.info->connection.max_transactions;
             }
             break;
         case connector_request_id_config_rx_keepalive:
             {
                 connector_config_keepalive_t * rx_keepalives = data;
-                rx_keepalives->interval_in_seconds = ccapi_data->transport.tcp->keepalives.rx;
+                rx_keepalives->interval_in_seconds = ccapi_data->transport_tcp.info->keepalives.rx;
             }
             break;
         case connector_request_id_config_tx_keepalive:
             {
                 connector_config_keepalive_t * tx_keepalives = data;
-                tx_keepalives->interval_in_seconds = ccapi_data->transport.tcp->keepalives.tx;
+                tx_keepalives->interval_in_seconds = ccapi_data->transport_tcp.info->keepalives.tx;
             }
             break;
         case connector_request_id_config_wait_count:
             {
                 connector_config_wait_count_t * wc_keepalives = data;
-                wc_keepalives->count = ccapi_data->transport.tcp->keepalives.wait_count;
+                wc_keepalives->count = ccapi_data->transport_tcp.info->keepalives.wait_count;
             }
             break;
         case connector_request_id_config_link_speed:
             {
                 connector_config_link_speed_t * link_speed = data;
-                link_speed->speed = ccapi_data->transport.tcp->connection.info.wan.link_speed;
+                link_speed->speed = ccapi_data->transport_tcp.info->connection.info.wan.link_speed;
             }
             break;
         case connector_request_id_config_phone_number:
             {
                 connector_config_pointer_string_t * phone_number = data;
-                phone_number->string = ccapi_data->transport.tcp->connection.info.wan.phone_number;
-                phone_number->length = strlen(ccapi_data->transport.tcp->connection.info.wan.phone_number);
+                phone_number->string = ccapi_data->transport_tcp.info->connection.info.wan.phone_number;
+                phone_number->length = strlen(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
             }
             break;
         default:

@@ -232,8 +232,8 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    ccapi_data->transport.tcp = ccapi_malloc(sizeof *ccapi_data->transport.tcp);
-    if (!valid_malloc(ccapi_data->transport.tcp, &error))
+    ccapi_data->transport_tcp.info = ccapi_malloc(sizeof *ccapi_data->transport_tcp.info);
+    if (!valid_malloc(ccapi_data->transport_tcp.info, &error))
     {
         goto done;
     }
@@ -248,7 +248,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    if (copy_ccapi_tcp_info_t_structure(ccapi_data->transport.tcp, tcp_start, &error) != CCAPI_TRUE)
+    if (copy_ccapi_tcp_info_t_structure(ccapi_data->transport_tcp.info, tcp_start, &error) != CCAPI_TRUE)
     {
         goto done;
     }
