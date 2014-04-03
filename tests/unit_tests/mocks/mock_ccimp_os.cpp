@@ -102,6 +102,21 @@ void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const
     mock("ccimp_create_thread").setData("behavior", behavior);
 }
 
+void Mock_ccimp_os_get_system_time_create(void)
+{
+    return;
+}
+
+void Mock_ccimp_os_get_system_time_destroy(void)
+{
+    mock("ccimp_os_get_system_time").checkExpectations();
+}
+
+void Mock_ccimp_os_get_system_time_return(unsigned long retval)
+{
+    mock("ccimp_os_get_system_time").expectOneCall("ccimp_os_get_system_time").andReturnValue((int)retval);
+}
+
 extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
@@ -213,7 +228,9 @@ ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info)
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time)
 {
-    return ccimp_os_get_system_time_real(system_up_time);
+    mock_scope_c("ccimp_os_get_system_time")->actualCall("ccimp_os_get_system_time");
+    system_up_time->sys_uptime = mock_scope_c("ccimp_os_get_system_time")->returnValue().value.intValue;
+    return CCIMP_STATUS_OK;
 }
 
 ccimp_status_t ccimp_os_yield(void)

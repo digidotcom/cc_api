@@ -160,6 +160,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
@@ -203,13 +204,13 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigConnectionType)
 TEST(ccapi_config_test_tcp_start_LAN_1, testConfigMAC)
 {
     connector_request_id_t request;
-    connector_config_pointer_data_t connector_mac_addr = {NULL, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address};
+    connector_config_pointer_data_t connector_mac_addr = {NULL, sizeof (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address};
     connector_callback_status_t callback_status;
 
     request.config_request = connector_request_id_config_mac_addr;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_mac_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(0, memcmp(connector_mac_addr.data, (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.mac_address));
+    CHECK_EQUAL(0, memcmp(connector_mac_addr.data, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address, sizeof (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
@@ -222,7 +223,7 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_ip_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
     CHECK_EQUAL(connector_ip_address_ipv4, connector_ip_addr.ip_address_type);
-    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv4));
+    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv4, sizeof (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv4));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_1, testIdVerificationSimple)
@@ -266,6 +267,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -310,7 +312,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testConfigIPv6)
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &connector_ip_addr, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
     CHECK_EQUAL(connector_ip_address_ipv6, connector_ip_addr.ip_address_type);
-    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6, sizeof (*spy_ccapi_data)->transport.tcp->connection.info.lan.ip.address.ipv6));
+    CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &(*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv6, sizeof (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.ip.address.ipv6));
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testIdVerificationPassword)
@@ -334,9 +336,9 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testPassword)
     request.config_request = connector_request_id_config_password;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &password, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(strlen((*spy_ccapi_data)->transport.tcp->connection.password), password.length);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->connection.password, password.string);
-    STRCMP_EQUAL((*spy_ccapi_data)->transport.tcp->connection.password, password.string);
+    CHECK_EQUAL(strlen((*spy_ccapi_data)->transport_tcp.info->connection.password), password.length);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.password, password.string);
+    STRCMP_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.password, password.string);
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testMaxTransactions)
@@ -348,7 +350,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testMaxTransactions)
     request.config_request = connector_request_id_config_max_transaction;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &max_transaction, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->connection.max_transactions, max_transaction.count);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.max_transactions, max_transaction.count);
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testRxKeepalives)
@@ -360,7 +362,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testRxKeepalives)
     request.config_request = connector_request_id_config_rx_keepalive;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &rx_keepalive, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->keepalives.rx, rx_keepalive.interval_in_seconds);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->keepalives.rx, rx_keepalive.interval_in_seconds);
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testTxKeepalives)
@@ -372,7 +374,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testTxKeepalives)
     request.config_request = connector_request_id_config_tx_keepalive;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &tx_keepalive, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->keepalives.tx, tx_keepalive.interval_in_seconds);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->keepalives.tx, tx_keepalive.interval_in_seconds);
 }
 
 TEST(ccapi_config_test_tcp_start_LAN_2, testWcKeepalives)
@@ -384,7 +386,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testWcKeepalives)
     request.config_request = connector_request_id_config_wait_count;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &wait_count, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->keepalives.wait_count, wait_count.count);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->keepalives.wait_count, wait_count.count);
 }
 
 TEST_GROUP(ccapi_config_test_tcp_start_WAN)
@@ -414,6 +416,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         ccapi_data = *spy_ccapi_data;
         mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
         mock_info->connector_handle = ccapi_data->connector_handle;
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -455,7 +458,7 @@ TEST(ccapi_config_test_tcp_start_WAN, testLinkSpeed)
     request.config_request = connector_request_id_config_link_speed;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &link_speed, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->connection.info.wan.link_speed, link_speed.speed);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.info.wan.link_speed, link_speed.speed);
 }
 
 TEST(ccapi_config_test_tcp_start_WAN, testPhoneNumber)
@@ -467,7 +470,7 @@ TEST(ccapi_config_test_tcp_start_WAN, testPhoneNumber)
     request.config_request = connector_request_id_config_phone_number;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &phone_number, (*spy_ccapi_data));
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(strlen((*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number), phone_number.length);
-    CHECK_EQUAL((*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number, phone_number.string);
-    STRCMP_EQUAL((*spy_ccapi_data)->transport.tcp->connection.info.wan.phone_number, phone_number.string);
+    CHECK_EQUAL(strlen((*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number), phone_number.length);
+    CHECK_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number, phone_number.string);
+    STRCMP_EQUAL((*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number, phone_number.string);
 }

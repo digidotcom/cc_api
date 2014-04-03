@@ -54,7 +54,7 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
         /* call ccapi_start in a sepatare thread as it won't return */
         pthread_t const aux_thread = aux_ccapi_start(&start);
 
-        ASSERT_WAIT(1);
+        WAIT_FOR_ASSERT();
         ASSERT_IF_NOT_HIT_DO ("ccapi_data != NULL", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                           FAIL_TEST("'ccapi_data != NULL' not hitted"));
 
@@ -101,7 +101,7 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
-    ASSERT_WAIT(1);
+    WAIT_FOR_ASSERT();
     ASSERT_IF_NOT_HIT_DO ("status != connector_init_error", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                      FAIL_TEST("'status != connector_init_error' not hitted"));
 

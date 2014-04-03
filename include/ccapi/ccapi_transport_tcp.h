@@ -28,7 +28,8 @@ typedef enum {
     CCAPI_TCP_START_ERROR_IP,
     CCAPI_TCP_START_ERROR_INVALID_MAC,
     CCAPI_TCP_START_ERROR_PHONE,
-    CCAPI_TCP_START_ERROR_INIT
+    CCAPI_TCP_START_ERROR_INIT,
+    CCAPI_TCP_START_ERROR_TIMEOUT
 } ccapi_tcp_start_error_t;
 
 typedef enum {
@@ -60,9 +61,10 @@ typedef struct {
     } keepalives;
 
     struct {
-        uint8_t max_transactions; /* connector_request_id_config_max_transaction */
+        uint8_t max_transactions;
         char * password;
         ccapi_connection_type_t type;
+        uint8_t timeout;
         union {
             struct {
                 uint32_t link_speed;
