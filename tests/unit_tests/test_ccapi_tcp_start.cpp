@@ -75,10 +75,12 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
     char phone_number[] = "+54-3644-421921";
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
@@ -98,8 +100,8 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-    tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
+    tcp_start.connection.ip.type = CCAPI_IPV4;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
@@ -131,8 +133,8 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-    tcp_start.connection.info.lan.ip.type = CCAPI_IPV4;
-    memcpy(tcp_start.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_start.connection.info.lan.ip.address.ipv4);
+    tcp_start.connection.ip.type = CCAPI_IPV4;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
@@ -150,11 +152,13 @@ TEST(ccapi_tcp_start_test, testTCPConnectionTimeout)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     char phone_number[] = "+54-3644-421921";
 
     tcp_start.connection.type = CCAPI_CONNECTION_WAN;
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     tcp_start.callback.close = ccapi_tcp_close_cb;
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
