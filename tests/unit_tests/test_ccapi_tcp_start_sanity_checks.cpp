@@ -382,8 +382,9 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-static ccapi_bool_t ccapi_tcp_close_cb(void)
+static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 {
+    UNUSED_ARGUMENT(cause);
     return CCAPI_TRUE;
 }
 

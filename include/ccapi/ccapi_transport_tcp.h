@@ -50,7 +50,14 @@ typedef enum {
     CCAPI_KEEPALIVE_RESTORED
 } ccapi_keepalive_status_t;
 
-typedef ccapi_bool_t (* ccapi_tcp_close_cb_t)(void);
+typedef enum {
+    CCAPI_TCP_CLOSE_DISCONNECTED,
+    CCAPI_TCP_CLOSE_REDIRECTED,
+    CCAPI_TCP_CLOSE_NO_KEEPALIVE,
+    CCAPI_TCP_CLOSE_DATA_ERROR
+} ccapi_tcp_close_cause_t;
+
+typedef ccapi_bool_t (* ccapi_tcp_close_cb_t)(ccapi_tcp_close_cause_t cause);
 typedef void (* ccapi_tcp_keepalives_cb_t)(ccapi_keepalive_status_t status);
 
 typedef struct {
