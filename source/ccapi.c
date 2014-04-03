@@ -305,6 +305,40 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
     return connector_status;
 }
 
+static ccapi_bool_t ask_user_if_reconnect(connector_close_status_t const close_status, ccapi_data_t const * const ccapi_data)
+{
+    ccapi_tcp_close_cb_t const close_cb = ccapi_data->transport_tcp.info->callback.close;
+    ccapi_tcp_close_cause_t ccapi_close_cause;
+    ccapi_bool_t reconnect = CCAPI_FALSE;
+
+    if (close_cb != NULL)
+    {
+        switch (close_status)
+        {
+            case connector_close_status_cloud_disconnected:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_DISCONNECTED;
+                break;
+            case connector_close_status_cloud_redirected:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_REDIRECTED;
+                break;
+            case connector_close_status_device_error:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_DATA_ERROR;
+                break;
+            case connector_close_status_no_keepalive:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_NO_KEEPALIVE;
+                break;
+            case connector_close_status_device_stopped:
+            case connector_close_status_device_terminated:
+            case connector_close_status_abort:
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+        reconnect = close_cb(ccapi_close_cause);
+    }
+done:
+    return reconnect;
+}
+
 connector_callback_status_t ccapi_network_handler(connector_request_id_network_t network_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -341,11 +375,40 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
         {
             connector_network_close_t * connector_close_data = data;
             ccimp_network_close_t close_data;
+            connector_close_status_t const close_status = connector_close_data->status;
 
             close_data.handle = connector_close_data->handle;
             ccimp_status = ccimp_network_tcp_close(&close_data);
-            /* TODO: Check connector_close_status_t and decide if reconnect or not */
-            connector_close_data->reconnect = connector_false;
+
+            switch(ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    break;
+                case CCIMP_STATUS_ABORT:
+                case CCIMP_STATUS_BUSY:
+                    goto done;
+                    break;
+            }
+
+            switch (close_status)
+            {
+                case connector_close_status_cloud_disconnected:
+                case connector_close_status_cloud_redirected:
+                case connector_close_status_device_error:
+                case connector_close_status_no_keepalive:
+                {
+                    connector_close_data->reconnect = ask_user_if_reconnect(close_status, ccapi_data);
+                    break;
+                }
+                case connector_close_status_device_stopped:
+                case connector_close_status_device_terminated:
+                case connector_close_status_abort:
+                {
+                    connector_close_data->reconnect = connector_false;
+                    break;
+                }
+            }
             break;
         }
 
@@ -355,6 +418,8 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
             break;
         }
     }
+
+done:
 
     connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
 
