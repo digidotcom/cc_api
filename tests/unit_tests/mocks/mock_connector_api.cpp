@@ -239,8 +239,10 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
             if (mock_info->connector_initiate_transport_start_info.init_transport)
             {
                  connector_request_id_t request_id;
+                 connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
+
                  request_id.status_request = connector_request_id_status_tcp;
-                 ccapi_connector_callback(connector_class_id_status, request_id, NULL, (void *)ccapi_data);
+                 ccapi_connector_callback(connector_class_id_status, request_id, &tcp_status, (void *)ccapi_data);
             }
             break;
         }

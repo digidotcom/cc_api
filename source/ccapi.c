@@ -366,16 +366,46 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
 {
     connector_callback_status_t connector_status = connector_callback_continue;
 
-    UNUSED_ARGUMENT(ccapi_data);
-    UNUSED_ARGUMENT(data);
-
     switch (status_request)
     {
-    case connector_request_id_status_tcp:
-        ccapi_data->transport_tcp.connected = CCAPI_TRUE;
-        break;
-    case connector_request_id_status_stop_completed:
-        break;
+        case connector_request_id_status_tcp:
+        {
+            connector_status_tcp_event_t * tcp_event = data;
+
+            switch(tcp_event->status)
+            {
+                case connector_tcp_communication_started:
+                {
+                    ccapi_data->transport_tcp.connected = CCAPI_TRUE;
+                    break;
+                }
+                case connector_tcp_keepalive_missed:
+                {
+                    ccapi_keepalive_status_t const keepalive_status = CCAPI_KEEPALIVE_MISSED;
+
+                    if (ccapi_data->transport_tcp.info->callback.keepalive != NULL)
+                    {
+                        ccapi_data->transport_tcp.info->callback.keepalive(keepalive_status);
+                    }
+                    break;
+                }
+                case connector_tcp_keepalive_restored:
+                {
+                    ccapi_keepalive_status_t const keepalive_status = CCAPI_KEEPALIVE_RESTORED;
+
+                    if (ccapi_data->transport_tcp.info->callback.keepalive != NULL)
+                    {
+                        ccapi_data->transport_tcp.info->callback.keepalive(keepalive_status);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case connector_request_id_status_stop_completed:
+        {
+            break;
+        }
     }
 
     return connector_status;
