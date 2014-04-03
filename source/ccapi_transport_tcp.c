@@ -306,7 +306,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             ccimp_os_system_up_time_t end_time;
 
             ccimp_os_get_system_time(&time_start);
-            end_time.sys_uptime = wait_forever ? 0 : time_start.sys_uptime + tcp_start->connection.timeout;
+            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.timeout + 1;
             do {
                 ccimp_os_system_up_time_t system_uptime;
 
