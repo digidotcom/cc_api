@@ -39,9 +39,7 @@ typedef struct  {
     } connector_initiate_transport_start_info;
 } mock_connector_api_info_t;
 
-mock_connector_api_info_t * alloc_mock_connector_api_info(void);
-mock_connector_api_info_t * get_mock_connector_api_info(connector_handle_t connector_handle);
-void free_mock_connector_api_info(mock_connector_api_info_t * mock_info);
+mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);
 
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);

@@ -14,7 +14,6 @@ static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_i
 
 TEST_GROUP(ccapi_config_test_basic)
 {
-    mock_connector_api_info_t * mock_info; 
     ccapi_data_t * ccapi_data;
 
     void setup()
@@ -24,16 +23,15 @@ TEST_GROUP(ccapi_config_test_basic)
 
         Mock_create_all();
 
-        mock_info = alloc_mock_connector_api_info();
-        CHECK(mock_info != NULL);
-
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
         ccapi_data = *spy_ccapi_data;
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
-        mock_info->connector_handle = ccapi_data->connector_handle;
+        {
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        }
     }
 
     void teardown()
@@ -42,8 +40,6 @@ TEST_GROUP(ccapi_config_test_basic)
         Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
-        free_mock_connector_api_info(mock_info);
 
         Mock_destroy_all();
     }
@@ -134,7 +130,6 @@ TEST(ccapi_config_test_basic, testDataServiceSupport)
 
 TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 {
-    mock_connector_api_info_t * mock_info; 
     ccapi_data_t * ccapi_data;
 
     /* This groups starts with LAN and IPv4, No password */
@@ -150,17 +145,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 
         Mock_create_all();
 
-        mock_info = alloc_mock_connector_api_info();
-        CHECK(mock_info != NULL);
-
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
         ccapi_data = *spy_ccapi_data;
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
-        mock_info->connector_handle = ccapi_data->connector_handle;
-        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        {
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        }
 
         tcp_start.connection.type = CCAPI_CONNECTION_LAN;
         tcp_start.connection.ip.type = CCAPI_IPV4;
@@ -182,8 +176,6 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
-        free_mock_connector_api_info(mock_info);
 
         Mock_destroy_all();
     }
@@ -240,7 +232,6 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testIdVerificationSimple)
 
 TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
 {
-    mock_connector_api_info_t * mock_info; 
     ccapi_data_t * ccapi_data;
 
     /* This groups starts with LAN and IPv6, Password enabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
@@ -257,17 +248,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
 
         Mock_create_all();
 
-        mock_info = alloc_mock_connector_api_info();
-        CHECK(mock_info != NULL);
-
         fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
         ccapi_data = *spy_ccapi_data;
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
-        mock_info->connector_handle = ccapi_data->connector_handle;
-        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        {
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        }
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -295,8 +285,6 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
-        free_mock_connector_api_info(mock_info);
 
         Mock_destroy_all();
     }
@@ -391,7 +379,6 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testWcKeepalives)
 
 TEST_GROUP(ccapi_config_test_tcp_start_WAN)
 {
-    mock_connector_api_info_t * mock_info; 
     ccapi_data_t * ccapi_data;
 
     /* This groups starts with WAN, linkspeed = 1000 and phone number != "", password disabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
@@ -407,18 +394,17 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
 
         Mock_create_all();
 
-        mock_info = alloc_mock_connector_api_info();
-        CHECK(mock_info != NULL);
-
         fill_start_structure_with_good_parameters(&start);
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
         ccapi_data = *spy_ccapi_data;
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
-        mock_info->connector_handle = ccapi_data->connector_handle;
-        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        {
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        }
 
         tcp_start.keepalives.rx = 90;
         tcp_start.keepalives.tx = 100;
@@ -445,8 +431,6 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
         Mock_connector_initiate_action_expectAndReturn((*spy_ccapi_data)->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
-        free_mock_connector_api_info(mock_info);
 
         Mock_destroy_all();
     }

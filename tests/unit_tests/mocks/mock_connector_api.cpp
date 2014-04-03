@@ -9,11 +9,9 @@
 #include "mock_ccimp_os.h"
 #include <pthread.h>
 
-mock_connector_api_info_t mock_info[MAX_INFO];
+static mock_connector_api_info_t mock_info[MAX_INFO];
 
-uint8_t thread_wait;
-
-mock_connector_api_info_t * alloc_mock_connector_api_info(void)
+mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t connector_handle)
 {
     size_t i;
 
@@ -22,6 +20,7 @@ mock_connector_api_info_t * alloc_mock_connector_api_info(void)
         if (mock_info[i].used == connector_false)
         {
             mock_info[i].used = connector_true;
+            mock_info[i].connector_handle = connector_handle;
             mock_info[i].connector_run_retval = connector_idle;
 
             return &mock_info[i];
@@ -31,7 +30,7 @@ mock_connector_api_info_t * alloc_mock_connector_api_info(void)
     return NULL;
 }
 
-mock_connector_api_info_t * get_mock_connector_api_info(connector_handle_t connector_handle)
+mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle)
 {
     size_t i;
 
@@ -44,10 +43,11 @@ mock_connector_api_info_t * get_mock_connector_api_info(connector_handle_t conne
     return NULL;
 }
 
-void free_mock_connector_api_info(mock_connector_api_info_t * mock_info)
+void mock_connector_api_info_free(connector_handle_t connector_handle)
 {
-    mock_info->ccapi_handle = NULL;
+    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(connector_handle);
     mock_info->used = connector_false;
+    mock_info->ccapi_handle = NULL;
 }
 
 union vp2fp 
@@ -88,6 +88,7 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     vp2fp u;
     u.fp = callback;
     uint8_t behavior;
+    connector_handle_t connector_handle;
 
     UNUSED_ARGUMENT(context);
 
@@ -96,12 +97,15 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
     {
         mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp);
-        return mock("connector_init").returnValue().getPointerValue();
+        connector_handle = mock("connector_init").returnValue().getPointerValue();
     }
     else
     {
-        return malloc(sizeof (int)); /* Return a different pointer each time. */
+        connector_handle = malloc(sizeof (int)); /* Return a different pointer each time. */
     } 
+    mock_connector_api_info_alloc(connector_handle);
+
+    return connector_handle;
 }
 
 static connector_bool_t kill_ccapi_thread = connector_false;
@@ -126,7 +130,7 @@ connector_status_t connector_run(connector_handle_t const handle)
 
     /* printf("+connector_run: handle=%p\n",(void*)handle);	*/
     do {
-        mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
         connector_run_retval = mock_info != NULL? mock_info->connector_run_retval:connector_idle;
 
         if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
@@ -139,6 +143,16 @@ connector_status_t connector_run(connector_handle_t const handle)
         }
     } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
     /* printf("-connector_run: handle=%p\n",(void*)handle); */
+
+    switch (connector_run_retval)
+    {
+        case connector_device_terminated:
+        case connector_init_error:
+            mock_connector_api_info_free(handle);
+            break;
+        default:
+            break;
+    }
 
     return connector_run_retval;
 }
@@ -211,7 +225,7 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
 
 connector_status_t connector_initiate_action(connector_handle_t const handle, connector_initiate_request_t const request, void const * const request_data)
 {
-    mock_connector_api_info_t * mock_info = get_mock_connector_api_info(handle);
+    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
     ccapi_data_t * ccapi_data = (ccapi_data_t *)mock_info->ccapi_handle;
 
     switch (request)

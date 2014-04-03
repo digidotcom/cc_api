@@ -22,7 +22,7 @@ static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_i
 
 TEST_GROUP(ccapi_tcp_start_test)
 {
-    mock_connector_api_info_t * mock_info; 
+    mock_connector_api_info_t * mock_info;
     ccapi_data_t * ccapi_data;
 
     void setup()
@@ -32,17 +32,16 @@ TEST_GROUP(ccapi_tcp_start_test)
 
         Mock_create_all();
 
-        mock_info = alloc_mock_connector_api_info();
-        CHECK(mock_info != NULL);
-
         fill_start_structure_with_good_parameters(&start);
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
         ccapi_data = *spy_ccapi_data;
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
-        mock_info->connector_handle = ccapi_data->connector_handle;
-        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        {
+            mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        }
     }
 
     void teardown()
@@ -52,8 +51,6 @@ TEST_GROUP(ccapi_tcp_start_test)
         Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
-        free_mock_connector_api_info(mock_info);
 
         Mock_destroy_all();
     }

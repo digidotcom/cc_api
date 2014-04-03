@@ -78,8 +78,6 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     ccimp_create_thread_info_t expected_create_thread_connector_run;
     connector_handle_t handle = &handle; /* Not-NULL */
 
-    mock_connector_api_info_t * mock_info = NULL; 
-
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
@@ -88,11 +86,6 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
 
-    mock_info = alloc_mock_connector_api_info();
-    CHECK(mock_info != NULL);
-    mock_info->connector_handle = handle;
-    mock_info->connector_run_retval = connector_init_error;
- 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
@@ -100,6 +93,12 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
+
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle); 
+        mock_info->ccapi_handle = (ccapi_handle_t)malloc_for_ccapi_data;
+        mock_info->connector_run_retval = connector_init_error;
+    }
 
     WAIT_FOR_ASSERT();
     ASSERT_IF_NOT_HIT_DO ("status != connector_init_error", "source/ccapi.c", "ccapi_connector_run_thread", 
@@ -110,6 +109,4 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
     free(malloc_for_ccapi_data);
-
-    free_mock_connector_api_info(mock_info);
 }
