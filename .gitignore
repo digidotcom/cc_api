@@ -14,3 +14,7 @@
 
 # Test launcher binary
 test
+
+# Samples binaries
+tests/samples/ccapi_start_stop/ccapi
+tests/samples/tcp_start/ccapi
