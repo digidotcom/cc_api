@@ -32,6 +32,31 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->service.rci = NULL;
 }
 
+static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
+{
+    ccapi_bool_t reconnect;
+    switch (cause)
+    {
+        case CCAPI_TCP_CLOSE_DISCONNECTED:
+            printf("ccapi_tcp_close_cb cause CCAPI_TCP_CLOSE_DISCONNECTED\n");
+            reconnect = CCAPI_TRUE;
+            break;
+        case CCAPI_TCP_CLOSE_REDIRECTED:
+            printf("ccapi_tcp_close_cb cause CCAPI_TCP_CLOSE_REDIRECTED\n");
+            reconnect = CCAPI_TRUE;
+            break;
+        case CCAPI_TCP_CLOSE_NO_KEEPALIVE:
+            printf("ccapi_tcp_close_cb cause CCAPI_TCP_CLOSE_NO_KEEPALIVE\n");
+            reconnect = CCAPI_TRUE;
+            break;
+        case CCAPI_TCP_CLOSE_DATA_ERROR:
+            printf("ccapi_tcp_close_cb cause CCAPI_TCP_CLOSE_DATA_ERROR\n");
+            reconnect = CCAPI_TRUE;
+            break;
+    }
+    return reconnect;
+}
+
 int main (void)
 {
     ccapi_start_t start = {0};
@@ -56,10 +81,10 @@ int main (void)
     }
 
     tcp_info.connection.type = CCAPI_CONNECTION_LAN;
-    memcpy(tcp_info.connection.info.lan.ip.address.ipv4, ipv4, sizeof tcp_info.connection.info.lan.ip.address.ipv4);
+    memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);
     memcpy(tcp_info.connection.info.lan.mac_address, mac, sizeof tcp_info.connection.info.lan.mac_address);
 
-    tcp_info.callback.close = NULL;
+    tcp_info.callback.close = ccapi_tcp_close_cb;
     tcp_info.callback.keepalive = NULL;
 
     tcp_start_error = ccapi_start_transport_tcp(&tcp_info);
