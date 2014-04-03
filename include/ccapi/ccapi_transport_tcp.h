@@ -61,18 +61,17 @@ typedef struct {
     } keepalives;
 
     struct {
+        ccapi_ip_address_t ip;
         uint8_t max_transactions;
         char * password;
-        ccapi_connection_type_t type;
         uint8_t timeout;
+        ccapi_connection_type_t type;
         union {
             struct {
                 uint32_t link_speed;
                 char * phone_number;
             } wan;
-
             struct {
-                ccapi_ip_address_t ip;
                 uint8_t mac_address[6];
             } lan;
         } info;

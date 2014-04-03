@@ -171,19 +171,19 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_ip_addr:
             {
                 connector_config_ip_address_t * ip_addr = data;
-                switch(ccapi_data->transport_tcp.info->connection.info.lan.ip.type)
+                switch(ccapi_data->transport_tcp.info->connection.ip.type)
                 {
                     case CCAPI_IPV4:
                     {
                         ip_addr->ip_address_type = connector_ip_address_ipv4;
                         /* TODO: would this work in a big-endian machine? */
-                        ip_addr->address = (uint8_t *)&ccapi_data->transport_tcp.info->connection.info.lan.ip.address.ipv4;
+                        ip_addr->address = (uint8_t *)&ccapi_data->transport_tcp.info->connection.ip.address.ipv4;
                         break;
                     }
                     case CCAPI_IPV6:
                     {
                         ip_addr->ip_address_type = connector_ip_address_ipv6;
-                        ip_addr->address = ccapi_data->transport_tcp.info->connection.info.lan.ip.address.ipv6;
+                        ip_addr->address = ccapi_data->transport_tcp.info->connection.ip.address.ipv6;
                         break;
                     }
                 }
