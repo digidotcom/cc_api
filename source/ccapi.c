@@ -176,8 +176,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                     case CCAPI_IPV4:
                     {
                         ip_addr->ip_address_type = connector_ip_address_ipv4;
-                        /* TODO: would this work in a big-endian machine? */
-                        ip_addr->address = (uint8_t *)&ccapi_data->transport_tcp.info->connection.ip.address.ipv4;
+                        ip_addr->address = ccapi_data->transport_tcp.info->connection.ip.address.ipv4;
                         break;
                     }
                     case CCAPI_IPV6:
