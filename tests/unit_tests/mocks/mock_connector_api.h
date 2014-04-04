@@ -13,7 +13,7 @@
 
 extern "C" {
 #include "connector_api.h"
-#include "ccxapi/ccxapi.h"
+#include "ccapi/ccxapi.h"
 }
 
 #define MOCK_CONNECTOR_INIT_ENABLED 1

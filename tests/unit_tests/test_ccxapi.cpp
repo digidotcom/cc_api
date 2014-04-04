@@ -6,7 +6,7 @@
 
 extern "C" {
 #include "ccapi_definitions.h"
-#include "ccxapi/ccxapi.h"
+#include "ccapi/ccxapi.h"
 }
 
 #include "test_helper_functions.h"
