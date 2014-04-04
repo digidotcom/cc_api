@@ -310,6 +310,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             do {
                 ccimp_os_system_up_time_t system_uptime;
 
+                ccimp_os_yield();
                 ccimp_os_get_system_time(&system_uptime);
                 if (system_uptime.sys_uptime > end_time.sys_uptime)
                 {
