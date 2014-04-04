@@ -40,6 +40,7 @@ typedef struct  {
 } mock_connector_api_info_t;
 
 mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);
+void mock_connector_api_info_free(connector_handle_t connector_handle);
 
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);

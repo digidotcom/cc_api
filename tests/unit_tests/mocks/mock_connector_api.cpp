@@ -8,12 +8,17 @@
 #include "mock_connector_api.h"
 #include "mock_ccimp_os.h"
 #include <pthread.h>
+#include <unistd.h>
+#include <semaphore.h>
 
 static mock_connector_api_info_t mock_info[MAX_INFO];
+static sem_t sem;
 
 mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t connector_handle)
 {
     size_t i;
+
+    sem_wait(&sem);
 
     for (i = 0; i < MAX_INFO; i++)
     {
@@ -23,14 +28,18 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_handle = connector_handle;
             mock_info[i].connector_run_retval = connector_idle;
 
+            sem_post(&sem);
+
             return &mock_info[i];
         }
     }
 
+    sem_post(&sem);
+
     return NULL;
 }
 
-mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle)
+mock_connector_api_info_t * mock_connector_api_info_get_nosem(connector_handle_t connector_handle)
 {
     size_t i;
 
@@ -40,14 +49,35 @@ mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t conne
             return &mock_info[i];
     }
 
+    assert (0);
+
     return NULL;
+}
+
+mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle)
+{
+    mock_connector_api_info_t * mock_info;
+
+    sem_wait(&sem);
+
+    mock_info = mock_connector_api_info_get_nosem(connector_handle);
+
+    sem_post(&sem);
+
+    return mock_info;
 }
 
 void mock_connector_api_info_free(connector_handle_t connector_handle)
 {
-    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(connector_handle);
+    mock_connector_api_info_t * mock_info;
+
+    sem_wait(&sem);
+
+    mock_info = mock_connector_api_info_get_nosem(connector_handle);
     mock_info->used = connector_false;
     mock_info->ccapi_handle = NULL;
+
+    sem_post(&sem);
 }
 
 union vp2fp 
@@ -103,23 +133,51 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     {
         connector_handle = malloc(sizeof (int)); /* Return a different pointer each time. */
     } 
-    mock_connector_api_info_alloc(connector_handle);
+    
+    if (connector_handle != NULL)
+        mock_connector_api_info_alloc(connector_handle);
 
     return connector_handle;
 }
 
-static connector_bool_t kill_ccapi_thread = connector_false;
-
 void Mock_connector_run_create(void)
 {
-    kill_ccapi_thread = connector_false;
+    if (sem_init(&sem, 0, 1) == -1)
+    {
+        printf("Mock_connector_run_create: sem_init error\n");
+    }
 
     return;
 }
 
 void Mock_connector_run_destroy(void)
 {
-    kill_ccapi_thread = connector_true;
+    size_t i;
+    connector_bool_t finished;
+
+    do
+    {
+        finished = connector_true;
+
+        sem_wait(&sem);
+
+        for (i = 0; i < MAX_INFO; i++)
+        {
+            if (mock_info[i].used == connector_true)
+            {
+                mock_info[i].connector_run_retval = connector_device_terminated;
+
+                sem_post(&sem);
+
+                usleep(100);
+
+                finished = connector_false;
+                break;
+            }
+        }
+    } while (finished == connector_false);
+
+    if (sem_destroy(&sem) == -1) printf("ccimp_os_syncr_destroy error\n");
 
     return;
 }
@@ -136,10 +194,6 @@ connector_status_t connector_run(connector_handle_t const handle)
         if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
         {
             ccimp_os_yield();
-        }
-        if (kill_ccapi_thread == connector_true)
-        {
-            pthread_exit(NULL);
         }
     } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
     /* printf("-connector_run: handle=%p\n",(void*)handle); */

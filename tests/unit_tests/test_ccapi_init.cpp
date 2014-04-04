@@ -238,6 +238,13 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
+
+    {
+        /* The connector won't start but has been allocated. Manually clean it */
+        ccapi_data_t * ccapi_data = (ccapi_data_t *)malloc_for_ccapi_data;
+        assert(ccapi_data->connector_handle != NULL);
+        mock_connector_api_info_free(ccapi_data->connector_handle);
+    }
 }
 
 TEST(ccapi_init_test, testStartThreadFail)
@@ -267,6 +274,13 @@ TEST(ccapi_init_test, testStartThreadFail)
     fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
+
+    {
+        /* The connector won't start but has been allocated. Manually clean it */
+        ccapi_data_t * ccapi_data = (ccapi_data_t *)malloc_for_ccapi_data;
+        assert(ccapi_data->connector_handle != NULL);
+        mock_connector_api_info_free(ccapi_data->connector_handle);
+    }
 }
 
 TEST(ccapi_init_test, testStartTwiceFails)

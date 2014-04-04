@@ -59,6 +59,14 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
                                                           FAIL_TEST("'ccapi_data != NULL' not hitted"));
 
         stop_aux_thread(aux_thread);
+
+        {
+            ccapi_data_t * ccapi_data = (ccapi_data_t *)malloc_for_ccapi_data;
+
+            /* The connector won't start but has been allocated. Manually clean it */
+            assert(ccapi_data->connector_handle != NULL);
+            mock_connector_api_info_free(ccapi_data->connector_handle);
+        }
     }
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
