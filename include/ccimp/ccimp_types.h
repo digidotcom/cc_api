@@ -10,8 +10,6 @@
 
 #include "custom/custom_ccimp_types.h"
 
-#define DEVICE_ID_LENGTH    16
-
 typedef enum {
     CCAPI_FALSE,
     CCAPI_TRUE

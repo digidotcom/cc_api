@@ -13,26 +13,33 @@
 
 extern "C" {
 #include "connector_api.h"
+#include "ccxapi/ccxapi.h"
 }
 
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
 
-#define ASSERT_WAIT(timeout_sec)            { ccimp_os_system_up_time_t system_up_time; \
-                                              unsigned long time_end; \
-                                              ccimp_os_get_system_time(&system_up_time); \
-                                              time_end= (system_up_time.sys_uptime + timeout_sec); \
-                                              do \
-                                              { \
-                                                  ccimp_os_get_system_time(&system_up_time); \
-                                              } while (assert_buffer == NULL && system_up_time.sys_uptime <= time_end); \
-                                            }
+#define WAIT_FOR_ASSERT()   {do ccimp_os_yield(); while (assert_buffer == NULL);}
+
 #define ASSERT_IF_NOT_HIT_DO(label, file, function, code) \
                        ON_FALSE_DO_(assert_buffer != NULL && \
                                     (!strcmp(assert_buffer, label) && (!strcmp(assert_file, file))) \
                                     , {printf("Didn't hit assert: %s\n", label); code;})
 #define ASSERT_CLEAN()                      assert_buffer = NULL
 
+#define MAX_INFO 10
+
+typedef struct  {
+    connector_bool_t used;
+    ccapi_handle_t ccapi_handle;
+    connector_handle_t connector_handle;
+    connector_status_t connector_run_retval;
+    struct {
+        ccapi_bool_t init_transport;
+    } connector_initiate_transport_start_info;
+} mock_connector_api_info_t;
+
+mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);
 
 void Mock_connector_init_create(void);
 void Mock_connector_init_destroy(void);
@@ -40,7 +47,6 @@ void Mock_connector_init_expectAndReturn(connector_callback_t const callback, co
 
 void Mock_connector_run_create(void);
 void Mock_connector_run_destroy(void);
-void Mock_connector_run_returnInNextLoop(connector_status_t retval);
 
 void Mock_connector_initiate_action_create(void);
 void Mock_connector_initiate_action_destroy(void);

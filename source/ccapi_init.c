@@ -5,7 +5,7 @@
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
-    uint8_t invalid_device_id[DEVICE_ID_LENGTH] = {0x00};
+    uint8_t const invalid_device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     if (start->vendor_id == 0x00)
     {
@@ -55,13 +55,25 @@ static ccapi_start_error_t check_malloc(void const * const p)
 }
 
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
-ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
+ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
-    ccapi_data_t * ccapi_data;
+    ccapi_data_t * ccapi_data = NULL;
+
+    if (ccapi_handle == NULL)
+    {
+        error = CCAPI_START_ERROR_NULL_PARAMETER;
+        goto done;
+    }
+
+    if (*ccapi_handle != NULL)
+    {
+        error = CCAPI_START_ERROR_ALREADY_STARTED;
+        goto done;
+    }
 
     ccapi_data = ccapi_malloc(sizeof *ccapi_data);
-    *ccapi_handle = (ccapi_handle_t)ccapi_data;
+    *ccapi_handle = ccapi_data;
 
     error = check_malloc(ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
@@ -166,9 +178,8 @@ done:
     return error;
 }
 
-ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t const behavior)
 {
-    ccapi_data_t * ccapi_data = (ccapi_data_t *) ccapi_handle;
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
     UNUSED_ARGUMENT(behavior);
@@ -246,11 +257,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-	if (ccapi_data_single_instance != NULL)
-	{
-	    error = CCAPI_START_ERROR_ALREADY_STARTED;
-	    goto done;
-	}
     error = ccxapi_start(&ccapi_data_single_instance, start);
 
     switch (error)
@@ -270,7 +276,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
             break;
     }
 
-done:
 	return error;
 }
 

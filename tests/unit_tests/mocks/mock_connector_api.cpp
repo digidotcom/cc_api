@@ -9,9 +9,46 @@
 #include "mock_ccimp_os.h"
 #include <pthread.h>
 
-static connector_handle_t global_handle;
+static mock_connector_api_info_t mock_info[MAX_INFO];
 
-uint8_t thread_wait;
+mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t connector_handle)
+{
+    size_t i;
+
+    for (i = 0; i < MAX_INFO; i++)
+    {
+        if (mock_info[i].used == connector_false)
+        {
+            mock_info[i].used = connector_true;
+            mock_info[i].connector_handle = connector_handle;
+            mock_info[i].connector_run_retval = connector_idle;
+
+            return &mock_info[i];
+        }
+    }
+
+    return NULL;
+}
+
+mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle)
+{
+    size_t i;
+
+    for (i = 0; i < MAX_INFO; i++)
+    {
+        if (mock_info[i].used == connector_true && mock_info[i].connector_handle == connector_handle)
+            return &mock_info[i];
+    }
+
+    return NULL;
+}
+
+void mock_connector_api_info_free(connector_handle_t connector_handle)
+{
+    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(connector_handle);
+    mock_info->used = connector_false;
+    mock_info->ccapi_handle = NULL;
+}
 
 union vp2fp 
 {
@@ -21,7 +58,7 @@ union vp2fp
 
 void Mock_connector_init_create(void)
 {
-    global_handle = NULL;
+    memset(mock_info, 0, sizeof(mock_info));
 
     return;
 }
@@ -51,6 +88,7 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     vp2fp u;
     u.fp = callback;
     uint8_t behavior;
+    connector_handle_t connector_handle;
 
     UNUSED_ARGUMENT(context);
 
@@ -59,23 +97,21 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
     {
         mock("connector_init").actualCall("connector_init").withParameter("callback", u.vp);
-        global_handle = mock("connector_init").returnValue().getPointerValue();
+        connector_handle = mock("connector_init").returnValue().getPointerValue();
     }
     else
     {
-		global_handle = &global_handle; /* Not-NULL */
-    }
+        connector_handle = malloc(sizeof (int)); /* Return a different pointer each time. */
+    } 
+    mock_connector_api_info_alloc(connector_handle);
 
-    return global_handle;
+    return connector_handle;
 }
 
-
-static connector_status_t connector_run_retval = connector_idle;
 static connector_bool_t kill_ccapi_thread = connector_false;
 
 void Mock_connector_run_create(void)
 {
-    connector_run_retval = connector_idle;
     kill_ccapi_thread = connector_false;
 
     return;
@@ -88,16 +124,15 @@ void Mock_connector_run_destroy(void)
     return;
 }
 
-void Mock_connector_run_returnInNextLoop(connector_status_t retval)
-{
-    connector_run_retval = retval;
-}
-
 connector_status_t connector_run(connector_handle_t const handle)
 {
-    UNUSED_ARGUMENT(handle);
+    connector_status_t connector_run_retval;
 
+    /* printf("+connector_run: handle=%p\n",(void*)handle);	*/
     do {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
+        connector_run_retval = mock_info != NULL? mock_info->connector_run_retval:connector_idle;
+
         if (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success)
         {
             ccimp_os_yield();
@@ -107,12 +142,50 @@ connector_status_t connector_run(connector_handle_t const handle)
             pthread_exit(NULL);
         }
     } while (connector_run_retval == connector_idle || connector_run_retval == connector_working || connector_run_retval == connector_pending || connector_run_retval == connector_active || connector_run_retval == connector_success);
+    /* printf("-connector_run: handle=%p\n",(void*)handle); */
+
+    switch (connector_run_retval)
+    {
+        case connector_device_terminated:
+        case connector_init_error:
+            mock_connector_api_info_free(handle);
+            break;
+        default:
+            break;
+    }
 
     return connector_run_retval;
 }
 
+/* * * * * * * * * * connector_initiate_action() * * * * * * * * * */
+SimpleString connector_transport_t_ValueToString(void* object)
+{
+    UNUSED_ARGUMENT(object);
+    return "connector_transport_t";
+}
+
+bool connector_transport_t_IsEqual(void * object1, void * object2)
+{
+    connector_transport_t * connector_transport_1 = (connector_transport_t *)object1;
+    connector_transport_t * connector_transport_2 = (connector_transport_t *)object2;
+
+    if (connector_transport_1 == connector_transport_2)
+        return true;
+
+    if (connector_transport_1 == NULL || connector_transport_2 == NULL)
+        return false;
+
+    if (*connector_transport_1 != *connector_transport_2)
+        return false;
+
+    return true;
+}
+
 void Mock_connector_initiate_action_create(void)
 {
+    static MockFunctionComparator connector_transport_t_comparator(connector_transport_t_IsEqual, connector_transport_t_ValueToString);
+    mock().installComparator("connector_transport_t", connector_transport_t_comparator);
+
     return;
 }
 
@@ -123,27 +196,82 @@ void Mock_connector_initiate_action_destroy(void)
 
 void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, connector_initiate_request_t request, void * request_data, connector_status_t retval)
 {
-    mock("connector_initiate_action").expectOneCall("connector_initiate_action")
-             .withParameter("handle", handle)
-             .withParameter("request", request)
-             .withParameter("request_data", request_data)
-             .andReturnValue(retval);
+    switch (request)
+    {
+        case connector_initiate_transport_start:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_transport_t", "request_data", request_data)
+                     .andReturnValue(retval);
+            break;
+        case connector_initiate_transport_stop:
+        case connector_initiate_send_data:
+#ifdef CONNECTOR_SHORT_MESSAGE
+        case connector_initiate_ping_request:
+        case connector_initiate_session_cancel:
+        case connector_initiate_session_cancel_all:
+#endif
+        case connector_initiate_terminate:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameter("request_data", request_data)
+                     .andReturnValue(retval);
+            break;
+    }
+
 }
 
 connector_status_t connector_initiate_action(connector_handle_t const handle, connector_initiate_request_t const request, void const * const request_data)
 {
-    mock("connector_initiate_action").actualCall("connector_initiate_action")
-            .withParameter("handle", handle)
-            .withParameter("request", request)
-            .withParameter("request_data", (void *)request_data);
+    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
+    ccapi_data_t * ccapi_data = (ccapi_data_t *)mock_info->ccapi_handle;
 
-    if (request == connector_initiate_terminate)
+    switch (request)
     {
-        ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
+        case connector_initiate_transport_start:
+        {
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_transport_t", "request_data", (void *)request_data);
+            if (mock_info->connector_initiate_transport_start_info.init_transport)
+            {
+                 connector_request_id_t request_id;
+                 connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
 
-        (*spy_ccapi_data)->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
-        Mock_connector_run_returnInNextLoop(connector_device_terminated);
+                 request_id.status_request = connector_request_id_status_tcp;
+                 ccapi_connector_callback(connector_class_id_status, request_id, &tcp_status, (void *)ccapi_data);
+            }
+            break;
+        }
+        case connector_initiate_terminate:
+        {
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameter("request_data", (void *)request_data);
+
+            if (mock_info && mock_info->ccapi_handle != NULL)
+            {
+                /* printf("terminate: handle=%p\n",(void*)handle); */
+                ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                mock_info->connector_run_retval = connector_device_terminated;
+            }
+
+            break;
+        }
+        case connector_initiate_transport_stop:
+        case connector_initiate_send_data:
+#ifdef CONNECTOR_SHORT_MESSAGE
+        case connector_initiate_ping_request:
+        case connector_initiate_session_cancel:
+        case connector_initiate_session_cancel_all:
+#endif
+            break;
     }
+
 
     return (connector_status_t)mock("connector_initiate_action").returnValue().getIntValue();
 }

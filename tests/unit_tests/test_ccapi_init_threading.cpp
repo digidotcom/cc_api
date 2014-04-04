@@ -54,7 +54,7 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
         /* call ccapi_start in a sepatare thread as it won't return */
         pthread_t const aux_thread = aux_ccapi_start(&start);
 
-        ASSERT_WAIT(1);
+        WAIT_FOR_ASSERT();
         ASSERT_IF_NOT_HIT_DO ("ccapi_data != NULL", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                           FAIL_TEST("'ccapi_data != NULL' not hitted"));
 
@@ -85,7 +85,6 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     Mock_ccimp_free_notExpected();
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
-    Mock_connector_run_returnInNextLoop(connector_init_error);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
@@ -95,7 +94,13 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
-    ASSERT_WAIT(1);
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle); 
+        mock_info->ccapi_handle = (ccapi_handle_t)malloc_for_ccapi_data;
+        mock_info->connector_run_retval = connector_init_error;
+    }
+
+    WAIT_FOR_ASSERT();
     ASSERT_IF_NOT_HIT_DO ("status != connector_init_error", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                      FAIL_TEST("'status != connector_init_error' not hitted"));
 

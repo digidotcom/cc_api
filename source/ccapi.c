@@ -9,7 +9,7 @@
 
 #include "ccapi_definitions.h"
 
-ccapi_handle_t ccapi_data_single_instance = NULL;
+ccapi_data_t * ccapi_data_single_instance = NULL;
 
 void * ccapi_malloc(size_t size)
 {
@@ -150,6 +150,96 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                 rci_supported->supported = ccapi_data->config.rci_supported;
             }
             break;
+        case connector_request_id_config_data_service:
+            {
+                connector_config_supported_t * data_service_supported = data;
+                data_service_supported->supported = connector_true;
+            }
+            break;
+        case connector_request_id_config_connection_type:
+            {
+                connector_config_connection_type_t * connection_type = data;
+                connection_type->type = ccapi_data->transport_tcp.info->connection.type;
+            }
+            break;
+        case connector_request_id_config_mac_addr:
+            {
+                connector_config_pointer_data_t * mac_addr = data;
+                mac_addr->data = ccapi_data->transport_tcp.info->connection.info.lan.mac_address;
+            }
+            break;
+        case connector_request_id_config_ip_addr:
+            {
+                connector_config_ip_address_t * ip_addr = data;
+                switch(ccapi_data->transport_tcp.info->connection.ip.type)
+                {
+                    case CCAPI_IPV4:
+                    {
+                        ip_addr->ip_address_type = connector_ip_address_ipv4;
+                        ip_addr->address = ccapi_data->transport_tcp.info->connection.ip.address.ipv4;
+                        break;
+                    }
+                    case CCAPI_IPV6:
+                    {
+                        ip_addr->ip_address_type = connector_ip_address_ipv6;
+                        ip_addr->address = ccapi_data->transport_tcp.info->connection.ip.address.ipv6;
+                        break;
+                    }
+                }
+            }
+            break;
+        case connector_request_id_config_identity_verification:
+            {
+                connector_config_identity_verification_t * id_verification = data;
+                int const has_password = ccapi_data->transport_tcp.info->connection.password != NULL;
+
+                id_verification->type = has_password ? connector_identity_verification_password : connector_identity_verification_simple;
+            }
+            break;
+        case connector_request_id_config_password:
+            {
+                connector_config_pointer_string_t * password = data;
+                password->string = ccapi_data->transport_tcp.info->connection.password;
+                password->length = strlen(password->string);
+            }
+            break;
+        case connector_request_id_config_max_transaction:
+            {
+                connector_config_max_transaction_t * max_transaction = data;
+                max_transaction->count = ccapi_data->transport_tcp.info->connection.max_transactions;
+            }
+            break;
+        case connector_request_id_config_rx_keepalive:
+            {
+                connector_config_keepalive_t * rx_keepalives = data;
+                rx_keepalives->interval_in_seconds = ccapi_data->transport_tcp.info->keepalives.rx;
+            }
+            break;
+        case connector_request_id_config_tx_keepalive:
+            {
+                connector_config_keepalive_t * tx_keepalives = data;
+                tx_keepalives->interval_in_seconds = ccapi_data->transport_tcp.info->keepalives.tx;
+            }
+            break;
+        case connector_request_id_config_wait_count:
+            {
+                connector_config_wait_count_t * wc_keepalives = data;
+                wc_keepalives->count = ccapi_data->transport_tcp.info->keepalives.wait_count;
+            }
+            break;
+        case connector_request_id_config_link_speed:
+            {
+                connector_config_link_speed_t * link_speed = data;
+                link_speed->speed = ccapi_data->transport_tcp.info->connection.info.wan.link_speed;
+            }
+            break;
+        case connector_request_id_config_phone_number:
+            {
+                connector_config_pointer_string_t * phone_number = data;
+                phone_number->string = ccapi_data->transport_tcp.info->connection.info.wan.phone_number;
+                phone_number->length = strlen(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
+            }
+            break;
         default:
             status = connector_callback_unrecognized;
             ASSERT_MSG_GOTO(0, done);
@@ -215,6 +305,40 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
     return connector_status;
 }
 
+static ccapi_bool_t ask_user_if_reconnect(connector_close_status_t const close_status, ccapi_data_t const * const ccapi_data)
+{
+    ccapi_tcp_close_cb_t const close_cb = ccapi_data->transport_tcp.info->callback.close;
+    ccapi_tcp_close_cause_t ccapi_close_cause;
+    ccapi_bool_t reconnect = CCAPI_FALSE;
+
+    if (close_cb != NULL)
+    {
+        switch (close_status)
+        {
+            case connector_close_status_cloud_disconnected:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_DISCONNECTED;
+                break;
+            case connector_close_status_cloud_redirected:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_REDIRECTED;
+                break;
+            case connector_close_status_device_error:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_DATA_ERROR;
+                break;
+            case connector_close_status_no_keepalive:
+                ccapi_close_cause = CCAPI_TCP_CLOSE_NO_KEEPALIVE;
+                break;
+            case connector_close_status_device_stopped:
+            case connector_close_status_device_terminated:
+            case connector_close_status_abort:
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+        reconnect = close_cb(ccapi_close_cause);
+    }
+done:
+    return reconnect;
+}
+
 connector_callback_status_t ccapi_network_handler(connector_request_id_network_t network_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -251,11 +375,40 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
         {
             connector_network_close_t * connector_close_data = data;
             ccimp_network_close_t close_data;
+            connector_close_status_t const close_status = connector_close_data->status;
 
             close_data.handle = connector_close_data->handle;
             ccimp_status = ccimp_network_tcp_close(&close_data);
-            /* TODO: Check connector_close_status_t and decide if reconnect or not */
-            connector_close_data->reconnect = connector_false;
+
+            switch(ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    break;
+                case CCIMP_STATUS_ABORT:
+                case CCIMP_STATUS_BUSY:
+                    goto done;
+                    break;
+            }
+
+            switch (close_status)
+            {
+                case connector_close_status_cloud_disconnected:
+                case connector_close_status_cloud_redirected:
+                case connector_close_status_device_error:
+                case connector_close_status_no_keepalive:
+                {
+                    connector_close_data->reconnect = ask_user_if_reconnect(close_status, ccapi_data);
+                    break;
+                }
+                case connector_close_status_device_stopped:
+                case connector_close_status_device_terminated:
+                case connector_close_status_abort:
+                {
+                    connector_close_data->reconnect = connector_false;
+                    break;
+                }
+            }
             break;
         }
 
@@ -266,11 +419,61 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
         }
     }
 
+done:
+
     connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
 
     return connector_status;
 }
 
+connector_callback_status_t ccapi_status_handler(connector_request_id_status_t status_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_continue;
+
+    switch (status_request)
+    {
+        case connector_request_id_status_tcp:
+        {
+            connector_status_tcp_event_t * tcp_event = data;
+
+            switch(tcp_event->status)
+            {
+                case connector_tcp_communication_started:
+                {
+                    ccapi_data->transport_tcp.connected = CCAPI_TRUE;
+                    break;
+                }
+                case connector_tcp_keepalive_missed:
+                {
+                    ccapi_keepalive_status_t const keepalive_status = CCAPI_KEEPALIVE_MISSED;
+
+                    if (ccapi_data->transport_tcp.info->callback.keepalive != NULL)
+                    {
+                        ccapi_data->transport_tcp.info->callback.keepalive(keepalive_status);
+                    }
+                    break;
+                }
+                case connector_tcp_keepalive_restored:
+                {
+                    ccapi_keepalive_status_t const keepalive_status = CCAPI_KEEPALIVE_RESTORED;
+
+                    if (ccapi_data->transport_tcp.info->callback.keepalive != NULL)
+                    {
+                        ccapi_data->transport_tcp.info->callback.keepalive(keepalive_status);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case connector_request_id_status_stop_completed:
+        {
+            break;
+        }
+    }
+
+    return connector_status;
+}
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
@@ -287,6 +490,9 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             break;
         case connector_class_id_network_tcp:
             status = ccapi_network_handler(request_id.network_request, data, ccapi_data);
+            break;
+        case connector_class_id_status:
+            status = ccapi_status_handler(request_id.status_request, data, ccapi_data);
             break;
         default:
             status = connector_callback_unrecognized;

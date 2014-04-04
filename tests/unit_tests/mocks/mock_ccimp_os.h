@@ -48,6 +48,10 @@ void Mock_ccimp_create_thread_create(void);
 void Mock_ccimp_create_thread_destroy(void);
 void Mock_ccimp_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
 
+void Mock_ccimp_os_get_system_time_create(void);
+void Mock_ccimp_os_get_system_time_destroy(void);
+void Mock_ccimp_os_get_system_time_return(unsigned long retval);
+
 extern "C" {
 ccimp_status_t ccimp_malloc_real(ccimp_malloc_t * malloc_info);
 ccimp_status_t ccimp_free_real(ccimp_free_t * free_info);

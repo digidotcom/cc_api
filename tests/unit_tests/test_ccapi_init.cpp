@@ -51,7 +51,7 @@ TEST(ccapi_init_test, testVendorIdZero)
 
 TEST(ccapi_init_test, testInvalidDeviceId)
 {
-    uint8_t device_id[DEVICE_ID_LENGTH] = {0};
+    uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
@@ -199,7 +199,6 @@ TEST(ccapi_init_test, testStartOk)
     Mock_ccimp_free_notExpected();
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
-    Mock_connector_run_returnInNextLoop(connector_success);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
