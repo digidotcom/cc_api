@@ -13,13 +13,7 @@ using namespace std;
 static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
 
 static ccapi_bool_t ccapi_tcp_keepalives_cb_called;
-static ccapi_bool_t ccapi_tcp_close_cb_called;
 static ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
-
-static ccapi_bool_t ccapi_tcp_close_cb(void)
-{
-    return CCAPI_TRUE;
-}
 
 static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 {
@@ -52,15 +46,14 @@ TEST_GROUP(ccapi_status_handler_test)
             mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
             mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
             mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+        }
 
         tcp_start.connection.type = CCAPI_CONNECTION_WAN;
         tcp_start.connection.info.wan.phone_number = phone_number;
         tcp_start.connection.info.wan.link_speed = 115200;
         memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
-        ccapi_tcp_close_cb_called = CCAPI_FALSE;
         ccapi_tcp_keepalives_cb_called = CCAPI_FALSE;
-        tcp_start.callback.close = ccapi_tcp_close_cb;
         tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
 
         connector_transport_t connector_transport = connector_transport_tcp;
@@ -68,7 +61,6 @@ TEST_GROUP(ccapi_status_handler_test)
 
         error = ccapi_start_transport_tcp(&tcp_start);
         CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-        }
     }
 
     void teardown()
@@ -167,7 +159,6 @@ TEST_GROUP(ccapi_status_handler_test_no_callbacks)
         tcp_start.connection.info.wan.link_speed = 115200;
         memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
-        ccapi_tcp_close_cb_called = CCAPI_FALSE;
         ccapi_tcp_keepalives_cb_called = CCAPI_FALSE;
         tcp_start.callback.close = NULL;
         tcp_start.callback.keepalive = NULL;

@@ -56,12 +56,13 @@ TEST_GROUP(ccapi_tcp_start_test)
     }
 };
 
-ccapi_bool_t ccapi_tcp_close_cb(void)
+static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 {
+    UNUSED_ARGUMENT(cause);
     return CCAPI_TRUE;
 }
 
-void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
+static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 {
     UNUSED_ARGUMENT(status);
     return;
