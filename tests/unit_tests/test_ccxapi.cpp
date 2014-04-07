@@ -34,7 +34,7 @@ TEST(ccxapi_test, testNULLHandle)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccxapi_start(NULL, &start);
 
     CHECK_EQUAL(error, CCAPI_START_ERROR_NULL_PARAMETER);
@@ -46,7 +46,7 @@ TEST(ccxapi_test, testStartTwiceSameHandlerFails)
     ccapi_start_t start = {0};
     ccapi_handle_t ccapi_handle = NULL;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     start_error = ccxapi_start(&ccapi_handle, &start);
 
@@ -66,7 +66,7 @@ TEST(ccxapi_test, testStartOneInstance)
 
     ccapi_data_t * ccapi_data = NULL;
 
-    fill_start_structure_with_good_parameters(&start1);
+    th_fill_start_structure_with_good_parameters(&start1);
 
     CHECK(ccapi_data_single_instance == NULL);
     start1_error = ccxapi_start(&ccapi_handle1, &start1);
@@ -101,7 +101,7 @@ TEST(ccxapi_test, testStartTwoInstances)
     ccapi_stop_error_t stop2_error = CCAPI_STOP_ERROR_NONE;
     ccapi_handle_t ccapi_handle2 = NULL;
 
-    fill_start_structure_with_good_parameters(&start1);
+    th_fill_start_structure_with_good_parameters(&start1);
     memcpy(start1.device_id, device_id1, sizeof start1.device_id);
 
     CHECK(ccapi_data_single_instance == NULL);
@@ -110,7 +110,7 @@ TEST(ccxapi_test, testStartTwoInstances)
     CHECK(ccapi_handle1 != NULL);
     CHECK(ccapi_data_single_instance == NULL);
 
-    fill_start_structure_with_good_parameters(&start2);
+    th_fill_start_structure_with_good_parameters(&start2);
     memcpy(start2.device_id, device_id2, sizeof start2.device_id);
 
     CHECK(ccapi_data_single_instance == NULL);

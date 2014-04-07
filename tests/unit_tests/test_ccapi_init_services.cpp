@@ -28,7 +28,7 @@ TEST(ccapi_init_services_test, testCliNotSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -41,7 +41,7 @@ TEST(ccapi_init_services_test, testCliSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.service.cli = &pointer;
     error = ccapi_start(&start);
 
@@ -55,7 +55,7 @@ TEST(ccapi_init_services_test, testReceiveSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.service.receive = &pointer;
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
@@ -68,7 +68,7 @@ TEST(ccapi_init_services_test, testReceiveNotSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -81,7 +81,7 @@ TEST(ccapi_init_services_test, testFirmwareSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.service.firmware = &pointer;
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
@@ -94,7 +94,7 @@ TEST(ccapi_init_services_test, testFirmwareNotSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -107,7 +107,7 @@ TEST(ccapi_init_services_test, testRciSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.service.rci = &pointer;
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
@@ -120,7 +120,7 @@ TEST(ccapi_init_services_test, testRciNotSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -133,7 +133,7 @@ TEST(ccapi_init_services_test, testFileSysSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.service.file_system = &pointer;
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
@@ -146,7 +146,7 @@ TEST(ccapi_init_services_test, testFileSysNotSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 

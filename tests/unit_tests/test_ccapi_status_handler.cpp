@@ -35,7 +35,7 @@ TEST_GROUP(ccapi_status_handler_test)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
@@ -140,7 +140,7 @@ TEST_GROUP(ccapi_status_handler_test_no_callbacks)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 

@@ -15,8 +15,20 @@ extern "C" {
 #define DEVICE_TYPE_STRING      "Device type"
 #define DEVICE_CLOUD_URL_STRING "login.etherios.com"
 
-void fill_start_structure_with_good_parameters(ccapi_start_t * start);
-pthread_t aux_ccapi_start(void * argument);
-int stop_aux_thread(pthread_t pthread);
+#include "CppUTest/CommandLineTestRunner.h"
+#include "mocks/mocks.h"
+
+extern "C" {
+#include "ccapi/ccapi.h"
+#include "ccapi_definitions.h"
+}
+
+void th_fill_start_structure_with_good_parameters(ccapi_start_t * start);
+void th_start_ccapi(void);
+void th_start_tcp_wan_ipv4(void);
+mock_connector_api_info_t * th_setup_mock_info_single_instance(void);
+void th_stop_ccapi(ccapi_data_t * const ccapi_data);
+pthread_t th_aux_ccapi_start(void * argument);
+int th_stop_aux_thread(pthread_t pthread);
 
 #endif

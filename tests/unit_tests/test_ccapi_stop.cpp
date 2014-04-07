@@ -51,7 +51,7 @@ TEST(ccapi_stop_test, testCcapiStartedBadly)
     ccapi_start_t start = {0};
 
     /*Mock_ccimp_free_expectAndReturn(NULL, CCIMP_STATUS_OK);*/
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.vendor_id = 0;
     start_error = ccapi_start(&start);
 
@@ -73,7 +73,7 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
     Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
@@ -106,7 +106,7 @@ TEST(ccapi_stop_test, testCcapiStopImmediately)
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     start_error = ccapi_start(&start);
 

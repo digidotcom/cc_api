@@ -19,7 +19,7 @@ TEST_GROUP(ccapi_config_test_basic)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -138,7 +138,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -238,7 +238,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -381,7 +381,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);

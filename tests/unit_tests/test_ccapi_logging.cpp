@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_logging_test)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
     }
@@ -171,7 +171,7 @@ TEST(ccapi_logging_test, testDbgDefineDisabled)
 {
     ccapi_start_error_t error;
     ccapi_start_t start = {0};
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     /* Manually enable the mock to check that nothing is called */
     mock("ccimp_hal_logging_vprintf").setData("behavior", CCIMP_LOGGING_PRINTF_DOESNT_EXPECT_A_CALL);

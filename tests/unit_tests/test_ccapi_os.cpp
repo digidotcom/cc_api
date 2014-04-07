@@ -19,7 +19,7 @@ TEST_GROUP(ccapi_os_test)
 
         Mock_create_all();
 
-        fill_start_structure_with_good_parameters(&start);
+        th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
     }

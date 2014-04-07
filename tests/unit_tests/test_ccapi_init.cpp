@@ -40,7 +40,7 @@ TEST(ccapi_init_test, testVendorIdZero)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.vendor_id = 0;
     error = ccapi_start(&start);
 
@@ -53,7 +53,7 @@ TEST(ccapi_init_test, testInvalidDeviceId)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     memcpy(start.device_id, device_id, sizeof start.device_id);
     error = ccapi_start(&start);
 
@@ -65,7 +65,7 @@ TEST(ccapi_init_test, testNullDeviceCloudURL)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.device_cloud_url = NULL;
     error = ccapi_start(&start);
 
@@ -77,7 +77,7 @@ TEST(ccapi_init_test, testInvalidDeviceCloudURL)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.device_cloud_url = "";
     error = ccapi_start(&start);
 
@@ -89,7 +89,7 @@ TEST(ccapi_init_test, testNullDeviceType)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.device_type = NULL;
     error = ccapi_start(&start);
 
@@ -101,7 +101,7 @@ TEST(ccapi_init_test, testInvalidDeviceType)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     start.device_type = "";
     error = ccapi_start(&start);
 
@@ -116,7 +116,7 @@ TEST(ccapi_init_test, testNoMemory)
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
     Mock_ccimp_free_notExpected();
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     error = ccapi_start(&start);
 
@@ -136,7 +136,7 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
     /* No need to call free on malloc_for_device_type because the malloc failed */
     Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
@@ -158,7 +158,7 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     Mock_ccimp_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
     Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
@@ -172,7 +172,7 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
 
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
@@ -203,7 +203,7 @@ TEST(ccapi_init_test, testStartOk)
     /* expected_create_thread_connector_run.start */
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
@@ -233,7 +233,7 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     Mock_ccimp_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
     Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 
@@ -269,7 +269,7 @@ TEST(ccapi_init_test, testStartThreadFail)
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, CCIMP_STATUS_ABORT);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_THREAD_FAILED);
 
@@ -286,7 +286,7 @@ TEST(ccapi_init_test, testStartTwiceFails)
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
 
     start_error = ccapi_start(&start);
 

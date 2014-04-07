@@ -47,16 +47,16 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_ARGUMENT_NULL, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     {
         /* call ccapi_start in a sepatare thread as it won't return */
-        pthread_t const aux_thread = aux_ccapi_start(&start);
+        pthread_t const aux_thread = th_aux_ccapi_start(&start);
 
         WAIT_FOR_ASSERT();
         ASSERT_IF_NOT_HIT_DO ("ccapi_data != NULL", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                           FAIL_TEST("'ccapi_data != NULL' not hitted"));
 
-        stop_aux_thread(aux_thread);
+        th_stop_aux_thread(aux_thread);
 
         {
             ccapi_data_t * ccapi_data = (ccapi_data_t *)malloc_for_ccapi_data;
@@ -96,7 +96,7 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
     Mock_ccimp_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
-    fill_start_structure_with_good_parameters(&start);
+    th_fill_start_structure_with_good_parameters(&start);
     error = ccapi_start(&start);
     CHECK(error == CCAPI_START_ERROR_NONE);
 
