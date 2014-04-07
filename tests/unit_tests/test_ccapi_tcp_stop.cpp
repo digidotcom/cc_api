@@ -76,7 +76,7 @@ static void start_tcp(void)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
 }
 
-TEST_GROUP(ccapi_tcp_stop_no_ccapi)
+TEST_GROUP(ccapi_tcp_stop)
 {
     void setup()
     {
@@ -89,7 +89,7 @@ TEST_GROUP(ccapi_tcp_stop_no_ccapi)
     }
 };
 
-TEST(ccapi_tcp_stop_no_ccapi, testCCAPINotStarted)
+TEST(ccapi_tcp_stop, testCCAPINotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -98,7 +98,7 @@ TEST(ccapi_tcp_stop_no_ccapi, testCCAPINotStarted)
     CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NO_CCAPI, tcp_stop_error);
 }
 
-TEST(ccapi_tcp_stop_no_ccapi, testTCPNotStarted)
+TEST(ccapi_tcp_stop, testTCPNotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -108,7 +108,7 @@ TEST(ccapi_tcp_stop_no_ccapi, testTCPNotStarted)
     CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NOT_STARTED, tcp_stop_error);
 }
 
-TEST(ccapi_tcp_stop_no_ccapi, testTCPStopOK)
+TEST(ccapi_tcp_stop, testTCPStopOK)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -125,7 +125,7 @@ TEST(ccapi_tcp_stop_no_ccapi, testTCPStopOK)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_stop_no_ccapi, testTCPStopCcfsmError)
+TEST(ccapi_tcp_stop, testTCPStopCcfsmError)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -142,7 +142,7 @@ TEST(ccapi_tcp_stop_no_ccapi, testTCPStopCcfsmError)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_stop_no_ccapi, testTCPStopTimeout)
+TEST(ccapi_tcp_stop, testTCPStopTimeout)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
