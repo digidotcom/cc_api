@@ -301,12 +301,12 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         }
         else
         {
-            ccapi_bool_t timeout = CCAPI_FALSE;
             ccimp_os_system_up_time_t time_start;
             ccimp_os_system_up_time_t end_time;
+            unsigned long const jitter = 1;
 
             ccimp_os_get_system_time(&time_start);
-            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.timeout + 1;
+            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.timeout + jitter;
             do {
                 ccimp_os_system_up_time_t system_uptime;
 
@@ -314,15 +314,10 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
                 ccimp_os_get_system_time(&system_uptime);
                 if (system_uptime.sys_uptime > end_time.sys_uptime)
                 {
-                    timeout = CCAPI_TRUE;
+                    error = CCAPI_TCP_START_ERROR_TIMEOUT;
+                    goto done;
                 }
-            } while (!ccapi_data->transport_tcp.connected && !timeout);
-
-            if (timeout)
-            {
-                error = CCAPI_TCP_START_ERROR_TIMEOUT;
-                goto done;
-            }
+            } while (!ccapi_data->transport_tcp.connected);
         }
     }
 done:
@@ -387,12 +382,12 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
             }
             else
             {
-                ccapi_bool_t timeout = CCAPI_FALSE;
                 ccimp_os_system_up_time_t time_start;
                 ccimp_os_system_up_time_t end_time;
+                unsigned long const jitter = 1;
 
                 ccimp_os_get_system_time(&time_start);
-                end_time.sys_uptime = time_start.sys_uptime + tcp_stop->timeout + 1;
+                end_time.sys_uptime = time_start.sys_uptime + tcp_stop->timeout + jitter;
                 do {
                     ccimp_os_system_up_time_t system_uptime;
 
@@ -400,15 +395,10 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
                     ccimp_os_get_system_time(&system_uptime);
                     if (system_uptime.sys_uptime > end_time.sys_uptime)
                     {
-                        timeout = CCAPI_TRUE;
+                        error = CCAPI_TCP_STOP_ERROR_TIMEOUT;
+                        goto done;
                     }
-                } while (ccapi_data->transport_tcp.connected && !timeout);
-
-                if (timeout)
-                {
-                    error = CCAPI_TCP_STOP_ERROR_TIMEOUT;
-                    goto done;
-                }
+                } while (ccapi_data->transport_tcp.connected);
             }
         }
 
