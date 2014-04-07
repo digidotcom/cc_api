@@ -129,6 +129,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
+    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
