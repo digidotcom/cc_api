@@ -291,7 +291,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
     }
 
     {
-        ccapi_bool_t const wait_forever = tcp_start->connection.timeout ? CCAPI_FALSE : CCAPI_TRUE;
+        ccapi_bool_t const wait_forever = CCAPI_BOOL(tcp_start->connection.timeout == 0);
 
         if (wait_forever)
         {
@@ -377,7 +377,7 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
     }
 
     {
-            ccapi_bool_t const wait_forever = tcp_stop->timeout ? CCAPI_FALSE : CCAPI_TRUE;
+            ccapi_bool_t const wait_forever = CCAPI_BOOL(tcp_stop->timeout == 0);
 
             if (wait_forever)
             {

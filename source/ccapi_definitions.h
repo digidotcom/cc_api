@@ -32,6 +32,7 @@
 #endif
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
+#define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
 
 typedef struct {
     uint32_t vendor_id;
