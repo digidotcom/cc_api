@@ -37,6 +37,9 @@ typedef struct  {
     struct {
         ccapi_bool_t init_transport;
     } connector_initiate_transport_start_info;
+    struct {
+        ccapi_bool_t stop_transport;
+    } connector_initiate_transport_stop_info;
 } mock_connector_api_info_t;
 
 mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);

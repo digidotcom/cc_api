@@ -235,10 +235,41 @@ bool connector_transport_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
+SimpleString connector_initiate_stop_request_t_ValueToString(void* object)
+{
+    UNUSED_ARGUMENT(object);
+    return "connector_initiate_stop_request_t";
+}
+
+bool connector_initiate_stop_request_t_IsEqual(void * object1, void * object2)
+{
+    connector_initiate_stop_request_t * connector_initiate_stop_request_1 = (connector_initiate_stop_request_t *)object1;
+    connector_initiate_stop_request_t * connector_initiate_stop_request_2 = (connector_initiate_stop_request_t *)object2;
+
+    if (connector_initiate_stop_request_1 == connector_initiate_stop_request_2)
+        return true;
+
+    if (connector_initiate_stop_request_1 == NULL || connector_initiate_stop_request_2 == NULL)
+        return false;
+
+    if (connector_initiate_stop_request_1->condition != connector_initiate_stop_request_2->condition)
+        return false;
+
+    if (connector_initiate_stop_request_1->transport != connector_initiate_stop_request_2->transport)
+        return false;
+
+    if (connector_initiate_stop_request_1->user_context != connector_initiate_stop_request_2->user_context)
+        return false;
+
+    return true;
+}
+
 void Mock_connector_initiate_action_create(void)
 {
     static MockFunctionComparator connector_transport_t_comparator(connector_transport_t_IsEqual, connector_transport_t_ValueToString);
+    static MockFunctionComparator connector_initiate_stop_request_t_comparator(connector_initiate_stop_request_t_IsEqual, connector_initiate_stop_request_t_ValueToString);
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
+    mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
 
     return;
 }
@@ -252,6 +283,13 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
 {
     switch (request)
     {
+        case connector_initiate_transport_stop:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_initiate_stop_request_t", "request_data", request_data)
+                     .andReturnValue(retval);
+            break;
         case connector_initiate_transport_start:
             mock("connector_initiate_action").expectOneCall("connector_initiate_action")
                      .withParameter("handle", handle)
@@ -259,7 +297,6 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
                      .withParameterOfType("connector_transport_t", "request_data", request_data)
                      .andReturnValue(retval);
             break;
-        case connector_initiate_transport_stop:
         case connector_initiate_send_data:
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
@@ -284,13 +321,29 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 
     switch (request)
     {
+        case connector_initiate_transport_stop:
+        {
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_initiate_stop_request_t", "request_data", (void *)request_data);
+            if (ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_stop_info.stop_transport)
+            {
+                 connector_request_id_t request_id;
+                 connector_initiate_stop_request_t stop_status = {connector_transport_tcp, connector_wait_sessions_complete, NULL};
+
+                 request_id.status_request = connector_request_id_status_stop_completed;
+                 ccapi_connector_callback(connector_class_id_status, request_id, &stop_status, (void *)ccapi_data);
+            }
+            break;
+        }
         case connector_initiate_transport_start:
         {
             mock("connector_initiate_action").actualCall("connector_initiate_action")
                     .withParameter("handle", handle)
                     .withParameter("request", request)
                     .withParameterOfType("connector_transport_t", "request_data", (void *)request_data);
-            if (mock_info->connector_initiate_transport_start_info.init_transport)
+            if (!ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_start_info.init_transport)
             {
                  connector_request_id_t request_id;
                  connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
@@ -309,14 +362,12 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 
             if (mock_info && mock_info->ccapi_handle != NULL)
             {
-                /* printf("terminate: handle=%p\n",(void*)handle); */
                 ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
                 mock_info->connector_run_retval = connector_device_terminated;
             }
 
             break;
         }
-        case connector_initiate_transport_stop:
         case connector_initiate_send_data:
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
