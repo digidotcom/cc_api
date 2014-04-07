@@ -95,7 +95,7 @@ TEST(ccapi_tcp_stop, testCCAPINotStarted)
     ccapi_tcp_stop_t tcp_stop = {0};
 
     tcp_stop_error = ccapi_stop_transport_tcp(&tcp_stop);
-    CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NO_CCAPI, tcp_stop_error);
+    CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NOT_STARTED, tcp_stop_error);
 }
 
 TEST(ccapi_tcp_stop, testTCPNotStarted)
