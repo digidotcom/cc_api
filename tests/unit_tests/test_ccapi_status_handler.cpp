@@ -1,14 +1,4 @@
-#include "CppUTest/CommandLineTestRunner.h"
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi/ccapi.h"
-#include "ccapi_definitions.h"
-}
-
 #include "test_helper_functions.h"
-
-using namespace std;
 
 static ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 static ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;

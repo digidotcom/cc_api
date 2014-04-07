@@ -1,14 +1,4 @@
-#include "CppUTest/CommandLineTestRunner.h"
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi/ccapi.h"
-#include "ccapi_definitions.h"
-}
-
 #include "test_helper_functions.h"
-
-using namespace std;
 
 TEST_GROUP(ccapi_logging_test)
 {

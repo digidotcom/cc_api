@@ -8,12 +8,10 @@
 #ifndef _TEST_HELPER_FUNCTIONS_H_
 #define _TEST_HELPER_FUNCTIONS_H_
 
-extern "C" {
-#include "ccapi/ccapi.h"
-}
+#define CCAPI_CONST_PROTECTION_UNLOCK
 
-#define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define TH_DEVICE_TYPE_STRING      "Device type"
+#define TH_DEVICE_CLOUD_URL_STRING "login.etherios.com"
 
 #include "CppUTest/CommandLineTestRunner.h"
 #include "mocks/mocks.h"

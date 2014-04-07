@@ -1,14 +1,3 @@
-#include "CppUTest/CommandLineTestRunner.h"
-
-#define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi_definitions.h"
-#include "ccapi/ccxapi.h"
-}
-
 #include "test_helper_functions.h"
 
 using namespace std;

@@ -1,14 +1,3 @@
-#include "CppUTest/CommandLineTestRunner.h"
-
-#define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi/ccapi.h"
-#include "ccapi_definitions.h"
-}
-
 #include "test_helper_functions.h"
 
 TEST_GROUP(ccapi_tcp_test)

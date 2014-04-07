@@ -1,21 +1,3 @@
-/*
- * test_ccapi_stop.cpp
- *
- *  Created on: Mar 17, 2014
- *      Author: spastor
- */
-
-#include "CppUTest/CommandLineTestRunner.h"
-
-#define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi/ccapi.h"
-#include "ccapi_definitions.h"
-}
-
 #include "test_helper_functions.h"
 
 mock_connector_api_info_t * mock_info;

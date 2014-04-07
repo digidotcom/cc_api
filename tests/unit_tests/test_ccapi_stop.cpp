@@ -1,21 +1,3 @@
-/*
- * test_ccapi_stop.cpp
- *
- *  Created on: Mar 17, 2014
- *      Author: spastor
- */
-
-#include "CppUTest/CommandLineTestRunner.h"
-
-#define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mocks/mocks.h"
-
-extern "C" {
-#include "ccapi/ccapi.h"
-#include "ccapi_definitions.h"
-}
-
 #include "test_helper_functions.h"
 
 TEST_GROUP(ccapi_stop_test)
@@ -65,8 +47,8 @@ TEST(ccapi_stop_test, testCcapiStartedBadly)
 TEST(ccapi_stop_test, testCcapiStopGracefully)
 {
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
-    void * malloc_for_device_type = malloc(sizeof DEVICE_TYPE_STRING);
-    void * malloc_for_device_cloud_url = malloc(sizeof DEVICE_CLOUD_URL_STRING);
+    void * malloc_for_device_type = malloc(sizeof TH_DEVICE_TYPE_STRING);
+    void * malloc_for_device_cloud_url = malloc(sizeof TH_DEVICE_CLOUD_URL_STRING);
     static ccimp_create_thread_info_t mem_for_thread_connector_run;
 
     ccapi_stop_error_t stop_error;
@@ -76,8 +58,8 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     th_fill_start_structure_with_good_parameters(&start);
 
     Mock_ccimp_malloc_expectAndReturn(sizeof(ccapi_data_t), malloc_for_ccapi_data);
-    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_TYPE_STRING), malloc_for_device_type);
-    Mock_ccimp_malloc_expectAndReturn(sizeof(DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
+    Mock_ccimp_malloc_expectAndReturn(sizeof(TH_DEVICE_TYPE_STRING), malloc_for_device_type);
+    Mock_ccimp_malloc_expectAndReturn(sizeof(TH_DEVICE_CLOUD_URL_STRING), malloc_for_device_cloud_url);
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
 
     start_error = ccapi_start(&start);

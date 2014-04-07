@@ -1,13 +1,6 @@
-/*
- * test_helper_functions.cpp
- *
- *  Created on: Mar 18, 2014
- *      Author: spastor
- */
-
+#include "test_helper_functions.h"
 #include <stdio.h>
 #include <pthread.h>
-#include "test_helper_functions.h"
 
 static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 {
@@ -24,8 +17,8 @@ static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 void th_fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
-    char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
-    char const * const device_type = DEVICE_TYPE_STRING;
+    char const * const device_cloud_url = TH_DEVICE_CLOUD_URL_STRING;
+    char const * const device_type = TH_DEVICE_TYPE_STRING;
     start->vendor_id = 0x12345678; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
     start->device_cloud_url = device_cloud_url;
