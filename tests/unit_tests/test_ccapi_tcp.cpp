@@ -11,8 +11,6 @@ extern "C" {
 
 #include "test_helper_functions.h"
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 TEST_GROUP(ccapi_tcp_test)
 {
     void setup()
@@ -36,7 +34,7 @@ TEST(ccapi_tcp_test, testTcpOpen)
     Mock_ccimp_network_tcp_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_open;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_open_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_open_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
@@ -54,7 +52,7 @@ TEST(ccapi_tcp_test, testTcpSend)
     Mock_ccimp_network_tcp_send_expectAndReturn(&ccimp_send_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_send;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_send_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_send_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
@@ -72,7 +70,7 @@ TEST(ccapi_tcp_test, testTcpReceive)
     Mock_ccimp_network_tcp_receive_expectAndReturn(&ccimp_receive_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_receive;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_receive_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_receive_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
@@ -104,8 +102,6 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 
 TEST_GROUP(ccapi_tcp_test_close)
 {
-    ccapi_data_t * ccapi_data;
-
     void setup()
     {
         ccapi_start_error_t start_error;
@@ -121,10 +117,9 @@ TEST_GROUP(ccapi_tcp_test_close)
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
-        ccapi_data = *spy_ccapi_data;
         {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle);
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
             mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
         }
 
@@ -137,7 +132,7 @@ TEST_GROUP(ccapi_tcp_test_close)
         tcp_start.callback.close = ccapi_tcp_close_cb;
 
         connector_transport_t connector_transport = connector_transport_tcp;
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
         error = ccapi_start_transport_tcp(&tcp_start);
         CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
@@ -147,7 +142,7 @@ TEST_GROUP(ccapi_tcp_test_close)
     {
         ccapi_stop_error_t stop_error;
 
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
 
@@ -166,13 +161,13 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudDisconnected)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(CCAPI_TCP_CLOSE_DISCONNECTED, ccapi_tcp_close_cb_argument);
     CHECK_EQUAL(connector_true, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudRedirected)
@@ -186,13 +181,13 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudRedirected)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(CCAPI_TCP_CLOSE_REDIRECTED, ccapi_tcp_close_cb_argument);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseCallbackNoKeepalive)
@@ -206,13 +201,13 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackNoKeepalive)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(CCAPI_TCP_CLOSE_NO_KEEPALIVE, ccapi_tcp_close_cb_argument);
     CHECK_EQUAL(connector_true, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseDeviceError)
@@ -226,13 +221,13 @@ TEST(ccapi_tcp_test_close, testTcpCloseDeviceError)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(CCAPI_TCP_CLOSE_DATA_ERROR, ccapi_tcp_close_cb_argument);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseNoCallback)
@@ -243,15 +238,15 @@ TEST(ccapi_tcp_test_close, testTcpCloseNoCallback)
     ccimp_network_close_t ccimp_close_data = {handle};
     connector_callback_status_t status;
 
-    ccapi_data->transport_tcp.info->callback.close = NULL;
+    ccapi_data_single_instance->transport_tcp.info->callback.close = NULL;
 
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_FALSE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseAbort)
@@ -265,12 +260,12 @@ TEST(ccapi_tcp_test_close, testTcpCloseAbort)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_FALSE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseTerminated)
@@ -284,12 +279,12 @@ TEST(ccapi_tcp_test_close, testTcpCloseTerminated)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_FALSE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
 TEST(ccapi_tcp_test_close, testTcpCloseStopped)
@@ -303,10 +298,10 @@ TEST(ccapi_tcp_test_close, testTcpCloseStopped)
     Mock_ccimp_network_tcp_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
     request.network_request = connector_request_id_network_close;
-    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, (*spy_ccapi_data));
+    status = ccapi_connector_callback(connector_class_id_network_tcp, request, &connector_close_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_FALSE, ccapi_tcp_close_cb_called);
     CHECK_EQUAL(connector_false, connector_close_data.reconnect);
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_data->transport_tcp.connected);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }

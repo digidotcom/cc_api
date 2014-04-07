@@ -18,12 +18,9 @@ extern "C" {
 
 #include "test_helper_functions.h"
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 TEST_GROUP(ccapi_tcp_start_test)
 {
     mock_connector_api_info_t * mock_info;
-    ccapi_data_t * ccapi_data;
 
     void setup()
     {
@@ -36,10 +33,9 @@ TEST_GROUP(ccapi_tcp_start_test)
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
-        ccapi_data = *spy_ccapi_data;
         {
-            mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
             mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
         }
     }
@@ -48,7 +44,7 @@ TEST_GROUP(ccapi_tcp_start_test)
     {
         ccapi_stop_error_t stop_error;
 
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
 
@@ -84,7 +80,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
@@ -107,17 +103,17 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
 
     connector_transport_t connector_transport = connector_transport_tcp;
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_init_error);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_invalid_data);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
@@ -140,7 +136,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
 
     connector_transport_t connector_transport = connector_transport_tcp;
 
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport,
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_abort);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
@@ -164,7 +160,7 @@ TEST(ccapi_tcp_start_test, testTCPConnectionTimeout)
     mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     Mock_ccimp_os_get_system_time_return(0); /* Start time */
     Mock_ccimp_os_get_system_time_return(5);
@@ -173,5 +169,5 @@ TEST(ccapi_tcp_start_test, testTCPConnectionTimeout)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(tcp_start.connection.timeout, ccapi_data->transport_tcp.info->connection.timeout);
+    CHECK_EQUAL(tcp_start.connection.timeout, ccapi_data_single_instance->transport_tcp.info->connection.timeout);
 }

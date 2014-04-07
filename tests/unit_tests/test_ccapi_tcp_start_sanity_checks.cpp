@@ -18,8 +18,6 @@ extern "C" {
 
 #include "test_helper_functions.h"
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 /* This group doesn't call ccapi_start/stop functions */
 TEST_GROUP(ccapi_tcp_start_with_no_ccapi) {};
 TEST(ccapi_tcp_start_with_no_ccapi, testNotStarted)
@@ -35,8 +33,6 @@ TEST(ccapi_tcp_start_with_no_ccapi, testNotStarted)
 
 TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
 {
-    ccapi_data_t * ccapi_data;
-
     void setup()
     {
         ccapi_start_error_t start_error;
@@ -48,10 +44,9 @@ TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
         start_error = ccapi_start(&start);
         CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
-        ccapi_data = *spy_ccapi_data;
         {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
             mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
         }
     }
@@ -60,7 +55,7 @@ TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
     {
         ccapi_stop_error_t stop_error;
 
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
         stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
         CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
 
@@ -151,12 +146,12 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(memcmp(ipv4, (*spy_ccapi_data)->transport_tcp.info->connection.ip.address.ipv4, sizeof ipv4) == 0);
-    CHECK(memcmp(mac, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
+    CHECK(memcmp(ipv4, ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv4, sizeof ipv4) == 0);
+    CHECK(memcmp(mac, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
@@ -172,12 +167,12 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(memcmp(ipv6, (*spy_ccapi_data)->transport_tcp.info->connection.ip.address.ipv6, sizeof ipv6) == 0);
-    CHECK(memcmp(mac, (*spy_ccapi_data)->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
+    CHECK(memcmp(ipv6, ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv6, sizeof ipv6) == 0);
+    CHECK(memcmp(mac, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
@@ -211,13 +206,13 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.password != (*spy_ccapi_data)->transport_tcp.info->connection.password);
-    STRCMP_EQUAL(tcp_start.connection.password, (*spy_ccapi_data)->transport_tcp.info->connection.password);
+    /* If both pointers are the same, then ccapi_data_single_instance is holding a pointer to a stack variable */
+    CHECK(tcp_start.connection.password != ccapi_data_single_instance->transport_tcp.info->connection.password);
+    STRCMP_EQUAL(tcp_start.connection.password, ccapi_data_single_instance->transport_tcp.info->connection.password);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
@@ -233,14 +228,14 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.link_speed);
-    /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
-    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
+    CHECK(tcp_start.connection.info.wan.link_speed == ccapi_data_single_instance->transport_tcp.info->connection.info.wan.link_speed);
+    /* If both pointers are the same, then ccapi_data_single_instance is holding a pointer to a stack variable */
+    CHECK(tcp_start.connection.info.wan.phone_number != ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
+    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
@@ -256,14 +251,14 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK(tcp_start.connection.info.wan.link_speed == (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.link_speed);
-    /* If both pointers are the same, then ccapi_data is holding a pointer to a stack variable */
-    CHECK(tcp_start.connection.info.wan.phone_number != (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
-    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, (*spy_ccapi_data)->transport_tcp.info->connection.info.wan.phone_number);
+    CHECK(tcp_start.connection.info.wan.link_speed == ccapi_data_single_instance->transport_tcp.info->connection.info.wan.link_speed);
+    /* If both pointers are the same, then ccapi_data_single_instance is holding a pointer to a stack variable */
+    CHECK(tcp_start.connection.info.wan.phone_number != ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
+    STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
@@ -294,14 +289,14 @@ TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.connection.type, (*spy_ccapi_data)->transport_tcp.info->connection.type);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_RX_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.rx);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_TX_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.tx);
-    CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, (*spy_ccapi_data)->transport_tcp.info->keepalives.wait_count);
+    CHECK_EQUAL(tcp_start.connection.type, ccapi_data_single_instance->transport_tcp.info->connection.type);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_RX_DEFAULT, ccapi_data_single_instance->transport_tcp.info->keepalives.rx);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_TX_DEFAULT, ccapi_data_single_instance->transport_tcp.info->keepalives.tx);
+    CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, ccapi_data_single_instance->transport_tcp.info->keepalives.wait_count);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
@@ -318,11 +313,11 @@ TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.connection.max_transactions, (*spy_ccapi_data)->transport_tcp.info->connection.max_transactions);
+    CHECK_EQUAL(tcp_start.connection.max_transactions, ccapi_data_single_instance->transport_tcp.info->connection.max_transactions);
 }
 
 TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
@@ -353,7 +348,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
     Mock_ccimp_malloc_expectAndReturn(sizeof password, malloc_for_password);
@@ -410,10 +405,10 @@ TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
     tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
 
     connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
-    CHECK_EQUAL(tcp_start.callback.close, (*spy_ccapi_data)->transport_tcp.info->callback.close);
-    CHECK_EQUAL(tcp_start.callback.keepalive, (*spy_ccapi_data)->transport_tcp.info->callback.keepalive);
+    CHECK_EQUAL(tcp_start.callback.close, ccapi_data_single_instance->transport_tcp.info->callback.close);
+    CHECK_EQUAL(tcp_start.callback.keepalive, ccapi_data_single_instance->transport_tcp.info->callback.keepalive);
 }

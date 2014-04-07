@@ -13,8 +13,6 @@ extern "C" {
 
 using namespace std;
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 uint8_t device_id1[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
 uint8_t device_id2[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0x44};
 
@@ -70,11 +68,11 @@ TEST(ccxapi_test, testStartOneInstance)
 
     fill_start_structure_with_good_parameters(&start1);
 
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
     start1_error = ccxapi_start(&ccapi_handle1, &start1);
     CHECK(start1_error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_handle1 != NULL);
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 
     ccapi_data = (ccapi_data_t *)ccapi_handle1;
     {
@@ -86,7 +84,7 @@ TEST(ccxapi_test, testStartOneInstance)
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
 
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }
 
 TEST(ccxapi_test, testStartTwoInstances)
@@ -106,20 +104,20 @@ TEST(ccxapi_test, testStartTwoInstances)
     fill_start_structure_with_good_parameters(&start1);
     memcpy(start1.device_id, device_id1, sizeof start1.device_id);
 
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
     start1_error = ccxapi_start(&ccapi_handle1, &start1);
     CHECK(start1_error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_handle1 != NULL);
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 
     fill_start_structure_with_good_parameters(&start2);
     memcpy(start2.device_id, device_id2, sizeof start2.device_id);
 
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
     start2_error = ccxapi_start(&ccapi_handle2, &start2);
     CHECK(start2_error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_handle2 != NULL);
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 
     CHECK(ccapi_handle1 != ccapi_handle2);
 
@@ -132,7 +130,7 @@ TEST(ccxapi_test, testStartTwoInstances)
 
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 
     ccapi_data = (ccapi_data_t *)ccapi_handle2;
     {
@@ -143,5 +141,5 @@ TEST(ccxapi_test, testStartTwoInstances)
 
     stop2_error = ccxapi_stop(ccapi_handle2, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop2_error == CCAPI_STOP_ERROR_NONE);
-    CHECK(*spy_ccapi_data == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }

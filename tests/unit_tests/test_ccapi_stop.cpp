@@ -18,8 +18,6 @@ extern "C" {
 
 #include "test_helper_functions.h"
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 TEST_GROUP(ccapi_stop_test)
 {
     void setup()
@@ -37,13 +35,13 @@ TEST(ccapi_stop_test, testCcapiNotStarted)
 {
     ccapi_stop_error_t error;
 
-    CHECK((*spy_ccapi_data) == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
     error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(error == CCAPI_STOP_ERROR_NOT_STARTED);
 
     error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK(error == CCAPI_STOP_ERROR_NOT_STARTED);
-    CHECK((*spy_ccapi_data) == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStartedBadly)
@@ -61,7 +59,7 @@ TEST(ccapi_stop_test, testCcapiStartedBadly)
 
     stop_error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NOT_STARTED);
-    CHECK((*spy_ccapi_data) == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStopGracefully)
@@ -74,8 +72,6 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     ccapi_stop_error_t stop_error;
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
-
-    ccapi_data_t * ccapi_data = NULL;
 
     fill_start_structure_with_good_parameters(&start);
 
@@ -93,16 +89,15 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     Mock_ccimp_free_expectAndReturn(&mem_for_thread_connector_run, CCIMP_STATUS_OK);
     Mock_ccimp_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
-    ccapi_data = *spy_ccapi_data;
     {
-        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
     }
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop_error = ccapi_stop(CCAPI_STOP_GRACEFULLY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
-    CHECK((*spy_ccapi_data) == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }
 
 TEST(ccapi_stop_test, testCcapiStopImmediately)
@@ -111,22 +106,19 @@ TEST(ccapi_stop_test, testCcapiStopImmediately)
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
 
-    ccapi_data_t * ccapi_data = NULL;
-
     fill_start_structure_with_good_parameters(&start);
 
     start_error = ccapi_start(&start);
 
     CHECK_EQUAL(start_error, CCAPI_START_ERROR_NONE);
 
-    ccapi_data = *spy_ccapi_data;
     {
-        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data;
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
     }
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
-    CHECK((*spy_ccapi_data) == NULL);
+    CHECK(ccapi_data_single_instance == NULL);
 }

@@ -10,8 +10,6 @@ extern "C" {
 
 using namespace std;
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 TEST_GROUP(ccapi_os_test)
 {
     void setup()
@@ -42,7 +40,7 @@ TEST(ccapi_os_test, testMalloc)
     Mock_ccimp_malloc_expectAndReturn(malloc_structure.size, pre_allocated_buffer);
 
     request.os_request = connector_request_id_os_malloc;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, &malloc_structure, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &malloc_structure, ccapi_data_single_instance);
 
     CHECK(status == connector_callback_continue);
     CHECK(malloc_structure.ptr == pre_allocated_buffer);
@@ -58,7 +56,7 @@ TEST(ccapi_os_test, testFreeOk)
     Mock_ccimp_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_OK);
 
     request.os_request = connector_request_id_os_free;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
 }
 
@@ -72,7 +70,7 @@ TEST(ccapi_os_test, testFreeAbort)
     Mock_ccimp_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_ABORT);
 
     request.os_request = connector_request_id_os_free;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, ccapi_data_single_instance);
     CHECK(status == connector_callback_abort);
 }
 
@@ -84,7 +82,7 @@ TEST(ccapi_os_test, testYield)
     connector_callback_status_t status;
 
     request.os_request = connector_request_id_os_yield;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, NULL, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, NULL, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
 }
 
@@ -96,7 +94,7 @@ TEST(ccapi_os_test, testSystemUptime)
 
     Mock_ccimp_os_get_system_time_return(0);
     request.os_request = connector_request_id_os_system_up_time;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, &uptime, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &uptime, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
 }
 
@@ -107,7 +105,7 @@ TEST(ccapi_os_test, testReboot)
     connector_callback_status_t status;
 
     request.os_request = connector_request_id_os_reboot;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, NULL, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, NULL, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
 }
 
@@ -122,7 +120,7 @@ TEST(ccapi_os_test, testRealloc)
 
     memcpy(realloc_info.ptr, aux_buffer, 512);
     request.os_request = connector_request_id_os_realloc;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, &realloc_info, *spy_ccapi_data);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &realloc_info, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
     memcpy(realloc_info.ptr, aux_buffer, 1024); /* If realloc is not done, this would throw a SIGSEV */
 }

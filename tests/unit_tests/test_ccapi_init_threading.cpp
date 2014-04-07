@@ -13,8 +13,6 @@ extern "C" {
 
 using namespace std;
 
-static ccapi_data_t * * spy_ccapi_data = (ccapi_data_t * *) &ccapi_data_single_instance;
-
 TEST_GROUP(ccapi_init_threading_test)
 {
     void setup()
@@ -92,7 +90,7 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
     Mock_ccimp_free_notExpected();
 
-    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, (*spy_ccapi_data));
+    Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
     expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
@@ -112,7 +110,7 @@ TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
     ASSERT_IF_NOT_HIT_DO ("status != connector_init_error", "source/ccapi.c", "ccapi_connector_run_thread", 
                                                      FAIL_TEST("'status != connector_init_error' not hitted"));
 
-    CHECK((*spy_ccapi_data)->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 
     free(malloc_for_device_cloud_url);
     free(malloc_for_device_type);
