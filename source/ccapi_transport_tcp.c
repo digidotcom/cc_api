@@ -329,8 +329,106 @@ done:
     return error;
 }
 
+ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_stop_t const * const tcp_stop)
+{
+    ccapi_tcp_stop_error_t error = CCAPI_TCP_STOP_ERROR_NONE;
+
+    UNUSED_ARGUMENT(tcp_stop);
+    if (ccapi_data == NULL)
+    {
+        error = CCAPI_TCP_STOP_ERROR_NO_CCAPI;
+        goto done;
+    }
+
+    if (!ccapi_data->transport_tcp.connected)
+    {
+        error = CCAPI_TCP_STOP_ERROR_NOT_STARTED;
+        goto done;
+    }
+
+    {
+        connector_status_t connector_status;
+        connector_initiate_stop_request_t stop_data = {connector_transport_tcp, connector_wait_sessions_complete, NULL};
+
+        connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_transport_stop, &stop_data);
+
+        switch(connector_status)
+        {
+            case connector_success:
+                break;
+            case connector_init_error:
+            case connector_invalid_data:
+            case connector_service_busy:
+            case connector_invalid_data_size:
+            case connector_invalid_data_range:
+            case connector_keepalive_error:
+            case connector_bad_version:
+            case connector_device_terminated:
+            case connector_invalid_response:
+            case connector_no_resource:
+            case connector_unavailable:
+            case connector_idle:
+            case connector_working:
+            case connector_pending:
+            case connector_active:
+            case connector_abort:
+            case connector_device_error:
+            case connector_exceed_timeout:
+            case connector_invalid_payload_packet:
+            case connector_open_error:
+                error = CCAPI_TCP_STOP_ERROR_CCFSM;
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+    }
+
+    {
+            ccapi_bool_t const wait_forever = tcp_stop->timeout ? CCAPI_FALSE : CCAPI_TRUE;
+
+            if (wait_forever)
+            {
+                do {
+                    ccimp_os_yield();
+                } while (ccapi_data->transport_tcp.connected);
+            }
+            else
+            {
+                ccapi_bool_t timeout = CCAPI_FALSE;
+                ccimp_os_system_up_time_t time_start;
+                ccimp_os_system_up_time_t end_time;
+
+                ccimp_os_get_system_time(&time_start);
+                end_time.sys_uptime = time_start.sys_uptime + tcp_stop->timeout + 1;
+                do {
+                    ccimp_os_system_up_time_t system_uptime;
+
+                    ccimp_os_yield();
+                    ccimp_os_get_system_time(&system_uptime);
+                    if (system_uptime.sys_uptime > end_time.sys_uptime)
+                    {
+                        timeout = CCAPI_TRUE;
+                    }
+                } while (ccapi_data->transport_tcp.connected && !timeout);
+
+                if (timeout)
+                {
+                    error = CCAPI_TCP_STOP_ERROR_TIMEOUT;
+                    goto done;
+                }
+            }
+        }
+
+done:
+    return error;
+}
+
+
 ccapi_tcp_start_error_t ccapi_start_transport_tcp(ccapi_tcp_info_t const * const tcp_start)
 {
     return ccxapi_start_transport_tcp(ccapi_data_single_instance, tcp_start);
 }
 
+ccapi_tcp_stop_error_t ccapi_stop_transport_tcp(ccapi_tcp_stop_t const * const tcp_stop)
+{
+    return ccxapi_stop_transport_tcp(ccapi_data_single_instance, tcp_stop);
+}

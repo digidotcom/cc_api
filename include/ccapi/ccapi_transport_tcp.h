@@ -33,6 +33,14 @@ typedef enum {
 } ccapi_tcp_start_error_t;
 
 typedef enum {
+    CCAPI_TCP_STOP_ERROR_NONE,
+    CCAPI_TCP_STOP_ERROR_NO_CCAPI,
+    CCAPI_TCP_STOP_ERROR_NOT_STARTED,
+    CCAPI_TCP_STOP_ERROR_TIMEOUT,
+    CCAPI_TCP_STOP_ERROR_CCFSM
+} ccapi_tcp_stop_error_t;
+
+typedef enum {
     CCAPI_IPV4,
     CCAPI_IPV6
 } ccapi_ip_address_type_t;
@@ -90,6 +98,10 @@ typedef struct {
     } callback;
 } ccapi_tcp_info_t;
 
-ccapi_tcp_start_error_t ccapi_start_transport_tcp(ccapi_tcp_info_t const * const tcp_start);
+typedef struct {
+    uint8_t timeout;
+} ccapi_tcp_stop_t;
 
+ccapi_tcp_start_error_t ccapi_start_transport_tcp(ccapi_tcp_info_t const * const tcp_start);
+ccapi_tcp_stop_error_t ccapi_stop_transport_tcp(ccapi_tcp_stop_t const * const tcp_stop);
 #endif

@@ -468,6 +468,21 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
         }
         case connector_request_id_status_stop_completed:
         {
+            connector_initiate_stop_request_t * stop_request = data;
+
+            switch (stop_request->transport)
+            {
+                case connector_transport_tcp:
+                {
+                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    break;
+                }
+                default:
+                {
+                    assert(0);
+                    break;
+                }
+            }
             break;
         }
     }
