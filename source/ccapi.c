@@ -478,6 +478,10 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
                     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
                     break;
                 }
+                case connector_transport_udp:
+                case connector_transport_sms:
+                    /* TODO */
+                    break;
             }
             break;
         }
