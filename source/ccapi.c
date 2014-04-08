@@ -258,17 +258,25 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
     switch (os_request) {
         case connector_request_id_os_malloc:
         {
-            ccimp_malloc_t * malloc_data = data;
+            connector_os_malloc_t * connector_malloc_data = data;
+            ccimp_malloc_t ccimp_malloc_data;
 
-            ccimp_status = ccimp_malloc(malloc_data);
+            ccimp_malloc_data.size = connector_malloc_data->size;
+            ccimp_malloc_data.ptr = connector_malloc_data->ptr;
+
+            ccimp_status = ccimp_malloc(&ccimp_malloc_data);
+
+            connector_malloc_data->ptr = ccimp_malloc_data.ptr;
             break;
         }
 
         case connector_request_id_os_free:
         {
-            ccimp_free_t * free_data = data;
+            connector_os_free_t * connector_free_data = data;
+            ccimp_free_t ccimp_free_data;
 
-            ccimp_status = ccimp_free(free_data);
+            ccimp_free_data.ptr = connector_free_data->ptr;
+            ccimp_status = ccimp_free(&ccimp_free_data);
             break;
         }
 
@@ -280,9 +288,12 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
 
         case connector_request_id_os_system_up_time:
         {
-            ccimp_os_system_up_time_t * system_uptime = data;
+            connector_os_system_up_time_t * connector_system_uptime = data;
+            ccimp_os_system_up_time_t ccimp_system_uptime;
 
-            ccimp_status = ccimp_os_get_system_time(system_uptime);
+            ccimp_status = ccimp_os_get_system_time(&ccimp_system_uptime);
+
+            connector_system_uptime->sys_uptime = ccimp_system_uptime.sys_uptime;
             break;
         }
 
@@ -294,8 +305,15 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
 
         case connector_request_id_os_realloc:
         {
-            ccimp_realloc_t * realloc_info = data;
-            ccimp_status = ccimp_realloc(realloc_info);
+            connector_os_realloc_t * connector_realloc_data = data;
+            ccimp_realloc_t ccimp_realloc_data;
+
+            ccimp_realloc_data.new_size = connector_realloc_data->new_size;
+            ccimp_realloc_data.old_size = connector_realloc_data->old_size;
+            ccimp_realloc_data.ptr = connector_realloc_data->ptr;
+            ccimp_status = ccimp_realloc(&ccimp_realloc_data);
+
+            connector_realloc_data->ptr = ccimp_realloc_data.ptr;
             break;
         }
     }
@@ -349,25 +367,47 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
     {
         case connector_request_id_network_open:
         {
-            ccimp_network_open_t * open_data = data;
+            connector_network_open_t * connector_open_data = data;
+            ccimp_network_open_t ccimp_open_data;
 
-            ccimp_status = ccimp_network_tcp_open(open_data);
+            ccimp_open_data.device_cloud.url = connector_open_data->device_cloud.url;
+            ccimp_open_data.handle = connector_open_data->handle;
+
+            ccimp_status = ccimp_network_tcp_open(&ccimp_open_data);
+
+            connector_open_data->handle = ccimp_open_data.handle;
             break;
         }
 
         case connector_request_id_network_send:
         {
-            ccimp_network_send_t * send_data = data;
+            connector_network_send_t * connector_send_data = data;
+            ccimp_network_send_t ccimp_send_data;
 
-            ccimp_status = ccimp_network_tcp_send(send_data);
+            ccimp_send_data.buffer = connector_send_data->buffer;
+            ccimp_send_data.bytes_available = connector_send_data->bytes_available;
+            ccimp_send_data.handle = connector_send_data->handle;
+            ccimp_send_data.bytes_used = 0;
+
+            ccimp_status = ccimp_network_tcp_send(&ccimp_send_data);
+
+            connector_send_data->bytes_used = ccimp_send_data.bytes_used;
             break;
         }
 
         case connector_request_id_network_receive:
         {
-            ccimp_network_receive_t * receive_data = data;
+            connector_network_receive_t * connector_receive_data = data;
+            ccimp_network_receive_t ccimp_receive_data;
 
-            ccimp_status = ccimp_network_tcp_receive(receive_data);
+            ccimp_receive_data.buffer = connector_receive_data->buffer;
+            ccimp_receive_data.bytes_available = connector_receive_data->bytes_available;
+            ccimp_receive_data.handle = connector_receive_data->handle;
+            ccimp_receive_data.bytes_used = 0;
+
+            ccimp_status = ccimp_network_tcp_receive(&ccimp_receive_data);
+
+            connector_receive_data->bytes_used = ccimp_receive_data.bytes_used;
             break;
         }
 
