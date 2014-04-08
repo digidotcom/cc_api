@@ -7,6 +7,8 @@
 
 #include "mock_connector_api.h"
 #include "mock_ccimp_os.h"
+#include "mocks_comparators.h"
+
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
@@ -212,65 +214,10 @@ connector_status_t connector_run(connector_handle_t const handle)
 }
 
 /* * * * * * * * * * connector_initiate_action() * * * * * * * * * */
-SimpleString connector_transport_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "connector_transport_t";
-}
-
-bool connector_transport_t_IsEqual(void * object1, void * object2)
-{
-    connector_transport_t * connector_transport_1 = (connector_transport_t *)object1;
-    connector_transport_t * connector_transport_2 = (connector_transport_t *)object2;
-
-    if (connector_transport_1 == connector_transport_2)
-        return true;
-
-    if (connector_transport_1 == NULL || connector_transport_2 == NULL)
-        return false;
-
-    if (*connector_transport_1 != *connector_transport_2)
-        return false;
-
-    return true;
-}
-
-SimpleString connector_initiate_stop_request_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "connector_initiate_stop_request_t";
-}
-
-bool connector_initiate_stop_request_t_IsEqual(void * object1, void * object2)
-{
-    connector_initiate_stop_request_t * connector_initiate_stop_request_1 = (connector_initiate_stop_request_t *)object1;
-    connector_initiate_stop_request_t * connector_initiate_stop_request_2 = (connector_initiate_stop_request_t *)object2;
-
-    if (connector_initiate_stop_request_1 == connector_initiate_stop_request_2)
-        return true;
-
-    if (connector_initiate_stop_request_1 == NULL || connector_initiate_stop_request_2 == NULL)
-        return false;
-
-    if (connector_initiate_stop_request_1->condition != connector_initiate_stop_request_2->condition)
-        return false;
-
-    if (connector_initiate_stop_request_1->transport != connector_initiate_stop_request_2->transport)
-        return false;
-
-    if (connector_initiate_stop_request_1->user_context != connector_initiate_stop_request_2->user_context)
-        return false;
-
-    return true;
-}
-
 void Mock_connector_initiate_action_create(void)
 {
-    static MockFunctionComparator connector_transport_t_comparator(connector_transport_t_IsEqual, connector_transport_t_ValueToString);
-    static MockFunctionComparator connector_initiate_stop_request_t_comparator(connector_initiate_stop_request_t_IsEqual, connector_initiate_stop_request_t_ValueToString);
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
     mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
-
     return;
 }
 
