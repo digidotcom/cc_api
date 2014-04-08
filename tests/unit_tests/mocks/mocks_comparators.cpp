@@ -1,46 +1,20 @@
 #include "mocks.h"
 
-#define compare_pointers(object1, object2) do {if (object1 == NULL || object2 == NULL) return false; else if (object1 == object2) return true;} while(0)
+#define ValueToStringFunction(type)     static SimpleString type##_ValueToString(void * object) {(void)object; return #type;}
+#define compare_pointers(object1, object2)  do {if (object1 == NULL || object2 == NULL) return false; else if (object1 == object2) return true;} while(0)
+#define compare_strings(string1, string2)   do {if (string1 != string2 && (string1 == NULL || string2 == NULL)) return false;\
+                                                else if (strcmp(string1, string2) != 0) return false;                          } while(0)
 
-static SimpleString ccimp_network_open_t_ValueToString(void * object)
-{
-    UNUSED_ARGUMENT(object);
-    return "ccimp_network_open_t";
-}
-
-static SimpleString ccimp_network_send_t_ValueToString(void * object)
-{
-    UNUSED_ARGUMENT(object);
-    return "ccimp_network_send_t";
-}
-
-static SimpleString ccimp_network_receive_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "ccimp_network_receive_t";
-}
-
-static SimpleString ccimp_network_close_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "ccimp_network_close_t";
-}
+ValueToStringFunction(ccimp_network_open_t)
+ValueToStringFunction(ccimp_network_send_t)
+ValueToStringFunction(ccimp_network_receive_t)
+ValueToStringFunction(ccimp_network_close_t)
+ValueToStringFunction(connector_transport_t)
+ValueToStringFunction(connector_initiate_stop_request_t)
 
 static SimpleString ccimp_create_thread_info_t_ValueToString(void* object)
 {
     return StringFrom(((ccimp_create_thread_info_t*)object)->type);
-}
-
-static SimpleString connector_transport_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "connector_transport_t";
-}
-
-static SimpleString connector_initiate_stop_request_t_ValueToString(void* object)
-{
-    UNUSED_ARGUMENT(object);
-    return "connector_initiate_stop_request_t";
 }
 
 static bool ccimp_network_open_t_IsEqual(void * object1, void * object2)
@@ -49,8 +23,7 @@ static bool ccimp_network_open_t_IsEqual(void * object1, void * object2)
     ccimp_network_open_t * open_data_2 = (ccimp_network_open_t*)object2;
 
     compare_pointers(object1, object2);
-    if (strcmp(open_data_1->device_cloud.url, open_data_2->device_cloud.url) != 0)
-        return false;
+    compare_strings(open_data_1->device_cloud.url, open_data_2->device_cloud.url);
 
     if (open_data_1->handle != open_data_2->handle)
         return false;
