@@ -4,28 +4,14 @@ TEST_GROUP(ccapi_config_test_basic)
 {
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-
         Mock_create_all();
-
-        th_fill_start_structure_with_good_parameters(&start);
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
-
-        {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
-        }
+        th_start_ccapi();
+        th_setup_mock_info_single_instance();
     }
 
     void teardown()
     {
-        ccapi_stop_error_t stop_error;
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
-        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
-        CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
+        th_stop_ccapi(ccapi_data_single_instance);
         Mock_destroy_all();
     }
 };
@@ -118,47 +104,17 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
     /* This groups starts with LAN and IPv4, No password */
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_tcp_start_error_t tcp_start_error;
-        ccapi_tcp_info_t tcp_start = {{0}};
-        uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
-        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-        connector_transport_t connector_transport = connector_transport_tcp;
 
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
-
-        {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
-            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
-        }
-
-        tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-        tcp_start.connection.ip.type = CCAPI_IPV4;
-        memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
-        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
-
-        tcp_start.callback.close = NULL;
-        tcp_start.callback.keepalive = NULL;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
-        tcp_start_error = ccapi_start_transport_tcp(&tcp_start);
-        CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_start_error);
+        th_start_ccapi();
+        th_setup_mock_info_single_instance();
+        th_start_tcp_lan_ipv4();
     }
 
     void teardown()
     {
-        ccapi_stop_error_t stop_error;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
-        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
-        CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
-
+        th_stop_ccapi(ccapi_data_single_instance);
         Mock_destroy_all();
     }
 };
@@ -217,53 +173,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
     /* This groups starts with LAN and IPv6, Password enabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_tcp_start_error_t tcp_error;
-        ccapi_tcp_info_t tcp_start = {{0}};
-        uint8_t ipv6[] = {0x00, 0x00, 0x00, 0x00, 0xFE, 0x80, 0x00, 0x00, 0x02, 0x25, 0x64, 0xFF, 0xFE, 0x9B, 0xAF, 0x03}; /* fe80::225:64ff:fe9b:af03 */
-        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-        connector_transport_t connector_transport = connector_transport_tcp;
-        char password[] = "CCAPI Rules!";
-
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
-
-        {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
-            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
-        }
-
-        tcp_start.keepalives.rx = 90;
-        tcp_start.keepalives.tx = 100;
-        tcp_start.keepalives.wait_count = 10;
-
-        tcp_start.connection.password = password;
-        tcp_start.connection.max_transactions = 10;
-        tcp_start.connection.type = CCAPI_CONNECTION_LAN;
-        tcp_start.connection.ip.type = CCAPI_IPV6;
-        memcpy(tcp_start.connection.ip.address.ipv6, ipv6, sizeof tcp_start.connection.ip.address.ipv6);
-        memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
-
-        tcp_start.callback.close = NULL;
-        tcp_start.callback.keepalive = NULL;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
-        tcp_error = ccapi_start_transport_tcp(&tcp_start);
-        CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_error);
+        th_start_ccapi();
+        th_setup_mock_info_single_instance();
+        th_start_tcp_lan_ipv6_password_keepalives();
     }
 
     void teardown()
     {
-        ccapi_stop_error_t stop_error;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
-        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
-        CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+        th_stop_ccapi(ccapi_data_single_instance);
 
         Mock_destroy_all();
     }
@@ -361,52 +280,16 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
     /* This groups starts with WAN, linkspeed = 1000 and phone number != "", password disabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_tcp_start_error_t tcp_error;
-        ccapi_tcp_info_t tcp_start = {{0}};
-        connector_transport_t connector_transport = connector_transport_tcp;
-        char phone_number[] = "+34 941 27 00 60";
-        uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
-
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
-
-        {
-            mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-            mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
-            mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
-        }
-
-        tcp_start.keepalives.rx = 90;
-        tcp_start.keepalives.tx = 100;
-        tcp_start.keepalives.wait_count = 10;
-
-        tcp_start.connection.max_transactions = 10;
-        tcp_start.connection.type = CCAPI_CONNECTION_WAN;
-        tcp_start.connection.info.wan.link_speed = 1000;
-        tcp_start.connection.info.wan.phone_number = phone_number;
-        memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
-
-        tcp_start.callback.close = NULL;
-        tcp_start.callback.keepalive = NULL;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
-        tcp_error = ccapi_start_transport_tcp(&tcp_start);
-        CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_error);
+        th_start_ccapi();
+        th_setup_mock_info_single_instance();
+        th_start_tcp_wan_ipv4_with_callbacks();
     }
 
     void teardown()
     {
-        ccapi_stop_error_t stop_error;
-
-        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
-        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
-        CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
+        th_stop_ccapi(ccapi_data_single_instance);
 
         Mock_destroy_all();
     }

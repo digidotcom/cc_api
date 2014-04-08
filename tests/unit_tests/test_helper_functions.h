@@ -21,9 +21,19 @@ extern "C" {
 #include "ccapi_definitions.h"
 }
 
+extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
+extern ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
+extern ccapi_bool_t ccapi_tcp_close_cb_called;
+extern ccapi_tcp_close_cause_t ccapi_tcp_close_cb_argument;
+
 void th_fill_start_structure_with_good_parameters(ccapi_start_t * start);
 void th_start_ccapi(void);
-void th_start_tcp_wan_ipv4(void);
+void th_fill_tcp_wan_ipv4_callbacks_info(ccapi_tcp_info_t * tcp_start);
+void th_fill_tcp_lan_ipv4(ccapi_tcp_info_t * tcp_start);
+
+void th_start_tcp_wan_ipv4_with_callbacks(void);
+void th_start_tcp_lan_ipv4(void);
+void th_start_tcp_lan_ipv6_password_keepalives(void);
 mock_connector_api_info_t * th_setup_mock_info_single_instance(void);
 void th_stop_ccapi(ccapi_data_t * const ccapi_data);
 pthread_t th_aux_ccapi_start(void * argument);

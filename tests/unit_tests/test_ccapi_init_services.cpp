@@ -13,19 +13,17 @@ TEST_GROUP(ccapi_init_services_test)
     }
 };
 
-TEST(ccapi_init_services_test, testCliNotSupported)
+TEST(ccapi_init_services_test, testServicesNotSupported)
 {
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-
-    th_fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
+    th_start_ccapi();
     CHECK(ccapi_data_single_instance->config.cli_supported == CCAPI_FALSE);
+    CHECK(ccapi_data_single_instance->config.receive_supported == CCAPI_FALSE);
+    CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_FALSE);
+    CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_FALSE);
+    CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE);
 }
 
-TEST(ccapi_init_services_test, testCliSupported)
+TEST(ccapi_init_services_test, testServicesSupported)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -33,112 +31,18 @@ TEST(ccapi_init_services_test, testCliSupported)
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.cli = &pointer;
+    start.service.receive = &pointer;
+    start.service.firmware = &pointer;
+    start.service.rci = &pointer;
+    start.service.file_system = &pointer;
+
     error = ccapi_start(&start);
 
     CHECK(error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_data_single_instance->config.cli_supported == CCAPI_TRUE);
-}
-
-TEST(ccapi_init_services_test, testReceiveSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-    void * pointer = pointer; /* Not-NULL */
-
-    th_fill_start_structure_with_good_parameters(&start);
-    start.service.receive = &pointer;
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
     CHECK(ccapi_data_single_instance->config.receive_supported == CCAPI_TRUE);
-}
-
-TEST(ccapi_init_services_test, testReceiveNotSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-
-    th_fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
-    CHECK(ccapi_data_single_instance->config.receive_supported == CCAPI_FALSE);
-}
-
-TEST(ccapi_init_services_test, testFirmwareSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-    void * pointer = pointer; /* Not-NULL */
-
-    th_fill_start_structure_with_good_parameters(&start);
-    start.service.firmware = &pointer;
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
     CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_TRUE);
-}
-
-TEST(ccapi_init_services_test, testFirmwareNotSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-
-    th_fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
-    CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_FALSE);
-}
-
-TEST(ccapi_init_services_test, testRciSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-    void * pointer = pointer; /* Not-NULL */
-
-    th_fill_start_structure_with_good_parameters(&start);
-    start.service.rci = &pointer;
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
     CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_TRUE);
-}
-
-TEST(ccapi_init_services_test, testRciNotSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-
-    th_fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
-    CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_FALSE);
-}
-
-TEST(ccapi_init_services_test, testFileSysSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-    void * pointer = pointer; /* Not-NULL */
-
-    th_fill_start_structure_with_good_parameters(&start);
-    start.service.file_system = &pointer;
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
     CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_TRUE);
-}
 
-TEST(ccapi_init_services_test, testFileSysNotSupported)
-{
-    ccapi_start_t start = {0};
-    ccapi_start_error_t error;
-
-    th_fill_start_structure_with_good_parameters(&start);
-    error = ccapi_start(&start);
-    CHECK(error == CCAPI_START_ERROR_NONE);
-
-    CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE);
 }
