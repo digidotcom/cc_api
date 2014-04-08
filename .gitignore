@@ -11,10 +11,18 @@
 # Eclipse droppings
 .project
 .cproject
+.settings
 
 # Test launcher binary
 test
 
+# Local scripts
+*.sh
+
+# Local patches
+*.patch
+
 # Samples binaries
 tests/samples/ccapi_start_stop/ccapi
 tests/samples/tcp_start/ccapi
+tests/samples/coverity/ccapi
