@@ -1,5 +1,4 @@
 #include "mocks.h"
-#include "mock_ccimp_logging.h"
 
 #define MOCK_LOGGING_ENABLED 1    /* Mock disabled. Do printf normally */
 

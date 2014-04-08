@@ -1,8 +1,7 @@
 #include <pthread.h>
 
 #define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mock_ccimp_os.h"
+#include "mocks.h"
 
 void Mock_ccimp_malloc_create(void)
 {
@@ -59,32 +58,9 @@ void Mock_ccimp_free_notExpected(void)
     mock("ccimp_free").setData("behavior", MOCK_FREE_ENABLED_NOT_EXPECTED);
 }
 
-bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
-{
-    ccimp_create_thread_info_t * o1 = (ccimp_create_thread_info_t*)object1;
-    ccimp_create_thread_info_t * o2 = (ccimp_create_thread_info_t*)object2;
-    bool ret = 0;
-
-    if (o1 != NULL && o2 != NULL) 
-    {  
-        ret = ((o1->argument == o2->argument) && (o1->type == o2->type));
-        /* Not checking 'start' parameter */
-    }
-
-    return ret;
-}
-
-SimpleString ccimp_create_thread_info_t_ValueToString(void* object)
-{
-	return StringFrom(((ccimp_create_thread_info_t*)object)->type);
-}
-
 void Mock_ccimp_create_thread_create(void)
 {
-
-    static MockFunctionComparator comparator(ccimp_create_thread_info_t_IsEqual, ccimp_create_thread_info_t_ValueToString);
-    mock().installComparator("ccimp_create_thread_info_t", comparator);
-
+    mock().installComparator("ccimp_create_thread_info_t", ccimp_create_thread_info_t_comparator);
     return;
 }
 
