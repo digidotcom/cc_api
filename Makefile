@@ -22,7 +22,7 @@ CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = ./tests/unit_tests
 
 TEST_DIR = ./tests/unit_tests
-MOCKS_DIR = ./tests/unit_tests/mocks
+MOCKS_DIR = ./tests/mocks
 CCIMP_SOURCE_DIR = ./tests/ccimp
 
 # CFLAG Definition
@@ -38,7 +38,7 @@ CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -W
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
 # Include Public Header Files.
-CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(CCAPI_INCLUDE) -I. -I$(CUSTOM_CONNECTOR_INCLUDE) -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
+CFLAGS += -I$(UNIT_TEST_INCLUDE) -I$(MOCKS_DIR) -I$(CCAPI_INCLUDE) -I. -I$(CUSTOM_CONNECTOR_INCLUDE) -I$(CONNECTOR_INCLUDE) -I$(CCAPI_SOURCE_DIR)
 CFLAGS += -g -O0
 
 CCAPI_SOURCES = $(wildcard $(CCAPI_SOURCE_DIR)/*.c)
