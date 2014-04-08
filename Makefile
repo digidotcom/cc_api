@@ -43,7 +43,7 @@ CFLAGS += -g -O0
 
 CCAPI_SOURCES = $(wildcard $(CCAPI_SOURCE_DIR)/*.c)
 CCIMP_SOURCES = $(wildcard $(CCIMP_SOURCE_DIR)/*.c) 
-TESTS_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
+TESTS_SOURCES := $(shell find $(TEST_DIR) -name '*.cpp')
 MOCKS_SOURCES = $(wildcard $(MOCKS_DIR)/*.cpp)
 
 CSRCS = $(CCAPI_SOURCES) $(CCIMP_SOURCES) 

@@ -14,7 +14,7 @@
 #define TH_DEVICE_CLOUD_URL_STRING "login.etherios.com"
 
 #include "CppUTest/CommandLineTestRunner.h"
-#include "mocks/mocks.h"
+#include "mocks.h"
 
 extern "C" {
 #include "ccapi/ccapi.h"
