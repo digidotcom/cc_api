@@ -1,9 +1,7 @@
 #include <pthread.h>
 
 #define CCAPI_CONST_PROTECTION_UNLOCK
-
-#include "mock_ccimp_os.h"
-#include "mocks_comparators.h"
+#include "mocks.h"
 
 void Mock_ccimp_malloc_create(void)
 {

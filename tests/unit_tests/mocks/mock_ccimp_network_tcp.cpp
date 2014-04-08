@@ -1,6 +1,4 @@
-
-#include "mock_ccimp_network_tcp.h"
-#include "mocks_comparators.h"
+#include "mocks.h"
 
 void Mock_ccimp_network_tcp_open_create(void)
 {

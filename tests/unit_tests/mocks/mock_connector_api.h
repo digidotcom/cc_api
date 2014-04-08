@@ -8,14 +8,6 @@
 #ifndef _MOCK_CONNECTOR_API_H_
 #define _MOCK_CONNECTOR_API_H_
 
-#include "CppUTestExt/MockSupport.h"
-#include "CppUTest/CommandLineTestRunner.h"
-
-extern "C" {
-#include "connector_api.h"
-#include "ccapi/ccxapi.h"
-}
-
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
 

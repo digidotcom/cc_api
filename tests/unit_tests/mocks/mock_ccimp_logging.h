@@ -8,13 +8,6 @@
 #ifndef _MOCK_CCIMP_LOGGING_H_
 #define _MOCK_CCIMP_LOGGING_H_
 
-#include "CppUTestExt/MockSupport.h"
-
-extern "C" {
-#include "ccapi_definitions.h"
-#include "ccimp/ccimp_logging.h"
-}
-
 #define CCIMP_LOGGING_PRINTF_DOESNT_EXPECT_A_CALL   "_MOCK_DOESNT_EXPECT_A_CALL_"
 
 void Mock_ccimp_logging_printf_create(void);

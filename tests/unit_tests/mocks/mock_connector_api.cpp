@@ -5,13 +5,11 @@
  *      Author: spastor
  */
 
-#include "mock_connector_api.h"
-#include "mock_ccimp_os.h"
-#include "mocks_comparators.h"
-
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>
+
+#include "mocks.h"
 
 static mock_connector_api_info_t mock_info[MAX_INFO];
 static sem_t sem;

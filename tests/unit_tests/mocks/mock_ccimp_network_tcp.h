@@ -1,13 +1,6 @@
 #ifndef _MOCK_CCIMP_NETWORK_TCP_H_
 #define _MOCK_CCIMP_NETWORK_TCP_H_
 
-#include "CppUTestExt/MockSupport.h"
-
-extern "C" {
-#include "ccapi_definitions.h"
-#include "ccimp/ccimp_os.h"
-}
-
 void Mock_ccimp_network_tcp_open_create(void);
 void Mock_ccimp_network_tcp_open_destroy(void);
 void Mock_ccimp_network_tcp_open_expectAndReturn(ccimp_network_open_t * expect, ccimp_status_t retval);

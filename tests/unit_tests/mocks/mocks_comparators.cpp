@@ -1,8 +1,4 @@
-#include "CppUTestExt/MockSupport.h"
-
-extern "C" {
-#include "ccapi_definitions.h"
-}
+#include "mocks.h"
 
 #define compare_pointers(object1, object2) do {if (object1 == NULL || object2 == NULL) return false; else if (object1 == object2) return true;} while(0)
 
