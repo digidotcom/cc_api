@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_config_test_tcp_start_WAN)
+TEST_GROUP(test_ccapi_config_tcp_start_wan)
 {
     /* This groups starts with WAN, linkspeed = 1000 and phone number != "", password disabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_WAN)
     }
 };
 
-TEST(ccapi_config_test_tcp_start_WAN, testLinkSpeed)
+TEST(test_ccapi_config_tcp_start_wan, testLinkSpeed)
 {
     connector_request_id_t request;
     connector_config_link_speed_t link_speed = { 0 };
@@ -32,7 +32,7 @@ TEST(ccapi_config_test_tcp_start_WAN, testLinkSpeed)
     CHECK_EQUAL(ccapi_data_single_instance->transport_tcp.info->connection.info.wan.link_speed, link_speed.speed);
 }
 
-TEST(ccapi_config_test_tcp_start_WAN, testPhoneNumber)
+TEST(test_ccapi_config_tcp_start_wan, testPhoneNumber)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t phone_number = { 0 };

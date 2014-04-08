@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_os_test)
+TEST_GROUP(test_ccapi_os)
 {
     void setup()
     {
@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_os_test)
     }
 };
 
-TEST(ccapi_os_test, testMalloc)
+TEST(test_ccapi_os, testMalloc)
 {
     connector_request_id_t request;
     connector_os_malloc_t malloc_structure = {1024, NULL};
@@ -36,7 +36,7 @@ TEST(ccapi_os_test, testMalloc)
     CHECK(malloc_structure.ptr == pre_allocated_buffer);
 }
 
-TEST(ccapi_os_test, testFreeOk)
+TEST(test_ccapi_os, testFreeOk)
 {
     connector_request_id_t request;
     void * pre_allocated_buffer = malloc(1024);
@@ -50,7 +50,7 @@ TEST(ccapi_os_test, testFreeOk)
     CHECK(status == connector_callback_continue);
 }
 
-TEST(ccapi_os_test, testFreeAbort)
+TEST(test_ccapi_os, testFreeAbort)
 {
     connector_request_id_t request;
     void * pre_allocated_buffer = malloc(1024);
@@ -64,7 +64,7 @@ TEST(ccapi_os_test, testFreeAbort)
     CHECK(status == connector_callback_abort);
 }
 
-TEST(ccapi_os_test, testYield)
+TEST(test_ccapi_os, testYield)
 {
     /* Trying to mock ccimp_os_yield() was a complete failure, the function is being called from connector_thread()
      * making it quite difficult to check expectations */
@@ -76,7 +76,7 @@ TEST(ccapi_os_test, testYield)
     CHECK(status == connector_callback_continue);
 }
 
-TEST(ccapi_os_test, testSystemUptime)
+TEST(test_ccapi_os, testSystemUptime)
 {
     connector_request_id_t request;
     connector_os_system_up_time_t uptime;
@@ -88,7 +88,7 @@ TEST(ccapi_os_test, testSystemUptime)
     CHECK(status == connector_callback_continue);
 }
 
-TEST(ccapi_os_test, testReboot)
+TEST(test_ccapi_os, testReboot)
 {
     /* This is not entirely OK, reboot would never return */
     connector_request_id_t request;
@@ -99,7 +99,7 @@ TEST(ccapi_os_test, testReboot)
     CHECK(status == connector_callback_continue);
 }
 
-TEST(ccapi_os_test, testRealloc)
+TEST(test_ccapi_os, testRealloc)
 {
     /* This is not entirely OK, reboot would never return */
     connector_request_id_t request;

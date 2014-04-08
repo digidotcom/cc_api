@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_stop_test)
+TEST_GROUP(test_ccapi_stop)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_stop_test)
     }
 };
 
-TEST(ccapi_stop_test, testCcapiNotStarted)
+TEST(test_ccapi_stop, testCcapiNotStarted)
 {
     ccapi_stop_error_t stop_error;
 
@@ -25,7 +25,7 @@ TEST(ccapi_stop_test, testCcapiNotStarted)
     CHECK(ccapi_data_single_instance == NULL);
 }
 
-TEST(ccapi_stop_test, testCcapiStartedBadly)
+TEST(test_ccapi_stop, testCcapiStartedBadly)
 {
     ccapi_stop_error_t stop_error;
     ccapi_start_error_t start_error;
@@ -42,7 +42,7 @@ TEST(ccapi_stop_test, testCcapiStartedBadly)
     CHECK(ccapi_data_single_instance == NULL);
 }
 
-TEST(ccapi_stop_test, testCcapiStopGracefully)
+TEST(test_ccapi_stop, testCcapiStopGracefully)
 {
     ccapi_stop_error_t stop_error;
 
@@ -72,7 +72,7 @@ TEST(ccapi_stop_test, testCcapiStopGracefully)
     CHECK(ccapi_data_single_instance == NULL);
 }
 
-TEST(ccapi_stop_test, testCcapiStopImmediately)
+TEST(test_ccapi_stop, testCcapiStopImmediately)
 {
     ccapi_stop_error_t stop_error;
 

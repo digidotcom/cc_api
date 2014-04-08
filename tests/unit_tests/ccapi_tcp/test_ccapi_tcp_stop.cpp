@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_tcp_stop)
+TEST_GROUP(test_ccapi_tcp_stop)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_tcp_stop)
     }
 };
 
-TEST(ccapi_tcp_stop, testCCAPINotStarted)
+TEST(test_ccapi_tcp_stop, testCCAPINotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -22,7 +22,7 @@ TEST(ccapi_tcp_stop, testCCAPINotStarted)
     CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NOT_STARTED, tcp_stop_error);
 }
 
-TEST(ccapi_tcp_stop, testTCPNotStarted)
+TEST(test_ccapi_tcp_stop, testTCPNotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -34,7 +34,7 @@ TEST(ccapi_tcp_stop, testTCPNotStarted)
     CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NOT_STARTED, tcp_stop_error);
 }
 
-TEST(ccapi_tcp_stop, testTCPStopOK)
+TEST(test_ccapi_tcp_stop, testTCPStopOK)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -51,7 +51,7 @@ TEST(ccapi_tcp_stop, testTCPStopOK)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_stop, testTCPStopCcfsmError)
+TEST(test_ccapi_tcp_stop, testTCPStopCcfsmError)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};
@@ -68,7 +68,7 @@ TEST(ccapi_tcp_stop, testTCPStopCcfsmError)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_stop, testTCPStopTimeout)
+TEST(test_ccapi_tcp_stop, testTCPStopTimeout)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
     ccapi_tcp_stop_t tcp_stop = {0};

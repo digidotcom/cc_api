@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_init_services_test)
+TEST_GROUP(test_ccapi_init_services)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_init_services_test)
     }
 };
 
-TEST(ccapi_init_services_test, testServicesNotSupported)
+TEST(test_ccapi_init_services, testServicesNotSupported)
 {
     th_start_ccapi();
     CHECK(ccapi_data_single_instance->config.cli_supported == CCAPI_FALSE);
@@ -23,7 +23,7 @@ TEST(ccapi_init_services_test, testServicesNotSupported)
     CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE);
 }
 
-TEST(ccapi_init_services_test, testServicesSupported)
+TEST(test_ccapi_init_services, testServicesSupported)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;

@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
+TEST_GROUP(test_ccapi_config_tcp_start_lan_2)
 {
     /* This groups starts with LAN and IPv6, Password enabled, max transactions = 10 and Keepalives RX=90, TX=100, WC=10 */
     void setup()
@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_2)
     }
 };
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testConfigIPv6)
+TEST(test_ccapi_config_tcp_start_lan_2, testConfigIPv6)
 {
     connector_request_id_t request;
     connector_config_ip_address_t connector_ip_addr = {NULL, connector_ip_address_ipv4};
@@ -33,7 +33,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testConfigIPv6)
     CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv6, sizeof ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv6));
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testIdVerificationPassword)
+TEST(test_ccapi_config_tcp_start_lan_2, testIdVerificationPassword)
 {
     connector_request_id_t request;
     connector_config_identity_verification_t connector_id_verification = {connector_identity_verification_simple};
@@ -45,7 +45,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testIdVerificationPassword)
     CHECK_EQUAL(connector_identity_verification_password, connector_id_verification.type);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testPassword)
+TEST(test_ccapi_config_tcp_start_lan_2, testPassword)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t password = { 0 };
@@ -59,7 +59,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testPassword)
     STRCMP_EQUAL(ccapi_data_single_instance->transport_tcp.info->connection.password, password.string);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testMaxTransactions)
+TEST(test_ccapi_config_tcp_start_lan_2, testMaxTransactions)
 {
     connector_request_id_t request;
     connector_config_max_transaction_t max_transaction = { 0 };
@@ -71,7 +71,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testMaxTransactions)
     CHECK_EQUAL(ccapi_data_single_instance->transport_tcp.info->connection.max_transactions, max_transaction.count);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testRxKeepalives)
+TEST(test_ccapi_config_tcp_start_lan_2, testRxKeepalives)
 {
     connector_request_id_t request;
     connector_config_keepalive_t rx_keepalive = { 0 };
@@ -83,7 +83,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testRxKeepalives)
     CHECK_EQUAL(ccapi_data_single_instance->transport_tcp.info->keepalives.rx, rx_keepalive.interval_in_seconds);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testTxKeepalives)
+TEST(test_ccapi_config_tcp_start_lan_2, testTxKeepalives)
 {
     connector_request_id_t request;
     connector_config_keepalive_t tx_keepalive = { 0 };
@@ -95,7 +95,7 @@ TEST(ccapi_config_test_tcp_start_LAN_2, testTxKeepalives)
     CHECK_EQUAL(ccapi_data_single_instance->transport_tcp.info->keepalives.tx, tx_keepalive.interval_in_seconds);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_2, testWcKeepalives)
+TEST(test_ccapi_config_tcp_start_lan_2, testWcKeepalives)
 {
     connector_request_id_t request;
     connector_config_wait_count_t wait_count = { 0 };

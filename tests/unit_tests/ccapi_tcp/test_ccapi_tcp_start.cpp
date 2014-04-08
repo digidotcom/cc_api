@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_tcp_start_test)
+TEST_GROUP(test_ccapi_tcp_start)
 {
     mock_connector_api_info_t * mock_info;
     void setup()
@@ -30,7 +30,7 @@ static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
     return;
 }
 
-TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
+TEST(test_ccapi_tcp_start, testConnectorInitiateActionOK)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -52,7 +52,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionOK)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
 }
 
-TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
+TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -76,7 +76,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionInitError)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 }
 
-TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
+TEST(test_ccapi_tcp_start, testConnectorInitiateActionUnknownError)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -90,7 +90,7 @@ TEST(ccapi_tcp_start_test, testConnectorInitiateActionUnknownError)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 }
 
-TEST(ccapi_tcp_start_test, testTCPConnectionTimeout)
+TEST(test_ccapi_tcp_start, testTCPConnectionTimeout)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};

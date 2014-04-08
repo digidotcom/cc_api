@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_os_syncr_test)
+TEST_GROUP(test_ccapi_os_syncr)
 {
     void * syncr_object;
 
@@ -39,7 +39,7 @@ TEST_GROUP(ccapi_os_syncr_test)
     }
 };
 
-TEST(ccapi_os_syncr_test, CreateLeavesObjectInClearedState)
+TEST(test_ccapi_os_syncr, CreateLeavesObjectInClearedState)
 {
     ccimp_status_t status;
 
@@ -82,7 +82,7 @@ pthread_t create_thread_release(void * argument)
     return pthread;
 }
 
-TEST(ccapi_os_syncr_test, AcquireClearsObjectAutomatically)
+TEST(test_ccapi_os_syncr, AcquireClearsObjectAutomatically)
 {
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t status;
@@ -111,7 +111,7 @@ TEST(ccapi_os_syncr_test, AcquireClearsObjectAutomatically)
 /* This test fails as linux semaphores don't support max count.
    TODO: Should we delete that limitation?
  */
-IGNORE_TEST(ccapi_os_syncr_test, ReleaseMaxCountIs1)
+IGNORE_TEST(test_ccapi_os_syncr, ReleaseMaxCountIs1)
 {
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_os_syncr_release_t release_data;

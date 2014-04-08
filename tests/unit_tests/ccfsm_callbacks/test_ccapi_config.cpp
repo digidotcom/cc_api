@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_config_test_basic)
+TEST_GROUP(test_ccapi_config)
 {
     void setup()
     {
@@ -16,7 +16,7 @@ TEST_GROUP(ccapi_config_test_basic)
     }
 };
 
-TEST(ccapi_config_test_basic, testDeviceID)
+TEST(test_ccapi_config, testDeviceID)
 {
     connector_request_id_t request;
     connector_config_pointer_data_t device_id = {NULL, sizeof ccapi_data_single_instance->config.device_id};
@@ -27,7 +27,7 @@ TEST(ccapi_config_test_basic, testDeviceID)
     CHECK_EQUAL(device_id.data, ccapi_data_single_instance->config.device_id);
 }
 
-TEST(ccapi_config_test_basic, testCloudURL)
+TEST(test_ccapi_config, testCloudURL)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t device_cloud_url = {0};
@@ -38,7 +38,7 @@ TEST(ccapi_config_test_basic, testCloudURL)
     CHECK(strlen(ccapi_data_single_instance->config.device_cloud_url) == device_cloud_url.length);
 }
 
-TEST(ccapi_config_test_basic, testVendorID)
+TEST(test_ccapi_config, testVendorID)
 {
     connector_request_id_t request;
     connector_config_vendor_id_t vendor_id = {0};
@@ -48,7 +48,7 @@ TEST(ccapi_config_test_basic, testVendorID)
     CHECK(vendor_id.id == ccapi_data_single_instance->config.vendor_id);
 }
 
-TEST(ccapi_config_test_basic, testDeviceType)
+TEST(test_ccapi_config, testDeviceType)
 {
     connector_request_id_t request;
     connector_config_pointer_string_t device_type = {0};
@@ -59,7 +59,7 @@ TEST(ccapi_config_test_basic, testDeviceType)
     CHECK(strlen(ccapi_data_single_instance->config.device_type) == device_type.length);
 }
 
-TEST(ccapi_config_test_basic, testFirmwareSupport)
+TEST(test_ccapi_config, testFirmwareSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t firmware_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -69,7 +69,7 @@ TEST(ccapi_config_test_basic, testFirmwareSupport)
     CHECK(firmware_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test_basic, testFileSystemSupport)
+TEST(test_ccapi_config, testFileSystemSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t filesystem_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -79,7 +79,7 @@ TEST(ccapi_config_test_basic, testFileSystemSupport)
     CHECK(filesystem_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test_basic, testRCISupport)
+TEST(test_ccapi_config, testRCISupport)
 {
     connector_request_id_t request;
     connector_config_supported_t rci_supported = {connector_true}; /* Set to the opposite to test that it actually worked */
@@ -89,7 +89,7 @@ TEST(ccapi_config_test_basic, testRCISupport)
     CHECK(rci_supported.supported == connector_false);
 }
 
-TEST(ccapi_config_test_basic, testDataServiceSupport)
+TEST(test_ccapi_config, testDataServiceSupport)
 {
     connector_request_id_t request;
     connector_config_supported_t dataservice_supported = {connector_false}; /* Set to the opposite to test that it actually worked */

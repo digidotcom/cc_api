@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_init_threading_test)
+TEST_GROUP(test_ccapi_init_threading)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_init_threading_test)
     }
 };
 
-TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
+TEST(test_ccapi_init_threading, testInitErrorThreadNullPointer)
 {
     ccapi_start_t start = {0};
     void * malloc_for_ccapi_data = malloc(sizeof (ccapi_data_t));
@@ -60,7 +60,7 @@ TEST(ccapi_init_threading_test, testInitErrorThreadNullPointer)
 
 /* This test makes layer1 run thread return connector_init_error.
 */
-TEST(ccapi_init_threading_test, testInitErrorRunRetConnectorInitError)
+TEST(test_ccapi_init_threading, testInitErrorRunRetConnectorInitError)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;

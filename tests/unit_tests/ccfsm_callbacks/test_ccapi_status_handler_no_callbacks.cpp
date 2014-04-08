@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_status_handler_test_no_callbacks)
+TEST_GROUP(test_ccapi_status_handler_no_callbacks)
 {
     /* Checks that no segmentation fault is thrown because of calling a NULL function pointer */
     void setup()
@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_status_handler_test_no_callbacks)
     }
 };
 
-TEST(ccapi_status_handler_test_no_callbacks, testStatusTCPKeepaliveMissedNoCallback)
+TEST(test_ccapi_status_handler_no_callbacks, testStatusTCPKeepaliveMissedNoCallback)
 {
     connector_request_id_t request;
     connector_status_tcp_event_t tcp_status = {connector_tcp_keepalive_missed};
@@ -32,7 +32,7 @@ TEST(ccapi_status_handler_test_no_callbacks, testStatusTCPKeepaliveMissedNoCallb
     CHECK_EQUAL(CCAPI_FALSE, ccapi_tcp_keepalives_cb_called);
 }
 
-TEST(ccapi_status_handler_test_no_callbacks, testStatusTCPKeepaliveRestoredNoCallback)
+TEST(test_ccapi_status_handler_no_callbacks, testStatusTCPKeepaliveRestoredNoCallback)
 {
     connector_request_id_t request;
     connector_status_tcp_event_t tcp_status = {connector_tcp_keepalive_restored};

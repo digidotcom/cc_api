@@ -13,7 +13,7 @@ TEST(ccapi_tcp_start_with_no_ccapi, testNotStarted)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_CCAPI_STOPPED, error);
 }
 
-TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
+TEST_GROUP(test_ccapi_tcp_start_sanity_checks)
 {
     void setup()
     {
@@ -31,7 +31,7 @@ TEST_GROUP(ccapi_tcp_start_sanity_checks_test)
     }
 };
 
-TEST(ccapi_tcp_start_sanity_checks_test, testNullPointer)
+TEST(test_ccapi_tcp_start_sanity_checks, testNullPointer)
 {
     ccapi_tcp_start_error_t error;
 
@@ -39,7 +39,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testNullPointer)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NULL_POINTER, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesRx)
+TEST(test_ccapi_tcp_start_sanity_checks, testBadKeepalivesRx)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -53,7 +53,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesRx)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesTx)
+TEST(test_ccapi_tcp_start_sanity_checks, testBadKeepalivesTx)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -67,7 +67,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesTx)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesWaitCount)
+TEST(test_ccapi_tcp_start_sanity_checks, testBadKeepalivesWaitCount)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -81,7 +81,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadKeepalivesWaitCount)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_KEEPALIVES, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
+TEST(test_ccapi_tcp_start_sanity_checks, testBadIP)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -101,7 +101,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testBadIP)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_IP, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
+TEST(test_ccapi_tcp_start_sanity_checks, testLANIpv4)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -122,7 +122,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv4)
     CHECK(memcmp(mac, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
+TEST(test_ccapi_tcp_start_sanity_checks, testLANIpv6)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -143,7 +143,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANIpv6)
     CHECK(memcmp(mac, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
+TEST(test_ccapi_tcp_start_sanity_checks, testLANZeroMAC)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -159,7 +159,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testLANZeroMAC)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INVALID_MAC, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
+TEST(test_ccapi_tcp_start_sanity_checks, testPassword)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -183,7 +183,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPassword)
     STRCMP_EQUAL(tcp_start.connection.password, ccapi_data_single_instance->transport_tcp.info->connection.password);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
+TEST(test_ccapi_tcp_start_sanity_checks, testWAN)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -206,7 +206,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWAN)
     STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
+TEST(test_ccapi_tcp_start_sanity_checks, testWANEmptyPhone)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -229,7 +229,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANEmptyPhone)
     STRCMP_EQUAL(tcp_start.connection.info.wan.phone_number, ccapi_data_single_instance->transport_tcp.info->connection.info.wan.phone_number);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
+TEST(test_ccapi_tcp_start_sanity_checks, testWANPhoneNull)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -244,7 +244,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testWANPhoneNull)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_PHONE, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
+TEST(test_ccapi_tcp_start_sanity_checks, testKeepaliveDefaults)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -267,7 +267,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testKeepaliveDefaults)
     CHECK_EQUAL(CCAPI_KEEPALIVES_WCNT_DEFAULT, ccapi_data_single_instance->transport_tcp.info->keepalives.wait_count);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
+TEST(test_ccapi_tcp_start_sanity_checks, testMaxSessions)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -288,7 +288,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testMaxSessions)
     CHECK_EQUAL(tcp_start.connection.max_transactions, ccapi_data_single_instance->transport_tcp.info->connection.max_transactions);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
+TEST(test_ccapi_tcp_start_sanity_checks, testTcpInfoNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -299,7 +299,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testTcpInfoNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
+TEST(test_ccapi_tcp_start_sanity_checks, testPasswordNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -324,7 +324,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPasswordNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
+TEST(test_ccapi_tcp_start_sanity_checks, testPhoneNoMemory)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};
@@ -345,7 +345,7 @@ TEST(ccapi_tcp_start_sanity_checks_test, testPhoneNoMemory)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
 
-TEST(ccapi_tcp_start_sanity_checks_test, testCallbacksAreCopied)
+TEST(test_ccapi_tcp_start_sanity_checks, testCallbacksAreCopied)
 {
     ccapi_tcp_start_error_t error;
     ccapi_tcp_info_t tcp_start = {{0}};

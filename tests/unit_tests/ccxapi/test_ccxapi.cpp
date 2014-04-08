@@ -5,7 +5,7 @@ using namespace std;
 static const uint8_t device_id1[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
 static const uint8_t device_id2[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0x44};
 
-TEST_GROUP(ccxapi_test)
+TEST_GROUP(test_ccxapi)
 {
     void setup()
     {
@@ -18,7 +18,7 @@ TEST_GROUP(ccxapi_test)
     }
 };
 
-TEST(ccxapi_test, testNULLHandle)
+TEST(test_ccxapi, testNULLHandle)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -29,7 +29,7 @@ TEST(ccxapi_test, testNULLHandle)
     CHECK_EQUAL(error, CCAPI_START_ERROR_NULL_PARAMETER);
 }
 
-TEST(ccxapi_test, testStartTwiceSameHandlerFails)
+TEST(test_ccxapi, testStartTwiceSameHandlerFails)
 {
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};
@@ -46,7 +46,7 @@ TEST(ccxapi_test, testStartTwiceSameHandlerFails)
     CHECK_EQUAL(start_error, CCAPI_START_ERROR_ALREADY_STARTED);
 }
 
-TEST(ccxapi_test, testStartOneInstance)
+TEST(test_ccxapi, testStartOneInstance)
 {
     ccapi_start_t start1 = {0};
     ccapi_start_error_t start1_error = CCAPI_START_ERROR_NONE;
@@ -75,7 +75,7 @@ TEST(ccxapi_test, testStartOneInstance)
     CHECK(ccapi_data_single_instance == NULL);
 }
 
-TEST(ccxapi_test, testStartTwoInstances)
+TEST(test_ccxapi, testStartTwoInstances)
 {
     ccapi_data_t * ccapi_data = NULL;
 

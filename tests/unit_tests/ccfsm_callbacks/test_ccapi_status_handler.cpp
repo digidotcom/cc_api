@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_status_handler_test)
+TEST_GROUP(test_ccapi_status_handler)
 {
     void setup()
     {
@@ -19,7 +19,7 @@ TEST_GROUP(ccapi_status_handler_test)
     }
 };
 
-TEST(ccapi_status_handler_test, testStatusTCPStarted)
+TEST(test_ccapi_status_handler, testStatusTCPStarted)
 {
     connector_request_id_t request;
     connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
@@ -31,7 +31,7 @@ TEST(ccapi_status_handler_test, testStatusTCPStarted)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_status_handler_test, testStatusTCPKeepaliveMissed)
+TEST(test_ccapi_status_handler, testStatusTCPKeepaliveMissed)
 {
     connector_request_id_t request;
     connector_status_tcp_event_t tcp_status = {connector_tcp_keepalive_missed};
@@ -44,7 +44,7 @@ TEST(ccapi_status_handler_test, testStatusTCPKeepaliveMissed)
     CHECK_EQUAL(CCAPI_KEEPALIVE_MISSED, ccapi_tcp_keepalives_cb_argument);
 }
 
-TEST(ccapi_status_handler_test, testStatusTCPKeepaliveRestored)
+TEST(test_ccapi_status_handler, testStatusTCPKeepaliveRestored)
 {
     connector_request_id_t request;
     connector_status_tcp_event_t tcp_status = {connector_tcp_keepalive_restored};
@@ -58,7 +58,7 @@ TEST(ccapi_status_handler_test, testStatusTCPKeepaliveRestored)
     CHECK_EQUAL(CCAPI_KEEPALIVE_RESTORED, ccapi_tcp_keepalives_cb_argument);
 }
 
-TEST(ccapi_status_handler_test, testStatusStop)
+TEST(test_ccapi_status_handler, testStatusStop)
 {
     connector_request_id_t request;
     connector_initiate_stop_request_t stop_status = {connector_transport_tcp, connector_stop_immediately, NULL};

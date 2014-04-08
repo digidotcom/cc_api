@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_init_test)
+TEST_GROUP(test_ccapi_init)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_init_test)
     }
 };
 
-TEST(ccapi_init_test, testParamNULL)
+TEST(test_ccapi_init, testParamNULL)
 {
     ccapi_start_error_t error;
     ccapi_start_t * start = NULL;
@@ -22,7 +22,7 @@ TEST(ccapi_init_test, testParamNULL)
     CHECK(error == CCAPI_START_ERROR_NULL_PARAMETER);
 }
 
-TEST(ccapi_init_test, testVendorIdZero)
+TEST(test_ccapi_init, testVendorIdZero)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -34,7 +34,7 @@ TEST(ccapi_init_test, testVendorIdZero)
     CHECK_EQUAL(error, CCAPI_START_ERROR_INVALID_VENDORID);
 }
 
-TEST(ccapi_init_test, testInvalidDeviceId)
+TEST(test_ccapi_init, testInvalidDeviceId)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     ccapi_start_t start = {0};
@@ -47,7 +47,7 @@ TEST(ccapi_init_test, testInvalidDeviceId)
     CHECK(error == CCAPI_START_ERROR_INVALID_DEVICEID);
 }
 
-TEST(ccapi_init_test, testNullDeviceCloudURL)
+TEST(test_ccapi_init, testNullDeviceCloudURL)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -59,7 +59,7 @@ TEST(ccapi_init_test, testNullDeviceCloudURL)
     CHECK(error == CCAPI_START_ERROR_INVALID_URL);
 }
 
-TEST(ccapi_init_test, testInvalidDeviceCloudURL)
+TEST(test_ccapi_init, testInvalidDeviceCloudURL)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -71,7 +71,7 @@ TEST(ccapi_init_test, testInvalidDeviceCloudURL)
     CHECK(error == CCAPI_START_ERROR_INVALID_URL);
 }
 
-TEST(ccapi_init_test, testNullDeviceType)
+TEST(test_ccapi_init, testNullDeviceType)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -83,7 +83,7 @@ TEST(ccapi_init_test, testNullDeviceType)
     CHECK(error == CCAPI_START_ERROR_INVALID_DEVICETYPE);
 }
 
-TEST(ccapi_init_test, testInvalidDeviceType)
+TEST(test_ccapi_init, testInvalidDeviceType)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -95,7 +95,7 @@ TEST(ccapi_init_test, testInvalidDeviceType)
     CHECK(error == CCAPI_START_ERROR_INVALID_DEVICETYPE);
 }
 
-TEST(ccapi_init_test, testNoMemory)
+TEST(test_ccapi_init, testNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -110,7 +110,7 @@ TEST(ccapi_init_test, testNoMemory)
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
-TEST(ccapi_init_test, testDeviceTypeNoMemory)
+TEST(test_ccapi_init, testDeviceTypeNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -129,7 +129,7 @@ TEST(ccapi_init_test, testDeviceTypeNoMemory)
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
-TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
+TEST(test_ccapi_init, testDeviceCloudURLNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -151,7 +151,7 @@ TEST(ccapi_init_test, testDeviceCloudURLNoMemory)
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
-TEST(ccapi_init_test, testConnectorInitNoMemory)
+TEST(test_ccapi_init, testConnectorInitNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -165,7 +165,7 @@ TEST(ccapi_init_test, testConnectorInitNoMemory)
     CHECK(error == CCAPI_START_ERROR_INSUFFICIENT_MEMORY);
 }
 
-TEST(ccapi_init_test, testStartOk)
+TEST(test_ccapi_init, testStartOk)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -201,7 +201,7 @@ TEST(ccapi_init_test, testStartOk)
     CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
 }
 
-TEST(ccapi_init_test, testStartThreadNoMemory)
+TEST(test_ccapi_init, testStartThreadNoMemory)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -232,7 +232,7 @@ TEST(ccapi_init_test, testStartThreadNoMemory)
     }
 }
 
-TEST(ccapi_init_test, testStartThreadFail)
+TEST(test_ccapi_init, testStartThreadFail)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -268,7 +268,7 @@ TEST(ccapi_init_test, testStartThreadFail)
     }
 }
 
-TEST(ccapi_init_test, testStartTwiceFails)
+TEST(test_ccapi_init, testStartTwiceFails)
 {
     ccapi_start_error_t start_error;
     ccapi_start_t start = {0};

@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
+TEST_GROUP(test_ccapi_config_tcp_start_lan_1)
 {
     /* This groups starts with LAN and IPv4, No password */
     void setup()
@@ -20,7 +20,7 @@ TEST_GROUP(ccapi_config_test_tcp_start_LAN_1)
     }
 };
 
-TEST(ccapi_config_test_tcp_start_LAN_1, testConfigConnectionType)
+TEST(test_ccapi_config_tcp_start_lan_1, testConfigConnectionType)
 {
     connector_request_id_t request;
     connector_config_connection_type_t connection_type = { connector_connection_type_wan };
@@ -32,7 +32,7 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigConnectionType)
     CHECK_EQUAL(connection_type.type, connector_connection_type_lan);
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_1, testConfigMAC)
+TEST(test_ccapi_config_tcp_start_lan_1, testConfigMAC)
 {
     connector_request_id_t request;
     connector_config_pointer_data_t connector_mac_addr = {NULL, sizeof ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address};
@@ -44,7 +44,7 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigMAC)
     CHECK_EQUAL(0, memcmp(connector_mac_addr.data, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address));
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
+TEST(test_ccapi_config_tcp_start_lan_1, testConfigIPv4)
 {
     connector_request_id_t request;
     connector_config_ip_address_t connector_ip_addr = {NULL, connector_ip_address_ipv6};
@@ -57,7 +57,7 @@ TEST(ccapi_config_test_tcp_start_LAN_1, testConfigIPv4)
     CHECK_EQUAL(0, memcmp(connector_ip_addr.address, &ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv4, sizeof ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv4));
 }
 
-TEST(ccapi_config_test_tcp_start_LAN_1, testIdVerificationSimple)
+TEST(test_ccapi_config_tcp_start_lan_1, testIdVerificationSimple)
 {
     connector_request_id_t request;
     connector_config_identity_verification_t connector_id_verification = {connector_identity_verification_password};

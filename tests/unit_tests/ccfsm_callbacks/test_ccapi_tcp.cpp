@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_tcp_test)
+TEST_GROUP(test_ccapi_tcp)
 {
     void setup()
     {
@@ -13,7 +13,7 @@ TEST_GROUP(ccapi_tcp_test)
     }
 };
 
-TEST(ccapi_tcp_test, testTcpOpen)
+TEST(test_ccapi_tcp, testTcpOpen)
 {
     connector_request_id_t request;
     connector_network_open_t connector_open_data = {{"login.etherios.com"}, NULL};
@@ -27,7 +27,7 @@ TEST(ccapi_tcp_test, testTcpOpen)
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
-TEST(ccapi_tcp_test, testTcpSend)
+TEST(test_ccapi_tcp, testTcpSend)
 {
     connector_network_handle_t handle = &handle;
     uint8_t buffer[] = "Binary buffer";
@@ -45,7 +45,7 @@ TEST(ccapi_tcp_test, testTcpSend)
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
-TEST(ccapi_tcp_test, testTcpReceive)
+TEST(test_ccapi_tcp, testTcpReceive)
 {
     connector_network_handle_t handle = &handle;
     uint8_t buffer[1024] = {0};

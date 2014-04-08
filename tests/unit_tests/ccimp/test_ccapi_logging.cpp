@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_logging_test)
+TEST_GROUP(test_ccapi_logging)
 {
     void setup()
     {
@@ -23,7 +23,7 @@ TEST_GROUP(ccapi_logging_test)
 
 #if (defined CCIMP_DEBUG_ENABLED)
 
-TEST(ccapi_logging_test, layer2_args0)
+TEST(test_ccapi_logging, testCcapiNoArguments)
 {
 	debug_t debug;
 
@@ -34,7 +34,7 @@ TEST(ccapi_logging_test, layer2_args0)
     ccapi_logging_line("layer2_args0");
 }
 
-TEST(ccapi_logging_test, layer2_args1)
+TEST(test_ccapi_logging, testCcapiOneArgument)
 {
 	debug_t debug;
 
@@ -45,7 +45,7 @@ TEST(ccapi_logging_test, layer2_args1)
     ccapi_logging_line("layer2_args1 %d", 33);
 }
 
-TEST(ccapi_logging_test, layer2_args2)
+TEST(test_ccapi_logging, testCcapiTwoArguments)
 {
 	debug_t debug;
 
@@ -84,7 +84,7 @@ pthread_t create_thread_logging(void * argument)
 }
 
 
-TEST(ccapi_logging_test, layer2_syncr)
+TEST(test_ccapi_logging, testCcapiLoggingSyncr)
 {
     #define NUM_THREADS 10
     pthread_t thread_h[NUM_THREADS];
@@ -122,7 +122,7 @@ static void connector_debug_line(char const * const format, ...)
     CALL_DEBUG_VPRINTF(debug_all, format);
 }
 
-TEST(ccapi_logging_test, layer1_args0)
+TEST(test_ccapi_logging, testCcfsmNoArguments)
 {
 	debug_t debug;
 
@@ -133,7 +133,7 @@ TEST(ccapi_logging_test, layer1_args0)
     connector_debug_line("layer1_args0");
 }
 
-TEST(ccapi_logging_test, layer1_args1)
+TEST(test_ccapi_logging, testCcfsmOneArgument)
 {
 	debug_t debug;
 
@@ -144,7 +144,7 @@ TEST(ccapi_logging_test, layer1_args1)
     connector_debug_line("layer1_args1 %d", 33);
 }
 
-TEST(ccapi_logging_test, layer1_args2)
+TEST(test_ccapi_logging, testCcfsmTwoArguments)
 {
 	debug_t debug;
 
@@ -157,7 +157,7 @@ TEST(ccapi_logging_test, layer1_args2)
 
 #else
 /* CCAPI_LOGGING is not defined. Check that nothing happens */
-TEST(ccapi_logging_test, testDbgDefineDisabled)
+TEST(test_ccapi_logging, testDebugDefineDisabled)
 {
     ccapi_start_error_t error;
     ccapi_start_t start = {0};

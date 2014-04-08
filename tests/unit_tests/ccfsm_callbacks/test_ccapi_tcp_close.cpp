@@ -1,6 +1,6 @@
 #include "test_helper_functions.h"
 
-TEST_GROUP(ccapi_tcp_test_close)
+TEST_GROUP(test_ccapi_tcp_close)
 {
     void setup()
     {
@@ -19,7 +19,7 @@ TEST_GROUP(ccapi_tcp_test_close)
     }
 };
 
-TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudDisconnected)
+TEST(test_ccapi_tcp_close, testTcpCloseCallbackCloudDisconnected)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -39,7 +39,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudDisconnected)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudRedirected)
+TEST(test_ccapi_tcp_close, testTcpCloseCallbackCloudRedirected)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -59,7 +59,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackCloudRedirected)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseCallbackNoKeepalive)
+TEST(test_ccapi_tcp_close, testTcpCloseCallbackNoKeepalive)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -79,7 +79,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseCallbackNoKeepalive)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseDeviceError)
+TEST(test_ccapi_tcp_close, testTcpCloseDeviceError)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -99,7 +99,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseDeviceError)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseNoCallback)
+TEST(test_ccapi_tcp_close, testTcpCloseNoCallback)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -118,7 +118,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseNoCallback)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseAbort)
+TEST(test_ccapi_tcp_close, testTcpCloseAbort)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -137,7 +137,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseAbort)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseTerminated)
+TEST(test_ccapi_tcp_close, testTcpCloseTerminated)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
@@ -156,7 +156,7 @@ TEST(ccapi_tcp_test_close, testTcpCloseTerminated)
     CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_tcp.connected);
 }
 
-TEST(ccapi_tcp_test_close, testTcpCloseStopped)
+TEST(test_ccapi_tcp_close, testTcpCloseStopped)
 {
     connector_network_handle_t handle = &handle;
     connector_request_id_t request;
