@@ -122,7 +122,7 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thr
         mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Don't create thread, return FALSE */
-        return CCIMP_STATUS_ABORT;
+        return CCIMP_STATUS_ERROR;
     }
     else if (behavior == MOCK_THREAD_ENABLED_ARGUMENT_NULL)
     {
@@ -159,7 +159,7 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info)
         }
     }
 
-    return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
+    return malloc_info->ptr == NULL ? CCIMP_STATUS_ERROR : CCIMP_STATUS_OK;
 }
 
 ccimp_status_t ccimp_free(ccimp_free_t * const free_info)

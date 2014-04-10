@@ -23,7 +23,7 @@ void * ccapi_malloc(size_t size)
     {
         case CCIMP_STATUS_OK:
             return malloc_info.ptr;
-        case CCIMP_STATUS_ABORT:
+        case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
             break;
     }
@@ -84,7 +84,7 @@ static connector_callback_status_t connector_callback_status_from_ccimp_status(c
 
     switch(ccimp_status)
     {
-        case CCIMP_STATUS_ABORT:
+        case CCIMP_STATUS_ERROR:
             callback_status = connector_callback_abort;
             break;
         case CCIMP_STATUS_OK:
@@ -252,7 +252,7 @@ done:
 connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
-    ccimp_status_t ccimp_status = CCIMP_STATUS_ABORT;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
     UNUSED_ARGUMENT(ccapi_data);
     switch (os_request) {
@@ -360,7 +360,7 @@ done:
 connector_callback_status_t ccapi_network_handler(connector_request_id_network_t network_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
-    ccimp_status_t ccimp_status = CCIMP_STATUS_ABORT;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
     UNUSED_ARGUMENT(ccapi_data);
     switch (network_request)
@@ -425,7 +425,7 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
                 case CCIMP_STATUS_OK:
                     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
                     break;
-                case CCIMP_STATUS_ABORT:
+                case CCIMP_STATUS_ERROR:
                 case CCIMP_STATUS_BUSY:
                     goto done;
                     break;
@@ -454,7 +454,7 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
 
         default:
         {
-            ccimp_status = CCIMP_STATUS_ABORT;
+            ccimp_status = CCIMP_STATUS_ERROR;
             break;
         }
     }

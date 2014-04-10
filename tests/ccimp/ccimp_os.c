@@ -29,7 +29,7 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info)
 {
     malloc_info->ptr = malloc(malloc_info->size);
 
-    return malloc_info->ptr == NULL ? CCIMP_STATUS_ABORT : CCIMP_STATUS_OK;
+    return malloc_info->ptr == NULL ? CCIMP_STATUS_ERROR : CCIMP_STATUS_OK;
 }
 
 ccimp_status_t ccimp_free(ccimp_free_t * const free_info)
@@ -46,7 +46,7 @@ ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info)
     realloc_info->ptr = realloc(realloc_info->ptr, realloc_info->new_size);
     if (realloc_info->ptr == NULL)
     {
-        status = CCIMP_STATUS_ABORT;
+        status = CCIMP_STATUS_ERROR;
     }
 
     return status;
@@ -69,7 +69,7 @@ ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thr
     if (ccode != 0)
     {
         printf("ccimp_create_thread() error %d\n", ccode);
-        return (CCIMP_STATUS_ABORT);
+        return (CCIMP_STATUS_ERROR);
     }
 
     return CCIMP_STATUS_OK;
@@ -115,7 +115,7 @@ ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
     if (sem_init(sem, 0, 0) == -1)
     {
         printf("ccimp_os_syncr_create error\n");
-        return CCIMP_STATUS_ABORT;
+        return CCIMP_STATUS_ERROR;
     }
 
     data->syncr_object = sem;
@@ -149,7 +149,7 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
         {
             printf("ccimp_os_syncr_acquire: clock_gettime error\n");
-            return CCIMP_STATUS_ABORT;
+            return CCIMP_STATUS_ERROR;
         }
 
         ts.tv_sec += data->timeout_ms / 1000;
@@ -183,7 +183,7 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
         else
         {
             perror("sem_timedwait");
-            return CCIMP_STATUS_ABORT;
+            return CCIMP_STATUS_ERROR;
         }
     } 
     else
@@ -204,7 +204,7 @@ ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t const * const dat
     if (sem_post(sem) == -1) 
     {
         printf("ccimp_os_syncr_release error\n");
-        return CCIMP_STATUS_ABORT;
+        return CCIMP_STATUS_ERROR;
     }
 
     return CCIMP_STATUS_OK;
@@ -219,7 +219,7 @@ ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t const * const dat
     if (sem_destroy(sem) == -1) 
     {
         printf("ccimp_os_syncr_destroy error\n");
-        return CCIMP_STATUS_ABORT;
+        return CCIMP_STATUS_ERROR;
     }
 
     free(sem); 

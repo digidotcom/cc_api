@@ -60,7 +60,7 @@ ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * const data)
         /* EOF on input: the connection was closed. */
         printf("network_receive: EOF on socket\n");
         errno = ECONNRESET;
-        status = CCIMP_STATUS_ABORT;
+        status = CCIMP_STATUS_ERROR;
     }
     else
     {
@@ -75,7 +75,7 @@ ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * const data)
             printf("network_receive: recv() failed, errno %d\n", err);
             /* if not timeout (no data) return an error */
             dns_cache_invalidate();
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
         }
     }
     return status;
@@ -100,7 +100,7 @@ ccimp_status_t ccimp_network_tcp_send(ccimp_network_send_t * const data)
         }
         else
         {
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
             printf("app_network_tcp_send: send() failed, errno %d\n", err);
             dns_cache_invalidate();
         }
@@ -169,7 +169,7 @@ static ccimp_status_t app_tcp_connect(int const fd, in_addr_t const ip_addr)
 
         default:
             printf("app_tcp_connect: connect() failed, fd %d, errno %d\n", fd, err);
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
         }
     }
 
@@ -192,7 +192,7 @@ static ccimp_status_t app_is_tcp_connect_complete(int const fd)
     {
         if (errno != EINTR) {
             printf("app_is_tcp_connect_complete: select on fd %d returned %d, errno %d\n", fd, rc, errno);
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
         }
     }
     else
@@ -204,7 +204,7 @@ static ccimp_status_t app_is_tcp_connect_complete(int const fd)
         if (FD_ISSET(fd, &read_set))
         {
             printf("app_is_tcp_connect_complete: FD_ISSET for read, fd %d\n", fd);
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
 
         }
         else
@@ -223,7 +223,7 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
     static int fd = -1;
     socklen_t interface_addr_len;
 
-    ccimp_status_t status = CCIMP_STATUS_ABORT;
+    ccimp_status_t status = CCIMP_STATUS_ERROR;
     data->handle = &fd;
 
     if (fd == -1)
@@ -233,14 +233,14 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
         if (dns_resolve_error != 0)
         {
             printf("app_network_tcp_open: Can't resolve DNS for %s\n", data->device_cloud.url);
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
             goto done;
         }
 
         fd = app_tcp_create_socket();
         if (fd == -1)
         {
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
             goto done;
         }
 
@@ -280,12 +280,12 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
         if (elapsed_time >= APP_CONNECT_TIMEOUT)
         {
             printf("app_network_tcp_open: failed to connect withing 30 seconds\n");
-            status = CCIMP_STATUS_ABORT;
+            status = CCIMP_STATUS_ERROR;
         }
     }
 
 error:
-    if (status == CCIMP_STATUS_ABORT)
+    if (status == CCIMP_STATUS_ERROR)
     {
         printf("app_network_tcp_open: failed to connect to %s\n", data->device_cloud.url);
         dns_set_redirected(0);

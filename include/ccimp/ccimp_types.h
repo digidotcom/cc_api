@@ -18,7 +18,7 @@ typedef enum {
 typedef enum {
     CCIMP_STATUS_OK,
     CCIMP_STATUS_BUSY,
-    CCIMP_STATUS_ABORT
+    CCIMP_STATUS_ERROR
 } ccimp_status_t;
 
 #endif /* CCIMP_TYPES_H_ */
