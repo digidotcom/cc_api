@@ -13,11 +13,11 @@ ccapi_data_t * ccapi_data_single_instance = NULL;
 
 void * ccapi_malloc(size_t size)
 {
-    ccimp_malloc_t malloc_info;
+    ccimp_os_malloc_t malloc_info;
     ccimp_status_t status;
 
     malloc_info.size = size;
-    status = ccimp_malloc(&malloc_info);
+    status = ccimp_os_malloc(&malloc_info);
 
     switch (status)
     {
@@ -32,11 +32,11 @@ void * ccapi_malloc(size_t size)
 
 ccimp_status_t ccapi_free(void * ptr)
 {
-    ccimp_free_t free_info;
+    ccimp_os_free_t free_info;
 
     free_info.ptr = ptr;
 
-    return ccimp_free(&free_info);
+    return ccimp_os_free(&free_info);
 }
 
 ccimp_status_t ccapi_syncr_release(void * syncr_object)
@@ -259,12 +259,12 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
         case connector_request_id_os_malloc:
         {
             connector_os_malloc_t * connector_malloc_data = data;
-            ccimp_malloc_t ccimp_malloc_data;
+            ccimp_os_malloc_t ccimp_malloc_data;
 
             ccimp_malloc_data.size = connector_malloc_data->size;
             ccimp_malloc_data.ptr = connector_malloc_data->ptr;
 
-            ccimp_status = ccimp_malloc(&ccimp_malloc_data);
+            ccimp_status = ccimp_os_malloc(&ccimp_malloc_data);
 
             connector_malloc_data->ptr = ccimp_malloc_data.ptr;
             break;
@@ -273,10 +273,10 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
         case connector_request_id_os_free:
         {
             connector_os_free_t * connector_free_data = data;
-            ccimp_free_t ccimp_free_data;
+            ccimp_os_free_t ccimp_free_data;
 
             ccimp_free_data.ptr = connector_free_data->ptr;
-            ccimp_status = ccimp_free(&ccimp_free_data);
+            ccimp_status = ccimp_os_free(&ccimp_free_data);
             break;
         }
 
@@ -306,12 +306,12 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
         case connector_request_id_os_realloc:
         {
             connector_os_realloc_t * connector_realloc_data = data;
-            ccimp_realloc_t ccimp_realloc_data;
+            ccimp_os_realloc_t ccimp_realloc_data;
 
             ccimp_realloc_data.new_size = connector_realloc_data->new_size;
             ccimp_realloc_data.old_size = connector_realloc_data->old_size;
             ccimp_realloc_data.ptr = connector_realloc_data->ptr;
-            ccimp_status = ccimp_realloc(&ccimp_realloc_data);
+            ccimp_status = ccimp_os_realloc(&ccimp_realloc_data);
 
             connector_realloc_data->ptr = ccimp_realloc_data.ptr;
             break;

@@ -32,17 +32,17 @@ typedef struct
 typedef struct {
     size_t CONST size;
     void * ptr;
-} ccimp_malloc_t;
+} ccimp_os_malloc_t;
 
 typedef struct {
     void CONST * CONST ptr;
-} ccimp_free_t;
+} ccimp_os_free_t;
 
 typedef struct {
     size_t CONST old_size;
     size_t CONST new_size;
     void * ptr;
-} ccimp_realloc_t;
+} ccimp_os_realloc_t;
 
 typedef struct {
     unsigned long sys_uptime;
@@ -69,11 +69,11 @@ typedef struct {
     void * CONST syncr_object;
 } ccimp_os_syncr_destroy_t;
 
-ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info);
-ccimp_status_t ccimp_free(ccimp_free_t * const free_info);
-ccimp_status_t ccimp_realloc(ccimp_realloc_t * const realloc_info);
+ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info);
+ccimp_status_t ccimp_os_free(ccimp_os_free_t * const free_info);
+ccimp_status_t ccimp_os_realloc(ccimp_os_realloc_t * const realloc_info);
 
-ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info);
+ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info);
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield(void);
