@@ -34,7 +34,7 @@ ccimp_status_t ccimp_malloc(ccimp_malloc_t * const malloc_info)
 
 ccimp_status_t ccimp_free(ccimp_free_t * const free_info)
 {
-    free(free_info->ptr);
+    free((void *)free_info->ptr);
 
     return CCIMP_STATUS_OK;
 }
@@ -109,8 +109,7 @@ ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
 {
 
     ccimp_status_t status = CCIMP_STATUS_OK;
-
-    sem_t * sem = (sem_t *) malloc(sizeof(sem_t)); 
+    sem_t * const sem = (sem_t *) malloc(sizeof(sem_t));
 
     if (sem_init(sem, 0, 0) == -1)
     {
@@ -195,9 +194,9 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t const * const data)
+ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data)
 {
-    sem_t * sem = data->syncr_object;
+    sem_t * const sem = data->syncr_object;
 
     assert(sem);
 
@@ -210,9 +209,9 @@ ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t const * const dat
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t const * const data)
+ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t * const data)
 {
-    sem_t * sem = data->syncr_object;
+    sem_t * const sem = data->syncr_object;
 
     assert(sem);
 

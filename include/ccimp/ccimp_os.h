@@ -35,7 +35,7 @@ typedef struct {
 } ccimp_malloc_t;
 
 typedef struct {
-    void * CONST ptr;
+    void CONST * CONST ptr;
 } ccimp_free_t;
 
 typedef struct {
@@ -80,8 +80,8 @@ ccimp_status_t ccimp_os_yield(void);
 
 ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data);
 ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data);
-ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t const * const data);
-ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t const * const data);
+ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data);
+ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t * const data);
 
 
 #endif
