@@ -13,33 +13,33 @@
 #include <errno.h>
 
 #ifdef UNIT_TEST
-#define ccimp_malloc             ccimp_malloc_real
-#define ccimp_free               ccimp_free_real
-#define ccimp_realloc            ccimp_realloc_real
-#define ccimp_create_thread      ccimp_create_thread_real
-#define ccimp_os_get_system_time ccimp_os_get_system_time_real
-#define ccimp_os_yield           ccimp_os_yield_real
+#define ccimp_os_malloc             ccimp_os_malloc_real
+#define ccimp_os_free               ccimp_os_free_real
+#define ccimp_os_realloc            ccimp_os_realloc_real
+#define ccimp_os_create_thread      ccimp_os_create_thread_real
+#define ccimp_os_get_system_time    ccimp_os_get_system_time_real
+#define ccimp_os_yield              ccimp_os_yield_real
 #endif
 
 #define ccapi_logging_line_info(message) /* TODO */
 
 /******************** LINUX IMPLEMENTATION ********************/
 
-ccimp_status_t ccimp_malloc(ccimp_os_malloc_t * const malloc_info)
+ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info)
 {
     malloc_info->ptr = malloc(malloc_info->size);
 
     return malloc_info->ptr == NULL ? CCIMP_STATUS_ERROR : CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_free(ccimp_os_free_t * const free_info)
+ccimp_status_t ccimp_os_free(ccimp_os_free_t * const free_info)
 {
     free((void *)free_info->ptr);
 
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_realloc(ccimp_os_realloc_t * const realloc_info)
+ccimp_status_t ccimp_os_realloc(ccimp_os_realloc_t * const realloc_info)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
 
@@ -61,7 +61,7 @@ static void * thread_wrapper(void * argument)
     return NULL;
 }
 
-ccimp_status_t ccimp_create_thread(ccimp_create_thread_info_t * const create_thread_info)
+ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info)
 {
     pthread_t pthread;
     int ccode = pthread_create(&pthread, NULL, thread_wrapper, create_thread_info);

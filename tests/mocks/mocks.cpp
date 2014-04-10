@@ -14,9 +14,9 @@ char * assert_file;
 void Mock_create_all()
 {
     Mock_ccimp_logging_printf_create();
-    Mock_ccimp_malloc_create();
-    Mock_ccimp_free_create();
-    Mock_ccimp_create_thread_create();
+    Mock_ccimp_os_malloc_create();
+    Mock_ccimp_os_free_create();
+    Mock_ccimp_os_create_thread_create();
     Mock_connector_init_create();
     Mock_connector_run_create();
     Mock_connector_initiate_action_create();
@@ -37,11 +37,11 @@ void Mock_destroy_all()
          */
         ccapi_data_single_instance = NULL;
     }
-    Mock_ccimp_create_thread_destroy();
+    Mock_ccimp_os_create_thread_destroy();
     Mock_ccimp_logging_printf_destroy();
-    Mock_ccimp_malloc_destroy();
-    Mock_ccimp_free_destroy();
-    Mock_ccimp_create_thread_destroy();
+    Mock_ccimp_os_malloc_destroy();
+    Mock_ccimp_os_free_destroy();
+    Mock_ccimp_os_create_thread_destroy();
     Mock_connector_init_destroy();
     Mock_connector_run_destroy();
     Mock_connector_initiate_action_destroy();

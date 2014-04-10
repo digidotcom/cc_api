@@ -27,7 +27,7 @@ TEST(test_ccapi_os, testMalloc)
     connector_callback_status_t status;
     void * pre_allocated_buffer = malloc(1024);
 
-    Mock_ccimp_malloc_expectAndReturn(malloc_structure.size, pre_allocated_buffer);
+    Mock_ccimp_os_malloc_expectAndReturn(malloc_structure.size, pre_allocated_buffer);
 
     request.os_request = connector_request_id_os_malloc;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &malloc_structure, ccapi_data_single_instance);
@@ -43,7 +43,7 @@ TEST(test_ccapi_os, testFreeOk)
     connector_os_free_t free_structure = {pre_allocated_buffer};
     connector_callback_status_t status;
 
-    Mock_ccimp_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_OK);
 
     request.os_request = connector_request_id_os_free;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, ccapi_data_single_instance);
@@ -57,7 +57,7 @@ TEST(test_ccapi_os, testFreeAbort)
     connector_os_free_t free_structure = {pre_allocated_buffer};
     connector_callback_status_t status;
 
-    Mock_ccimp_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_free_expectAndReturn(pre_allocated_buffer, CCIMP_STATUS_ERROR);
 
     request.os_request = connector_request_id_os_free;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, ccapi_data_single_instance);

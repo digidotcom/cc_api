@@ -294,7 +294,7 @@ TEST(test_ccapi_tcp_start_sanity_checks, testTcpInfoNoMemory)
     ccapi_tcp_info_t tcp_start = {{0}};
     void * malloc_for_ccapi_tcp = NULL;
 
-    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
@@ -318,8 +318,8 @@ TEST(test_ccapi_tcp_start_sanity_checks, testPasswordNoMemory)
     connector_transport_t connector_transport = connector_transport_tcp;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
-    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
-    Mock_ccimp_malloc_expectAndReturn(sizeof password, malloc_for_password);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof password, malloc_for_password);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
@@ -339,8 +339,8 @@ TEST(test_ccapi_tcp_start_sanity_checks, testPhoneNoMemory)
     tcp_start.connection.info.wan.link_speed = 115200;
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
 
-    Mock_ccimp_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
-    Mock_ccimp_malloc_expectAndReturn(sizeof phone_number, malloc_for_phone);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof phone_number, malloc_for_phone);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY, error);
 }
