@@ -9,6 +9,7 @@
 #define _TEST_HELPER_FUNCTIONS_H_
 
 #define CCAPI_CONST_PROTECTION_UNLOCK
+#define CONNECTOR_CONST_PROTECTION
 
 #define TH_DEVICE_TYPE_STRING      "Device type"
 #define TH_DEVICE_CLOUD_URL_STRING "login.etherios.com"
