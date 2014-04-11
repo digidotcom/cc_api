@@ -4,14 +4,8 @@ TEST_GROUP(test_ccapi_os)
 {
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-
         Mock_create_all();
-
-        th_fill_start_structure_with_good_parameters(&start);
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
+        th_start_ccapi();
     }
 
     void teardown()
