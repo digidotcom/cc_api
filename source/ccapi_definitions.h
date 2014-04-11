@@ -14,6 +14,7 @@
 #include "ccimp/ccimp_logging.h"
 #include "ccimp/ccimp_os.h"
 #include "ccimp/ccimp_network.h"
+#include "ccimp/ccimp_filesystem.h"
 #include "connector_api.h"
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
