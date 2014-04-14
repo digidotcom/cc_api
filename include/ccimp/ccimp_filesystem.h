@@ -187,7 +187,7 @@ typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t CONST errnum;
-    void  * CONST buffer;
+    char  * CONST error_string;
     size_t  CONST bytes_available;
     size_t  bytes_used;
     ccimp_fs_error_t error_status;

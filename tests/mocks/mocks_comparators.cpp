@@ -392,7 +392,7 @@ static bool ccimp_fs_error_desc_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_error_desc_1->imp_context != ccimp_fs_error_desc_2->imp_context)
         return false;
-    if (ccimp_fs_error_desc_1->buffer != ccimp_fs_error_desc_2->buffer)
+    if (ccimp_fs_error_desc_1->error_string != ccimp_fs_error_desc_2->error_string)
         return false;
     if (ccimp_fs_error_desc_1->bytes_available != ccimp_fs_error_desc_2->bytes_available)
         return false;

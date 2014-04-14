@@ -951,7 +951,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_error_desc_data.errnum.pointer = ccfsm_error_desc_data->errnum;
             ccimp_error_desc_data.imp_context = ccfsm_error_desc_data->user_context;
-            ccimp_error_desc_data.buffer = ccfsm_error_desc_data->buffer;
+            ccimp_error_desc_data.error_string = ccfsm_error_desc_data->buffer;
             ccimp_error_desc_data.bytes_available = ccfsm_error_desc_data->bytes_available;
             ccimp_error_desc_data.bytes_used = 0;
             ccimp_error_desc_data.error_status = CCIMP_FS_ERROR_UNKNOWN;

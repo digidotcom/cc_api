@@ -416,7 +416,7 @@ ccimp_status_t ccimp_fs_error_desc(ccimp_fs_error_desc_t * const error_desc_data
         char * err_str = strerror(errnum);
 
         error_desc_data->bytes_used = MIN_VALUE(strlen(err_str), error_desc_data->bytes_available);
-        memcpy(error_desc_data->buffer, err_str, error_desc_data->bytes_used);
+        memcpy(error_desc_data->error_string, err_str, error_desc_data->bytes_used);
     }
 
     switch(errnum)
