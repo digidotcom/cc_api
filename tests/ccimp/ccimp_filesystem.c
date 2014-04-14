@@ -38,8 +38,8 @@ typedef struct
 
 static int app_convert_file_open_mode(int const oflag)
 {
-#if (CONNECTOR_FILE_O_RDONLY == O_RDONLY) && (CONNECTOR_FILE_O_WRONLY == O_WRONLY) && (CONNECTOR_FILE_O_RDWR == O_RDWR) && \
-    (CONNECTOR_FILE_O_CREAT == O_CREAT)   && (CONNECTOR_FILE_O_APPEND == O_APPEND) && (CONNECTOR_FILE_O_TRUNC == O_TRUNC)
+#if (CCIMP_FILE_O_RDONLY == O_RDONLY) && (CCIMP_FILE_O_WRONLY == O_WRONLY) && (CCIMP_FILE_O_RDWR == O_RDWR) && \
+    (CCIMP_FILE_O_CREAT == O_CREAT)   && (CCIMP_FILE_O_APPEND == O_APPEND) && (CCIMP_FILE_O_TRUNC == O_TRUNC)
 
     return oflag;
 #else
