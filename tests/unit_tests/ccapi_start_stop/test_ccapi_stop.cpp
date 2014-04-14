@@ -58,7 +58,6 @@ TEST(test_ccapi_stop, testCcapiStopGracefully)
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_thread_info_t), (void*)&mem_for_thread_connector_run);
 
     th_start_ccapi();
-    th_setup_mock_info_single_instance();
 
     Mock_ccimp_os_free_expectAndReturn(malloc_for_device_type, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_device_cloud_url, CCIMP_STATUS_OK);
@@ -77,7 +76,6 @@ TEST(test_ccapi_stop, testCcapiStopImmediately)
     ccapi_stop_error_t stop_error;
 
     th_start_ccapi();
-    th_setup_mock_info_single_instance();
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);

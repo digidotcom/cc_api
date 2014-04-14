@@ -2,13 +2,11 @@
 
 TEST_GROUP(test_ccapi_tcp_start)
 {
-    mock_connector_api_info_t * mock_info;
     void setup()
     {
         Mock_create_all();
 
         th_start_ccapi();
-        mock_info = th_setup_mock_info_single_instance();
     }
 
     void teardown()
@@ -98,7 +96,11 @@ TEST(test_ccapi_tcp_start, testTCPConnectionTimeout)
 
     th_fill_tcp_wan_ipv4_callbacks_info(&tcp_start);
     tcp_start.connection.timeout = 10;
-    mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 

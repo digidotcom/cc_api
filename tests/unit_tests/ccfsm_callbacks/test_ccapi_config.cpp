@@ -6,7 +6,6 @@ TEST_GROUP(test_ccapi_config)
     {
         Mock_create_all();
         th_start_ccapi();
-        th_setup_mock_info_single_instance();
     }
 
     void teardown()

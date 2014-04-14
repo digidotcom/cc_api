@@ -53,8 +53,6 @@ TEST(test_ccxapi, testStartOneInstance)
     ccapi_stop_error_t stop1_error = CCAPI_STOP_ERROR_NONE;
     ccapi_handle_t ccapi_handle1 = NULL;
 
-    ccapi_data_t * ccapi_data = NULL;
-
     th_fill_start_structure_with_good_parameters(&start1);
 
     CHECK(ccapi_data_single_instance == NULL);
@@ -63,12 +61,7 @@ TEST(test_ccxapi, testStartOneInstance)
     CHECK(ccapi_handle1 != NULL);
     CHECK(ccapi_data_single_instance == NULL);
 
-    ccapi_data = (ccapi_data_t *)ccapi_handle1;
-    {
-        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-        mock_info->ccapi_handle = ccapi_handle1;
-    }
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle1)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
@@ -77,8 +70,6 @@ TEST(test_ccxapi, testStartOneInstance)
 
 TEST(test_ccxapi, testStartTwoInstances)
 {
-    ccapi_data_t * ccapi_data = NULL;
-
     ccapi_start_t start1 = {0};
     ccapi_start_error_t start1_error = CCAPI_START_ERROR_NONE;
     ccapi_stop_error_t stop1_error = CCAPI_STOP_ERROR_NONE;
@@ -110,23 +101,13 @@ TEST(test_ccxapi, testStartTwoInstances)
 
     CHECK(ccapi_handle1 != ccapi_handle2);
 
-    ccapi_data = (ccapi_data_t *)ccapi_handle1;
-    {
-        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-        mock_info->ccapi_handle = ccapi_handle1;
-    }
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle1)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
 
-    ccapi_data = (ccapi_data_t *)ccapi_handle2;
-    {
-        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data->connector_handle); 
-        mock_info->ccapi_handle = ccapi_handle2;
-    }
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle2)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop2_error = ccxapi_stop(ccapi_handle2, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop2_error == CCAPI_STOP_ERROR_NONE);

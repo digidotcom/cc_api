@@ -14,7 +14,7 @@
 static mock_connector_api_info_t mock_info[MAX_INFO];
 static sem_t sem;
 
-mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t connector_handle)
+mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t connector_handle, ccapi_handle_t ccapi_handle)
 {
     size_t i;
 
@@ -26,7 +26,10 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
         {
             mock_info[i].used = connector_true;
             mock_info[i].connector_handle = connector_handle;
+            mock_info[i].ccapi_handle = ccapi_handle;	
             mock_info[i].connector_run_retval = connector_idle;
+            mock_info[i].connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
+            mock_info[i].connector_initiate_transport_stop_info.stop_transport = CCAPI_TRUE;
 
             sem_post(&sem);
 
@@ -120,8 +123,6 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     uint8_t behavior;
     connector_handle_t connector_handle;
 
-    UNUSED_ARGUMENT(context);
-
     behavior = mock("connector_init").getData("behavior").getIntValue();
 
     if (behavior == MOCK_CONNECTOR_INIT_ENABLED)
@@ -135,7 +136,7 @@ connector_handle_t connector_init(connector_callback_t const callback, void * co
     } 
     
     if (connector_handle != NULL)
-        mock_connector_api_info_alloc(connector_handle);
+        mock_connector_api_info_alloc(connector_handle, (ccapi_handle_t)context);
 
     return connector_handle;
 }
@@ -264,6 +265,8 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
     ccapi_data_t * ccapi_data = (ccapi_data_t *)mock_info->ccapi_handle;
 
+    assert(ccapi_data != NULL);
+
     switch (request)
     {
         case connector_initiate_transport_stop:
@@ -305,7 +308,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameter("request_data", (void *)request_data);
 
-            if (mock_info && mock_info->ccapi_handle != NULL)
+            if (mock_info)
             {
                 ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
                 mock_info->connector_run_retval = connector_device_terminated;

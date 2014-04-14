@@ -89,7 +89,6 @@ TEST(test_ccapi_init_threading, testInitErrorRunRetConnectorInitError)
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle); 
-        mock_info->ccapi_handle = (ccapi_handle_t)malloc_for_ccapi_data;
         mock_info->connector_run_retval = connector_init_error;
     }
 

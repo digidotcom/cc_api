@@ -65,16 +65,6 @@ void th_start_ccapi(void)
     CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 }
 
-mock_connector_api_info_t * th_setup_mock_info_single_instance(void)
-{
-    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-    mock_info->ccapi_handle = (ccapi_handle_t)ccapi_data_single_instance;
-    mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
-    mock_info->connector_initiate_transport_stop_info.stop_transport = CCAPI_TRUE;
-
-    return mock_info;
-}
-
 void th_stop_ccapi(ccapi_data_t * const ccapi_data)
 {
     ccapi_stop_error_t stop_error;

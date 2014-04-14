@@ -20,7 +20,6 @@ TEST_GROUP(test_ccapi_tcp_start_sanity_checks)
         Mock_create_all();
 
         th_start_ccapi();
-        th_setup_mock_info_single_instance();
     }
 
     void teardown()

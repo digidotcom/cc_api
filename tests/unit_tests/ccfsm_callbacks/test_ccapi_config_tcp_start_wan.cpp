@@ -8,7 +8,6 @@ TEST_GROUP(test_ccapi_config_tcp_start_wan)
         Mock_create_all();
 
         th_start_ccapi();
-        th_setup_mock_info_single_instance();
         th_start_tcp_wan_ipv4_with_callbacks();
     }
 

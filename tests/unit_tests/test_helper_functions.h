@@ -34,7 +34,6 @@ void th_fill_tcp_lan_ipv4(ccapi_tcp_info_t * tcp_start);
 void th_start_tcp_wan_ipv4_with_callbacks(void);
 void th_start_tcp_lan_ipv4(void);
 void th_start_tcp_lan_ipv6_password_keepalives(void);
-mock_connector_api_info_t * th_setup_mock_info_single_instance(void);
 void th_stop_ccapi(ccapi_data_t * const ccapi_data);
 pthread_t th_aux_ccapi_start(void * argument);
 int th_stop_aux_thread(pthread_t pthread);
