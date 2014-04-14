@@ -25,6 +25,20 @@ void Mock_create_all()
     Mock_ccimp_network_tcp_receive_create();
     Mock_ccimp_network_tcp_close_create();
     Mock_ccimp_os_get_system_time_create();
+    Mock_ccimp_fs_file_open_create();
+    Mock_ccimp_fs_file_read_create();
+    Mock_ccimp_fs_file_write_create();
+    Mock_ccimp_fs_file_seek_create();
+    Mock_ccimp_fs_file_close_create();
+    Mock_ccimp_fs_file_remove_create();
+    Mock_ccimp_fs_dir_open_create();
+    Mock_ccimp_fs_dir_read_entry_create();
+    Mock_ccimp_fs_dir_entry_status_create();
+    Mock_ccimp_fs_dir_close_create();
+    Mock_ccimp_fs_hash_status_create();
+    Mock_ccimp_fs_hash_file_create();
+    Mock_ccimp_fs_error_desc_create();
+    Mock_ccimp_fs_session_error_create();
 }
 
 void Mock_destroy_all()
@@ -50,6 +64,20 @@ void Mock_destroy_all()
     Mock_ccimp_network_tcp_receive_destroy();
     Mock_ccimp_network_tcp_close_destroy();
     Mock_ccimp_os_get_system_time_destroy();
+    Mock_ccimp_fs_file_open_destroy();
+    Mock_ccimp_fs_file_read_destroy();
+    Mock_ccimp_fs_file_write_destroy();
+    Mock_ccimp_fs_file_seek_destroy();
+    Mock_ccimp_fs_file_close_destroy();
+    Mock_ccimp_fs_file_remove_destroy();
+    Mock_ccimp_fs_dir_open_destroy();
+    Mock_ccimp_fs_dir_read_entry_destroy();
+    Mock_ccimp_fs_dir_entry_status_destroy();
+    Mock_ccimp_fs_dir_close_destroy();
+    Mock_ccimp_fs_hash_status_destroy();
+    Mock_ccimp_fs_hash_file_destroy();
+    Mock_ccimp_fs_error_desc_destroy();
+    Mock_ccimp_fs_session_error_destroy();
     ASSERT_CLEAN();
     mock().removeAllComparators();
     mock().checkExpectations();
