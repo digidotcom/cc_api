@@ -371,7 +371,7 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     ccfsm_error_desc_data.buffer = ccimp_error_desc_data.buffer;
     ccfsm_error_desc_data.bytes_available = ccimp_error_desc_data.bytes_available;
     ccfsm_error_desc_data.bytes_used = ccimp_error_desc_data.bytes_used;
-    ccfsm_error_desc_data.bytes_used = connector_file_system_unspec_error;
+    ccfsm_error_desc_data.error_status = connector_file_system_unspec_error;
 
     Mock_ccimp_fs_error_desc_expectAndReturn(&ccimp_error_desc_data, CCIMP_STATUS_OK);
 
