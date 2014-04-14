@@ -518,10 +518,16 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
                     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
                     break;
                 }
+#if defined CONNECTOR_TRANSPORT_UDP
                 case connector_transport_udp:
+                    /* TODO */
+                    break;
+#endif
+#if defined CONNECTOR_TRANSPORT_SMS
                 case connector_transport_sms:
                     /* TODO */
                     break;
+#endif
             }
             break;
         }
