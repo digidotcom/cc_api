@@ -960,7 +960,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccfsm_error_desc_data->user_context = ccimp_error_desc_data.imp_context;
             ccfsm_error_desc_data->bytes_used = ccimp_error_desc_data.bytes_used;
-            ccfsm_error_desc_data->error_status = ccfsm_file_system_error_status_from_ccimp_fs_error(ccfsm_error_desc_data->error_status);
+            ccfsm_error_desc_data->error_status = ccfsm_file_system_error_status_from_ccimp_fs_error(ccimp_error_desc_data.error_status);
             break;
         }
 
