@@ -536,7 +536,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
     return connector_status;
 }
 
-
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 static ccimp_fs_seek_origin_t ccimp_seek_origin_from_ccfsm_seek_origin(connector_file_system_seek_origin_t ccfsm_origin)
 {
     ccimp_fs_seek_origin_t ccimp_fs_seek = CCIMP_SEEK_CUR;
@@ -990,6 +990,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
     connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
     return connector_status;
 }
+#endif
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
@@ -1010,9 +1011,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
         case connector_class_id_status:
             status = ccapi_status_handler(request_id.status_request, data, ccapi_data);
             break;
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         case connector_class_id_file_system:
             status = ccapi_filesystem_handler(request_id.file_system_request, data, ccapi_data);
             break;
+#endif
         default:
             status = connector_callback_unrecognized;
             ASSERT_MSG_GOTO(0, done);
