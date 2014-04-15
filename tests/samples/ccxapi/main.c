@@ -132,7 +132,6 @@ int main (void)
         printf("ccapi_start_transport_tcp failed with error %d for handle %p\n", tcp_start_error, (void *)ccapi_handle_devB);
         goto done;
     }
-}
 
     printf("Waiting for ever\n");
     for(;;);
