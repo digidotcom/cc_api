@@ -20,9 +20,6 @@
 #include "connector_api.h"
 #include "dns_helper.h"
 
-/* Global structure of connected interface */
-static struct sockaddr_in interface_addr;
-
 ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
@@ -38,11 +35,10 @@ ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const data)
     }
 
     *fd = -1;
+    free(fd);
 
     return status;
 }
-
-
 
 ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * const data)
 {
@@ -220,13 +216,24 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
 #define APP_CONNECT_TIMEOUT 30
 
     static unsigned long connect_time;
-    static int fd = -1;
+    int * pfd = NULL;
+    struct sockaddr_in interface_addr;
     socklen_t interface_addr_len;
 
     ccimp_status_t status = CCIMP_STATUS_ERROR;
-    data->handle = &fd;
 
-    if (fd == -1)
+    if (data->handle == NULL)
+    {
+        pfd = (int *)malloc(sizeof(int));
+        *pfd = -1;
+        data->handle = pfd;
+    }
+    else
+    {
+        pfd = data->handle;
+    }
+
+    if (*pfd == -1)
     {
         in_addr_t ip_addr;
         int const dns_resolve_error = dns_resolve(data->device_cloud.url, &ip_addr);
@@ -237,10 +244,11 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
             goto done;
         }
 
-        fd = app_tcp_create_socket();
-        if (fd == -1)
+        *pfd = app_tcp_create_socket();
+        if (*pfd == -1)
         {
             status = CCIMP_STATUS_ERROR;
+            free(pfd);
             goto done;
         }
 
@@ -249,20 +257,20 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
             ccimp_os_get_system_time(&uptime);
             connect_time = uptime.sys_uptime;
         }
-        status = app_tcp_connect(fd, ip_addr);
+        status = app_tcp_connect(*pfd, ip_addr);
         if (status != CCIMP_STATUS_OK)
             goto error;
     }
 
     /* Get socket info of connected interface */
     interface_addr_len = sizeof(interface_addr);
-    if (getsockname(fd, (struct sockaddr *)&interface_addr, &interface_addr_len))
+    if (getsockname(*pfd, (struct sockaddr *)&interface_addr, &interface_addr_len))
     {
         printf("network_connect: getsockname error, errno %d\n", errno);
         goto done;
     }
 
-    status = app_is_tcp_connect_complete(fd);
+    status = app_is_tcp_connect_complete(*pfd);
     if (status == CCIMP_STATUS_OK)
     {
          printf("app_network_tcp_open: connected to %s\n", data->device_cloud.url);
@@ -290,10 +298,14 @@ error:
         printf("app_network_tcp_open: failed to connect to %s\n", data->device_cloud.url);
         dns_set_redirected(0);
 
-        if (fd >= 0)
+        if (pfd != NULL)
         {
-            close(fd);
-            fd = -1;
+            if (*pfd >= 0)
+            {
+                close(*pfd);
+                *pfd = -1;
+            }
+            free(pfd);
         }
     }
 
