@@ -328,7 +328,6 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
 {
     ccapi_tcp_stop_error_t error = CCAPI_TCP_STOP_ERROR_NONE;
 
-    UNUSED_ARGUMENT(tcp_stop);
     if (ccapi_data == NULL || !ccapi_data->transport_tcp.connected)
     {
         error = CCAPI_TCP_STOP_ERROR_NOT_STARTED;
