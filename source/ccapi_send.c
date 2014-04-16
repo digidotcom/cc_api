@@ -98,7 +98,7 @@ typedef struct
 {
     void * next_data;
     size_t bytes_remaining;
-    unsigned long event_bit;
+    void * send_syncr;
     ccapi_send_error_t error;
 } connector_app_send_data_t;
 
@@ -108,6 +108,22 @@ typedef struct
     connector_app_send_data_t data_ptr;
 } ccapi_send_t;
 #endif
+
+static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_info, unsigned long const timeout_ms)
+{
+    ccimp_os_syncr_acquire_t acquire_data;
+    ccimp_status_t status = CCIMP_STATUS_ERROR;
+    
+    if (logging_syncr != NULL)
+    {
+        acquire_data.syncr_object = send_info->data_ptr.send_syncr;
+        acquire_data.timeout_ms= timeout_ms;
+
+        status = ccimp_os_syncr_acquire(&acquire_data);
+    }
+
+    return status;
+}
 
 ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
 {
@@ -135,7 +151,12 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    /* TODO: Create syncr in send_info->data_ptr.event_bit */
+    {
+        ccimp_os_syncr_create_t create_data;
+    
+        if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK)
+            send_info->data_ptr.send_syncr = create_data.syncr_object;
+    }
 
     /* we are storing some stack variables here, need to block until we get a response */
     send_info->data_ptr.error = CCAPI_SEND_ERROR_NONE;
@@ -164,9 +185,17 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
 
         if (status == connector_success)
         {
+            /* This case, as we don't want a reply, we want to wait infinite. The status callback will signal us */
+            /* ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE); */
+            /* send_info->data_ptr.error = result; */
+
+            /* TODO: What will we want for the with_reply variant? also infinite so is the ccfsm who produces the timeout? or something like:
+               send_info->header.timeout_in_seconds==SEND_WAIT_FOREVER?OS_SYNCR_ACQUIRE_INFINITE:(send_info->header.timeout_in_seconds+INIT_ACTION_DELAY)*1000
+             */
         }
         else
         {
+            /* result = (status == connector_init_error) ? connector_error_init_error : connector_error_resource_error; */
         }
     }
 done:
