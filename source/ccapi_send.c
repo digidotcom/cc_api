@@ -67,11 +67,52 @@ done:
     return error;
 }
 
+static connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
+{
+    connector_transport_t connector_transport;
+
+    switch(ccapi_transport)
+    {
+        case CCAPI_TRANSPORT_TCP:
+            connector_transport = connector_transport_tcp;
+            break;
+#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+        case CCAPI_TRANSPORT_UDP:
+            connector_transport = connector_transport_udp;
+            break;
+#endif
+#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+        case CCAPI_TRANSPORT_SMS:
+            connector_transport = connector_transport_sms;
+            break;
+#endif
+    }
+
+    return connector_transport;
+}
+
+
+/* TODO: move to private definitions? */
+#ifdef CCIMP_DATA_SERVICE_ENABLED
+typedef struct
+{
+    void * next_data;
+    size_t bytes_remaining;
+    unsigned long event_bit;
+    ccapi_send_error_t error;
+} connector_app_send_data_t;
+
+typedef struct
+{
+	connector_request_data_service_send_t header;
+    connector_app_send_data_t data_ptr;
+} ccapi_send_t;
+#endif
+
 ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
-
-    UNUSED_ARGUMENT(behavior);
+    ccapi_send_t * send_info;
 
     error = check_send_common_args(ccapi_data, transport, cloud_path, content_type);
     if (error != CCAPI_SEND_ERROR_NONE)
@@ -87,6 +128,47 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
+    send_info = ccapi_malloc(sizeof(ccapi_send_t));
+
+    if (!valid_malloc(send_info, &error))
+    {
+        goto done;
+    }
+
+    /* TODO: Create syncr in send_info->data_ptr.event_bit */
+
+    /* we are storing some stack variables here, need to block until we get a response */
+    send_info->data_ptr.error = CCAPI_SEND_ERROR_NONE;
+    send_info->data_ptr.next_data = (void *)data;
+    send_info->data_ptr.bytes_remaining = bytes;
+    send_info->header.path = cloud_path;
+    send_info->header.content_type = content_type;
+    send_info->header.user_context = &send_info->data_ptr;
+    send_info->header.response_required = connector_false;
+    send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER;
+
+    send_info->header.transport = ccapi_to_connector_transport(transport);
+
+    switch (behavior)
+    {
+        case CCAPI_SEND_BEHAVIOR_APPEND:
+            send_info->header.option = connector_data_service_send_option_append;
+            break;
+        case CCAPI_SEND_BEHAVIOR_OVERWRITE:
+            send_info->header.option = connector_data_service_send_option_overwrite;
+            break;
+    }
+
+    {
+        connector_status_t const status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_send_data, &send_info->header);
+
+        if (status == connector_success)
+        {
+        }
+        else
+        {
+        }
+    }
 done:
     return error;
 }

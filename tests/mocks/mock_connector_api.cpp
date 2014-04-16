@@ -217,6 +217,7 @@ void Mock_connector_initiate_action_create(void)
 {
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
     mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
+    mock().installComparator("connector_request_data_service_send_t", connector_request_data_service_send_t_comparator);
     return;
 }
 
@@ -244,10 +245,19 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
                      .andReturnValue(retval);
             break;
         case connector_initiate_send_data:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_request_data_service_send_t", "request_data", request_data)
+                     .andReturnValue(retval);
+
+            mock("connector_initiate_action").setData("connector_request_data_service_send_t_behavior", 1);
+            break;
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
         case connector_initiate_session_cancel:
         case connector_initiate_session_cancel_all:
+            break;
 #endif
         case connector_initiate_terminate:
             mock("connector_initiate_action").expectOneCall("connector_initiate_action")
@@ -317,6 +327,18 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
             break;
         }
         case connector_initiate_send_data:
+        {
+
+            uint8_t behavior = mock("connector_initiate_action").getData("connector_request_data_service_send_t_behavior").getIntValue();
+            if (behavior == 1)
+            {
+                mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_request_data_service_send_t", "request_data", (void *)request_data);
+            }
+            break;
+        }
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
         case connector_initiate_session_cancel:
