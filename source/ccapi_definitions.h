@@ -78,7 +78,7 @@ typedef struct
     size_t bytes_remaining;
     void * send_syncr;
     ccapi_send_error_t error;
-} ccapi_srv_send_data_t;
+} ccapi_svc_send_data_t;
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;

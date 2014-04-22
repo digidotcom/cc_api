@@ -7,7 +7,7 @@
 typedef struct
 {
     connector_request_data_service_send_t header;
-    ccapi_srv_send_data_t srv_send;
+    ccapi_svc_send_data_t svc_send;
 } ccapi_send_t;
 
 static ccapi_bool_t valid_malloc(void * ptr, ccapi_send_error_t * const error)
@@ -103,9 +103,9 @@ static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_in
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t status = CCIMP_STATUS_ERROR;
 
-    ASSERT_MSG_GOTO(send_info->srv_send.send_syncr != NULL, done);
+    ASSERT_MSG_GOTO(send_info->svc_send.send_syncr != NULL, done);
     
-    acquire_data.syncr_object = send_info->srv_send.send_syncr;
+    acquire_data.syncr_object = send_info->svc_send.send_syncr;
     acquire_data.timeout_ms= timeout_ms;
 
     status = ccimp_os_syncr_acquire(&acquire_data);
@@ -147,17 +147,17 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         ccimp_os_syncr_create_t create_data;
     
         if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK)
-            send_info->srv_send.send_syncr = create_data.syncr_object;
+            send_info->svc_send.send_syncr = create_data.syncr_object;
         else goto done;
     }
 
     /* we are storing some stack variables here, need to block until we get a response */
-    send_info->srv_send.error = CCAPI_SEND_ERROR_NONE;
-    send_info->srv_send.next_data = (void *)data;
-    send_info->srv_send.bytes_remaining = bytes;
+    send_info->svc_send.error = CCAPI_SEND_ERROR_NONE;
+    send_info->svc_send.next_data = (void *)data;
+    send_info->svc_send.bytes_remaining = bytes;
     send_info->header.path = cloud_path;
     send_info->header.content_type = content_type;
-    send_info->header.user_context = &send_info->srv_send;
+    send_info->header.user_context = &send_info->svc_send;
     send_info->header.response_required = connector_false;
     send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
@@ -186,7 +186,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
             }
             else
             {
-                error = send_info->srv_send.error;
+                error = send_info->svc_send.error;
             }
         }
         else
@@ -199,7 +199,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
     /* Free resources */
     {
         ccimp_os_syncr_destroy_t destroy_data;
-        destroy_data.syncr_object = send_info->srv_send.send_syncr;
+        destroy_data.syncr_object = send_info->svc_send.send_syncr;
     
         ccimp_os_syncr_destroy(&destroy_data);
     }

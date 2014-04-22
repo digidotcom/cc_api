@@ -994,15 +994,15 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 
-static void send_data_completed(ccapi_srv_send_data_t * const srv_send, ccapi_send_error_t const error_code)
+static void send_data_completed(ccapi_svc_send_data_t * const svc_send, ccapi_send_error_t const error_code)
 {
     ccimp_os_syncr_release_t release_data;
 
-    srv_send->error = error_code;
+    svc_send->error = error_code;
 
-    ASSERT_MSG_GOTO(srv_send->send_syncr != NULL, done);
+    ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
     
-    release_data.syncr_object = srv_send->send_syncr;
+    release_data.syncr_object = svc_send->send_syncr;
 
     ccimp_os_syncr_release(&release_data);
 
@@ -1016,15 +1016,15 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 	
     if (send_ptr != NULL)
     {
-        ccapi_srv_send_data_t * const srv_send = (ccapi_srv_send_data_t *)send_ptr->user_context;
+        ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)send_ptr->user_context;
 
-        ASSERT(srv_send != NULL);
-        send_ptr->bytes_used = (send_ptr->bytes_available > srv_send->bytes_remaining) ? srv_send->bytes_remaining : send_ptr->bytes_available;
+        ASSERT(svc_send != NULL);
+        send_ptr->bytes_used = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        memcpy(send_ptr->buffer, srv_send->next_data, send_ptr->bytes_used);
-        srv_send->next_data = ((char *)srv_send->next_data) + send_ptr->bytes_used;
-        srv_send->bytes_remaining -= send_ptr->bytes_used;
-        send_ptr->more_data = (srv_send->bytes_remaining > 0) ? connector_true : connector_false;
+        memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
+        svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
+        svc_send->bytes_remaining -= send_ptr->bytes_used;
+        send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
     }
     else
     {
@@ -1037,13 +1037,13 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 
 static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
 {
-    ccapi_srv_send_data_t * const srv_send = (ccapi_srv_send_data_t *)status_ptr->user_context;
+    ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
     ccapi_send_error_t error_code;
 
     ccapi_logging_line("Data service status: %d\n", status_ptr->status);
     error_code = (status_ptr->status == connector_data_service_status_complete) ? CCAPI_SEND_ERROR_NONE : CCAPI_SEND_ERROR_CCFSM_ERROR;
 
-    send_data_completed(srv_send, error_code);
+    send_data_completed(svc_send, error_code);
 
     return connector_callback_continue;
 }
