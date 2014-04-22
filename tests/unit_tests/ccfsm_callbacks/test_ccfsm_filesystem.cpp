@@ -26,7 +26,7 @@ TEST_GROUP(test_ccfsm_filesystem)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = &fs_service; /* Not NULL */
+        ccapi_filesystem_service_t fs_service = {NULL}; /* Not NULL */
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
