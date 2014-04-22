@@ -894,6 +894,24 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             break;
         }
 
+        case connector_request_id_file_system_ftruncate:
+        {
+            connector_file_system_truncate_t * ccfsm_truncate_data = data;
+            ccimp_fs_file_truncate_t ccimp_truncate_data;
+            ccapi_fs_file_handle_t * ccapi_fs_handle = ccfsm_truncate_data->handle;
+
+            ccimp_truncate_data.errnum.pointer = NULL;
+            ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+            ccimp_truncate_data.imp_context = ccfsm_truncate_data->user_context;
+            ccimp_truncate_data.length_in_bytes = ccfsm_truncate_data->length_in_bytes;
+
+            ccimp_status = ccimp_fs_file_truncate(&ccimp_truncate_data);
+
+            ccfsm_truncate_data->errnum = ccimp_truncate_data.errnum.pointer;
+            ccfsm_truncate_data->user_context = ccimp_truncate_data.imp_context;
+            break;
+        }
+
         case connector_request_id_file_system_remove:
         {
             connector_file_system_remove_t * ccfsm_remove_data = data;
@@ -1113,8 +1131,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccfsm_session_error_data->user_context = ccimp_session_error_data.imp_context;
             break;
         }
-        default:
-            break;
     }
 
 done:
