@@ -21,6 +21,10 @@ void Mock_ccimp_fs_file_close_create(void);
 void Mock_ccimp_fs_file_close_destroy(void);
 void Mock_ccimp_fs_file_close_expectAndReturn(ccimp_fs_file_close_t * expect, ccimp_status_t retval);
 
+void Mock_ccimp_fs_file_truncate_create(void);
+void Mock_ccimp_fs_file_truncate_destroy(void);
+void Mock_ccimp_fs_file_truncate_expectAndReturn(ccimp_fs_file_truncate_t * expect, ccimp_status_t retval);
+
 void Mock_ccimp_fs_file_remove_create(void);
 void Mock_ccimp_fs_file_remove_destroy(void);
 void Mock_ccimp_fs_file_remove_expectAndReturn(ccimp_fs_file_remove_t * expect, ccimp_status_t retval);

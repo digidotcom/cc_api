@@ -90,6 +90,24 @@ void Mock_ccimp_fs_file_close_expectAndReturn(ccimp_fs_file_close_t * data, ccim
             .andReturnValue(retval);
 }
 
+/* * * ccimp_fs_file_truncate * * */
+void Mock_ccimp_fs_file_truncate_create(void)
+{
+    mock().installComparator("ccimp_fs_file_truncate_t", ccimp_fs_file_truncate_t_comparator);
+}
+
+void Mock_ccimp_fs_file_truncate_destroy(void)
+{
+    mock("ccimp_fs_file_truncate").checkExpectations();
+}
+
+void Mock_ccimp_fs_file_truncate_expectAndReturn(ccimp_fs_file_truncate_t * data, ccimp_status_t retval)
+{
+    mock("ccimp_fs_file_truncate").expectOneCall("ccimp_fs_file_truncate")
+            .withParameterOfType("ccimp_fs_file_truncate_t", "data", data)
+            .andReturnValue(retval);
+}
+
 /* * * ccimp_fs_file_remove * * */
 void Mock_ccimp_fs_file_remove_create(void)
 {
@@ -313,6 +331,16 @@ ccimp_status_t ccimp_fs_file_close(ccimp_fs_file_close_t * const data)
     *fs_context = 4;
     data->errnum.value = EROFS;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_file_close")->returnValue().value.intValue;
+}
+
+ccimp_status_t ccimp_fs_file_truncate(ccimp_fs_file_truncate_t * const data)
+{
+    my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
+
+    mock_scope_c("ccimp_fs_file_truncate")->actualCall("ccimp_fs_file_truncate")->withParameterOfType("ccimp_fs_file_truncate_t", "data", (void *)data);
+    *fs_context = 12;
+    data->errnum.value = EIO;
+    return (ccimp_status_t)mock_scope_c("ccimp_fs_file_truncate")->returnValue().value.intValue;
 }
 
 ccimp_status_t ccimp_fs_file_remove(ccimp_fs_file_remove_t * const data)

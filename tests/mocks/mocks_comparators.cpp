@@ -16,6 +16,7 @@ ValueToStringFunction(ccimp_fs_file_read_t)
 ValueToStringFunction(ccimp_fs_file_write_t)
 ValueToStringFunction(ccimp_fs_file_seek_t)
 ValueToStringFunction(ccimp_fs_file_close_t)
+ValueToStringFunction(ccimp_fs_file_truncate_t)
 ValueToStringFunction(ccimp_fs_file_remove_t)
 ValueToStringFunction(ccimp_fs_dir_open_t)
 ValueToStringFunction(ccimp_fs_dir_read_entry_t)
@@ -247,6 +248,24 @@ static bool ccimp_fs_file_close_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
+static bool ccimp_fs_file_truncate_t_IsEqual(void * object1, void * object2)
+{
+    ccimp_fs_file_truncate_t * ccimp_fs_file_truncate_1 = (ccimp_fs_file_truncate_t *)object1;
+    ccimp_fs_file_truncate_t * ccimp_fs_file_truncate_2 = (ccimp_fs_file_truncate_t *)object2;
+
+    compare_pointers(object1, object2);
+    if (ccimp_fs_file_truncate_1->errnum.pointer != ccimp_fs_file_truncate_2->errnum.pointer)
+        return false;
+    if (ccimp_fs_file_truncate_1->imp_context != ccimp_fs_file_truncate_2->imp_context)
+        return false;
+    if (ccimp_fs_file_truncate_1->handle.pointer != ccimp_fs_file_truncate_2->handle.pointer)
+        return false;
+    if (ccimp_fs_file_truncate_1->length_in_bytes != ccimp_fs_file_truncate_2->length_in_bytes)
+        return false;
+
+    return true;
+}
+
 static bool ccimp_fs_file_remove_t_IsEqual(void * object1, void * object2)
 {
     ccimp_fs_file_remove_t * ccimp_fs_file_remove_1 = (ccimp_fs_file_remove_t *)object1;
@@ -428,6 +447,7 @@ MockFunctionComparator ccimp_fs_file_read_t_comparator(ccimp_fs_file_read_t_IsEq
 MockFunctionComparator ccimp_fs_file_write_t_comparator(ccimp_fs_file_write_t_IsEqual, ccimp_fs_file_write_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_seek_t_comparator(ccimp_fs_file_seek_t_IsEqual, ccimp_fs_file_seek_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_close_t_comparator(ccimp_fs_file_close_t_IsEqual, ccimp_fs_file_close_t_ValueToString);
+MockFunctionComparator ccimp_fs_file_truncate_t_comparator(ccimp_fs_file_truncate_t_IsEqual, ccimp_fs_file_truncate_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_remove_t_comparator(ccimp_fs_file_remove_t_IsEqual, ccimp_fs_file_remove_t_ValueToString);
 MockFunctionComparator ccimp_fs_dir_open_t_comparator(ccimp_fs_dir_open_t_IsEqual, ccimp_fs_dir_open_t_ValueToString);
 MockFunctionComparator ccimp_fs_dir_read_entry_t_comparator(ccimp_fs_dir_read_entry_t_IsEqual, ccimp_fs_dir_read_entry_t_ValueToString);
