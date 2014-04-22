@@ -85,7 +85,7 @@ static connector_callback_status_t connector_callback_status_from_ccimp_status(c
     switch(ccimp_status)
     {
         case CCIMP_STATUS_ERROR:
-            callback_status = connector_callback_abort;
+            callback_status = connector_callback_error;
             break;
         case CCIMP_STATUS_OK:
             callback_status = connector_callback_continue;

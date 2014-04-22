@@ -55,7 +55,7 @@ TEST(test_ccapi_os, testFreeAbort)
 
     request.os_request = connector_request_id_os_free;
     status = ccapi_connector_callback(connector_class_id_operating_system, request, &free_structure, ccapi_data_single_instance);
-    CHECK(status == connector_callback_abort);
+    CHECK(status == connector_callback_error);
 }
 
 TEST(test_ccapi_os, testYield)
