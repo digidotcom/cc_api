@@ -24,7 +24,7 @@ extern "C" {
 typedef struct {
     ccimp_fs_handle_t ccimp_handle;
     char * file_path;
-    int flags;
+    ccapi_fs_request_t request;
 } ccapi_fs_file_handle_t;
 }
 
