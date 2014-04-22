@@ -19,7 +19,7 @@ TEST_GROUP(test_ccapi_fs_access)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {ccapi_fs_access_cb};
+        ccapi_filesystem_service_t fs_service = {ccapi_fs_access_cb, NULL};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
@@ -32,6 +32,7 @@ TEST_GROUP(test_ccapi_fs_access)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.access_cb);
     }
 
     void teardown()

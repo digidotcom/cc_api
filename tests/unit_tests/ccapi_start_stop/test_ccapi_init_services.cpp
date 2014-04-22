@@ -27,7 +27,7 @@ TEST(test_ccapi_init_services, testServicesSupported)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_filesystem_service_t fs_service = {NULL};
+    ccapi_filesystem_service_t fs_service = {NULL, NULL};
     void * pointer = pointer; /* Not-NULL */
 
     th_fill_start_structure_with_good_parameters(&start);
