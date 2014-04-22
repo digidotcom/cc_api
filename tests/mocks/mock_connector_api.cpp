@@ -30,6 +30,7 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_run_retval = connector_idle;
             mock_info[i].connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
             mock_info[i].connector_initiate_transport_stop_info.stop_transport = CCAPI_TRUE;
+            mock_info[i].connector_initiate_send_data_info.status = connector_data_service_status_t::connector_data_service_status_complete;
 
             sem_post(&sem);
 
@@ -318,11 +319,8 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameter("request_data", (void *)request_data);
 
-            if (mock_info)
-            {
-                ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
-                mock_info->connector_run_retval = connector_device_terminated;
-            }
+            ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+            mock_info->connector_run_retval = connector_device_terminated;
 
             break;
         }
@@ -343,7 +341,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                  connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
                  connector_data_service_status_t data_service_status = {
                                                        header->transport, header->user_context, 
-                                                       connector_data_service_status_t::connector_data_service_status_complete, 
+                                                       mock_info->connector_initiate_send_data_info.status==(int)connector_data_service_status_t::connector_data_service_status_complete?connector_data_service_status_t::connector_data_service_status_complete:connector_data_service_status_t::connector_data_service_status_session_error,
                                                        connector_session_error_none
                                                        };
 
