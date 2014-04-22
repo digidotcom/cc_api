@@ -713,6 +713,12 @@ static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error
       return cccimp_session_error;
 }
 
+typedef struct {
+    ccimp_fs_handle_t ccimp_handle;
+    char * file_path;
+    int flags;
+} ccapi_fs_file_handle_t;
+
 connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -765,8 +771,20 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                         break;
                 }
             }
+            if (ccimp_status == CCIMP_STATUS_OK)
+            {
+                ccapi_fs_file_handle_t * ccapi_fs_handle = ccapi_malloc(sizeof *ccapi_fs_handle);
+                ccapi_fs_handle->ccimp_handle.pointer = ccimp_open_data.handle.pointer;
+                ccapi_fs_handle->flags = ccimp_open_data.flags;
+                ccapi_fs_handle->file_path = ccapi_malloc(strlen(ccimp_open_data.path) + 1);
+                strcpy(ccapi_fs_handle->file_path, ccimp_open_data.path);
+                ccfsm_open_data->handle = ccapi_fs_handle;
+            }
+            else
+            {
+                ccfsm_open_data->handle = NULL;
+            }
 
-            ccfsm_open_data->handle = ccimp_open_data.handle.pointer;
             ccfsm_open_data->errnum = ccimp_open_data.errnum.pointer;
             ccfsm_open_data->user_context = ccimp_open_data.imp_context;
             break;
@@ -776,10 +794,11 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_read_t * ccfsm_read_data = data;
             ccimp_fs_file_read_t ccimp_read_data;
+            ccapi_fs_file_handle_t * ccapi_fs_handle = ccfsm_read_data->handle;
 
             ccimp_read_data.errnum.pointer = NULL;
             ccimp_read_data.bytes_used = 0;
-            ccimp_read_data.handle.pointer = ccfsm_read_data->handle;
+            ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
             ccimp_read_data.imp_context = ccfsm_read_data->user_context;
             ccimp_read_data.buffer = ccfsm_read_data->buffer;
             ccimp_read_data.bytes_available = ccfsm_read_data->bytes_available;
@@ -796,10 +815,11 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_write_t * ccfsm_write_data = data;
             ccimp_fs_file_write_t ccimp_write_data;
+            ccapi_fs_file_handle_t * ccapi_fs_handle = ccfsm_write_data->handle;
 
             ccimp_write_data.errnum.pointer = NULL;
             ccimp_write_data.bytes_used = 0;
-            ccimp_write_data.handle.pointer = ccfsm_write_data->handle;
+            ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
             ccimp_write_data.imp_context = ccfsm_write_data->user_context;
             ccimp_write_data.buffer = ccfsm_write_data->buffer;
             ccimp_write_data.bytes_available = ccfsm_write_data->bytes_available;
@@ -816,9 +836,10 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_lseek_t * ccfsm_seek_data = data;
             ccimp_fs_file_seek_t ccimp_seek_data;
+            ccapi_fs_file_handle_t * ccapi_fs_handle = ccfsm_seek_data->handle;
 
             ccimp_seek_data.errnum.pointer = NULL;
-            ccimp_seek_data.handle.pointer = ccfsm_seek_data->handle;
+            ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
             ccimp_seek_data.imp_context = ccfsm_seek_data->user_context;
             ccimp_seek_data.resulting_offset = 0;
             ccimp_seek_data.requested_offset = ccfsm_seek_data->requested_offset;
@@ -836,15 +857,18 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_close_t * ccfsm_close_data = data;
             ccimp_fs_file_close_t ccimp_close_data;
+            ccapi_fs_file_handle_t * ccapi_fs_handle = ccfsm_close_data->handle;
 
             ccimp_close_data.errnum.pointer = NULL;
-            ccimp_close_data.handle.pointer = ccfsm_close_data->handle;
+            ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
             ccimp_close_data.imp_context = ccfsm_close_data->user_context;
 
             ccimp_status = ccimp_fs_file_close(&ccimp_close_data);
 
             ccfsm_close_data->errnum = ccimp_close_data.errnum.pointer;
             ccfsm_close_data->user_context = ccimp_close_data.imp_context;
+
+            ccapi_free(ccapi_fs_handle);
             break;
         }
 
