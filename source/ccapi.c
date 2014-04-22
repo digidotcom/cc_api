@@ -48,6 +48,18 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
+static char * ccapi_strdup(char const * const string)
+{
+    char * dup_string = ccapi_malloc(strlen(string) + 1);
+    if (dup_string == NULL)
+    {
+        goto done;
+    }
+    strcpy(dup_string, string);
+done:
+    return dup_string;
+}
+
 void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * ccapi_data = argument;
@@ -774,10 +786,12 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             if (ccimp_status == CCIMP_STATUS_OK)
             {
                 ccapi_fs_file_handle_t * ccapi_fs_handle = ccapi_malloc(sizeof *ccapi_fs_handle);
+
+                ASSERT_MSG_GOTO(ccapi_fs_handle != NULL, done);
+                ccapi_fs_handle->file_path = ccapi_strdup(ccimp_open_data.path);
+                ASSERT_MSG_GOTO(ccapi_fs_handle->file_path != NULL, done);
                 ccapi_fs_handle->ccimp_handle.pointer = ccimp_open_data.handle.pointer;
                 ccapi_fs_handle->flags = ccimp_open_data.flags;
-                ccapi_fs_handle->file_path = ccapi_malloc(strlen(ccimp_open_data.path) + 1);
-                strcpy(ccapi_fs_handle->file_path, ccimp_open_data.path);
                 ccfsm_open_data->handle = ccapi_fs_handle;
             }
             else
