@@ -198,3 +198,30 @@ int th_stop_aux_thread(pthread_t pthread)
 done:
     return error;
 }
+
+ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connector_file_system_open_t * const ccfsm_open_data, int flags)
+{
+    connector_request_id_t request;
+    ccimp_fs_file_open_t ccimp_open_data;
+    connector_callback_status_t status;
+
+    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.imp_context = NULL;
+    ccimp_open_data.handle.pointer = NULL;
+    ccimp_open_data.flags = flags;
+    ccimp_open_data.path = path;
+
+    ccfsm_open_data->errnum = NULL;
+    ccfsm_open_data->handle = NULL;
+    ccfsm_open_data->oflag = flags;
+    ccfsm_open_data->path = ccimp_open_data.path;
+    ccfsm_open_data->user_context = NULL;
+
+    Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
+
+    request.file_system_request = connector_request_id_file_system_open;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, ccfsm_open_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK(ccfsm_open_data->handle != NULL);
+    return (ccapi_fs_file_handle_t *)ccfsm_open_data->handle;
+}

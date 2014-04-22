@@ -20,7 +20,15 @@
 extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
+
+typedef struct {
+    ccimp_fs_handle_t ccimp_handle;
+    char * file_path;
+    int flags;
+} ccapi_fs_file_handle_t;
 }
+
+
 
 extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 extern ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
@@ -38,5 +46,6 @@ void th_start_tcp_lan_ipv6_password_keepalives(void);
 void th_stop_ccapi(ccapi_data_t * const ccapi_data);
 pthread_t th_aux_ccapi_start(void * argument);
 int th_stop_aux_thread(pthread_t pthread);
+ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connector_file_system_open_t * const ccfsm_open_data, int flags);
 
 #endif

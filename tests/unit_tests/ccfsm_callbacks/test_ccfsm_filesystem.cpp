@@ -26,7 +26,7 @@ TEST_GROUP(test_ccfsm_filesystem)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {NULL}; /* Not NULL */
+        ccapi_filesystem_service_t fs_service = {NULL, NULL};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
@@ -90,16 +90,19 @@ TEST(test_ccfsm_filesystem, testFileRead)
     connector_file_system_read_t ccfsm_read_data;
     connector_callback_status_t status;
     uint8_t buffer[128] = {0x00};
+    connector_file_system_open_t ccfsm_open_data;
+    ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_CREAT);
+
     ccimp_read_data.errnum.pointer = NULL;
     ccimp_read_data.imp_context = &my_fs_context;
-    ccimp_read_data.handle.pointer = NULL;
+    ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_read_data.buffer = buffer;
     ccimp_read_data.bytes_available = 128;
     ccimp_read_data.bytes_used = 0;
 
     ccfsm_read_data.errnum = ccimp_read_data.errnum.pointer;
     ccfsm_read_data.user_context = ccimp_read_data.imp_context;
-    ccfsm_read_data.handle = ccimp_read_data.handle.pointer;
+    ccfsm_read_data.handle = ccfsm_open_data.handle;
     ccfsm_read_data.buffer = ccimp_read_data.buffer;
     ccfsm_read_data.bytes_available = ccimp_read_data.bytes_available;
     ccfsm_read_data.bytes_used = ccimp_read_data.bytes_used;
@@ -123,17 +126,19 @@ TEST(test_ccfsm_filesystem, testFileWrite)
     connector_file_system_write_t ccfsm_write_data;
     connector_callback_status_t status;
     uint8_t buffer[] = "testFileWrite";
+    connector_file_system_open_t ccfsm_open_data;
+    ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
     ccimp_write_data.errnum.pointer = NULL;
     ccimp_write_data.imp_context = &my_fs_context;
-    ccimp_write_data.handle.pointer = NULL;
+    ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_write_data.buffer = buffer;
     ccimp_write_data.bytes_available = sizeof buffer;
     ccimp_write_data.bytes_used = 0;
 
     ccfsm_write_data.errnum = ccimp_write_data.errnum.pointer;
     ccfsm_write_data.user_context = ccimp_write_data.imp_context;
-    ccfsm_write_data.handle = ccimp_write_data.handle.pointer;
+    ccfsm_write_data.handle = ccfsm_open_data.handle;
     ccfsm_write_data.buffer = ccimp_write_data.buffer;
     ccfsm_write_data.bytes_available = ccimp_write_data.bytes_available;
     ccfsm_write_data.bytes_used = 0;
@@ -155,17 +160,19 @@ TEST(test_ccfsm_filesystem, testFileSeek)
     ccimp_fs_file_seek_t ccimp_seek_data;
     connector_file_system_lseek_t ccfsm_seek_data;
     connector_callback_status_t status;
+    connector_file_system_open_t ccfsm_open_data;
+    ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
     ccimp_seek_data.errnum.pointer = NULL;
     ccimp_seek_data.imp_context = &my_fs_context;
-    ccimp_seek_data.handle.pointer = NULL;
+    ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_seek_data.origin = CCIMP_SEEK_END;
     ccimp_seek_data.requested_offset = -128;
     ccimp_seek_data.resulting_offset = 0;
 
     ccfsm_seek_data.errnum = ccimp_seek_data.errnum.pointer;
     ccfsm_seek_data.user_context = ccimp_seek_data.imp_context;
-    ccfsm_seek_data.handle = ccimp_seek_data.handle.pointer;
+    ccfsm_seek_data.handle = ccfsm_open_data.handle;
     ccfsm_seek_data.origin = connector_file_system_seek_end;
     ccfsm_seek_data.requested_offset = ccimp_seek_data.requested_offset;
     ccfsm_seek_data.resulting_offset = 0;
@@ -187,14 +194,16 @@ TEST(test_ccfsm_filesystem, testFileClose)
     ccimp_fs_file_close_t ccimp_close_data;
     connector_file_system_close_t ccfsm_close_data;
     connector_callback_status_t status;
+    connector_file_system_open_t ccfsm_open_data;
+    ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
 
     ccimp_close_data.errnum.pointer = NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = NULL;
+    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
     ccfsm_close_data.user_context = ccimp_close_data.imp_context;
-    ccfsm_close_data.handle = ccimp_close_data.handle.pointer;
+    ccfsm_close_data.handle = ccfsm_open_data.handle;
 
     Mock_ccimp_fs_file_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
 
