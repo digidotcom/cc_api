@@ -868,6 +868,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccfsm_close_data->errnum = ccimp_close_data.errnum.pointer;
             ccfsm_close_data->user_context = ccimp_close_data.imp_context;
 
+            if (ccapi_data->service.file_system.changed_cb != NULL)
+            {
+                if ((ccapi_fs_handle->flags & CCIMP_FILE_O_WRONLY) || (ccapi_fs_handle->flags & CCIMP_FILE_O_RDWR))
+                {
+                    ccapi_data->service.file_system.changed_cb(ccapi_fs_handle->file_path, CCAPI_FS_CHANGED_MODIFIED);
+                }
+            }
+            ccapi_free(ccapi_fs_handle->file_path);
             ccapi_free(ccapi_fs_handle);
             break;
         }
@@ -904,6 +912,11 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
             ccfsm_remove_data->user_context = ccimp_remove_data.imp_context;
+
+            if (ccapi_data->service.file_system.changed_cb != NULL)
+            {
+                ccapi_data->service.file_system.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
+            }
             break;
         }
 
