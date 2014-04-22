@@ -71,6 +71,16 @@ typedef struct {
     } transport_tcp;
 } ccapi_data_t;
 
+#ifdef CCIMP_DATA_SERVICE_ENABLED
+typedef struct
+{
+    void * next_data;
+    size_t bytes_remaining;
+    void * send_syncr;
+    ccapi_send_error_t error;
+} ccapi_srv_send_data_t;
+#endif
+
 extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;
 

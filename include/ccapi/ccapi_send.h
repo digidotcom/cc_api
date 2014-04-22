@@ -11,7 +11,9 @@ typedef enum {
     CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED,
     CCAPI_SEND_ERROR_INVALID_CLOUD_PATH,
     CCAPI_SEND_ERROR_INVALID_DATA,
-    CCAPI_SEND_ERROR_INSUFFICIENT_MEMORY
+    CCAPI_SEND_ERROR_INSUFFICIENT_MEMORY,
+    CCAPI_SEND_ERROR_SYNCR_ERROR,
+    CCAPI_SEND_ERROR_CCFSM_ERROR           /* Error reported by ccfsm by either connector_initiate_action or send_status */
 } ccapi_send_error_t;
 
 typedef enum {

@@ -4,6 +4,12 @@
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 
+typedef struct
+{
+    connector_request_data_service_send_t header;
+    ccapi_srv_send_data_t srv_send;
+} ccapi_send_t;
+
 static ccapi_bool_t valid_malloc(void * ptr, ccapi_send_error_t * const error)
 {
     if (ptr == NULL)
@@ -92,36 +98,22 @@ static connector_transport_t ccapi_to_connector_transport(ccapi_transport_t cons
 }
 
 
-/* TODO: move to private definitions? */
-#ifdef CCIMP_DATA_SERVICE_ENABLED
-typedef struct
-{
-    void * next_data;
-    size_t bytes_remaining;
-    void * send_syncr;
-    ccapi_send_error_t error;
-} connector_app_send_data_t;
-
-typedef struct
-{
-	connector_request_data_service_send_t header;
-    connector_app_send_data_t data_ptr;
-} ccapi_send_t;
-#endif
-
 static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_info, unsigned long const timeout_ms)
 {
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t status = CCIMP_STATUS_ERROR;
+
+    ASSERT_MSG_GOTO(send_info->srv_send.send_syncr != NULL, done);
     
-    if (logging_syncr != NULL)
-    {
-        acquire_data.syncr_object = send_info->data_ptr.send_syncr;
-        acquire_data.timeout_ms= timeout_ms;
+    acquire_data.syncr_object = send_info->srv_send.send_syncr;
+    acquire_data.timeout_ms= timeout_ms;
 
-        status = ccimp_os_syncr_acquire(&acquire_data);
-    }
+    status = ccimp_os_syncr_acquire(&acquire_data);
 
+    if (status == CCIMP_STATUS_OK && acquire_data.acquired != CCAPI_TRUE)
+        status = CCIMP_STATUS_ERROR;
+
+done:
     return status;
 }
 
@@ -155,16 +147,17 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         ccimp_os_syncr_create_t create_data;
     
         if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK)
-            send_info->data_ptr.send_syncr = create_data.syncr_object;
+            send_info->srv_send.send_syncr = create_data.syncr_object;
+        else goto done;
     }
 
     /* we are storing some stack variables here, need to block until we get a response */
-    send_info->data_ptr.error = CCAPI_SEND_ERROR_NONE;
-    send_info->data_ptr.next_data = (void *)data;
-    send_info->data_ptr.bytes_remaining = bytes;
+    send_info->srv_send.error = CCAPI_SEND_ERROR_NONE;
+    send_info->srv_send.next_data = (void *)data;
+    send_info->srv_send.bytes_remaining = bytes;
     send_info->header.path = cloud_path;
     send_info->header.content_type = content_type;
-    send_info->header.user_context = &send_info->data_ptr;
+    send_info->header.user_context = &send_info->srv_send;
     send_info->header.response_required = connector_false;
     send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
@@ -185,19 +178,33 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
 
         if (status == connector_success)
         {
-            /* This case, as we don't want a reply, we want to wait infinite. The status callback will signal us */
-            /* ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE); */
-            /* send_info->data_ptr.error = result; */
-
-            /* TODO: What will we want for the with_reply variant? also infinite so is the ccfsm who produces the timeout? or something like:
-               send_info->header.timeout_in_seconds==SEND_WAIT_FOREVER?OS_SYNCR_ACQUIRE_INFINITE:(send_info->header.timeout_in_seconds+INIT_ACTION_DELAY)*1000
-             */
+            ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE);
+            if (result != CCIMP_STATUS_OK)
+            {
+                ccapi_logging_line("ccxapi_send_data: lock_acquire failed");
+                error = CCAPI_SEND_ERROR_SYNCR_ERROR;
+            }
+            else
+            {
+                error = send_info->srv_send.error;
+            }
         }
         else
         {
-            /* result = (status == connector_init_error) ? connector_error_init_error : connector_error_resource_error; */
+            ccapi_logging_line("ccxapi_send_data: ccfsm error %d", status);
+            error = CCAPI_SEND_ERROR_CCFSM_ERROR;
         }
     }
+
+    /* Free resources */
+    {
+        ccimp_os_syncr_destroy_t destroy_data;
+        destroy_data.syncr_object = send_info->srv_send.send_syncr;
+    
+        ccimp_os_syncr_destroy(&destroy_data);
+    }
+    ccapi_free(send_info);
+
 done:
     return error;
 }

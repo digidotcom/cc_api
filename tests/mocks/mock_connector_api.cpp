@@ -337,6 +337,19 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameterOfType("connector_request_data_service_send_t", "request_data", (void *)request_data);
             }
+
+            {
+                 connector_request_id_t request_id;
+                 connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
+                 connector_data_service_status_t data_service_status = {
+                                                       header->transport, header->user_context, 
+                                                       connector_data_service_status_t::connector_data_service_status_complete, 
+                                                       connector_session_error_none
+                                                       };
+
+                 request_id.data_service_request = connector_request_id_data_service_send_status;
+                 ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_status, (void *)ccapi_data);
+            }
             break;
         }
 #ifdef CONNECTOR_SHORT_MESSAGE
