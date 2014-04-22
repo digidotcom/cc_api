@@ -903,8 +903,20 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                         break;
                 }
             }
-            ccapi_free(ccapi_fs_handle->file_path);
-            ccapi_free(ccapi_fs_handle);
+
+            switch(ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                case CCIMP_STATUS_ERROR:
+                {
+                    ccapi_free(ccapi_fs_handle->file_path);
+                    ccapi_free(ccapi_fs_handle);
+                    break;
+                }
+                case CCIMP_STATUS_BUSY:
+                    break;
+            }
+
             break;
         }
 
