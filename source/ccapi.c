@@ -926,10 +926,19 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
             ccfsm_remove_data->user_context = ccimp_remove_data.imp_context;
-
-            if (ccapi_data->service.file_system.changed_cb != NULL)
+            switch (ccimp_status)
             {
-                ccapi_data->service.file_system.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
+                case CCIMP_STATUS_OK:
+                {
+                    if (ccapi_data->service.file_system.changed_cb != NULL)
+                    {
+                        ccapi_data->service.file_system.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
+                    }
+                    break;
+                }
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    break;
             }
             break;
         }
