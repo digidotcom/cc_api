@@ -718,7 +718,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
     connector_callback_status_t connector_status;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
-    UNUSED_ARGUMENT(ccapi_data);
     switch (filesystem_request)
     {
         case connector_request_id_file_system_open:
@@ -732,7 +731,40 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_open_data.path = ccfsm_open_data->path;
             ccimp_open_data.imp_context = ccfsm_open_data->user_context;
 
-            ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
+            if (ccapi_data->service.file_system.access_cb == NULL)
+            {
+                ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
+            }
+            else
+            {
+                ccapi_fs_request_t request = CCAPI_FS_REQUEST_UNKNOWN;
+                ccapi_fs_access_t access;
+
+                if (ccimp_open_data.flags & CCIMP_FILE_O_WRONLY)
+                {
+                    request = CCAPI_FS_REQUEST_WRITE;
+                }
+                else if (ccimp_open_data.flags & CCIMP_FILE_O_RDWR)
+                {
+                    request = CCAPI_FS_REQUEST_READWRITE;
+                }
+                else
+                {
+                    request = CCAPI_FS_REQUEST_READ;
+                }
+
+                ASSERT_MSG_GOTO(request != CCAPI_FS_REQUEST_UNKNOWN, done);
+                access = ccapi_data->service.file_system.access_cb(ccimp_open_data.path, request);
+                switch (access)
+                {
+                    case CCAPI_FS_ACCESS_ALLOW:
+                        ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
+                        break;
+                    case CCAPI_FS_ACCESS_DENY:
+                        ccimp_status = CCIMP_STATUS_ERROR;
+                        break;
+                }
+            }
 
             ccfsm_open_data->handle = ccimp_open_data.handle.pointer;
             ccfsm_open_data->errnum = ccimp_open_data.errnum.pointer;
@@ -825,7 +857,26 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_remove_data.path = ccfsm_remove_data->path;
             ccimp_remove_data.imp_context = ccfsm_remove_data->user_context;
 
-            ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
+            if (ccapi_data->service.file_system.access_cb == NULL)
+            {
+                ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
+            }
+            else
+            {
+                ccapi_fs_request_t request = CCAPI_FS_REQUEST_REMOVE;
+                ccapi_fs_access_t access;
+
+                access = ccapi_data->service.file_system.access_cb(ccimp_remove_data.path, request);
+                switch (access)
+                {
+                    case CCAPI_FS_ACCESS_ALLOW:
+                        ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
+                        break;
+                    case CCAPI_FS_ACCESS_DENY:
+                        ccimp_status = CCIMP_STATUS_ERROR;
+                        break;
+                }
+            }
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
             ccfsm_remove_data->user_context = ccimp_remove_data.imp_context;
@@ -842,7 +893,26 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_dir_open_data.path = ccfsm_dir_open_data->path;
             ccimp_dir_open_data.imp_context = ccfsm_dir_open_data->user_context;
 
-            ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+            if (ccapi_data->service.file_system.access_cb == NULL)
+            {
+                ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+            }
+            else
+            {
+                ccapi_fs_request_t request = CCAPI_FS_REQUEST_LIST;
+                ccapi_fs_access_t access;
+
+                access = ccapi_data->service.file_system.access_cb(ccimp_dir_open_data.path, request);
+                switch (access)
+                {
+                    case CCAPI_FS_ACCESS_ALLOW:
+                        ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                        break;
+                    case CCAPI_FS_ACCESS_DENY:
+                        ccimp_status = CCIMP_STATUS_ERROR;
+                        break;
+                }
+            }
 
             ccfsm_dir_open_data->errnum = ccimp_dir_open_data.errnum.pointer;
             ccfsm_dir_open_data->user_context = ccimp_dir_open_data.imp_context;
@@ -987,6 +1057,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             break;
     }
 
+done:
     connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
     return connector_status;
 }
