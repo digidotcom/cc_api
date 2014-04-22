@@ -18,7 +18,7 @@ ccimp_fs_errnum_t expected_errnum[20];
 #define FS_DIRCLOSE_ERRNUM_INDEX  9
 #define FS_HASHSTAT_ERRNUM_INDEX    10
 #define FS_HASHFILE_ERRNUM_INDEX    11
-
+#define FS_TRUNCATE_ERRNUM_INDEX    12
 
 TEST_GROUP(test_ccfsm_filesystem)
 {
@@ -45,6 +45,7 @@ TEST_GROUP(test_ccfsm_filesystem)
         expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX].value = EINVAL;
         expected_errnum[FS_HASHSTAT_ERRNUM_INDEX].value = ENAMETOOLONG;
         expected_errnum[FS_HASHFILE_ERRNUM_INDEX].value = ENOSPC;
+        expected_errnum[FS_TRUNCATE_ERRNUM_INDEX].value = EIO;
     }
 
     void teardown()
@@ -213,6 +214,35 @@ TEST(test_ccfsm_filesystem, testFileClose)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_CLOSE_ERRNUM_INDEX].pointer, ccfsm_close_data.errnum);
     CHECK_EQUAL(4, *(my_filesystem_context_t *)ccfsm_close_data.user_context);
+}
+
+TEST(test_ccfsm_filesystem, testFileTruncate)
+{
+    connector_request_id_t request;
+    ccimp_fs_file_truncate_t ccimp_truncate_data;
+    connector_file_system_truncate_t ccfsm_truncate_data;
+    connector_callback_status_t status;
+    connector_file_system_open_t ccfsm_open_data;
+    ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
+
+    ccimp_truncate_data.errnum.pointer = NULL;
+    ccimp_truncate_data.imp_context = &my_fs_context;
+    ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_truncate_data.length_in_bytes = 1024;
+
+    ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum.pointer;
+    ccfsm_truncate_data.user_context = ccimp_truncate_data.imp_context;
+    ccfsm_truncate_data.handle = ccfsm_open_data.handle;
+    ccfsm_truncate_data.length_in_bytes = ccimp_truncate_data.length_in_bytes;
+
+    Mock_ccimp_fs_file_truncate_expectAndReturn(&ccimp_truncate_data, CCIMP_STATUS_OK);
+
+    request.file_system_request = connector_request_id_file_system_ftruncate;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_truncate_data, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(expected_errnum[FS_TRUNCATE_ERRNUM_INDEX].pointer, ccfsm_truncate_data.errnum);
+    CHECK_EQUAL(12, *(my_filesystem_context_t *)ccfsm_truncate_data.user_context);
 }
 
 TEST(test_ccfsm_filesystem, testFileRemove)
