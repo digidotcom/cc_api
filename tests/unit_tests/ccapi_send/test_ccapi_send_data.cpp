@@ -43,16 +43,16 @@ TEST(test_ccapi_send_data_no_reply, testSEND_ERROR_NONE)
     header.response_required = connector_false;
     header.timeout_in_seconds = 0; /* TODO: SEND_WAIT_FOREVER;*/
 
-    mock_info->connector_initiate_send_data_info.bytes = strlen(data);
+    mock_info->connector_initiate_send_data_info.in.bytes = strlen(data);
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(mock_info->connector_initiate_send_data_info.bytes == mock_info->connector_initiate_send_data_info.bytes_used);
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.data, mock_info->connector_initiate_send_data_info.bytes));
-    CHECK(mock_info->connector_initiate_send_data_info.more_data == connector_false);
+    CHECK(mock_info->connector_initiate_send_data_info.in.bytes == mock_info->connector_initiate_send_data_info.out.bytes_used);
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, mock_info->connector_initiate_send_data_info.in.bytes));
+    CHECK(mock_info->connector_initiate_send_data_info.out.more_data == connector_false);
 }
 
 TEST(test_ccapi_send_data_no_reply, testMoreData)
@@ -73,16 +73,16 @@ TEST(test_ccapi_send_data_no_reply, testMoreData)
     header.response_required = connector_false;
     header.timeout_in_seconds = 0; /* TODO: SEND_WAIT_FOREVER;*/
 
-    mock_info->connector_initiate_send_data_info.bytes = strlen(data) - 10; /* Don't allocate enough space so more_data remain true */
+    mock_info->connector_initiate_send_data_info.in.bytes = strlen(data) - 10; /* Don't allocate enough space so more_data remain true */
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(mock_info->connector_initiate_send_data_info.bytes == mock_info->connector_initiate_send_data_info.bytes_used);
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.data, mock_info->connector_initiate_send_data_info.bytes));
-    CHECK(mock_info->connector_initiate_send_data_info.more_data == connector_true);
+    CHECK(mock_info->connector_initiate_send_data_info.in.bytes == mock_info->connector_initiate_send_data_info.out.bytes_used);
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, mock_info->connector_initiate_send_data_info.in.bytes));
+    CHECK(mock_info->connector_initiate_send_data_info.out.more_data == connector_true);
 }
 
 TEST(test_ccapi_send_data_no_reply, testSEND_ERROR_CCFSM_ERROR)
@@ -103,7 +103,7 @@ TEST(test_ccapi_send_data_no_reply, testSEND_ERROR_CCFSM_ERROR)
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
-        mock_info->connector_initiate_send_data_info.status = connector_data_service_status_t::connector_data_service_status_session_error;
+        mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_session_error;
     }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);

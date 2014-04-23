@@ -30,10 +30,11 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_run_retval = connector_idle;
             mock_info[i].connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
             mock_info[i].connector_initiate_transport_stop_info.stop_transport = CCAPI_TRUE;
-            mock_info[i].connector_initiate_send_data_info.data = NULL;
-            mock_info[i].connector_initiate_send_data_info.bytes = 0;
-            mock_info[i].connector_initiate_send_data_info.bytes_used = 0;
-            mock_info[i].connector_initiate_send_data_info.status = connector_data_service_status_t::connector_data_service_status_complete;
+            mock_info[i].connector_initiate_send_data_info.out.data = NULL;
+            mock_info[i].connector_initiate_send_data_info.in.bytes = 0;
+            mock_info[i].connector_initiate_send_data_info.out.bytes_used = 0;
+            mock_info[i].connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_complete;
+            mock_info[i].connector_initiate_send_data_info.out.more_data = connector_false;			
 
             sem_post(&sem);
 
@@ -345,19 +346,19 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 
                  uint8_t * buffer;
 
-                 if (mock_info->connector_initiate_send_data_info.bytes == 0)
+                 if (mock_info->connector_initiate_send_data_info.in.bytes == 0)
                  {
                      /* If test does not set a value... */
-                     mock_info->connector_initiate_send_data_info.bytes = 100;
+                     mock_info->connector_initiate_send_data_info.in.bytes = 100;
                  }
 
-                 buffer = (uint8_t *)malloc(mock_info->connector_initiate_send_data_info.bytes);
+                 buffer = (uint8_t *)malloc(mock_info->connector_initiate_send_data_info.in.bytes);
 
                  connector_data_service_send_data_t data_service_send = {
                                                        header->transport, 
                                                        header->user_context,
                                                        buffer,
-                                                       mock_info->connector_initiate_send_data_info.bytes,
+                                                       mock_info->connector_initiate_send_data_info.in.bytes,
                                                        0,
                                                        connector_false
                                                        };
@@ -365,9 +366,9 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                  request_id.data_service_request = connector_request_id_data_service_send_data;
                  ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_send, (void *)ccapi_data);
 
-                 mock_info->connector_initiate_send_data_info.data = (void*)buffer;
-                 mock_info->connector_initiate_send_data_info.bytes_used = data_service_send.bytes_used;
-                 mock_info->connector_initiate_send_data_info.more_data = data_service_send.more_data;
+                 mock_info->connector_initiate_send_data_info.out.data = (void*)buffer;
+                 mock_info->connector_initiate_send_data_info.out.bytes_used = data_service_send.bytes_used;
+                 mock_info->connector_initiate_send_data_info.out.more_data = data_service_send.more_data;
             }
 
             {
@@ -375,7 +376,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                  connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
                  connector_data_service_status_t data_service_status = {
                                                        header->transport, header->user_context, 
-                                                       mock_info->connector_initiate_send_data_info.status==(int)connector_data_service_status_t::connector_data_service_status_complete?connector_data_service_status_t::connector_data_service_status_complete:connector_data_service_status_t::connector_data_service_status_session_error,
+                                                       mock_info->connector_initiate_send_data_info.in.status==(int)connector_data_service_status_t::connector_data_service_status_complete?connector_data_service_status_t::connector_data_service_status_complete:connector_data_service_status_t::connector_data_service_status_session_error,
                                                        connector_session_error_none
                                                        };
 

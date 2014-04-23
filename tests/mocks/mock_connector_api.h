@@ -33,11 +33,15 @@ typedef struct  {
         ccapi_bool_t stop_transport;
     } connector_initiate_transport_stop_info;
     struct {
-        size_t bytes; /* In */
-        void * data;  /* Out */
-        size_t bytes_used; /* Out */
-        connector_bool_t more_data; /* Out */
-        int status;  /* In */
+        struct {
+            size_t bytes;
+            int status;
+        } in;
+        struct {
+            void * data;
+            size_t bytes_used;
+            connector_bool_t more_data;
+        } out;
     } connector_initiate_send_data_info;
 } mock_connector_api_info_t;
 
