@@ -28,8 +28,11 @@ typedef struct {
 } ccapi_fs_file_handle_t;
 }
 
+typedef int my_filesystem_context_t;
+typedef int my_filesystem_dir_handle_t;
 
-
+extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
+extern my_filesystem_dir_handle_t dir_handle; /* Defined in mock_ccimp_filesystem.cpp */
 extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 extern ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
 extern ccapi_bool_t ccapi_tcp_close_cb_called;

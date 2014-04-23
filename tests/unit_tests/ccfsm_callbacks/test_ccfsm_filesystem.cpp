@@ -1,9 +1,6 @@
 #include "test_helper_functions.h"
 #include <errno.h>
 
-typedef int my_filesystem_context_t;
-
-extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
 ccimp_fs_errnum_t expected_errnum[20];
 
 #define FS_OPEN_ERRNUM_INDEX    0

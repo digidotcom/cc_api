@@ -1,9 +1,5 @@
 #include "test_helper_functions.h"
 
-typedef int my_filesystem_context_t;
-
-extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
-
 static char const * ccapi_fs_changed_expected_path = NULL;
 static ccapi_fs_changed_t ccapi_fs_changed_expected_request = CCAPI_FS_CHANGED_MODIFIED;
 static ccapi_bool_t ccapi_fs_changed_cb_called = CCAPI_FALSE;
