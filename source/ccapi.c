@@ -50,13 +50,14 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
 
 static char * ccapi_strdup(char const * const string)
 {
-    char * dup_string = ccapi_malloc(strlen(string) + 1);
-    if (dup_string == NULL)
+    size_t const string_size = strlen(string) + 1;
+    char * dup_string = ccapi_malloc(string_size);
+
+    if (dup_string != NULL)
     {
-        goto done;
+        memcpy(dup_string, string, string_size);
     }
-    strcpy(dup_string, string);
-done:
+
     return dup_string;
 }
 
