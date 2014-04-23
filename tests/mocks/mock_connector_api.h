@@ -10,6 +10,7 @@
 
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
+#define MOCK_CONNECTOR_SEND_DATA_ENABLED 1
 
 #define WAIT_FOR_ASSERT()   {do ccimp_os_yield(); while (assert_buffer == NULL);}
 

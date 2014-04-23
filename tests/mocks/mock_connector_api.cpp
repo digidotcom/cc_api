@@ -256,7 +256,7 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
                      .withParameterOfType("connector_request_data_service_send_t", "request_data", request_data)
                      .andReturnValue(retval);
 
-            mock("connector_initiate_action").setData("connector_request_data_service_send_t_behavior", 1);
+            mock("connector_initiate_action").setData("connector_request_data_service_send_t_behavior", MOCK_CONNECTOR_SEND_DATA_ENABLED);
             break;
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
@@ -332,7 +332,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
         {
 
             uint8_t behavior = mock("connector_initiate_action").getData("connector_request_data_service_send_t_behavior").getIntValue();
-            if (behavior == 1)
+            if (behavior == MOCK_CONNECTOR_SEND_DATA_ENABLED)
             {
                 mock("connector_initiate_action").actualCall("connector_initiate_action")
                     .withParameter("handle", handle)
