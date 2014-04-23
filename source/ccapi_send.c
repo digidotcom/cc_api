@@ -26,6 +26,7 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_send_error_t * const error)
 static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
+    ccapi_bool_t * p_transport_started = NULL;
 
     if (ccapi_data == NULL || ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING)
     {
@@ -38,25 +39,27 @@ static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data
     switch (transport)
     {
         case CCAPI_TRANSPORT_TCP:
-            if (ccapi_data->transport_tcp.connected)
-                goto transport_started;
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+            p_transport_started = &ccapi_data->transport_tcp.connected;
+            break;
         case CCAPI_TRANSPORT_UDP:
-            if (ccapi_data->transport_udp.started)
-                goto transport_started;
+#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+            p_transport_started = &ccapi_data->transport_udp.started;
 #endif
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+            break;
         case CCAPI_TRANSPORT_SMS:
-            if (ccapi_data->transport_sms.started)
-                goto transport_started;
+#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+            p_transport_started = &ccapi_data->transport_udp.started;
 #endif
+            break;
     }
 
-    ccapi_logging_line("ccxapi_send: Transport not started");
-    error = CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED;
-    goto done;
-transport_started:
+    if (p_transport_started == NULL || *p_transport_started == CCAPI_FALSE)
+    {
+        ccapi_logging_line("ccxapi_send: Transport not started");
 
+        error = CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED;
+        goto done;
+    }
 
     if (cloud_path == NULL)
     {
@@ -75,23 +78,23 @@ done:
 
 static connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
 {
-    connector_transport_t connector_transport;
+    connector_transport_t connector_transport = connector_transport_all;
 
     switch(ccapi_transport)
     {
         case CCAPI_TRANSPORT_TCP:
             connector_transport = connector_transport_tcp;
             break;
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
         case CCAPI_TRANSPORT_UDP:
+#ifdef CCIMP_UDP_TRANSPORT_ENABLED
             connector_transport = connector_transport_udp;
-            break;
 #endif
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+            break;
         case CCAPI_TRANSPORT_SMS:
+#ifdef CCIMP_SMS_TRANSPORT_ENABLED
             connector_transport = connector_transport_sms;
-            break;
 #endif
+            break;
     }
 
     return connector_transport;

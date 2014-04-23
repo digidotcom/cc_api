@@ -69,6 +69,16 @@ typedef struct {
         ccapi_tcp_info_t * info;
         ccapi_bool_t connected;
     } transport_tcp;
+#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+    struct {
+        ccapi_bool_t started;
+    } transport_udp;
+#endif
+#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+    struct {
+        ccapi_bool_t started;
+    } transport_sms;
+#endif
 } ccapi_data_t;
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED

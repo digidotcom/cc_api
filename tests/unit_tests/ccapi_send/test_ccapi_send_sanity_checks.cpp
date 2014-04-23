@@ -132,3 +132,18 @@ TEST(test_ccapi_send_data_sanity_checks, testOK)
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 }
 
+TEST(test_ccapi_send_data_sanity_checks, testUdpTransportNotStarted)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_UDP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+}
+
+TEST(test_ccapi_send_data_sanity_checks, testSmsTransportNotStarted)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_SMS, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+}
