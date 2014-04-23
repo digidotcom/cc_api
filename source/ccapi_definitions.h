@@ -59,6 +59,12 @@ typedef struct {
     ccapi_thread_status_t status;
 } ccapi_thread_info_t;
 
+typedef struct ccapi_fs_virtual_dir {
+    char * virtual_path;
+    char * actual_path;
+    struct ccapi_fs_virtual_dir * next;
+} ccapi_fs_virtual_dir_t;
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
@@ -68,6 +74,7 @@ typedef struct {
     struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
+            ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
     } service;
