@@ -1,22 +1,5 @@
 #include "test_helper_functions.h"
 
-static void th_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path)
-{
-    ccimp_dir_open_data->errnum.pointer = NULL;
-    ccimp_dir_open_data->imp_context = &my_fs_context;
-    ccimp_dir_open_data->handle.pointer = NULL;
-    ccimp_dir_open_data->path = path;
-    Mock_ccimp_fs_dir_open_expectAndReturn(ccimp_dir_open_data, CCIMP_STATUS_OK);
-}
-
-static void th_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data)
-{
-    ccimp_dir_close_data->handle.pointer = &dir_handle;
-    ccimp_dir_close_data->errnum.pointer = NULL;
-    ccimp_dir_close_data->imp_context = ccapi_data_single_instance->service.file_system.imp_context;
-    Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_dir_close_data, CCIMP_STATUS_OK);
-}
-
 TEST_GROUP(test_ccapi_fs_mapping_no_CCAPI)
 {
     void setup()
@@ -116,8 +99,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4DirEntry)
         void * malloc_for_dir_list_entry = NULL;
         Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_fs_virtual_dir_t), malloc_for_dir_list_entry);
     }
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, actual_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -140,8 +123,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4ActualPath)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(actual_path) + 1, malloc_for_actual_path);
         Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry, CCIMP_STATUS_OK);
     }
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, actual_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -167,8 +150,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4VirtualPath)
         Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(malloc_for_actual_path, CCIMP_STATUS_OK);
     }
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, actual_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -192,8 +175,8 @@ TEST(test_ccapi_fs_mapping, testMapDirOK)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(actual_path) + 1, malloc_for_actual_path);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path) + 1, malloc_for_virtual_path);
     }
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, actual_path);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, actual_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
@@ -228,10 +211,10 @@ TEST(test_ccapi_fs_mapping, testMapTwoDirs)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(actual_path_2) + 1, malloc_for_actual_path_2);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path_2) + 1, malloc_for_virtual_path_2);
     }
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, actual_path_1);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
-    th_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, actual_path_2);
-    th_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, actual_path_1);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
+    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, actual_path_2);
+    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path_1, actual_path_1);
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);

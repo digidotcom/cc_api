@@ -50,5 +50,7 @@ void th_stop_ccapi(ccapi_data_t * const ccapi_data);
 pthread_t th_aux_ccapi_start(void * argument);
 int th_stop_aux_thread(pthread_t pthread);
 ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connector_file_system_open_t * const ccfsm_open_data, int flags);
+void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
+void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
 
 #endif

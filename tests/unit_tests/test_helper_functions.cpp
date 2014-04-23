@@ -225,3 +225,20 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
     CHECK(ccfsm_open_data->handle != NULL);
     return (ccapi_fs_file_handle_t *)ccfsm_open_data->handle;
 }
+
+void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path)
+{
+    ccimp_dir_open_data->errnum.pointer = NULL;
+    ccimp_dir_open_data->imp_context = &my_fs_context;
+    ccimp_dir_open_data->handle.pointer = NULL;
+    ccimp_dir_open_data->path = path;
+    Mock_ccimp_fs_dir_open_expectAndReturn(ccimp_dir_open_data, CCIMP_STATUS_OK);
+}
+
+void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data)
+{
+    ccimp_dir_close_data->handle.pointer = &dir_handle;
+    ccimp_dir_close_data->errnum.pointer = NULL;
+    ccimp_dir_close_data->imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+    Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_dir_close_data, CCIMP_STATUS_OK);
+}
