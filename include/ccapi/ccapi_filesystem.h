@@ -34,9 +34,11 @@ typedef enum {
     CCAPI_FS_ERROR_INVALID_PATH,
     CCAPI_FS_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_FS_ERROR_NOT_A_DIR,
+    CCAPI_FS_ERROR_NOT_MAPPED,
     CCAPI_FS_ERROR_EXISTING_VIRTUAL_DIR
 } ccapi_fs_error_t;
 
 ccapi_fs_error_t ccapi_fs_add_virtual_dir(char const * const virtual_dir, char const * const actual_dir);
+ccapi_fs_error_t ccapi_fs_remove_virtual_dir(char const * const virtual_dir);
 
 #endif
