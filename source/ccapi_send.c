@@ -10,17 +10,20 @@ typedef struct
     ccapi_svc_send_data_t svc_send;
 } ccapi_send_t;
 
-static ccapi_bool_t valid_malloc(void * ptr, ccapi_send_error_t * const error)
+static ccapi_bool_t valid_malloc(void * * ptr, size_t size, ccapi_send_error_t * const error)
 {
-    if (ptr == NULL)
+    ccapi_bool_t success;
+ 
+    *ptr = ccapi_malloc(size);
+
+    success = (*ptr == NULL) ? CCAPI_FALSE : CCAPI_TRUE;
+    
+    if (!success)
     {
         *error = CCAPI_SEND_ERROR_INSUFFICIENT_MEMORY;
-        return CCAPI_FALSE;
     }
-    else
-    {
-        return CCAPI_TRUE;
-    }
+
+    return success;
 }
 
 static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type)
@@ -139,9 +142,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    send_info = ccapi_malloc(sizeof(ccapi_send_t));
-
-    if (!valid_malloc(send_info, &error))
+    if (!valid_malloc((void**)&send_info, sizeof(ccapi_send_t), &error))
     {
         goto done;
     }
