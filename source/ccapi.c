@@ -48,7 +48,7 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
-static char * ccapi_strdup(char const * const string)
+char * ccapi_strdup(char const * const string)
 {
     size_t const string_size = strlen(string) + 1;
     char * dup_string = ccapi_malloc(string_size);
