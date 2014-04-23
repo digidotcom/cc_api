@@ -28,7 +28,7 @@ static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
     ccapi_bool_t * p_transport_started = NULL;
 
-    if (ccapi_data == NULL || ccapi_data->thread.connector_run->status != CCAPI_THREAD_RUNNING)
+    if (!CCAPI_RUNNING(ccapi_data))
     {
         ccapi_logging_line("ccxapi_send_data: CCAPI not started");
 
