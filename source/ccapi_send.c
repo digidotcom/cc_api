@@ -64,7 +64,7 @@ static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data
         goto done;
     }
 
-    if (cloud_path == NULL)
+    if (cloud_path == NULL || *cloud_path == '\0')
     {
         ccapi_logging_line("ccxapi_send: Invalid cloud_path");
 
@@ -72,8 +72,13 @@ static ccapi_send_error_t check_send_common_args(ccapi_data_t * const ccapi_data
         goto done;
     }
 
-    if (content_type != NULL)
-        ASSERT_MSG_GOTO(strlen(content_type) <= UCHAR_MAX, done);
+    if (content_type != NULL && (*content_type == '\0' || strlen(content_type) > UCHAR_MAX))
+    {
+        ccapi_logging_line("ccxapi_send: Invalid content_type");
+
+        error = CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE;
+        goto done;
+    }
 
 done:
     return error;

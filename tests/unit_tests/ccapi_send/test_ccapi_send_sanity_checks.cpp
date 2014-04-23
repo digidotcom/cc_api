@@ -71,11 +71,19 @@ TEST_GROUP(test_ccapi_send_common_sanity_checks)
     }
 };
 
-TEST(test_ccapi_send_common_sanity_checks, testInvalidCloudPath)
+TEST(test_ccapi_send_common_sanity_checks, testNullCloudPath)
 {
     ccapi_send_error_t error;
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, NULL, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_CLOUD_PATH, error);
+}
+
+TEST(test_ccapi_send_common_sanity_checks, testEmptyCloudPath)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_TCP, "", CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_CLOUD_PATH, error);
 }
 
@@ -85,6 +93,41 @@ TEST(test_ccapi_send_common_sanity_checks, testNullContentTypeIsValid)
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, NULL, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+}
+
+TEST(test_ccapi_send_common_sanity_checks, testEmptyContentType)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, "", DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE, error);
+}
+
+TEST(test_ccapi_send_common_sanity_checks, testLimitContentType)
+{
+    ccapi_send_error_t error;
+    char * content_type;
+
+    #define TEST_SIZE_FAIL (UCHAR_MAX+1)
+    content_type = (char *)malloc(TEST_SIZE_FAIL+1);
+    memset(content_type, 'A', TEST_SIZE_FAIL);
+    content_type[TEST_SIZE_FAIL] = '\0';
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, content_type, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE, error);
+
+    free(content_type);
+
+
+    #define TEST_SIZE_OK (UCHAR_MAX)
+    content_type = (char *)malloc(TEST_SIZE_OK+1);
+    memset(content_type, 'B', TEST_SIZE_OK);
+    content_type[TEST_SIZE_OK] = '\0';
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, content_type, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+
+    free(content_type);
 }
 
 TEST_GROUP(test_ccapi_send_data_sanity_checks)
