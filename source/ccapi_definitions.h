@@ -68,6 +68,7 @@ typedef struct {
     struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
+            void * imp_context;
         } file_system;
     } service;
     struct {

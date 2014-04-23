@@ -128,6 +128,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         ccapi_data->config.filesystem_supported = CCAPI_TRUE;
         ccapi_data->service.file_system.user_callbacks.access_cb = start->service.file_system->access_cb;
         ccapi_data->service.file_system.user_callbacks.changed_cb = start->service.file_system->changed_cb;
+        ccapi_data->service.file_system.imp_context = NULL;
     }
     else
     {
