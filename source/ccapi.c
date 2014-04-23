@@ -1012,26 +1012,28 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
-	connector_callback_status_t status = connector_callback_continue;
+    connector_callback_status_t status = connector_callback_abort;
 	
     if (send_ptr != NULL)
     {
         ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)send_ptr->user_context;
 
-        ASSERT(svc_send != NULL);
+        ASSERT_MSG_GOTO(svc_send != NULL, done);
         send_ptr->bytes_used = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
         memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
         svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
         svc_send->bytes_remaining -= send_ptr->bytes_used;
         send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
+
+        status = connector_callback_continue;
     }
     else
     {
         ccapi_logging_line("process_send_data_request: no app data set to send\n");
-        status = connector_callback_abort;
     }
 
+done:
     return status;
 }
 
@@ -1073,10 +1075,12 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
             break;
         }
         default:
-            ccapi_logging_line("ccapi_data_service_handler: unknown request id type %d for connector_request_id_data_service\n", data_service_request);
+            connector_status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(0, done);
             break;
     }
 
+done:
     return connector_status;
 }
 #endif

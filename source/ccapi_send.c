@@ -125,7 +125,7 @@ done:
 
 ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
 {
-    ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
+    ccapi_send_error_t error;
     ccapi_send_t * send_info;
 
     error = check_send_common_args(ccapi_data, transport, cloud_path, content_type);
@@ -150,9 +150,15 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
     {
         ccimp_os_syncr_create_t create_data;
     
-        if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK)
-            send_info->svc_send.send_syncr = create_data.syncr_object;
-        else goto done;
+        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK)
+        {
+            ccapi_free(send_info);
+
+            error = CCAPI_SEND_ERROR_SYNCR_ERROR;
+            goto done;
+        }
+
+        send_info->svc_send.send_syncr = create_data.syncr_object;
     }
 
     /* we are storing some stack variables here, need to block until we get a response */
