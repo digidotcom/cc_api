@@ -217,7 +217,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 {
     ccapi_tcp_start_error_t error = CCAPI_TCP_START_ERROR_NONE;
 
-    if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+    if (!CCAPI_RUNNING(ccapi_data))
     {
         ccapi_logging_line("ccxapi_start_transport_tcp: CCAPI not started");
 

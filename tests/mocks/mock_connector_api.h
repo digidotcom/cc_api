@@ -10,6 +10,7 @@
 
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
+#define MOCK_CONNECTOR_SEND_DATA_ENABLED 1
 
 #define WAIT_FOR_ASSERT()   {do ccimp_os_yield(); while (assert_buffer == NULL);}
 
@@ -32,6 +33,17 @@ typedef struct  {
     struct {
         ccapi_bool_t stop_transport;
     } connector_initiate_transport_stop_info;
+    struct {
+        struct {
+            size_t bytes;
+            int status;
+        } in;
+        struct {
+            void * data;
+            size_t bytes_used;
+            connector_bool_t more_data;
+        } out;
+    } connector_initiate_send_data_info;
 } mock_connector_api_info_t;
 
 mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);

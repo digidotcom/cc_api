@@ -30,6 +30,11 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_run_retval = connector_idle;
             mock_info[i].connector_initiate_transport_start_info.init_transport = CCAPI_TRUE;
             mock_info[i].connector_initiate_transport_stop_info.stop_transport = CCAPI_TRUE;
+            mock_info[i].connector_initiate_send_data_info.out.data = NULL;
+            mock_info[i].connector_initiate_send_data_info.in.bytes = 0;
+            mock_info[i].connector_initiate_send_data_info.out.bytes_used = 0;
+            mock_info[i].connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_complete;
+            mock_info[i].connector_initiate_send_data_info.out.more_data = connector_false;			
 
             sem_post(&sem);
 
@@ -217,6 +222,7 @@ void Mock_connector_initiate_action_create(void)
 {
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
     mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
+    mock().installComparator("connector_request_data_service_send_t", connector_request_data_service_send_t_comparator);
     return;
 }
 
@@ -244,10 +250,19 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
                      .andReturnValue(retval);
             break;
         case connector_initiate_send_data:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_request_data_service_send_t", "request_data", request_data)
+                     .andReturnValue(retval);
+
+            mock("connector_initiate_action").setData("connector_request_data_service_send_t_behavior", MOCK_CONNECTOR_SEND_DATA_ENABLED);
+            break;
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
         case connector_initiate_session_cancel:
         case connector_initiate_session_cancel_all:
+            break;
 #endif
         case connector_initiate_terminate:
             mock("connector_initiate_action").expectOneCall("connector_initiate_action")
@@ -308,15 +323,68 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameter("request", request)
                     .withParameter("request_data", (void *)request_data);
 
-            if (mock_info)
-            {
-                ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
-                mock_info->connector_run_retval = connector_device_terminated;
-            }
+            ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+            mock_info->connector_run_retval = connector_device_terminated;
 
             break;
         }
         case connector_initiate_send_data:
+        {
+
+            uint8_t behavior = mock("connector_initiate_action").getData("connector_request_data_service_send_t_behavior").getIntValue();
+            if (behavior == MOCK_CONNECTOR_SEND_DATA_ENABLED)
+            {
+                mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_request_data_service_send_t", "request_data", (void *)request_data);
+            }
+
+            {
+                 connector_request_id_t request_id;
+                 connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
+
+                 uint8_t * buffer;
+
+                 if (mock_info->connector_initiate_send_data_info.in.bytes == 0)
+                 {
+                     /* If test does not set a value... */
+                     mock_info->connector_initiate_send_data_info.in.bytes = 100;
+                 }
+
+                 buffer = (uint8_t *)malloc(mock_info->connector_initiate_send_data_info.in.bytes);
+
+                 connector_data_service_send_data_t data_service_send = {
+                                                       header->transport, 
+                                                       header->user_context,
+                                                       buffer,
+                                                       mock_info->connector_initiate_send_data_info.in.bytes,
+                                                       0,
+                                                       connector_false
+                                                       };
+
+                 request_id.data_service_request = connector_request_id_data_service_send_data;
+                 ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_send, (void *)ccapi_data);
+
+                 mock_info->connector_initiate_send_data_info.out.data = (void*)buffer;
+                 mock_info->connector_initiate_send_data_info.out.bytes_used = data_service_send.bytes_used;
+                 mock_info->connector_initiate_send_data_info.out.more_data = data_service_send.more_data;
+            }
+
+            {
+                 connector_request_id_t request_id;
+                 connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
+                 connector_data_service_status_t data_service_status = {
+                                                       header->transport, header->user_context, 
+                                                       mock_info->connector_initiate_send_data_info.in.status==(int)connector_data_service_status_t::connector_data_service_status_complete?connector_data_service_status_t::connector_data_service_status_complete:connector_data_service_status_t::connector_data_service_status_session_error,
+                                                       connector_session_error_none
+                                                       };
+
+                 request_id.data_service_request = connector_request_id_data_service_send_status;
+                 ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_status, (void *)ccapi_data);
+            }
+            break;
+        }
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
         case connector_initiate_session_cancel:

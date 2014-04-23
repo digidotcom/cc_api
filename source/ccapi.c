@@ -992,6 +992,99 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 }
 #endif
 
+#ifdef CCIMP_DATA_SERVICE_ENABLED
+
+static void send_data_completed(ccapi_svc_send_data_t * const svc_send, ccapi_send_error_t const error_code)
+{
+    ccimp_os_syncr_release_t release_data;
+
+    svc_send->error = error_code;
+
+    ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
+    
+    release_data.syncr_object = svc_send->send_syncr;
+
+    ccimp_os_syncr_release(&release_data);
+
+done:
+    return;
+}
+
+static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
+{
+    connector_callback_status_t status = connector_callback_abort;
+	
+    if (send_ptr != NULL)
+    {
+        ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)send_ptr->user_context;
+
+        ASSERT_MSG_GOTO(svc_send != NULL, done);
+        send_ptr->bytes_used = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
+
+        memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
+        svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
+        svc_send->bytes_remaining -= send_ptr->bytes_used;
+        send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
+
+        status = connector_callback_continue;
+    }
+    else
+    {
+        ccapi_logging_line("process_send_data_request: no app data set to send\n");
+    }
+
+done:
+    return status;
+}
+
+static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
+{
+    ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
+    ccapi_send_error_t error_code;
+
+    ccapi_logging_line("Data service status: %d\n", status_ptr->status);
+    error_code = (status_ptr->status == connector_data_service_status_complete) ? CCAPI_SEND_ERROR_NONE : CCAPI_SEND_ERROR_CCFSM_ERROR;
+
+    send_data_completed(svc_send, error_code);
+
+    return connector_callback_continue;
+}
+
+connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status;
+
+    UNUSED_ARGUMENT(ccapi_data);
+
+    switch (data_service_request)
+    {
+        case connector_request_id_data_service_send_data:
+        {
+            connector_data_service_send_data_t * send_ptr = data;
+
+            connector_status = ccapi_process_send_data_request(send_ptr);
+
+            break;
+        }
+        case connector_request_id_data_service_send_status:
+        {
+            connector_data_service_status_t * const status_ptr = data;
+            
+            connector_status = ccapi_process_send_data_status(status_ptr);
+
+            break;
+        }
+        default:
+            connector_status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(0, done);
+            break;
+    }
+
+done:
+    return connector_status;
+}
+#endif
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
     connector_callback_status_t status = connector_callback_error;
@@ -1014,6 +1107,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         case connector_class_id_file_system:
             status = ccapi_filesystem_handler(request_id.file_system_request, data, ccapi_data);
+            break;
+#endif
+#ifdef CCIMP_DATA_SERVICE_ENABLED
+        case connector_class_id_data_service:
+            status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
             break;
 #endif
         default:

@@ -34,6 +34,7 @@
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
+#define CCAPI_RUNNING(c) ((c) != NULL && (c)->thread.connector_run->status == CCAPI_THREAD_RUNNING)
 
 typedef struct {
     uint32_t vendor_id;
@@ -69,7 +70,27 @@ typedef struct {
         ccapi_tcp_info_t * info;
         ccapi_bool_t connected;
     } transport_tcp;
+#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+    struct {
+        ccapi_bool_t started;
+    } transport_udp;
+#endif
+#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+    struct {
+        ccapi_bool_t started;
+    } transport_sms;
+#endif
 } ccapi_data_t;
+
+#ifdef CCIMP_DATA_SERVICE_ENABLED
+typedef struct
+{
+    void * next_data;
+    size_t bytes_remaining;
+    void * send_syncr;
+    ccapi_send_error_t error;
+} ccapi_svc_send_data_t;
+#endif
 
 extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;

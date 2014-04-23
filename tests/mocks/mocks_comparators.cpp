@@ -11,6 +11,7 @@ ValueToStringFunction(ccimp_network_receive_t)
 ValueToStringFunction(ccimp_network_close_t)
 ValueToStringFunction(connector_transport_t)
 ValueToStringFunction(connector_initiate_stop_request_t)
+ValueToStringFunction(connector_request_data_service_send_t)
 ValueToStringFunction(ccimp_fs_file_open_t)
 ValueToStringFunction(ccimp_fs_file_read_t)
 ValueToStringFunction(ccimp_fs_file_write_t)
@@ -142,6 +143,31 @@ static bool connector_initiate_stop_request_t_IsEqual(void * object1, void * obj
 
     if (connector_initiate_stop_request_1->user_context != connector_initiate_stop_request_2->user_context)
         return false;
+
+    return true;
+}
+
+static bool connector_request_data_service_send_t_IsEqual(void * object1, void * object2)
+{
+    connector_request_data_service_send_t * connector_request_data_service_send_t_1 = (connector_request_data_service_send_t *)object1;
+    connector_request_data_service_send_t * connector_request_data_service_send_t_2 = (connector_request_data_service_send_t *)object2;
+
+    compare_pointers(object1, object2);
+
+    if (connector_request_data_service_send_t_1->transport != connector_request_data_service_send_t_2->transport)
+        return false;
+    if (connector_request_data_service_send_t_1->path != connector_request_data_service_send_t_2->path)
+        return false;
+    if (connector_request_data_service_send_t_1->content_type != connector_request_data_service_send_t_2->content_type)
+        return false;
+    if (connector_request_data_service_send_t_1->option != connector_request_data_service_send_t_2->option)
+        return false;
+    if (connector_request_data_service_send_t_1->response_required != connector_request_data_service_send_t_2->response_required)
+        return false;
+    if (connector_request_data_service_send_t_1->timeout_in_seconds != connector_request_data_service_send_t_2->timeout_in_seconds)
+        return false;
+ 
+    /* TODO: inspect user_context? */
 
     return true;
 }
@@ -423,6 +449,7 @@ MockFunctionComparator ccimp_network_close_t_comparator(ccimp_network_close_t_Is
 MockFunctionComparator ccimp_create_thread_info_t_comparator(ccimp_create_thread_info_t_IsEqual, ccimp_create_thread_info_t_ValueToString);
 MockFunctionComparator connector_transport_t_comparator(connector_transport_t_IsEqual, connector_transport_t_ValueToString);
 MockFunctionComparator connector_initiate_stop_request_t_comparator(connector_initiate_stop_request_t_IsEqual, connector_initiate_stop_request_t_ValueToString);
+MockFunctionComparator connector_request_data_service_send_t_comparator(connector_request_data_service_send_t_IsEqual, connector_request_data_service_send_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_open_t_comparator(ccimp_fs_file_open_t_IsEqual, ccimp_fs_file_open_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_read_t_comparator(ccimp_fs_file_read_t_IsEqual, ccimp_fs_file_read_t_ValueToString);
 MockFunctionComparator ccimp_fs_file_write_t_comparator(ccimp_fs_file_write_t_IsEqual, ccimp_fs_file_write_t_ValueToString);
