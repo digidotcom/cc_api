@@ -29,4 +29,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_handle_t const ccapi_handle, ccapi_tcp_info_t const * const tcp_start);
 ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_handle_t const ccapi_handle, ccapi_tcp_stop_t const * const tcp_stop);
 
+ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_handle_t const ccapi_handle, char const * const virtual_dir, char const * const actual_dir);
+ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_handle_t * const ccapi_data, char const * const virtual_dir);
+
 #endif
