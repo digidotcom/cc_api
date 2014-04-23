@@ -32,7 +32,7 @@ TEST_GROUP(test_ccapi_fs_access)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.access_cb);
+        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.user_callbacks.access_cb);
     }
 
     void teardown()
@@ -175,6 +175,9 @@ TEST(test_ccapi_fs_access, testAccessRemove)
     connector_callback_status_t status;
     int fs_context;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
+
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
@@ -210,6 +213,9 @@ TEST(test_ccapi_fs_access, testAccessList)
     connector_file_system_opendir_t ccfsm_dir_open_data;
     connector_callback_status_t status;
     int fs_context;
+
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
 
     ccapi_fs_access_expected_path = "/tmp/";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_LIST;

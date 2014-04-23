@@ -66,7 +66,10 @@ typedef struct {
         ccapi_thread_info_t * connector_run;
     } thread;
     struct {
-        ccapi_filesystem_service_t file_system;
+        struct {
+            ccapi_filesystem_service_t user_callbacks;
+            void * imp_context;
+        } file_system;
     } service;
     struct {
         ccapi_tcp_info_t * info;

@@ -1,5 +1,9 @@
 #include "test_helper_functions.h"
 
+typedef int my_filesystem_context_t;
+
+extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
+
 static char const * ccapi_fs_changed_expected_path = NULL;
 static ccapi_fs_changed_t ccapi_fs_changed_expected_request = CCAPI_FS_CHANGED_MODIFIED;
 static ccapi_bool_t ccapi_fs_changed_cb_called = CCAPI_FALSE;
@@ -47,7 +51,7 @@ TEST_GROUP(test_ccapi_fs_changed)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.changed_cb);
+        CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.user_callbacks.changed_cb);
     }
 
     void teardown()
@@ -63,6 +67,9 @@ TEST(test_ccapi_fs_changed, testChangedRemoved)
     connector_file_system_remove_t ccfsm_remove_data;
     connector_callback_status_t status;
     int fs_context;
+
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
 
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
@@ -125,7 +132,6 @@ TEST(test_ccapi_fs_changed, testChangedModified)
     connector_callback_status_t status;
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = NULL;
-    int fs_context;
 
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READWRITE;
@@ -136,7 +142,7 @@ TEST(test_ccapi_fs_changed, testChangedModified)
     ccapi_fs_changed_expected_request = CCAPI_FS_CHANGED_MODIFIED;
 
     ccimp_close_data.errnum.pointer = NULL;
-    ccimp_close_data.imp_context = &fs_context;
+    ccimp_close_data.imp_context = &my_fs_context;
     ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
@@ -160,7 +166,6 @@ TEST(test_ccapi_fs_changed, testOpenForReadNotChanged)
     connector_callback_status_t status;
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = NULL;
-    int fs_context;
 
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READ;
@@ -169,7 +174,7 @@ TEST(test_ccapi_fs_changed, testOpenForReadNotChanged)
     ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDONLY);
 
     ccimp_close_data.errnum.pointer = NULL;
-    ccimp_close_data.imp_context = &fs_context;
+    ccimp_close_data.imp_context = &my_fs_context;
     ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;

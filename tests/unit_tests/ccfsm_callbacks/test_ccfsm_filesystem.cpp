@@ -79,7 +79,7 @@ TEST(test_ccfsm_filesystem, testFileOpen)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_open_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK_EQUAL(&my_fs_context, ccfsm_open_data.user_context);
+    CHECK_EQUAL(&my_fs_context, ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(ccfsm_open_data.handle != NULL);
     CHECK_EQUAL(expected_errnum[FS_OPEN_ERRNUM_INDEX].pointer, ccfsm_open_data.errnum);
 }
@@ -102,7 +102,7 @@ TEST(test_ccfsm_filesystem, testFileRead)
     ccimp_read_data.bytes_used = 0;
 
     ccfsm_read_data.errnum = ccimp_read_data.errnum.pointer;
-    ccfsm_read_data.user_context = ccimp_read_data.imp_context;
+    ccfsm_read_data.user_context = NULL;
     ccfsm_read_data.handle = ccfsm_open_data.handle;
     ccfsm_read_data.buffer = ccimp_read_data.buffer;
     ccfsm_read_data.bytes_available = ccimp_read_data.bytes_available;
@@ -116,7 +116,7 @@ TEST(test_ccfsm_filesystem, testFileRead)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(sizeof "testFileRead", ccfsm_read_data.bytes_used);
     STRCMP_EQUAL("testFileRead", (char *)ccfsm_read_data.buffer);
-    CHECK_EQUAL(1, *(my_filesystem_context_t *)ccfsm_read_data.user_context);
+    CHECK_EQUAL(1, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(expected_errnum[FS_READ_ERRNUM_INDEX].pointer, ccfsm_read_data.errnum);
 }
 
@@ -138,7 +138,7 @@ TEST(test_ccfsm_filesystem, testFileWrite)
     ccimp_write_data.bytes_used = 0;
 
     ccfsm_write_data.errnum = ccimp_write_data.errnum.pointer;
-    ccfsm_write_data.user_context = ccimp_write_data.imp_context;
+    ccfsm_write_data.user_context = NULL;
     ccfsm_write_data.handle = ccfsm_open_data.handle;
     ccfsm_write_data.buffer = ccimp_write_data.buffer;
     ccfsm_write_data.bytes_available = ccimp_write_data.bytes_available;
@@ -150,7 +150,7 @@ TEST(test_ccfsm_filesystem, testFileWrite)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_write_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK_EQUAL(2, *(my_filesystem_context_t *)ccfsm_write_data.user_context);
+    CHECK_EQUAL(2, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(ccfsm_write_data.bytes_used, ccfsm_write_data.bytes_available);
     CHECK_EQUAL(expected_errnum[FS_WRITE_ERRNUM_INDEX].pointer, ccfsm_write_data.errnum);
 }
@@ -172,7 +172,7 @@ TEST(test_ccfsm_filesystem, testFileSeek)
     ccimp_seek_data.resulting_offset = 0;
 
     ccfsm_seek_data.errnum = ccimp_seek_data.errnum.pointer;
-    ccfsm_seek_data.user_context = ccimp_seek_data.imp_context;
+    ccfsm_seek_data.user_context = NULL;
     ccfsm_seek_data.handle = ccfsm_open_data.handle;
     ccfsm_seek_data.origin = connector_file_system_seek_end;
     ccfsm_seek_data.requested_offset = ccimp_seek_data.requested_offset;
@@ -185,7 +185,7 @@ TEST(test_ccfsm_filesystem, testFileSeek)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_SEEK_ERRNUM_INDEX].pointer, ccfsm_seek_data.errnum);
-    CHECK_EQUAL(3, *(my_filesystem_context_t *)ccfsm_seek_data.user_context);
+    CHECK_EQUAL(3, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(ccfsm_seek_data.requested_offset, ccfsm_seek_data.resulting_offset);
 }
 
@@ -203,7 +203,7 @@ TEST(test_ccfsm_filesystem, testFileClose)
     ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
-    ccfsm_close_data.user_context = ccimp_close_data.imp_context;
+    ccfsm_close_data.user_context = NULL;
     ccfsm_close_data.handle = ccfsm_open_data.handle;
 
     Mock_ccimp_fs_file_close_expectAndReturn(&ccimp_close_data, CCIMP_STATUS_OK);
@@ -213,7 +213,7 @@ TEST(test_ccfsm_filesystem, testFileClose)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_CLOSE_ERRNUM_INDEX].pointer, ccfsm_close_data.errnum);
-    CHECK_EQUAL(4, *(my_filesystem_context_t *)ccfsm_close_data.user_context);
+    CHECK_EQUAL(4, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 }
 
 TEST(test_ccfsm_filesystem, testFileTruncate)
@@ -231,7 +231,7 @@ TEST(test_ccfsm_filesystem, testFileTruncate)
     ccimp_truncate_data.length_in_bytes = 1024;
 
     ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum.pointer;
-    ccfsm_truncate_data.user_context = ccimp_truncate_data.imp_context;
+    ccfsm_truncate_data.user_context = NULL;
     ccfsm_truncate_data.handle = ccfsm_open_data.handle;
     ccfsm_truncate_data.length_in_bytes = ccimp_truncate_data.length_in_bytes;
 
@@ -242,7 +242,7 @@ TEST(test_ccfsm_filesystem, testFileTruncate)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_TRUNCATE_ERRNUM_INDEX].pointer, ccfsm_truncate_data.errnum);
-    CHECK_EQUAL(12, *(my_filesystem_context_t *)ccfsm_truncate_data.user_context);
+    CHECK_EQUAL(12, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 }
 
 TEST(test_ccfsm_filesystem, testFileRemove)
@@ -252,12 +252,15 @@ TEST(test_ccfsm_filesystem, testFileRemove)
     connector_file_system_remove_t ccfsm_remove_data;
     connector_callback_status_t status;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_remove_data.errnum.pointer = NULL;
     ccimp_remove_data.imp_context = &my_fs_context;
     ccimp_remove_data.path = "/tmp/hello.txt";
 
     ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
-    ccfsm_remove_data.user_context = ccimp_remove_data.imp_context;
+    ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
     Mock_ccimp_fs_file_remove_expectAndReturn(&ccimp_remove_data, CCIMP_STATUS_OK);
@@ -267,7 +270,7 @@ TEST(test_ccfsm_filesystem, testFileRemove)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_REMOVE_ERRNUM_INDEX].pointer, ccfsm_remove_data.errnum);
-    CHECK_EQUAL(5, *(my_filesystem_context_t *)ccfsm_remove_data.user_context);
+    CHECK_EQUAL(5, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 }
 
 TEST(test_ccfsm_filesystem, testDirOpen)
@@ -277,13 +280,16 @@ TEST(test_ccfsm_filesystem, testDirOpen)
     connector_file_system_opendir_t ccfsm_dir_open_data;
     connector_callback_status_t status;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_dir_open_data.errnum.pointer = NULL;
     ccimp_dir_open_data.imp_context = &my_fs_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = "/tmp/";
 
     ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
-    ccfsm_dir_open_data.user_context = ccimp_dir_open_data.imp_context;
+    ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
 
@@ -294,7 +300,7 @@ TEST(test_ccfsm_filesystem, testDirOpen)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_DIROPEN_ERRNUM_INDEX].pointer, ccfsm_dir_open_data.errnum);
-    CHECK_EQUAL(6, *(my_filesystem_context_t *)ccfsm_dir_open_data.user_context);
+    CHECK_EQUAL(6, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(NULL != ccfsm_dir_open_data.handle);
 }
 
@@ -307,6 +313,9 @@ TEST(test_ccfsm_filesystem, testDirRead)
     void * handle = &handle; /* Not NULL */
     char entry_name[256] = {0};
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_dir_read_entry_data.errnum.pointer = NULL;
     ccimp_dir_read_entry_data.imp_context = &my_fs_context;
     ccimp_dir_read_entry_data.handle.pointer = handle;
@@ -314,7 +323,7 @@ TEST(test_ccfsm_filesystem, testDirRead)
     ccimp_dir_read_entry_data.bytes_available = sizeof entry_name;
 
     ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum.pointer;
-    ccfsm_dir_read_entry_data.user_context = ccimp_dir_read_entry_data.imp_context;
+    ccfsm_dir_read_entry_data.user_context = NULL;
     ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle.pointer;
     ccfsm_dir_read_entry_data.entry_name = ccimp_dir_read_entry_data.entry_name;
     ccfsm_dir_read_entry_data.bytes_available = ccimp_dir_read_entry_data.bytes_available;
@@ -326,7 +335,7 @@ TEST(test_ccfsm_filesystem, testDirRead)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_DIRREAD_ERRNUM_INDEX].pointer, ccfsm_dir_read_entry_data.errnum);
-    CHECK_EQUAL(7, *(my_filesystem_context_t *)ccfsm_dir_read_entry_data.user_context);
+    CHECK_EQUAL(7, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     STRCMP_EQUAL("/tmp/hello.txt", ccfsm_dir_read_entry_data.entry_name);
 }
 
@@ -337,6 +346,9 @@ TEST(test_ccfsm_filesystem, testDirEntryStat)
     connector_file_system_stat_dir_entry_t ccfsm_dir_entry_status_data;
     connector_callback_status_t status;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_dir_entry_status_data.errnum.pointer = NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
@@ -345,7 +357,7 @@ TEST(test_ccfsm_filesystem, testDirEntryStat)
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
     ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum.pointer;
-    ccfsm_dir_entry_status_data.user_context = ccimp_dir_entry_status_data.imp_context;
+    ccfsm_dir_entry_status_data.user_context = NULL;
     ccfsm_dir_entry_status_data.path = ccimp_dir_entry_status_data.path;
     ccfsm_dir_entry_status_data.statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
     ccfsm_dir_entry_status_data.statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
@@ -358,7 +370,7 @@ TEST(test_ccfsm_filesystem, testDirEntryStat)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_DIRSTAT_ERRNUM_INDEX].pointer, ccfsm_dir_entry_status_data.errnum);
-    CHECK_EQUAL(8, *(my_filesystem_context_t *)ccfsm_dir_entry_status_data.user_context);
+    CHECK_EQUAL(8, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(1024, ccfsm_dir_entry_status_data.statbuf.file_size);
     CHECK_EQUAL(1397488930, ccfsm_dir_entry_status_data.statbuf.last_modified);
     CHECK_EQUAL(connector_file_system_file_type_is_reg, ccfsm_dir_entry_status_data.statbuf.flags);
@@ -372,12 +384,15 @@ TEST(test_ccfsm_filesystem, testDirClose)
     connector_callback_status_t status;
     void * handle = &handle; /* Not NULL */
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_dir_close_data.errnum.pointer = NULL;
     ccimp_dir_close_data.imp_context = &my_fs_context;
     ccimp_dir_close_data.handle.pointer = handle;
 
     ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum.pointer;
-    ccfsm_dir_close_data.user_context = ccimp_dir_close_data.imp_context;
+    ccfsm_dir_close_data.user_context = NULL;
     ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle.pointer;
 
     Mock_ccimp_fs_dir_close_expectAndReturn(&ccimp_dir_close_data, CCIMP_STATUS_OK);
@@ -387,7 +402,7 @@ TEST(test_ccfsm_filesystem, testDirClose)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX].pointer, ccfsm_dir_close_data.errnum);
-    CHECK_EQUAL(9, *(my_filesystem_context_t *)ccfsm_dir_close_data.user_context);
+    CHECK_EQUAL(9, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 
 }
 
@@ -397,6 +412,9 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     ccimp_fs_hash_status_t ccimp_fs_hash_status_data;
     connector_file_system_stat_t ccfsm_file_stat_data;
     connector_callback_status_t status;
+
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
     ccimp_fs_hash_status_data.errnum.pointer = NULL;
     ccimp_fs_hash_status_data.imp_context = &my_fs_context;
@@ -408,7 +426,7 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     ccimp_fs_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
     ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum.pointer;
-    ccfsm_file_stat_data.user_context = ccimp_fs_hash_status_data.imp_context;
+    ccfsm_file_stat_data.user_context = NULL;
     ccfsm_file_stat_data.path = ccimp_fs_hash_status_data.path;
     ccfsm_file_stat_data.hash_algorithm.actual = connector_file_system_hash_none;
     ccfsm_file_stat_data.hash_algorithm.requested = connector_file_system_hash_crc32;
@@ -423,7 +441,7 @@ TEST(test_ccfsm_filesystem, testHashStatus)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_HASHSTAT_ERRNUM_INDEX].pointer, ccfsm_file_stat_data.errnum);
-    CHECK_EQUAL(10, *(my_filesystem_context_t *)ccfsm_file_stat_data.user_context);
+    CHECK_EQUAL(10, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(connector_file_system_file_type_is_reg, ccfsm_file_stat_data.statbuf.flags);
     CHECK_EQUAL(1024, ccfsm_file_stat_data.statbuf.file_size);
     CHECK_EQUAL(1397488930, ccfsm_file_stat_data.statbuf.last_modified);
@@ -438,6 +456,9 @@ TEST(test_ccfsm_filesystem, testHashFile)
     connector_callback_status_t status;
     uint32_t hash_value = 0;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_fs_hash_file_data.errnum.pointer = NULL;
     ccimp_fs_hash_file_data.imp_context = &my_fs_context;
     ccimp_fs_hash_file_data.path = "/tmp/hello.txt";
@@ -446,7 +467,7 @@ TEST(test_ccfsm_filesystem, testHashFile)
     ccimp_fs_hash_file_data.bytes_requested = sizeof hash_value;
 
     ccfsm_hash_file_data.errnum = ccimp_fs_hash_file_data.errnum.pointer;
-    ccfsm_hash_file_data.user_context = ccimp_fs_hash_file_data.imp_context;
+    ccfsm_hash_file_data.user_context = NULL;
     ccfsm_hash_file_data.path = ccimp_fs_hash_file_data.path;
     ccfsm_hash_file_data.hash_algorithm = connector_file_system_hash_crc32;
     ccfsm_hash_file_data.hash_value = ccimp_fs_hash_file_data.hash_value;
@@ -459,7 +480,7 @@ TEST(test_ccfsm_filesystem, testHashFile)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(expected_errnum[FS_HASHFILE_ERRNUM_INDEX].pointer, ccfsm_hash_file_data.errnum);
-    CHECK_EQUAL(11, *(my_filesystem_context_t *)ccfsm_hash_file_data.user_context);
+    CHECK_EQUAL(11, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(0x34EC, hash_value);
 }
 
@@ -471,6 +492,9 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     connector_callback_status_t status;
     uint8_t buffer[256] = {0};
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_error_desc_data.errnum.value = ETIMEDOUT;
     ccimp_error_desc_data.imp_context = &my_fs_context;
     ccimp_error_desc_data.error_string = (char *)buffer;
@@ -479,7 +503,7 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     ccimp_error_desc_data.error_status = CCIMP_FS_ERROR_UNKNOWN;
 
     ccfsm_error_desc_data.errnum = ccimp_error_desc_data.errnum.pointer;
-    ccfsm_error_desc_data.user_context = ccimp_error_desc_data.imp_context;
+    ccfsm_error_desc_data.user_context = NULL;
     ccfsm_error_desc_data.buffer = ccimp_error_desc_data.error_string;
     ccfsm_error_desc_data.bytes_available = ccimp_error_desc_data.bytes_available;
     ccfsm_error_desc_data.bytes_used = ccimp_error_desc_data.bytes_used;
@@ -491,7 +515,7 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_error_desc_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK_EQUAL(12, *(my_filesystem_context_t *)ccfsm_error_desc_data.user_context);
+    CHECK_EQUAL(12, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
     CHECK_EQUAL(strlen(strerror(ccimp_error_desc_data.errnum.value)) + 1, ccfsm_error_desc_data.bytes_used);
     STRCMP_EQUAL(strerror(ccimp_error_desc_data.errnum.value), (char*)ccfsm_error_desc_data.buffer);
     CHECK_EQUAL(connector_file_system_invalid_parameter, ccfsm_error_desc_data.error_status);
@@ -504,10 +528,13 @@ TEST(test_ccfsm_filesystem, testSessionError)
     connector_file_system_session_error_t ccfsm_session_error_data;
     connector_callback_status_t status;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
     ccimp_session_error_data.imp_context = &my_fs_context;
     ccimp_session_error_data.session_error = CCIMP_FS_SESSION_ERROR_TIMEOUT;
 
-    ccfsm_session_error_data.user_context = ccimp_session_error_data.imp_context;
+    ccfsm_session_error_data.user_context = NULL;
     ccfsm_session_error_data.session_error = connector_session_error_timeout;
 
     Mock_ccimp_fs_session_error_expectAndReturn(&ccimp_session_error_data, CCIMP_STATUS_OK);
@@ -516,5 +543,5 @@ TEST(test_ccfsm_filesystem, testSessionError)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_session_error_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK_EQUAL(13, *(my_filesystem_context_t *)ccfsm_session_error_data.user_context);
+    CHECK_EQUAL(13, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 }
