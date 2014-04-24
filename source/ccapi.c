@@ -1037,6 +1037,13 @@ done:
     return status;
 }
 
+static connector_callback_status_t ccapi_process_send_data_response(connector_data_service_send_response_t const * const resp_ptr)
+{
+    UNUSED_ARGUMENT(resp_ptr);
+
+    return connector_callback_continue;
+}
+
 static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
 {
     ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
@@ -1063,6 +1070,14 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
             connector_data_service_send_data_t * send_ptr = data;
 
             connector_status = ccapi_process_send_data_request(send_ptr);
+
+            break;
+        }
+        case connector_request_id_data_service_send_response:
+        {
+            connector_data_service_send_response_t * const resp_ptr = data;
+
+            connector_status = ccapi_process_send_data_response(resp_ptr);
 
             break;
         }
