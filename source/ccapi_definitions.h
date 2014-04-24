@@ -28,8 +28,14 @@
                                                ccimp_hal_halt(); \
                                                goto label; \
                                            })
+#define ASSERT_MSG(cond)               ON_FALSE_DO_((cond), \
+                                           { \
+                                               ccapi_logging_line(TMP_FATAL_PREFIX "Following condition '%s' failed in file '%s' line %d", #cond, __FILE__, __LINE__); \
+                                               ccimp_hal_halt(); \
+                                           })
 #else
 #define ASSERT_MSG_GOTO(cond, label)   ON_FALSE_DO_((cond), {goto label;})
+#define ASSERT_MSG(cond)
 #endif
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)

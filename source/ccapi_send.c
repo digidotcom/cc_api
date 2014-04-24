@@ -216,7 +216,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         ccimp_os_syncr_destroy_t destroy_data;
         destroy_data.syncr_object = send_info->svc_send.send_syncr;
     
-        ccimp_os_syncr_destroy(&destroy_data);
+        ASSERT_MSG(ccimp_os_syncr_destroy(&destroy_data) == CCIMP_STATUS_OK);
     }
     ccapi_free(send_info);
 
