@@ -6,6 +6,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
+
     new_entry->next = next_entry;
     ccapi_data->service.file_system.virtual_dir_list = new_entry;
     return error;
@@ -67,6 +68,8 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
         ccimp_os_yield();
     } while (loop_done == CCAPI_FALSE);
 
+    ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
+
     if (ccimp_status != CCIMP_STATUS_OK)
     {
         is_dir = CCAPI_FALSE;
@@ -93,6 +96,8 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
     } while (loop_done == CCAPI_FALSE);
 
     ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+    ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
+
 done:
     return is_dir;
 }
