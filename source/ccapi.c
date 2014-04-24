@@ -815,7 +815,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             if (local_path == NULL)
             {
-                ccimp_status = CCIMP_STATUS_ERROR;
                 goto done;
             }
 
@@ -1027,7 +1026,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             if (local_path == NULL)
             {
-                ccimp_status = CCIMP_STATUS_ERROR;
                 goto done;
             }
 
@@ -1098,7 +1096,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
                 if (local_path == NULL)
                 {
-                    ccimp_status = CCIMP_STATUS_ERROR;
                     goto done;
                 }
 
@@ -1199,7 +1196,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
                 if (local_path == NULL)
                 {
-                    ccimp_status = CCIMP_STATUS_ERROR;
                     goto done;
                 }
 
@@ -1275,7 +1271,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
                 if (local_path == NULL)
                 {
-                    ccimp_status = CCIMP_STATUS_ERROR;
                     goto done;
                 }
 
@@ -1314,7 +1309,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             if (local_path == NULL)
             {
-                ccimp_status = CCIMP_STATUS_ERROR;
                 goto done;
             }
 
