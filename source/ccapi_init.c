@@ -84,9 +84,13 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     {
         ccimp_os_syncr_create_t create_data;
     
-        if (ccimp_os_syncr_create(&create_data) == CCIMP_STATUS_OK &&
-                         ccapi_syncr_release(create_data.syncr_object) == CCIMP_STATUS_OK)
-            logging_syncr = create_data.syncr_object;
+        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK || ccapi_syncr_release(create_data.syncr_object) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+
+        logging_syncr = create_data.syncr_object;
     }
 
     ccapi_data->config.device_type = NULL;
@@ -164,6 +168,7 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
+        case CCAPI_START_ERROR_SYNCR_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
         case CCAPI_START_ERROR_COUNT:
             if (ccapi_data != NULL)
@@ -271,6 +276,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
+        case CCAPI_START_ERROR_SYNCR_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
         case CCAPI_START_ERROR_COUNT:
             ccapi_data_single_instance = NULL;
