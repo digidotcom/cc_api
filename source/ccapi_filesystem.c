@@ -70,10 +70,15 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
 
     ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
 
-    if (ccimp_status != CCIMP_STATUS_OK)
+    switch (ccimp_status)
     {
-        is_dir = CCAPI_FALSE;
-        goto done;
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            is_dir = CCAPI_FALSE;
+            goto done;
+            break;
     }
 
     ccimp_fs_dir_close_data.errnum.pointer = NULL;
