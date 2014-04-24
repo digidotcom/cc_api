@@ -144,7 +144,7 @@ done:
     return error;
 }
 
-static ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(ccapi_data_t * const ccapi_data, char const * const virtual_dir)
+ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length)
 {
     ccapi_fs_virtual_dir_t * * p_dir_entry = &ccapi_data->service.file_system.virtual_dir_list;
     ccapi_bool_t finished = CCAPI_FALSE;
@@ -154,7 +154,8 @@ static ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(cca
 
         if (dir_entry != NULL)
         {
-            if (strcmp(dir_entry->virtual_path, virtual_dir) == 0)
+            unsigned int const longest_strlen = strlen(dir_entry->virtual_path) > virtual_dir_length ? strlen(dir_entry->virtual_path) : virtual_dir_length;
+            if (strncmp(dir_entry->virtual_path, virtual_dir, longest_strlen) == 0)
             {
                 finished = CCAPI_TRUE;
             }
@@ -191,7 +192,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
-    p_dir_entry = get_pointer_to_dir_entry_from_virtual_path(ccapi_data, virtual_dir);
+    p_dir_entry = get_pointer_to_dir_entry_from_virtual_path(ccapi_data, virtual_dir, strlen(virtual_dir));
     if (*p_dir_entry == NULL)
     {
         error = CCAPI_FS_ERROR_NOT_MAPPED;
