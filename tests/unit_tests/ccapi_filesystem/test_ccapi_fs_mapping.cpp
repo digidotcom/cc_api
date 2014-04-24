@@ -69,6 +69,9 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
 
     error = ccapi_fs_add_virtual_dir(invalid_virtual_path, NULL);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
+
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_path, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 }
 
 TEST(test_ccapi_fs_mapping, testMapAFile)
