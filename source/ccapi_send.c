@@ -189,7 +189,16 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
     }
 
     {
-        connector_status_t const status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_send_data, &send_info->header);
+        connector_status_t status;
+        do
+        {
+            status = connector_initiate_action_secure(ccapi_data, connector_initiate_send_data, &send_info->header);
+
+            if (status == connector_service_busy)
+            {
+                ccimp_os_yield();
+            }
+        } while (status == connector_service_busy);
 
         if (status == connector_success)
         {
