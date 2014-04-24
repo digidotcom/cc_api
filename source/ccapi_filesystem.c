@@ -2,26 +2,12 @@
 
 #include "ccapi_definitions.h"
 
-static ccapi_fs_virtual_dir_t * * get_pointer_to_last_dir_entry(ccapi_data_t * const ccapi_data)
-{
-    ccapi_fs_virtual_dir_t * * p_last_dir_entry = &ccapi_data->service.file_system.virtual_dir_list;
-
-    do {
-        if (*p_last_dir_entry != NULL)
-        {
-            p_last_dir_entry = &(*p_last_dir_entry)->next;
-        }
-    } while (*p_last_dir_entry != NULL);
-
-    return p_last_dir_entry;
-}
-
 static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, ccapi_fs_virtual_dir_t * const new_entry)
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
-    ccapi_fs_virtual_dir_t * * const p_last_entry = get_pointer_to_last_dir_entry(ccapi_data);
-    *p_last_entry = new_entry;
-
+    ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
+    new_entry->next = next_entry;
+    ccapi_data->service.file_system.virtual_dir_list = new_entry;
     return error;
 }
 

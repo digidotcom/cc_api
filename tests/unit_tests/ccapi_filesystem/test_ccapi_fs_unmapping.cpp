@@ -121,8 +121,8 @@ TEST(test_ccapi_fs_unmapping, testUnMap_first)
     Mock_ccimp_os_free_expectAndReturn(malloc_for_virtual_path_1, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry_1, CCIMP_STATUS_OK);
 
-    CHECK_EQUAL(malloc_for_dir_list_entry_1, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list);
-    CHECK_EQUAL(malloc_for_dir_list_entry_2, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list->next);
+    CHECK_EQUAL(malloc_for_dir_list_entry_2, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list);
+    CHECK_EQUAL(malloc_for_dir_list_entry_1, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list->next);
 
     error = ccapi_fs_remove_virtual_dir(virtual_path_1);
 
@@ -139,8 +139,8 @@ TEST(test_ccapi_fs_unmapping, testUnMap_second)
     Mock_ccimp_os_free_expectAndReturn(malloc_for_virtual_path_2, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry_2, CCIMP_STATUS_OK);
 
-    CHECK_EQUAL(malloc_for_dir_list_entry_1, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list);
-    CHECK_EQUAL(malloc_for_dir_list_entry_2, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list->next);
+    CHECK_EQUAL(malloc_for_dir_list_entry_2, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list);
+    CHECK_EQUAL(malloc_for_dir_list_entry_1, (void *)ccapi_data_single_instance->service.file_system.virtual_dir_list->next);
 
     error = ccapi_fs_remove_virtual_dir(virtual_path_2);
 
