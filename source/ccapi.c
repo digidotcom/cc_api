@@ -749,7 +749,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_open_data.handle.pointer = NULL;
             ccimp_open_data.flags = ccfsm_open_data->oflag;
             ccimp_open_data.path = ccfsm_open_data->path;
-            ccimp_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_open_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             if (ccimp_open_data.flags & CCIMP_FILE_O_WRONLY)
             {
@@ -785,7 +785,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 }
             }
             ccfsm_open_data->errnum = ccimp_open_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_open_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_open_data.imp_context;
 
             switch (ccimp_status)
             {
@@ -820,14 +820,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_read_data.errnum.pointer = NULL;
             ccimp_read_data.bytes_used = 0;
             ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_read_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_read_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_read_data.buffer = ccfsm_read_data->buffer;
             ccimp_read_data.bytes_available = ccfsm_read_data->bytes_available;
 
             ccimp_status = ccimp_fs_file_read(&ccimp_read_data);
 
             ccfsm_read_data->errnum = ccimp_read_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_read_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_read_data.imp_context;
             ccfsm_read_data->bytes_used = ccimp_read_data.bytes_used;
             break;
         }
@@ -841,14 +841,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_write_data.errnum.pointer = NULL;
             ccimp_write_data.bytes_used = 0;
             ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_write_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_write_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_write_data.buffer = ccfsm_write_data->buffer;
             ccimp_write_data.bytes_available = ccfsm_write_data->bytes_available;
 
             ccimp_status = ccimp_fs_file_write(&ccimp_write_data);
 
             ccfsm_write_data->errnum = ccimp_write_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_write_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_write_data.imp_context;
             ccfsm_write_data->bytes_used = ccimp_write_data.bytes_used;
             break;
         }
@@ -861,7 +861,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_seek_data.errnum.pointer = NULL;
             ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_seek_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_seek_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_seek_data.resulting_offset = 0;
             ccimp_seek_data.requested_offset = ccfsm_seek_data->requested_offset;
             ccimp_seek_data.origin = ccimp_seek_origin_from_ccfsm_seek_origin(ccfsm_seek_data->origin);
@@ -869,7 +869,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_file_seek(&ccimp_seek_data);
 
             ccfsm_seek_data->errnum = ccimp_seek_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_seek_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_seek_data.imp_context;
             ccfsm_seek_data->resulting_offset = ccimp_seek_data.resulting_offset;
             break;
         }
@@ -882,12 +882,12 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_close_data.errnum.pointer = NULL;
             ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_close_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_close_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             ccimp_status = ccimp_fs_file_close(&ccimp_close_data);
 
             ccfsm_close_data->errnum = ccimp_close_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_close_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_close_data.imp_context;
 
             if (ccapi_data->service.file_system.user_callbacks.changed_cb != NULL)
             {
@@ -929,13 +929,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_truncate_data.errnum.pointer = NULL;
             ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_truncate_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_truncate_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_truncate_data.length_in_bytes = ccfsm_truncate_data->length_in_bytes;
 
             ccimp_status = ccimp_fs_file_truncate(&ccimp_truncate_data);
 
             ccfsm_truncate_data->errnum = ccimp_truncate_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_truncate_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_truncate_data.imp_context;
             break;
         }
 
@@ -946,7 +946,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_remove_data.errnum.pointer = NULL;
             ccimp_remove_data.path = ccfsm_remove_data->path;
-            ccimp_remove_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_remove_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
             {
@@ -970,7 +970,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             }
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_remove_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_remove_data.imp_context;
             switch (ccimp_status)
             {
                 case CCIMP_STATUS_OK:
@@ -996,7 +996,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_dir_open_data.errnum.pointer = NULL;
             ccimp_dir_open_data.handle.pointer = NULL;
             ccimp_dir_open_data.path = ccfsm_dir_open_data->path;
-            ccimp_dir_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
             {
@@ -1020,7 +1020,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             }
 
             ccfsm_dir_open_data->errnum = ccimp_dir_open_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_dir_open_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_dir_open_data.imp_context;
             ccfsm_dir_open_data->handle = ccimp_dir_open_data.handle.pointer;
             break;
         }
@@ -1031,7 +1031,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_dir_read_entry_t ccimp_dir_read_entry_data;
 
             ccimp_dir_read_entry_data.errnum.pointer = NULL;
-            ccimp_dir_read_entry_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_dir_read_entry_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_dir_read_entry_data.handle.pointer = ccfsm_dir_read_entry_data->handle;
             ccimp_dir_read_entry_data.entry_name = ccfsm_dir_read_entry_data->entry_name;
             ccimp_dir_read_entry_data.bytes_available = ccfsm_dir_read_entry_data->bytes_available;
@@ -1039,7 +1039,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_dir_read_entry(&ccimp_dir_read_entry_data);
 
             ccfsm_dir_read_entry_data->errnum = ccimp_dir_read_entry_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_dir_read_entry_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_dir_read_entry_data.imp_context;
             break;
         }
 
@@ -1049,7 +1049,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
 
             ccimp_dir_entry_status_data.errnum.pointer = NULL;
-            ccimp_dir_entry_status_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_dir_entry_status_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_dir_entry_status_data.path = ccfsm_dir_entry_status_data->path;
             ccimp_dir_entry_status_data.status.file_size = 0;
             ccimp_dir_entry_status_data.status.last_modified = 0;
@@ -1058,7 +1058,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_dir_entry_status(&ccimp_dir_entry_status_data);
 
             ccfsm_dir_entry_status_data->errnum = ccimp_dir_entry_status_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_dir_entry_status_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_dir_entry_status_data.imp_context;
             ccfsm_dir_entry_status_data->statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
             ccfsm_dir_entry_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
             ccfsm_dir_entry_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
@@ -1071,13 +1071,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_dir_close_t ccimp_dir_close_data;
 
             ccimp_dir_close_data.errnum.pointer = NULL;
-            ccimp_dir_close_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_dir_close_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_dir_close_data.handle.pointer = ccfsm_dir_close_data->handle;
 
             ccimp_status = ccimp_fs_dir_close(&ccimp_dir_close_data);
 
             ccfsm_dir_close_data->errnum = ccimp_dir_close_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_dir_close_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_dir_close_data.imp_context;
             break;
         }
 
@@ -1087,7 +1087,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_hash_status_t ccimp_hash_status_data;
 
             ccimp_hash_status_data.errnum.pointer = NULL;
-            ccimp_hash_status_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_hash_status_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_hash_status_data.path = ccfsm_hash_status_data->path;
             ccimp_hash_status_data.hash_alg.actual = ccfsm_hash_status_data->hash_algorithm.actual;
             ccimp_hash_status_data.hash_alg.requested = ccfsm_hash_status_data->hash_algorithm.requested;
@@ -1098,7 +1098,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_hash_status(&ccimp_hash_status_data);
 
             ccfsm_hash_status_data->errnum = ccimp_hash_status_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_hash_status_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_hash_status_data.imp_context;
             ccfsm_hash_status_data->statbuf.file_size = ccimp_hash_status_data.status.file_size;
             ccfsm_hash_status_data->statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
             ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
@@ -1112,7 +1112,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_hash_file_t ccimp_hash_file_data;
 
             ccimp_hash_file_data.errnum.pointer = NULL;
-            ccimp_hash_file_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_hash_file_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_hash_file_data.path = ccfsm_hash_file_data->path;
             ccimp_hash_file_data.hash_algorithm = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_file_data->hash_algorithm);
             ccimp_hash_file_data.hash_value = ccfsm_hash_file_data->hash_value;
@@ -1121,7 +1121,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_hash_file(&ccimp_hash_file_data);
 
             ccfsm_hash_file_data->errnum = ccimp_hash_file_data.errnum.pointer;
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_hash_file_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_hash_file_data.imp_context;
             break;
         }
 
@@ -1131,7 +1131,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_error_desc_t ccimp_error_desc_data;
 
             ccimp_error_desc_data.errnum.pointer = ccfsm_error_desc_data->errnum;
-            ccimp_error_desc_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_error_desc_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_error_desc_data.error_string = ccfsm_error_desc_data->buffer;
             ccimp_error_desc_data.bytes_available = ccfsm_error_desc_data->bytes_available;
             ccimp_error_desc_data.bytes_used = 0;
@@ -1139,7 +1139,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_status = ccimp_fs_error_desc(&ccimp_error_desc_data);
 
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_error_desc_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_error_desc_data.imp_context;
             ccfsm_error_desc_data->bytes_used = ccimp_error_desc_data.bytes_used;
             ccfsm_error_desc_data->error_status = ccfsm_file_system_error_status_from_ccimp_fs_error(ccimp_error_desc_data.error_status);
             break;
@@ -1150,12 +1150,12 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             connector_file_system_session_error_t * ccfsm_session_error_data = data;
             ccimp_fs_session_error_t ccimp_session_error_data;
 
-            ccimp_session_error_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+            ccimp_session_error_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_session_error_data.session_error = ccimp_session_error_from_ccfsm_session_error(ccfsm_session_error_data->session_error);
 
             ccimp_status = ccimp_fs_session_error(&ccimp_session_error_data);
 
-            ccapi_data_single_instance->service.file_system.imp_context = ccimp_session_error_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_session_error_data.imp_context;
             break;
         }
     }
