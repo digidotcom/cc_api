@@ -187,7 +187,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         error = CCAPI_FS_ERROR_NOT_MAPPED;
         goto done;
     }
-    else
+
     {
         ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
