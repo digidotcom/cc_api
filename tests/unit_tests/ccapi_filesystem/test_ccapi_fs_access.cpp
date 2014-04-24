@@ -227,7 +227,7 @@ TEST(test_ccapi_fs_access, testAccessList)
     ccimp_dir_open_data.path = ccapi_fs_access_expected_path;
 
     ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
-    ccfsm_dir_open_data.user_context = ccimp_dir_open_data.imp_context;
+    ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
 
