@@ -1158,8 +1158,8 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
                 ccimp_hash_status_data.errnum.pointer = NULL;
                 ccimp_hash_status_data.imp_context = ccapi_data->service.file_system.imp_context;
-                ccimp_hash_status_data.hash_alg.actual = ccfsm_hash_status_data->hash_algorithm.actual;
-                ccimp_hash_status_data.hash_alg.requested = ccfsm_hash_status_data->hash_algorithm.requested;
+                ccimp_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
+                ccimp_hash_status_data.hash_alg.requested = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_status_data->hash_algorithm.requested);
                 ccimp_hash_status_data.status.file_size = 0;
                 ccimp_hash_status_data.status.last_modified = 0;
                 ccimp_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
