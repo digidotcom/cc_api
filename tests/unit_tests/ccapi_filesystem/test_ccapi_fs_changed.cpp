@@ -79,7 +79,7 @@ TEST(test_ccapi_fs_changed, testChangedRemoved)
     ccimp_remove_data.path = ccapi_fs_changed_expected_path;
 
     ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
-    ccfsm_remove_data.user_context = ccimp_remove_data.imp_context;
+    ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
     Mock_ccimp_fs_file_remove_expectAndReturn(&ccimp_remove_data, CCIMP_STATUS_OK);
@@ -109,7 +109,7 @@ TEST(test_ccapi_fs_changed, testChangedRemoveNotAllowed)
     ccimp_remove_data.path = ccapi_fs_access_expected_path;
 
     ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
-    ccfsm_remove_data.user_context = ccimp_remove_data.imp_context;
+    ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
     request.file_system_request = connector_request_id_file_system_remove;

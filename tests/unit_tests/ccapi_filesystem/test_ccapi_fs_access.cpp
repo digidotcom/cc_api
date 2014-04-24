@@ -187,7 +187,7 @@ TEST(test_ccapi_fs_access, testAccessRemove)
     ccimp_remove_data.path = ccapi_fs_access_expected_path;
 
     ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
-    ccfsm_remove_data.user_context = ccimp_remove_data.imp_context;
+    ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
     Mock_ccimp_fs_file_remove_expectAndReturn(&ccimp_remove_data, CCIMP_STATUS_OK);
@@ -222,7 +222,7 @@ TEST(test_ccapi_fs_access, testAccessList)
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
     ccimp_dir_open_data.errnum.pointer = NULL;
-    ccimp_dir_open_data.imp_context = &fs_context;
+    ccimp_dir_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = ccapi_fs_access_expected_path;
 
