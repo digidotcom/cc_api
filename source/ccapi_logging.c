@@ -19,7 +19,7 @@ static ccimp_status_t ccapi_logging_lock_acquire(void)
     if (logging_syncr != NULL)
     {
         acquire_data.syncr_object = logging_syncr;
-        acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
+        acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
 
         status = ccimp_os_syncr_acquire(&acquire_data);
     }

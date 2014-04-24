@@ -55,7 +55,7 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
     ccimp_os_syncr_acquire_t acquire_data;
 
     acquire_data.syncr_object = ccapi_data->initiate_action_syncr;
-    acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
+    acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
     ASSERT_MSG_GOTO(ccimp_os_syncr_acquire(&acquire_data) == CCIMP_STATUS_OK, done);
 
     status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
