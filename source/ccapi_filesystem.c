@@ -78,6 +78,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
             case CCIMP_STATUS_BUSY:
                 break;
         }
+        ccimp_os_yield();
     } while (loop_done == CCAPI_FALSE);
 
     if (ccimp_status != CCIMP_STATUS_OK)
@@ -102,6 +103,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
             case CCIMP_STATUS_BUSY:
                 break;
         }
+        ccimp_os_yield();
     } while (loop_done == CCAPI_FALSE);
 
     ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
