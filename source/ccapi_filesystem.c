@@ -25,7 +25,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
     return error;
 }
 
-static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const actual_dir)
+static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const local_dir)
 {
     ccapi_fs_virtual_dir_t * new_dir_entry = ccapi_malloc(sizeof *new_dir_entry);
 
@@ -34,8 +34,8 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
         goto done;
     }
 
-    new_dir_entry->actual_path = ccapi_strdup(actual_dir);
-    if (new_dir_entry->actual_path == NULL)
+    new_dir_entry->local_path = ccapi_strdup(local_dir);
+    if (new_dir_entry->local_path == NULL)
     {
         reset_heap_ptr(&new_dir_entry);
         goto done;
@@ -44,7 +44,7 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
     new_dir_entry->virtual_path = ccapi_strdup(virtual_dir);
     if (new_dir_entry->virtual_path == NULL)
     {
-        ccapi_free(new_dir_entry->actual_path);
+        ccapi_free(new_dir_entry->local_path);
         reset_heap_ptr(&new_dir_entry);
         new_dir_entry = NULL;
         goto done;
@@ -54,7 +54,7 @@ done:
     return new_dir_entry;
 }
 
-static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const actual_dir)
+static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const local_dir)
 {
     ccapi_bool_t is_dir = CCAPI_TRUE;
     ccimp_fs_dir_open_t ccimp_fs_dir_open_data = {0};
@@ -62,7 +62,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
     ccimp_status_t ccimp_status;
     ccapi_bool_t loop_done = CCAPI_FALSE;
 
-    ccimp_fs_dir_open_data.path = actual_dir;
+    ccimp_fs_dir_open_data.path = local_dir;
     ccimp_fs_dir_open_data.handle.pointer = NULL;
     ccimp_fs_dir_open_data.errnum.pointer = NULL;
     ccimp_fs_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
@@ -109,12 +109,12 @@ done:
     return is_dir;
 }
 
-ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char const * const virtual_dir, char const * const actual_dir)
+ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char const * const virtual_dir, char const * const local_dir)
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccapi_fs_virtual_dir_t * new_dir_entry;
 
-    if (virtual_dir == NULL || actual_dir == NULL || virtual_dir[0] == '\0' || virtual_dir[0] == '/' || actual_dir[0] == '\0')
+    if (virtual_dir == NULL || local_dir == NULL || virtual_dir[0] == '\0' || virtual_dir[0] == '/' || local_dir[0] == '\0')
     {
         error = CCAPI_FS_ERROR_INVALID_PATH;
         goto done;
@@ -128,13 +128,13 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
-    if (is_a_dir(ccapi_data, actual_dir) != CCAPI_TRUE)
+    if (is_a_dir(ccapi_data, local_dir) != CCAPI_TRUE)
     {
         error = CCAPI_FS_ERROR_NOT_A_DIR;
         goto done;
     }
 
-    new_dir_entry = create_virtual_dir_entry(virtual_dir, actual_dir);
+    new_dir_entry = create_virtual_dir_entry(virtual_dir, local_dir);
     if (new_dir_entry == NULL)
     {
         error = CCAPI_FS_ERROR_INSUFFICIENT_MEMORY;
@@ -204,7 +204,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
 
-        ccapi_free(dir_entry->actual_path);
+        ccapi_free(dir_entry->local_path);
         ccapi_free(dir_entry->virtual_path);
         ccapi_free(dir_entry);
         *p_dir_entry = next_dir_entry;
@@ -215,9 +215,9 @@ done:
     return error;
 }
 
-ccapi_fs_error_t ccapi_fs_add_virtual_dir(char const * const virtual_dir, char const * const actual_dir)
+ccapi_fs_error_t ccapi_fs_add_virtual_dir(char const * const virtual_dir, char const * const local_dir)
 {
-    return ccxapi_fs_add_virtual_dir(ccapi_data_single_instance, virtual_dir, actual_dir);
+    return ccxapi_fs_add_virtual_dir(ccapi_data_single_instance, virtual_dir, local_dir);
 }
 
 ccapi_fs_error_t ccapi_fs_remove_virtual_dir(char const * const virtual_dir)

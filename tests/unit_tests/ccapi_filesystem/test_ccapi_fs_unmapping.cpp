@@ -23,15 +23,15 @@ TEST(test_ccapi_fs_unmapping_no_CCAPI, testCcapiNotStarted)
 
 TEST_GROUP(test_ccapi_fs_unmapping)
 {
-    char const * actual_path_1;
+    char const * local_path_1;
     char const * virtual_path_1;
-    char const * actual_path_2;
+    char const * local_path_2;
     char const * virtual_path_2;
     void * malloc_for_dir_list_entry_1;
-    void * malloc_for_actual_path_1;
+    void * malloc_for_local_path_1;
     void * malloc_for_virtual_path_1;
     void * malloc_for_dir_list_entry_2;
-    void * malloc_for_actual_path_2;
+    void * malloc_for_local_path_2;
     void * malloc_for_virtual_path_2;
 
     void setup()
@@ -44,15 +44,15 @@ TEST_GROUP(test_ccapi_fs_unmapping)
         ccimp_fs_dir_open_t ccimp_dir_open_data_1, ccimp_dir_open_data_2;
         ccimp_fs_dir_close_t ccimp_dir_close_data_1, ccimp_dir_close_data_2;
 
-        actual_path_1 = "/home/user/my_directory";
+        local_path_1 = "/home/user/my_directory";
         virtual_path_1 = "my_virtual_dir";
-        actual_path_2 = "/home/other_user/other_my_directory";
+        local_path_2 = "/home/other_user/other_my_directory";
         virtual_path_2 = "other_virtual_dir";
         malloc_for_dir_list_entry_1 = malloc(sizeof (ccapi_fs_virtual_dir_t));
-        malloc_for_actual_path_1 = malloc(strlen(actual_path_1) + 1);
+        malloc_for_local_path_1 = malloc(strlen(local_path_1) + 1);
         malloc_for_virtual_path_1 = malloc(strlen(virtual_path_1) + 1);
         malloc_for_dir_list_entry_2 = malloc(sizeof (ccapi_fs_virtual_dir_t));
-        malloc_for_actual_path_2 = malloc(strlen(actual_path_2) + 1);
+        malloc_for_local_path_2 = malloc(strlen(local_path_2) + 1);
         malloc_for_virtual_path_2 = malloc(strlen(virtual_path_2) + 1);
 
         Mock_create_all();
@@ -66,21 +66,21 @@ TEST_GROUP(test_ccapi_fs_unmapping)
         ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
         Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_fs_virtual_dir_t), malloc_for_dir_list_entry_1);
-        Mock_ccimp_os_malloc_expectAndReturn(strlen(actual_path_1) + 1, malloc_for_actual_path_1);
+        Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path_1) + 1, malloc_for_local_path_1);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path_1) + 1, malloc_for_virtual_path_1);
         Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_fs_virtual_dir_t), malloc_for_dir_list_entry_2);
-        Mock_ccimp_os_malloc_expectAndReturn(strlen(actual_path_2) + 1, malloc_for_actual_path_2);
+        Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path_2) + 1, malloc_for_local_path_2);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path_2) + 1, malloc_for_virtual_path_2);
 
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, actual_path_1);
+        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, local_path_1);
         th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, actual_path_2);
+        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, local_path_2);
         th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
 
-        error = ccapi_fs_add_virtual_dir(virtual_path_1, actual_path_1);
+        error = ccapi_fs_add_virtual_dir(virtual_path_1, local_path_1);
         CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
 
-        error = ccapi_fs_add_virtual_dir(virtual_path_2, actual_path_2);
+        error = ccapi_fs_add_virtual_dir(virtual_path_2, local_path_2);
         CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
     }
 
@@ -117,7 +117,7 @@ TEST(test_ccapi_fs_unmapping, testUnMap_first)
 {
     ccapi_fs_error_t error;
 
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_actual_path_1, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(malloc_for_local_path_1, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_virtual_path_1, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry_1, CCIMP_STATUS_OK);
 
@@ -135,7 +135,7 @@ TEST(test_ccapi_fs_unmapping, testUnMap_second)
 {
     ccapi_fs_error_t error;
 
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_actual_path_2, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(malloc_for_local_path_2, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_virtual_path_2, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry_2, CCIMP_STATUS_OK);
 
