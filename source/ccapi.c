@@ -756,22 +756,41 @@ static unsigned int get_virtual_dir_name_length(char const * const full_path)
     return c - dir_name_start;
 }
 
-static char * get_local_path_from_virtual_path(ccapi_data_t * ccapi_data, char const * const full_path)
+static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
 {
-    char * aux_buffer = NULL;
-    char const * const path_without_virtual_dir = get_path_without_virtual_dir(full_path);
-    char const * const virtual_dir_name_start = full_path + 1;
-    unsigned int const virtual_dir_name_length = get_virtual_dir_name_length(full_path);
-    ccapi_fs_virtual_dir_t * const dir_entry = *get_pointer_to_dir_entry_from_virtual_path(ccapi_data, virtual_dir_name_start, virtual_dir_name_length);
+    ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
+    char const * local_path = NULL;
 
-    if (dir_entry != NULL)
+    if (virtual_dirs_present == CCAPI_TRUE)
     {
-        aux_buffer = ccapi_malloc(strlen(dir_entry->local_path) + strlen(path_without_virtual_dir) + 1);
-        strcpy(aux_buffer, dir_entry->local_path);
-        strcat(aux_buffer, path_without_virtual_dir);
+        char const * const path_without_virtual_dir = get_path_without_virtual_dir(full_path);
+        char const * const virtual_dir_name_start = full_path + 1;
+        unsigned int const virtual_dir_name_length = get_virtual_dir_name_length(full_path);
+        ccapi_fs_virtual_dir_t * const dir_entry = *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir_name_start, virtual_dir_name_length);
+
+        if (dir_entry != NULL)
+        {
+            char * translated_path = NULL;
+            translated_path = ccapi_malloc(strlen(dir_entry->local_path) + strlen(path_without_virtual_dir) + 1);
+            ASSERT_MSG_GOTO(translated_path != 0, done);
+            strcpy(translated_path, dir_entry->local_path);
+            strcat(translated_path, path_without_virtual_dir);
+            local_path = translated_path;
+            *must_free_path = CCAPI_TRUE;
+        }
+        else
+        {
+            *must_free_path = CCAPI_FALSE;
+        }
+    }
+    else
+    {
+        local_path = full_path;
+        *must_free_path = CCAPI_FALSE;
     }
 
-    return aux_buffer;
+done:
+    return local_path;
 }
 
 static void free_local_path(char const * local_path)
@@ -791,21 +810,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             connector_file_system_open_t * ccfsm_open_data = data;
             ccimp_fs_file_open_t ccimp_open_data;
             ccapi_fs_request_t request = CCAPI_FS_REQUEST_UNKNOWN;
-            ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-            char const * local_path;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_open_data->path, &must_free_local_path);
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (local_path == NULL)
             {
-                local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_open_data->path);
-                if (local_path == NULL)
-                {
-                    ccimp_status = CCIMP_STATUS_ERROR;
-                    goto done;
-                }
-            }
-            else
-            {
-                local_path = ccimp_open_data.path = ccfsm_open_data->path;
+                ccimp_status = CCIMP_STATUS_ERROR;
+                goto done;
             }
 
             ccimp_open_data.path = local_path;
@@ -872,7 +883,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 }
             }
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (must_free_local_path == CCAPI_TRUE)
             {
                 free_local_path(local_path);
             }
@@ -1011,21 +1022,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_remove_t * ccfsm_remove_data = data;
             ccimp_fs_file_remove_t ccimp_remove_data;
-            ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-            char const * local_path;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_remove_data->path, &must_free_local_path);
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (local_path == NULL)
             {
-                local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_remove_data->path);
-                if (local_path == NULL)
-                {
-                    ccimp_status = CCIMP_STATUS_ERROR;
-                    goto done;
-                }
-            }
-            else
-            {
-                local_path = ccfsm_remove_data->path;
+                ccimp_status = CCIMP_STATUS_ERROR;
+                goto done;
             }
 
             ccimp_remove_data.path = local_path;
@@ -1070,7 +1073,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                     break;
             }
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (must_free_local_path == CCAPI_TRUE)
             {
                 free_local_path(local_path);
             }
@@ -1090,20 +1093,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             else
             {
                 ccimp_fs_dir_open_t ccimp_dir_open_data;
-                ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-                char const * local_path;
-                if (virtual_dir_present == CCAPI_TRUE)
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_dir_open_data->path, &must_free_local_path);
+
+                if (local_path == NULL)
                 {
-                    local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_dir_open_data->path);
-                    if (local_path == NULL)
-                    {
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        goto done;
-                    }
-                }
-                else
-                {
-                    local_path = ccfsm_dir_open_data->path;
+                    ccimp_status = CCIMP_STATUS_ERROR;
+                    goto done;
                 }
 
                 ccimp_dir_open_data.path = local_path;
@@ -1136,7 +1132,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccapi_data->service.file_system.imp_context = ccimp_dir_open_data.imp_context;
                 ccfsm_dir_open_data->handle = ccimp_dir_open_data.handle.pointer;
 
-                if (virtual_dir_present == CCAPI_TRUE)
+                if (must_free_local_path == CCAPI_TRUE)
                 {
                     free_local_path(local_path);
                 }
@@ -1198,21 +1194,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             else
             {
                 ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
-                ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-                char const * local_path;
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_dir_entry_status_data->path, &must_free_local_path);
 
-                if (virtual_dir_present == CCAPI_TRUE)
+                if (local_path == NULL)
                 {
-                    local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_dir_entry_status_data->path);
-                    if (local_path == NULL)
-                    {
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        goto done;
-                    }
-                }
-                else
-                {
-                    local_path = ccfsm_dir_entry_status_data->path;
+                    ccimp_status = CCIMP_STATUS_ERROR;
+                    goto done;
                 }
 
                 ccimp_dir_entry_status_data.path = local_path;
@@ -1230,7 +1218,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccfsm_dir_entry_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
                 ccfsm_dir_entry_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
 
-                if (virtual_dir_present == CCAPI_TRUE)
+                if (must_free_local_path == CCAPI_TRUE)
                 {
                     free_local_path(local_path);
                 }
@@ -1266,7 +1254,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_stat_t * ccfsm_hash_status_data = data;
 
-            if (strcmp(ccfsm_hash_status_data->path, "/") == 0 && ccapi_data->service.file_system.virtual_dir_list != NULL)
+            if (ccapi_data->service.file_system.virtual_dir_list != NULL && strcmp(ccfsm_hash_status_data->path, CCAPI_FS_ROOT_PATH) == 0)
             {
                 ccapi_fs_virtual_rootdir_listing_handle_t * root_dir_listing_handle = malloc(sizeof *root_dir_listing_handle);
 
@@ -1282,21 +1270,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             else
             {
                 ccimp_fs_hash_status_t ccimp_hash_status_data;
-                ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-                char const * local_path;
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_status_data->path, &must_free_local_path);
 
-                if (virtual_dir_present == CCAPI_TRUE)
+                if (local_path == NULL)
                 {
-                    local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_hash_status_data->path);
-                    if (local_path == NULL)
-                    {
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        goto done;
-                    }
-                }
-                else
-                {
-                    local_path = ccfsm_hash_status_data->path;
+                    ccimp_status = CCIMP_STATUS_ERROR;
+                    goto done;
                 }
 
                 ccimp_hash_status_data.path = local_path;
@@ -1316,7 +1296,8 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccfsm_hash_status_data->statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
                 ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
                 ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_status_data.hash_alg.actual);
-                if (virtual_dir_present == CCAPI_TRUE)
+
+                if (must_free_local_path == CCAPI_TRUE)
                 {
                     free_local_path(local_path);
                 }
@@ -1328,21 +1309,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_hash_t * ccfsm_hash_file_data = data;
             ccimp_fs_hash_file_t ccimp_hash_file_data;
-            ccapi_bool_t const virtual_dir_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
-            char const * local_path;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_file_data->path, &must_free_local_path);
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (local_path == NULL)
             {
-                local_path = get_local_path_from_virtual_path(ccapi_data, ccfsm_hash_file_data->path);
-                if (local_path == NULL)
-                {
-                    ccimp_status = CCIMP_STATUS_ERROR;
-                    goto done;
-                }
-            }
-            else
-            {
-                local_path = ccfsm_hash_file_data->path;
+                ccimp_status = CCIMP_STATUS_ERROR;
+                goto done;
             }
 
             ccimp_hash_file_data.path = local_path;
@@ -1357,7 +1330,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccfsm_hash_file_data->errnum = ccimp_hash_file_data.errnum.pointer;
             ccapi_data->service.file_system.imp_context = ccimp_hash_file_data.imp_context;
 
-            if (virtual_dir_present == CCAPI_TRUE)
+            if (must_free_local_path == CCAPI_TRUE)
             {
                 free_local_path(local_path);
             }

@@ -35,6 +35,8 @@
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
 
+#define CCAPI_FS_ROOT_PATH          "/"
+
 typedef struct {
     uint32_t vendor_id;
     uint8_t device_id[16];
@@ -94,7 +96,7 @@ char * ccapi_strdup(char const * const string);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
-ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length);
+ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length);
 
 void ccapi_logging_line(char const * const format, ...);
 void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
