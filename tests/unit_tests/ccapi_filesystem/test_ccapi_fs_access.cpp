@@ -19,7 +19,7 @@ TEST_GROUP(test_ccapi_fs_access)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {ccapi_fs_access_cb};
+        ccapi_filesystem_service_t fs_service = {ccapi_fs_access_cb, NULL};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
@@ -32,6 +32,7 @@ TEST_GROUP(test_ccapi_fs_access)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
+        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.user_callbacks.access_cb);
     }
 
     void teardown()
@@ -174,6 +175,9 @@ TEST(test_ccapi_fs_access, testAccessRemove)
     connector_callback_status_t status;
     int fs_context;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
+
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
@@ -183,7 +187,7 @@ TEST(test_ccapi_fs_access, testAccessRemove)
     ccimp_remove_data.path = ccapi_fs_access_expected_path;
 
     ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
-    ccfsm_remove_data.user_context = ccimp_remove_data.imp_context;
+    ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
     Mock_ccimp_fs_file_remove_expectAndReturn(&ccimp_remove_data, CCIMP_STATUS_OK);
@@ -210,17 +214,20 @@ TEST(test_ccapi_fs_access, testAccessList)
     connector_callback_status_t status;
     int fs_context;
 
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
+
     ccapi_fs_access_expected_path = "/tmp/";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_LIST;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
     ccimp_dir_open_data.errnum.pointer = NULL;
-    ccimp_dir_open_data.imp_context = &fs_context;
+    ccimp_dir_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = ccapi_fs_access_expected_path;
 
     ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
-    ccfsm_dir_open_data.user_context = ccimp_dir_open_data.imp_context;
+    ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
 

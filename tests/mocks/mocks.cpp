@@ -30,6 +30,7 @@ void Mock_create_all()
     Mock_ccimp_fs_file_write_create();
     Mock_ccimp_fs_file_seek_create();
     Mock_ccimp_fs_file_close_create();
+    Mock_ccimp_fs_file_truncate_create();
     Mock_ccimp_fs_file_remove_create();
     Mock_ccimp_fs_dir_open_create();
     Mock_ccimp_fs_dir_read_entry_create();
@@ -69,6 +70,7 @@ void Mock_destroy_all()
     Mock_ccimp_fs_file_write_destroy();
     Mock_ccimp_fs_file_seek_destroy();
     Mock_ccimp_fs_file_close_destroy();
+    Mock_ccimp_fs_file_truncate_destroy();
     Mock_ccimp_fs_file_remove_destroy();
     Mock_ccimp_fs_dir_open_destroy();
     Mock_ccimp_fs_dir_read_entry_destroy();
