@@ -1148,10 +1148,10 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
                 if (dir_entry != NULL)
                 {
-                    size_t const virtual_dir_strsize = strlen(dir_entry->virtual_path) + 1;
+                    size_t const virtual_dir_strsize = strlen(dir_entry->virtual_dir) + 1;
                     size_t const mecmpy_size = CCAPI_MIN_OF(virtual_dir_strsize, ccfsm_dir_read_entry_data->bytes_available);
 
-                    memcpy(ccfsm_dir_read_entry_data->entry_name, dir_entry->virtual_path, mecmpy_size);
+                    memcpy(ccfsm_dir_read_entry_data->entry_name, dir_entry->virtual_dir, mecmpy_size);
 
                     root_dir_listing_handle->dir_entry = dir_entry->next;
                 }

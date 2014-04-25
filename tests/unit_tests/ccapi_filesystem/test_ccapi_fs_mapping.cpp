@@ -185,7 +185,7 @@ TEST(test_ccapi_fs_mapping, testMapDirOK)
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list != NULL);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list->next == NULL);
-    STRCMP_EQUAL(virtual_path, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_path);
+    STRCMP_EQUAL(virtual_path, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_dir);
     STRCMP_EQUAL(local_path, ccapi_data_single_instance->service.file_system.virtual_dir_list->local_path);
 }
 
@@ -223,15 +223,15 @@ TEST(test_ccapi_fs_mapping, testMapTwoDirs)
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list != NULL);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list->next == NULL);
-    STRCMP_EQUAL(virtual_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_path);
+    STRCMP_EQUAL(virtual_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_dir);
     STRCMP_EQUAL(local_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->local_path);
 
     error = ccapi_fs_add_virtual_dir(virtual_path_2, local_path_2);
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list != NULL);
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list->next != NULL);
-    STRCMP_EQUAL(virtual_path_2, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_path);
+    STRCMP_EQUAL(virtual_path_2, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_dir);
     STRCMP_EQUAL(local_path_2, ccapi_data_single_instance->service.file_system.virtual_dir_list->local_path);
-    STRCMP_EQUAL(virtual_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->next->virtual_path);
+    STRCMP_EQUAL(virtual_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->next->virtual_dir);
     STRCMP_EQUAL(local_path_1, ccapi_data_single_instance->service.file_system.virtual_dir_list->next->local_path);
 }

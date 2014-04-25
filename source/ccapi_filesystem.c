@@ -28,8 +28,8 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
         goto done;
     }
 
-    new_dir_entry->virtual_path = ccapi_strdup(virtual_dir);
-    if (new_dir_entry->virtual_path == NULL)
+    new_dir_entry->virtual_dir = ccapi_strdup(virtual_dir);
+    if (new_dir_entry->virtual_dir == NULL)
     {
         ccapi_free(new_dir_entry->local_path);
         reset_heap_ptr(&new_dir_entry);
@@ -154,8 +154,8 @@ ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_
 
         if (dir_entry != NULL)
         {
-            unsigned int const longest_strlen = strlen(dir_entry->virtual_path) > virtual_dir_length ? strlen(dir_entry->virtual_path) : virtual_dir_length;
-            if (strncmp(dir_entry->virtual_path, virtual_dir, longest_strlen) == 0)
+            unsigned int const longest_strlen = strlen(dir_entry->virtual_dir) > virtual_dir_length ? strlen(dir_entry->virtual_dir) : virtual_dir_length;
+            if (strncmp(dir_entry->virtual_dir, virtual_dir, longest_strlen) == 0)
             {
                 finished = CCAPI_TRUE;
             }
@@ -204,7 +204,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
 
         ccapi_free(dir_entry->local_path);
-        ccapi_free(dir_entry->virtual_path);
+        ccapi_free(dir_entry->virtual_dir);
         ccapi_free(dir_entry);
         *p_dir_entry = next_dir_entry;
     }
