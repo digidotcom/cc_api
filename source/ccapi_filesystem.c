@@ -12,7 +12,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
     return error;
 }
 
-static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const local_dir)
+static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const local_path)
 {
     ccapi_fs_virtual_dir_t * new_dir_entry = ccapi_malloc(sizeof *new_dir_entry);
 
@@ -21,21 +21,23 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
         goto done;
     }
 
-    new_dir_entry->local_path = ccapi_strdup(local_dir);
+    new_dir_entry->local_path = ccapi_strdup(local_path);
     if (new_dir_entry->local_path == NULL)
     {
         reset_heap_ptr(&new_dir_entry);
         goto done;
     }
 
-    new_dir_entry->virtual_path = ccapi_strdup(virtual_dir);
-    if (new_dir_entry->virtual_path == NULL)
+    new_dir_entry->virtual_dir = ccapi_strdup(virtual_dir);
+    if (new_dir_entry->virtual_dir == NULL)
     {
         ccapi_free(new_dir_entry->local_path);
         reset_heap_ptr(&new_dir_entry);
         new_dir_entry = NULL;
         goto done;
     }
+    new_dir_entry->virtual_dir_length = strlen(virtual_dir);
+    new_dir_entry->local_path_length = strlen(local_path);
     new_dir_entry->next = NULL;
 done:
     return new_dir_entry;
@@ -66,7 +68,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
                 break;
         }
         ccimp_os_yield();
-    } while (loop_done == CCAPI_FALSE);
+    } while (!loop_done);
 
     ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
 
@@ -98,7 +100,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
                 break;
         }
         ccimp_os_yield();
-    } while (loop_done == CCAPI_FALSE);
+    } while (!loop_done);
 
     ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
     ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
@@ -112,7 +114,7 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccapi_fs_virtual_dir_t * new_dir_entry;
 
-    if (virtual_dir == NULL || local_dir == NULL || virtual_dir[0] == '\0' || virtual_dir[0] == '/' || local_dir[0] == '\0')
+    if (virtual_dir == NULL || local_dir == NULL || virtual_dir[0] == '\0' || local_dir[0] == '\0' || strstr(virtual_dir, "/") != NULL || strstr(virtual_dir, "\\"))
     {
         error = CCAPI_FS_ERROR_INVALID_PATH;
         goto done;
@@ -126,7 +128,7 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
-    if (is_a_dir(ccapi_data, local_dir) != CCAPI_TRUE)
+    if (!is_a_dir(ccapi_data, local_dir))
     {
         error = CCAPI_FS_ERROR_NOT_A_DIR;
         goto done;
@@ -144,7 +146,7 @@ done:
     return error;
 }
 
-static ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(ccapi_data_t * const ccapi_data, char const * const virtual_dir)
+ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length)
 {
     ccapi_fs_virtual_dir_t * * p_dir_entry = &ccapi_data->service.file_system.virtual_dir_list;
     ccapi_bool_t finished = CCAPI_FALSE;
@@ -154,7 +156,8 @@ static ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(cca
 
         if (dir_entry != NULL)
         {
-            if (strcmp(dir_entry->virtual_path, virtual_dir) == 0)
+            unsigned int const longest_strlen = CCAPI_MAX_OF(dir_entry->virtual_dir_length, virtual_dir_length);
+            if (strncmp(dir_entry->virtual_dir, virtual_dir, longest_strlen) == 0)
             {
                 finished = CCAPI_TRUE;
             }
@@ -167,7 +170,7 @@ static ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_path(cca
         {
             finished = CCAPI_TRUE;
         }
-    } while (finished == CCAPI_FALSE);
+    } while (!finished);
 
     return p_dir_entry;
 }
@@ -191,7 +194,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
-    p_dir_entry = get_pointer_to_dir_entry_from_virtual_path(ccapi_data, virtual_dir);
+    p_dir_entry = get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir, strlen(virtual_dir));
     if (*p_dir_entry == NULL)
     {
         error = CCAPI_FS_ERROR_NOT_MAPPED;
@@ -203,7 +206,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
 
         ccapi_free(dir_entry->local_path);
-        ccapi_free(dir_entry->virtual_path);
+        ccapi_free(dir_entry->virtual_dir);
         ccapi_free(dir_entry);
         *p_dir_entry = next_dir_entry;
     }
