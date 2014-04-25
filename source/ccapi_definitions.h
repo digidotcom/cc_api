@@ -73,9 +73,9 @@ typedef struct {
 
 typedef struct ccapi_fs_virtual_dir {
     char * virtual_dir;
-    char * local_path;
+    char * local_dir;
     size_t virtual_dir_length;
-    size_t local_path_length;
+    size_t local_dir_length;
     struct ccapi_fs_virtual_dir * next;
 } ccapi_fs_virtual_dir_t;
 

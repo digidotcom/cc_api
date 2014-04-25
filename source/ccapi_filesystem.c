@@ -12,7 +12,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
     return error;
 }
 
-static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const local_path)
+static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virtual_dir, char const * const local_dir)
 {
     ccapi_fs_virtual_dir_t * new_dir_entry = ccapi_malloc(sizeof *new_dir_entry);
 
@@ -21,8 +21,8 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
         goto done;
     }
 
-    new_dir_entry->local_path = ccapi_strdup(local_path);
-    if (new_dir_entry->local_path == NULL)
+    new_dir_entry->local_dir = ccapi_strdup(local_dir);
+    if (new_dir_entry->local_dir == NULL)
     {
         reset_heap_ptr(&new_dir_entry);
         goto done;
@@ -31,13 +31,13 @@ static ccapi_fs_virtual_dir_t * create_virtual_dir_entry(char const * const virt
     new_dir_entry->virtual_dir = ccapi_strdup(virtual_dir);
     if (new_dir_entry->virtual_dir == NULL)
     {
-        ccapi_free(new_dir_entry->local_path);
+        ccapi_free(new_dir_entry->local_dir);
         reset_heap_ptr(&new_dir_entry);
         new_dir_entry = NULL;
         goto done;
     }
     new_dir_entry->virtual_dir_length = strlen(virtual_dir);
-    new_dir_entry->local_path_length = strlen(local_path);
+    new_dir_entry->local_dir_length = strlen(local_dir);
     new_dir_entry->next = NULL;
 done:
     return new_dir_entry;
@@ -211,7 +211,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
 
-        ccapi_free(dir_entry->local_path);
+        ccapi_free(dir_entry->local_dir);
         ccapi_free(dir_entry->virtual_dir);
         ccapi_free(dir_entry);
         *p_dir_entry = next_dir_entry;

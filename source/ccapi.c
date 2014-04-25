@@ -798,12 +798,12 @@ static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, ch
         {
             char * translated_path = NULL;
             size_t path_without_virtual_dir_length = strlen(path_without_virtual_dir);
-            translated_path = ccapi_malloc(dir_entry->local_path_length + path_without_virtual_dir_length + 1);
+            translated_path = ccapi_malloc(dir_entry->local_dir_length + path_without_virtual_dir_length + 1);
 
             ASSERT_MSG_GOTO(translated_path != 0, done);
-            memcpy(translated_path, dir_entry->local_path, strlen(dir_entry->local_path));
-            memcpy(translated_path + dir_entry->local_path_length, path_without_virtual_dir, path_without_virtual_dir_length);
-            translated_path[dir_entry->local_path_length + path_without_virtual_dir_length] = '\0';
+            memcpy(translated_path, dir_entry->local_dir, strlen(dir_entry->local_dir));
+            memcpy(translated_path + dir_entry->local_dir_length, path_without_virtual_dir, path_without_virtual_dir_length);
+            translated_path[dir_entry->local_dir_length + path_without_virtual_dir_length] = '\0';
             local_path = translated_path;
             free_path = CCAPI_TRUE;
         }
