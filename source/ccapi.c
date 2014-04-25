@@ -828,6 +828,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_open_t * ccfsm_open_data = data;
             ccimp_fs_file_open_t ccimp_open_data;
+            ccapi_fs_access_t access;
             ccapi_fs_request_t request = CCAPI_FS_REQUEST_UNKNOWN;
             ccapi_bool_t must_free_local_path;
             char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_open_data->path, &must_free_local_path);
@@ -855,27 +856,27 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             {
                 request = CCAPI_FS_REQUEST_READ;
             }
+            ASSERT_MSG_GOTO(request != CCAPI_FS_REQUEST_UNKNOWN, done);
 
-            if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
+            if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
             {
-                ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
+                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_open_data.path, request);
             }
             else
             {
-                ccapi_fs_access_t access;
-
-                ASSERT_MSG_GOTO(request != CCAPI_FS_REQUEST_UNKNOWN, done);
-                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_open_data.path, request);
-                switch (access)
-                {
-                    case CCAPI_FS_ACCESS_ALLOW:
-                        ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
-                        break;
-                    case CCAPI_FS_ACCESS_DENY:
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        break;
-                }
+                access = CCAPI_FS_ACCESS_ALLOW;
             }
+
+            switch (access)
+            {
+                case CCAPI_FS_ACCESS_ALLOW:
+                    ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
+                    break;
+                case CCAPI_FS_ACCESS_DENY:
+                    ccimp_status = CCIMP_STATUS_ERROR;
+                    break;
+            }
+
             ccfsm_open_data->errnum = ccimp_open_data.errnum.pointer;
             ccapi_data->service.file_system.imp_context = ccimp_open_data.imp_context;
 
@@ -1041,6 +1042,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             connector_file_system_remove_t * ccfsm_remove_data = data;
             ccimp_fs_file_remove_t ccimp_remove_data;
             ccapi_bool_t must_free_local_path;
+            ccapi_fs_access_t access;
             char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_remove_data->path, &must_free_local_path);
 
             if (local_path == NULL)
@@ -1052,25 +1054,23 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_remove_data.errnum.pointer = NULL;
             ccimp_remove_data.imp_context = ccapi_data->service.file_system.imp_context;
 
-            if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
+            if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
             {
-                ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
+                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_remove_data.path, CCAPI_FS_REQUEST_REMOVE);
             }
             else
             {
-                ccapi_fs_request_t request = CCAPI_FS_REQUEST_REMOVE;
-                ccapi_fs_access_t access;
+                access = CCAPI_FS_ACCESS_ALLOW;
+            }
 
-                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_remove_data.path, request);
-                switch (access)
-                {
-                    case CCAPI_FS_ACCESS_ALLOW:
-                        ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
-                        break;
-                    case CCAPI_FS_ACCESS_DENY:
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        break;
-                }
+            switch (access)
+            {
+                case CCAPI_FS_ACCESS_ALLOW:
+                    ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
+                    break;
+                case CCAPI_FS_ACCESS_DENY:
+                    ccimp_status = CCIMP_STATUS_ERROR;
+                    break;
             }
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
@@ -1110,6 +1110,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             else
             {
                 ccimp_fs_dir_open_t ccimp_dir_open_data;
+                ccapi_fs_access_t access;
                 ccapi_bool_t must_free_local_path;
                 char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_dir_open_data->path, &must_free_local_path);
 
@@ -1123,25 +1124,23 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccimp_dir_open_data.handle.pointer = NULL;
                 ccimp_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
 
-                if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
+                if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
                 {
-                    ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                    access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_dir_open_data.path, CCAPI_FS_REQUEST_LIST);
                 }
                 else
                 {
-                    ccapi_fs_request_t request = CCAPI_FS_REQUEST_LIST;
-                    ccapi_fs_access_t access;
+                    access = CCAPI_FS_ACCESS_ALLOW;
+                }
 
-                    access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_dir_open_data.path, request);
-                    switch (access)
-                    {
-                        case CCAPI_FS_ACCESS_ALLOW:
-                            ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
-                            break;
-                        case CCAPI_FS_ACCESS_DENY:
-                            ccimp_status = CCIMP_STATUS_ERROR;
-                            break;
-                    }
+                switch (access)
+                {
+                    case CCAPI_FS_ACCESS_ALLOW:
+                        ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                        break;
+                    case CCAPI_FS_ACCESS_DENY:
+                        ccimp_status = CCIMP_STATUS_ERROR;
+                        break;
                 }
 
                 ccfsm_dir_open_data->errnum = ccimp_dir_open_data.errnum.pointer;
