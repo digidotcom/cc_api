@@ -198,6 +198,13 @@ TEST(test_ccapi_fs_mapping, testMapDirOK)
     CHECK(ccapi_data_single_instance->service.file_system.virtual_dir_list->next == NULL);
     STRCMP_EQUAL(virtual_path, ccapi_data_single_instance->service.file_system.virtual_dir_list->virtual_dir);
     STRCMP_EQUAL(local_path, ccapi_data_single_instance->service.file_system.virtual_dir_list->local_path);
+
+    /* Map to the same virtual dir and it will fail */
+    error = ccapi_fs_add_virtual_dir(virtual_path, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_ALREADY_MAPPED, error);
+
+    error = ccapi_fs_add_virtual_dir(virtual_path, "/a/different/path");
+    CHECK_EQUAL(CCAPI_FS_ERROR_ALREADY_MAPPED, error);
 }
 
 TEST(test_ccapi_fs_mapping, testMapTwoDirs)

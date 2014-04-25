@@ -128,6 +128,12 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
+    if (NULL != *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir, strlen(virtual_dir)))
+    {
+        error = CCAPI_FS_ERROR_ALREADY_MAPPED;
+        goto done;
+    }
+
     if (!is_a_dir(ccapi_data, local_dir))
     {
         error = CCAPI_FS_ERROR_NOT_A_DIR;
