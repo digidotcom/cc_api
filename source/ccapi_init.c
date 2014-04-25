@@ -42,6 +42,12 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
     reset_heap_ptr(&ccapi_data->thread.connector_run);
+
+    if (ccapi_data->initiate_action_syncr != NULL)
+    {   
+        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+    }
+
 done:
     return; 
 }
@@ -96,6 +102,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     ccapi_data->config.device_type = NULL;
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;
+    ccapi_data->initiate_action_syncr = NULL;
 
     if (start == NULL)
     {
@@ -156,6 +163,19 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
             ccimp_os_yield();
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
+
+    {
+        ccimp_os_syncr_create_t create_data;
+    
+        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK || ccapi_syncr_release(create_data.syncr_object) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+
+        ccapi_data->initiate_action_syncr = create_data.syncr_object;
+    }
+
 done:
     switch (error)
     {
@@ -192,7 +212,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
     if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
         goto done;
     {
-        connector_status_t connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_terminate, NULL);
+        connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
         switch(connector_status)
         {
         case connector_success:

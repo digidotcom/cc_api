@@ -257,7 +257,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
     {
         connector_transport_t transport = connector_transport_tcp;
-        connector_status_t const connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_transport_start, &transport);
+        connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
         switch (connector_status)
         {
             case connector_success:
@@ -339,7 +339,7 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         connector_status_t connector_status;
         connector_initiate_stop_request_t stop_data = {connector_transport_tcp, connector_wait_sessions_complete, NULL};
 
-        connector_status = connector_initiate_action(ccapi_data->connector_handle, connector_initiate_transport_stop, &stop_data);
+        connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
 
         switch(connector_status)
         {

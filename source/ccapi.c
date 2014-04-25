@@ -48,6 +48,32 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
+ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
+{
+    ccimp_os_syncr_destroy_t destroy_data;
+
+    destroy_data.syncr_object = syncr_object;
+        
+    return ccimp_os_syncr_destroy(&destroy_data);
+}
+
+connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
+{
+    connector_status_t status;
+
+    ccimp_os_syncr_acquire_t acquire_data;
+
+    acquire_data.syncr_object = ccapi_data->initiate_action_syncr;
+    acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
+    ASSERT_MSG(ccimp_os_syncr_acquire(&acquire_data) == CCIMP_STATUS_OK);
+
+    status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
+
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+
+    return status;
+}
+
 void ccapi_connector_run_thread(void * const argument)
 {
     ccapi_data_t * ccapi_data = argument;
@@ -994,22 +1020,6 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 
-static void send_data_completed(ccapi_svc_send_data_t * const svc_send, ccapi_send_error_t const error_code)
-{
-    ccimp_os_syncr_release_t release_data;
-
-    svc_send->error = error_code;
-
-    ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
-    
-    release_data.syncr_object = svc_send->send_syncr;
-
-    ccimp_os_syncr_release(&release_data);
-
-done:
-    return;
-}
-
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
     connector_callback_status_t status = connector_callback_abort;
@@ -1047,14 +1057,18 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
 {
     ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
-    ccapi_send_error_t error_code;
+    connector_callback_status_t connector_status = connector_callback_error;
 
     ccapi_logging_line("Data service status: %d\n", status_ptr->status);
-    error_code = (status_ptr->status == connector_data_service_status_complete) ? CCAPI_SEND_ERROR_NONE : CCAPI_SEND_ERROR_CCFSM_ERROR;
 
-    send_data_completed(svc_send, error_code);
+    svc_send->error = (status_ptr->status == connector_data_service_status_complete) ? CCAPI_SEND_ERROR_NONE : CCAPI_SEND_ERROR_CCFSM_ERROR;
 
-    return connector_callback_continue;
+    ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
+    
+    connector_status = (ccapi_syncr_release(svc_send->send_syncr) == CCIMP_STATUS_OK) ? connector_callback_continue : connector_callback_error;
+
+done:
+    return connector_status;
 }
 
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
