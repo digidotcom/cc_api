@@ -161,7 +161,7 @@ static bool ccimp_fs_file_open_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_file_open_1->handle.pointer != ccimp_fs_file_open_2->handle.pointer)
         return false;
-    if (ccimp_fs_file_open_1->path != ccimp_fs_file_open_2->path)
+    if (strcmp(ccimp_fs_file_open_1->path, ccimp_fs_file_open_2->path) != 0)
         return false;
     return true;
 }
@@ -276,7 +276,7 @@ static bool ccimp_fs_file_remove_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_file_remove_1->imp_context != ccimp_fs_file_remove_2->imp_context)
         return false;
-    if (ccimp_fs_file_remove_1->path != ccimp_fs_file_remove_2->path)
+    if (strcmp(ccimp_fs_file_remove_1->path, ccimp_fs_file_remove_2->path) != 0)
         return false;
 
     return true;
@@ -292,7 +292,7 @@ static bool ccimp_fs_dir_open_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_dir_open_1->imp_context != ccimp_fs_dir_open_2->imp_context)
         return false;
-    if (ccimp_fs_dir_open_1->path != ccimp_fs_dir_open_2->path)
+    if (strcmp(ccimp_fs_dir_open_1->path, ccimp_fs_dir_open_2->path) != 0)
         return false;
     if (ccimp_fs_dir_open_1->handle.pointer != ccimp_fs_dir_open_2->handle.pointer)
         return false;
@@ -329,7 +329,7 @@ static bool ccimp_fs_dir_entry_status_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_dir_entry_status_1->imp_context != ccimp_fs_dir_entry_status_2->imp_context)
         return false;
-    if (ccimp_fs_dir_entry_status_1->path != ccimp_fs_dir_entry_status_2->path)
+    if (strcmp(ccimp_fs_dir_entry_status_1->path, ccimp_fs_dir_entry_status_2->path) != 0)
         return false;
     if (ccimp_fs_dir_entry_status_1->status.file_size != ccimp_fs_dir_entry_status_2->status.file_size)
         return false;
@@ -365,7 +365,7 @@ static bool ccimp_fs_hash_status_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_hash_status_1->imp_context != ccimp_fs_hash_status_2->imp_context)
         return false;
-    if (ccimp_fs_hash_status_1->path != ccimp_fs_hash_status_2->path)
+    if (strcmp(ccimp_fs_hash_status_1->path, ccimp_fs_hash_status_2->path) != 0)
         return false;
     if (ccimp_fs_hash_status_1->hash_alg.actual != ccimp_fs_hash_status_2->hash_alg.actual)
         return false;
@@ -390,7 +390,7 @@ static bool ccimp_fs_hash_file_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_hash_file_1->imp_context != ccimp_fs_hash_file_2->imp_context)
         return false;
-    if (ccimp_fs_hash_file_1->path != ccimp_fs_hash_file_2->path)
+    if (strcmp(ccimp_fs_hash_file_1->path, ccimp_fs_hash_file_2->path) != 0)
         return false;
     if (ccimp_fs_hash_file_1->hash_algorithm != ccimp_fs_hash_file_2->hash_algorithm)
         return false;

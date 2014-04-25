@@ -28,4 +28,17 @@ typedef struct {
     ccapi_fs_changed_cb_t changed_cb;
 } ccapi_filesystem_service_t;
 
+typedef enum {
+    CCAPI_FS_ERROR_NONE,
+    CCAPI_FS_ERROR_CCAPI_STOPPED,
+    CCAPI_FS_ERROR_INVALID_PATH,
+    CCAPI_FS_ERROR_INSUFFICIENT_MEMORY,
+    CCAPI_FS_ERROR_NOT_A_DIR,
+    CCAPI_FS_ERROR_NOT_MAPPED,
+    CCAPI_FS_ERROR_EXISTING_VIRTUAL_DIR
+} ccapi_fs_error_t;
+
+ccapi_fs_error_t ccapi_fs_add_virtual_dir(char const * const virtual_dir, char const * const local_dir);
+ccapi_fs_error_t ccapi_fs_remove_virtual_dir(char const * const virtual_dir);
+
 #endif

@@ -276,8 +276,11 @@ extern "C" {
 #include <errno.h>
 
 typedef int my_filesystem_context_t;
+typedef int my_filesystem_dir_handle_t;
 
 my_filesystem_context_t my_fs_context = 0;
+
+my_filesystem_dir_handle_t dir_handle;
 
 ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const data)
 {
@@ -356,9 +359,8 @@ ccimp_status_t ccimp_fs_file_remove(ccimp_fs_file_remove_t * const data)
 ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const data)
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
-    int dummy_var;
     mock_scope_c("ccimp_fs_dir_open")->actualCall("ccimp_fs_dir_open")->withParameterOfType("ccimp_fs_dir_open_t", "data", (void *)data);
-    data->handle.pointer = &dummy_var;
+    data->handle.pointer = &dir_handle;
     *fs_context = 6;
     data->errnum.value = ENOTDIR;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_open")->returnValue().value.intValue;

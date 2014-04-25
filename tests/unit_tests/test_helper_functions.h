@@ -28,8 +28,11 @@ typedef struct {
 } ccapi_fs_file_handle_t;
 }
 
+typedef int my_filesystem_context_t;
+typedef int my_filesystem_dir_handle_t;
 
-
+extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
+extern my_filesystem_dir_handle_t dir_handle; /* Defined in mock_ccimp_filesystem.cpp */
 extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 extern ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
 extern ccapi_bool_t ccapi_tcp_close_cb_called;
@@ -47,5 +50,7 @@ void th_stop_ccapi(ccapi_data_t * const ccapi_data);
 pthread_t th_aux_ccapi_start(void * argument);
 int th_stop_aux_thread(pthread_t pthread);
 ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connector_file_system_open_t * const ccfsm_open_data, int flags);
+void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
+void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
 
 #endif

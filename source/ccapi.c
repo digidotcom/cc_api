@@ -48,7 +48,7 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
-static char * ccapi_strdup(char const * const string)
+char * ccapi_strdup(char const * const string)
 {
     size_t const string_size = strlen(string) + 1;
     char * dup_string = ccapi_malloc(string_size);
@@ -732,6 +732,65 @@ typedef struct {
     ccapi_fs_request_t request;
 } ccapi_fs_file_handle_t;
 
+typedef struct {
+    ccapi_fs_virtual_dir_t * dir_entry;
+} ccapi_fs_virtual_rootdir_listing_handle_t;
+
+static char const * get_path_without_virtual_dir(char const * const full_path)
+{
+    char const * c;
+    char const * const dir_name_start = full_path + 1; /* Skip leading '/' */
+
+    for (c = dir_name_start; *c != '\0' && *c != CCAPI_FS_DIR_SEPARATOR; c++);
+
+    return c;
+}
+
+static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
+{
+    ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
+    char const * local_path = NULL;
+
+    if (virtual_dirs_present)
+    {
+        char const * const path_without_virtual_dir = get_path_without_virtual_dir(full_path);
+        char const * const virtual_dir_name_start = full_path + 1;
+        size_t const virtual_dir_name_length = path_without_virtual_dir - full_path - sizeof (char);
+        ccapi_fs_virtual_dir_t * const dir_entry = *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir_name_start, virtual_dir_name_length);
+
+        if (dir_entry != NULL)
+        {
+            char * translated_path = NULL;
+            size_t path_without_virtual_dir_length = strlen(path_without_virtual_dir);
+            translated_path = ccapi_malloc(dir_entry->local_path_length + path_without_virtual_dir_length + 1);
+
+            ASSERT_MSG_GOTO(translated_path != 0, done);
+            memcpy(translated_path, dir_entry->local_path, strlen(dir_entry->local_path));
+            memcpy(translated_path + dir_entry->local_path_length, path_without_virtual_dir, path_without_virtual_dir_length);
+            translated_path[dir_entry->local_path_length + path_without_virtual_dir_length] = '\0';
+            local_path = translated_path;
+            *must_free_path = CCAPI_TRUE;
+        }
+        else
+        {
+            *must_free_path = CCAPI_FALSE;
+        }
+    }
+    else
+    {
+        local_path = full_path;
+        *must_free_path = CCAPI_FALSE;
+    }
+
+done:
+    return local_path;
+}
+
+static void free_local_path(char const * local_path)
+{
+    ccapi_free((void *)local_path);
+}
+
 connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -744,12 +803,19 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             connector_file_system_open_t * ccfsm_open_data = data;
             ccimp_fs_file_open_t ccimp_open_data;
             ccapi_fs_request_t request = CCAPI_FS_REQUEST_UNKNOWN;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_open_data->path, &must_free_local_path);
 
+            if (local_path == NULL)
+            {
+                goto done;
+            }
+
+            ccimp_open_data.path = local_path;
             ccimp_open_data.errnum.pointer = NULL;
             ccimp_open_data.handle.pointer = NULL;
             ccimp_open_data.flags = ccfsm_open_data->oflag;
-            ccimp_open_data.path = ccfsm_open_data->path;
-            ccimp_open_data.imp_context = ccfsm_open_data->user_context;
+            ccimp_open_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             if (ccimp_open_data.flags & CCIMP_FILE_O_WRONLY)
             {
@@ -764,7 +830,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 request = CCAPI_FS_REQUEST_READ;
             }
 
-            if (ccapi_data->service.file_system.access_cb == NULL)
+            if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
             {
                 ccimp_status = ccimp_fs_file_open(&ccimp_open_data);
             }
@@ -773,7 +839,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccapi_fs_access_t access;
 
                 ASSERT_MSG_GOTO(request != CCAPI_FS_REQUEST_UNKNOWN, done);
-                access = ccapi_data->service.file_system.access_cb(ccimp_open_data.path, request);
+                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_open_data.path, request);
                 switch (access)
                 {
                     case CCAPI_FS_ACCESS_ALLOW:
@@ -785,7 +851,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 }
             }
             ccfsm_open_data->errnum = ccimp_open_data.errnum.pointer;
-            ccfsm_open_data->user_context = ccimp_open_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_open_data.imp_context;
 
             switch (ccimp_status)
             {
@@ -808,6 +874,11 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                     break;
                 }
             }
+
+            if (must_free_local_path)
+            {
+                free_local_path(local_path);
+            }
             break;
         }
 
@@ -820,14 +891,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_read_data.errnum.pointer = NULL;
             ccimp_read_data.bytes_used = 0;
             ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_read_data.imp_context = ccfsm_read_data->user_context;
+            ccimp_read_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_read_data.buffer = ccfsm_read_data->buffer;
             ccimp_read_data.bytes_available = ccfsm_read_data->bytes_available;
 
             ccimp_status = ccimp_fs_file_read(&ccimp_read_data);
 
             ccfsm_read_data->errnum = ccimp_read_data.errnum.pointer;
-            ccfsm_read_data->user_context = ccimp_read_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_read_data.imp_context;
             ccfsm_read_data->bytes_used = ccimp_read_data.bytes_used;
             break;
         }
@@ -841,14 +912,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_write_data.errnum.pointer = NULL;
             ccimp_write_data.bytes_used = 0;
             ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_write_data.imp_context = ccfsm_write_data->user_context;
+            ccimp_write_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_write_data.buffer = ccfsm_write_data->buffer;
             ccimp_write_data.bytes_available = ccfsm_write_data->bytes_available;
 
             ccimp_status = ccimp_fs_file_write(&ccimp_write_data);
 
             ccfsm_write_data->errnum = ccimp_write_data.errnum.pointer;
-            ccfsm_write_data->user_context = ccimp_write_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_write_data.imp_context;
             ccfsm_write_data->bytes_used = ccimp_write_data.bytes_used;
             break;
         }
@@ -861,7 +932,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_seek_data.errnum.pointer = NULL;
             ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_seek_data.imp_context = ccfsm_seek_data->user_context;
+            ccimp_seek_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_seek_data.resulting_offset = 0;
             ccimp_seek_data.requested_offset = ccfsm_seek_data->requested_offset;
             ccimp_seek_data.origin = ccimp_seek_origin_from_ccfsm_seek_origin(ccfsm_seek_data->origin);
@@ -869,7 +940,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_file_seek(&ccimp_seek_data);
 
             ccfsm_seek_data->errnum = ccimp_seek_data.errnum.pointer;
-            ccfsm_seek_data->user_context = ccimp_seek_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_seek_data.imp_context;
             ccfsm_seek_data->resulting_offset = ccimp_seek_data.resulting_offset;
             break;
         }
@@ -882,20 +953,20 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_close_data.errnum.pointer = NULL;
             ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_close_data.imp_context = ccfsm_close_data->user_context;
+            ccimp_close_data.imp_context = ccapi_data->service.file_system.imp_context;
 
             ccimp_status = ccimp_fs_file_close(&ccimp_close_data);
 
             ccfsm_close_data->errnum = ccimp_close_data.errnum.pointer;
-            ccfsm_close_data->user_context = ccimp_close_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_close_data.imp_context;
 
-            if (ccapi_data->service.file_system.changed_cb != NULL)
+            if (ccapi_data->service.file_system.user_callbacks.changed_cb != NULL)
             {
                 switch (ccapi_fs_handle->request)
                 {
                     case CCAPI_FS_REQUEST_READWRITE:
                     case CCAPI_FS_REQUEST_WRITE:
-                        ccapi_data->service.file_system.changed_cb(ccapi_fs_handle->file_path, CCAPI_FS_CHANGED_MODIFIED);
+                        ccapi_data->service.file_system.user_callbacks.changed_cb(ccapi_fs_handle->file_path, CCAPI_FS_CHANGED_MODIFIED);
                         break;
                     case CCAPI_FS_REQUEST_LIST:
                     case CCAPI_FS_REQUEST_READ:
@@ -929,13 +1000,13 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_truncate_data.errnum.pointer = NULL;
             ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
-            ccimp_truncate_data.imp_context = ccfsm_truncate_data->user_context;
+            ccimp_truncate_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_truncate_data.length_in_bytes = ccfsm_truncate_data->length_in_bytes;
 
             ccimp_status = ccimp_fs_file_truncate(&ccimp_truncate_data);
 
             ccfsm_truncate_data->errnum = ccimp_truncate_data.errnum.pointer;
-            ccfsm_truncate_data->user_context = ccimp_truncate_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_truncate_data.imp_context;
             break;
         }
 
@@ -943,12 +1014,19 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_remove_t * ccfsm_remove_data = data;
             ccimp_fs_file_remove_t ccimp_remove_data;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_remove_data->path, &must_free_local_path);
 
+            if (local_path == NULL)
+            {
+                goto done;
+            }
+
+            ccimp_remove_data.path = local_path;
             ccimp_remove_data.errnum.pointer = NULL;
-            ccimp_remove_data.path = ccfsm_remove_data->path;
-            ccimp_remove_data.imp_context = ccfsm_remove_data->user_context;
+            ccimp_remove_data.imp_context = ccapi_data->service.file_system.imp_context;
 
-            if (ccapi_data->service.file_system.access_cb == NULL)
+            if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
             {
                 ccimp_status = ccimp_fs_file_remove(&ccimp_remove_data);
             }
@@ -957,7 +1035,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccapi_fs_request_t request = CCAPI_FS_REQUEST_REMOVE;
                 ccapi_fs_access_t access;
 
-                access = ccapi_data->service.file_system.access_cb(ccimp_remove_data.path, request);
+                access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_remove_data.path, request);
                 switch (access)
                 {
                     case CCAPI_FS_ACCESS_ALLOW:
@@ -970,14 +1048,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             }
 
             ccfsm_remove_data->errnum = ccimp_remove_data.errnum.pointer;
-            ccfsm_remove_data->user_context = ccimp_remove_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_remove_data.imp_context;
             switch (ccimp_status)
             {
                 case CCIMP_STATUS_OK:
                 {
-                    if (ccapi_data->service.file_system.changed_cb != NULL)
+                    if (ccapi_data->service.file_system.user_callbacks.changed_cb != NULL)
                     {
-                        ccapi_data->service.file_system.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
+                        ccapi_data->service.file_system.user_callbacks.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
                     }
                     break;
                 }
@@ -985,124 +1063,233 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 case CCIMP_STATUS_BUSY:
                     break;
             }
+
+            if (must_free_local_path)
+            {
+                free_local_path(local_path);
+            }
+
             break;
         }
 
         case connector_request_id_file_system_opendir:
         {
             connector_file_system_opendir_t * ccfsm_dir_open_data = data;
-            ccimp_fs_dir_open_t ccimp_dir_open_data;
 
-            ccimp_dir_open_data.errnum.pointer = NULL;
-            ccimp_dir_open_data.handle.pointer = NULL;
-            ccimp_dir_open_data.path = ccfsm_dir_open_data->path;
-            ccimp_dir_open_data.imp_context = ccfsm_dir_open_data->user_context;
-
-            if (ccapi_data->service.file_system.access_cb == NULL)
+            if (ccfsm_dir_open_data->user_context != NULL)
             {
-                ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                ccfsm_dir_open_data->handle = ccfsm_dir_open_data->user_context;
+                ccimp_status = CCIMP_STATUS_OK;
             }
             else
             {
-                ccapi_fs_request_t request = CCAPI_FS_REQUEST_LIST;
-                ccapi_fs_access_t access;
+                ccimp_fs_dir_open_t ccimp_dir_open_data;
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_dir_open_data->path, &must_free_local_path);
 
-                access = ccapi_data->service.file_system.access_cb(ccimp_dir_open_data.path, request);
-                switch (access)
+                if (local_path == NULL)
                 {
-                    case CCAPI_FS_ACCESS_ALLOW:
-                        ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
-                        break;
-                    case CCAPI_FS_ACCESS_DENY:
-                        ccimp_status = CCIMP_STATUS_ERROR;
-                        break;
+                    goto done;
+                }
+
+                ccimp_dir_open_data.path = local_path;
+                ccimp_dir_open_data.errnum.pointer = NULL;
+                ccimp_dir_open_data.handle.pointer = NULL;
+                ccimp_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
+
+                if (ccapi_data->service.file_system.user_callbacks.access_cb == NULL)
+                {
+                    ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                }
+                else
+                {
+                    ccapi_fs_request_t request = CCAPI_FS_REQUEST_LIST;
+                    ccapi_fs_access_t access;
+
+                    access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_dir_open_data.path, request);
+                    switch (access)
+                    {
+                        case CCAPI_FS_ACCESS_ALLOW:
+                            ccimp_status = ccimp_fs_dir_open(&ccimp_dir_open_data);
+                            break;
+                        case CCAPI_FS_ACCESS_DENY:
+                            ccimp_status = CCIMP_STATUS_ERROR;
+                            break;
+                    }
+                }
+
+                ccfsm_dir_open_data->errnum = ccimp_dir_open_data.errnum.pointer;
+                ccapi_data->service.file_system.imp_context = ccimp_dir_open_data.imp_context;
+                ccfsm_dir_open_data->handle = ccimp_dir_open_data.handle.pointer;
+
+                if (must_free_local_path)
+                {
+                    free_local_path(local_path);
                 }
             }
-
-            ccfsm_dir_open_data->errnum = ccimp_dir_open_data.errnum.pointer;
-            ccfsm_dir_open_data->user_context = ccimp_dir_open_data.imp_context;
-            ccfsm_dir_open_data->handle = ccimp_dir_open_data.handle.pointer;
             break;
         }
 
         case connector_request_id_file_system_readdir:
         {
             connector_file_system_readdir_t * ccfsm_dir_read_entry_data = data;
-            ccimp_fs_dir_read_entry_t ccimp_dir_read_entry_data;
+            if (ccfsm_dir_read_entry_data->user_context != NULL)
+            {
+                #define CCAPI_MIN_OF(a, b)  ((a) < (b) ? (a) : (b))
+                ccapi_fs_virtual_rootdir_listing_handle_t * root_dir_listing_handle = ccfsm_dir_read_entry_data->user_context;
+                ccapi_fs_virtual_dir_t * dir_entry = root_dir_listing_handle->dir_entry;
 
-            ccimp_dir_read_entry_data.errnum.pointer = NULL;
-            ccimp_dir_read_entry_data.imp_context = ccfsm_dir_read_entry_data->user_context;
-            ccimp_dir_read_entry_data.handle.pointer = ccfsm_dir_read_entry_data->handle;
-            ccimp_dir_read_entry_data.entry_name = ccfsm_dir_read_entry_data->entry_name;
-            ccimp_dir_read_entry_data.bytes_available = ccfsm_dir_read_entry_data->bytes_available;
+                if (dir_entry != NULL)
+                {
+                    size_t const virtual_dir_strsize = strlen(dir_entry->virtual_dir) + 1;
+                    size_t const mecmpy_size = CCAPI_MIN_OF(virtual_dir_strsize, ccfsm_dir_read_entry_data->bytes_available);
 
-            ccimp_status = ccimp_fs_dir_read_entry(&ccimp_dir_read_entry_data);
+                    memcpy(ccfsm_dir_read_entry_data->entry_name, dir_entry->virtual_dir, mecmpy_size);
 
-            ccfsm_dir_read_entry_data->errnum = ccimp_dir_read_entry_data.errnum.pointer;
-            ccfsm_dir_read_entry_data->user_context = ccimp_dir_read_entry_data.imp_context;
+                    root_dir_listing_handle->dir_entry = dir_entry->next;
+                }
+                else
+                {
+                    strcpy(ccfsm_dir_read_entry_data->entry_name, "");
+                }
+                ccimp_status = CCIMP_STATUS_OK;
+            }
+            else
+            {
+                ccimp_fs_dir_read_entry_t ccimp_dir_read_entry_data;
+
+                ccimp_dir_read_entry_data.errnum.pointer = NULL;
+                ccimp_dir_read_entry_data.imp_context = ccapi_data->service.file_system.imp_context;
+                ccimp_dir_read_entry_data.handle.pointer = ccfsm_dir_read_entry_data->handle;
+                ccimp_dir_read_entry_data.entry_name = ccfsm_dir_read_entry_data->entry_name;
+                ccimp_dir_read_entry_data.bytes_available = ccfsm_dir_read_entry_data->bytes_available;
+
+                ccimp_status = ccimp_fs_dir_read_entry(&ccimp_dir_read_entry_data);
+
+                ccfsm_dir_read_entry_data->errnum = ccimp_dir_read_entry_data.errnum.pointer;
+                ccapi_data->service.file_system.imp_context = ccimp_dir_read_entry_data.imp_context;
+            }
             break;
         }
 
         case connector_request_id_file_system_stat_dir_entry:
         {
             connector_file_system_stat_dir_entry_t * ccfsm_dir_entry_status_data = data;
-            ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
+            if (ccfsm_dir_entry_status_data->user_context != NULL)
+            {
+                ccfsm_dir_entry_status_data->statbuf.flags = connector_file_system_file_type_is_dir;
+                ccfsm_dir_entry_status_data->statbuf.last_modified = 0;
+                ccimp_status = CCIMP_STATUS_OK;
+            }
+            else
+            {
+                ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_dir_entry_status_data->path, &must_free_local_path);
 
-            ccimp_dir_entry_status_data.errnum.pointer = NULL;
-            ccimp_dir_entry_status_data.imp_context = ccfsm_dir_entry_status_data->user_context;
-            ccimp_dir_entry_status_data.path = ccfsm_dir_entry_status_data->path;
-            ccimp_dir_entry_status_data.status.file_size = 0;
-            ccimp_dir_entry_status_data.status.last_modified = 0;
-            ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+                if (local_path == NULL)
+                {
+                    goto done;
+                }
 
-            ccimp_status = ccimp_fs_dir_entry_status(&ccimp_dir_entry_status_data);
+                ccimp_dir_entry_status_data.path = local_path;
+                ccimp_dir_entry_status_data.errnum.pointer = NULL;
+                ccimp_dir_entry_status_data.imp_context = ccapi_data->service.file_system.imp_context;
+                ccimp_dir_entry_status_data.status.file_size = 0;
+                ccimp_dir_entry_status_data.status.last_modified = 0;
+                ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-            ccfsm_dir_entry_status_data->errnum = ccimp_dir_entry_status_data.errnum.pointer;
-            ccfsm_dir_entry_status_data->user_context = ccimp_dir_entry_status_data.imp_context;
-            ccfsm_dir_entry_status_data->statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
-            ccfsm_dir_entry_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
-            ccfsm_dir_entry_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
+                ccimp_status = ccimp_fs_dir_entry_status(&ccimp_dir_entry_status_data);
+
+                ccfsm_dir_entry_status_data->errnum = ccimp_dir_entry_status_data.errnum.pointer;
+                ccapi_data->service.file_system.imp_context = ccimp_dir_entry_status_data.imp_context;
+                ccfsm_dir_entry_status_data->statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
+                ccfsm_dir_entry_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
+                ccfsm_dir_entry_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
+
+                if (must_free_local_path)
+                {
+                    free_local_path(local_path);
+                }
+            }
             break;
         }
 
         case connector_request_id_file_system_closedir:
         {
             connector_file_system_close_t * ccfsm_dir_close_data = data;
-            ccimp_fs_dir_close_t ccimp_dir_close_data;
+            if (ccfsm_dir_close_data->user_context != NULL)
+            {
+                ccimp_status = ccapi_free(ccfsm_dir_close_data->user_context);
+                ccfsm_dir_close_data->user_context = NULL;
+            }
+            else
+            {
+                ccimp_fs_dir_close_t ccimp_dir_close_data;
 
-            ccimp_dir_close_data.errnum.pointer = NULL;
-            ccimp_dir_close_data.imp_context = ccfsm_dir_close_data->user_context;
-            ccimp_dir_close_data.handle.pointer = ccfsm_dir_close_data->handle;
+                ccimp_dir_close_data.errnum.pointer = NULL;
+                ccimp_dir_close_data.imp_context = ccapi_data->service.file_system.imp_context;
+                ccimp_dir_close_data.handle.pointer = ccfsm_dir_close_data->handle;
 
-            ccimp_status = ccimp_fs_dir_close(&ccimp_dir_close_data);
+                ccimp_status = ccimp_fs_dir_close(&ccimp_dir_close_data);
 
-            ccfsm_dir_close_data->errnum = ccimp_dir_close_data.errnum.pointer;
-            ccfsm_dir_close_data->user_context = ccimp_dir_close_data.imp_context;
+                ccfsm_dir_close_data->errnum = ccimp_dir_close_data.errnum.pointer;
+                ccapi_data->service.file_system.imp_context = ccimp_dir_close_data.imp_context;
+            }
             break;
         }
 
         case connector_request_id_file_system_stat:
         {
             connector_file_system_stat_t * ccfsm_hash_status_data = data;
-            ccimp_fs_hash_status_t ccimp_hash_status_data;
 
-            ccimp_hash_status_data.errnum.pointer = NULL;
-            ccimp_hash_status_data.imp_context = ccfsm_hash_status_data->user_context;
-            ccimp_hash_status_data.path = ccfsm_hash_status_data->path;
-            ccimp_hash_status_data.hash_alg.actual = ccfsm_hash_status_data->hash_algorithm.actual;
-            ccimp_hash_status_data.hash_alg.requested = ccfsm_hash_status_data->hash_algorithm.requested;
-            ccimp_hash_status_data.status.file_size = 0;
-            ccimp_hash_status_data.status.last_modified = 0;
-            ccimp_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+            if (ccapi_data->service.file_system.virtual_dir_list != NULL && strcmp(ccfsm_hash_status_data->path, CCAPI_FS_ROOT_PATH) == 0)
+            {
+                ccapi_fs_virtual_rootdir_listing_handle_t * root_dir_listing_handle = malloc(sizeof *root_dir_listing_handle);
 
-            ccimp_status = ccimp_fs_hash_status(&ccimp_hash_status_data);
+                ASSERT_MSG_GOTO(root_dir_listing_handle != NULL, done);
+                root_dir_listing_handle->dir_entry = ccapi_data->service.file_system.virtual_dir_list;
+                ccfsm_hash_status_data->user_context = root_dir_listing_handle;
+                ccfsm_hash_status_data->hash_algorithm.actual = connector_file_system_hash_none;
+                ccfsm_hash_status_data->statbuf.file_size = 0;
+                ccfsm_hash_status_data->statbuf.last_modified = 0;
+                ccfsm_hash_status_data->statbuf.flags = connector_file_system_file_type_is_dir;
+                ccimp_status = CCIMP_STATUS_OK;
+            }
+            else
+            {
+                ccimp_fs_hash_status_t ccimp_hash_status_data;
+                ccapi_bool_t must_free_local_path;
+                char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_status_data->path, &must_free_local_path);
 
-            ccfsm_hash_status_data->errnum = ccimp_hash_status_data.errnum.pointer;
-            ccfsm_hash_status_data->user_context = ccimp_hash_status_data.imp_context;
-            ccfsm_hash_status_data->statbuf.file_size = ccimp_hash_status_data.status.file_size;
-            ccfsm_hash_status_data->statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
-            ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
-            ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_status_data.hash_alg.actual);
+                if (local_path == NULL)
+                {
+                    goto done;
+                }
+
+                ccimp_hash_status_data.path = local_path;
+                ccimp_hash_status_data.errnum.pointer = NULL;
+                ccimp_hash_status_data.imp_context = ccapi_data->service.file_system.imp_context;
+                ccimp_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
+                ccimp_hash_status_data.hash_alg.requested = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_status_data->hash_algorithm.requested);
+                ccimp_hash_status_data.status.file_size = 0;
+                ccimp_hash_status_data.status.last_modified = 0;
+                ccimp_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+
+                ccimp_status = ccimp_fs_hash_status(&ccimp_hash_status_data);
+
+                ccfsm_hash_status_data->errnum = ccimp_hash_status_data.errnum.pointer;
+                ccapi_data->service.file_system.imp_context = ccimp_hash_status_data.imp_context;
+                ccfsm_hash_status_data->statbuf.file_size = ccimp_hash_status_data.status.file_size;
+                ccfsm_hash_status_data->statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
+                ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
+                ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_status_data.hash_alg.actual);
+
+                if (must_free_local_path)
+                {
+                    free_local_path(local_path);
+                }
+            }
             break;
         }
 
@@ -1110,10 +1297,17 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         {
             connector_file_system_hash_t * ccfsm_hash_file_data = data;
             ccimp_fs_hash_file_t ccimp_hash_file_data;
+            ccapi_bool_t must_free_local_path;
+            char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_file_data->path, &must_free_local_path);
 
+            if (local_path == NULL)
+            {
+                goto done;
+            }
+
+            ccimp_hash_file_data.path = local_path;
             ccimp_hash_file_data.errnum.pointer = NULL;
-            ccimp_hash_file_data.imp_context = ccfsm_hash_file_data->user_context;
-            ccimp_hash_file_data.path = ccfsm_hash_file_data->path;
+            ccimp_hash_file_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_hash_file_data.hash_algorithm = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_file_data->hash_algorithm);
             ccimp_hash_file_data.hash_value = ccfsm_hash_file_data->hash_value;
             ccimp_hash_file_data.bytes_requested = ccfsm_hash_file_data->bytes_requested;
@@ -1121,7 +1315,12 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_status = ccimp_fs_hash_file(&ccimp_hash_file_data);
 
             ccfsm_hash_file_data->errnum = ccimp_hash_file_data.errnum.pointer;
-            ccfsm_hash_file_data->user_context = ccimp_hash_file_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_hash_file_data.imp_context;
+
+            if (must_free_local_path)
+            {
+                free_local_path(local_path);
+            }
             break;
         }
 
@@ -1131,7 +1330,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccimp_fs_error_desc_t ccimp_error_desc_data;
 
             ccimp_error_desc_data.errnum.pointer = ccfsm_error_desc_data->errnum;
-            ccimp_error_desc_data.imp_context = ccfsm_error_desc_data->user_context;
+            ccimp_error_desc_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_error_desc_data.error_string = ccfsm_error_desc_data->buffer;
             ccimp_error_desc_data.bytes_available = ccfsm_error_desc_data->bytes_available;
             ccimp_error_desc_data.bytes_used = 0;
@@ -1139,7 +1338,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 
             ccimp_status = ccimp_fs_error_desc(&ccimp_error_desc_data);
 
-            ccfsm_error_desc_data->user_context = ccimp_error_desc_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_error_desc_data.imp_context;
             ccfsm_error_desc_data->bytes_used = ccimp_error_desc_data.bytes_used;
             ccfsm_error_desc_data->error_status = ccfsm_file_system_error_status_from_ccimp_fs_error(ccimp_error_desc_data.error_status);
             break;
@@ -1150,12 +1349,12 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             connector_file_system_session_error_t * ccfsm_session_error_data = data;
             ccimp_fs_session_error_t ccimp_session_error_data;
 
-            ccimp_session_error_data.imp_context = ccfsm_session_error_data->user_context;
+            ccimp_session_error_data.imp_context = ccapi_data->service.file_system.imp_context;
             ccimp_session_error_data.session_error = ccimp_session_error_from_ccfsm_session_error(ccfsm_session_error_data->session_error);
 
             ccimp_status = ccimp_fs_session_error(&ccimp_session_error_data);
 
-            ccfsm_session_error_data->user_context = ccimp_session_error_data.imp_context;
+            ccapi_data->service.file_system.imp_context = ccimp_session_error_data.imp_context;
             break;
         }
     }
