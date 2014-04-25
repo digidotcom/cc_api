@@ -776,15 +776,25 @@ static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, ch
 {
     ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
     char const * local_path = NULL;
+    ccapi_bool_t free_path = CCAPI_FALSE;
 
-    if (virtual_dirs_present)
+    if (!virtual_dirs_present)
+    {
+        local_path = full_path;
+        goto done;
+    }
+
     {
         char const * const path_without_virtual_dir = get_path_without_virtual_dir(full_path);
         char const * const virtual_dir_name_start = full_path + 1;
         size_t const virtual_dir_name_length = path_without_virtual_dir - full_path - sizeof (char);
         ccapi_fs_virtual_dir_t * const dir_entry = *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir_name_start, virtual_dir_name_length);
 
-        if (dir_entry != NULL)
+        if (dir_entry == NULL)
+        {
+            goto done;
+        }
+
         {
             char * translated_path = NULL;
             size_t path_without_virtual_dir_length = strlen(path_without_virtual_dir);
@@ -795,22 +805,16 @@ static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, ch
             memcpy(translated_path + dir_entry->local_path_length, path_without_virtual_dir, path_without_virtual_dir_length);
             translated_path[dir_entry->local_path_length + path_without_virtual_dir_length] = '\0';
             local_path = translated_path;
-            *must_free_path = CCAPI_TRUE;
+            free_path = CCAPI_TRUE;
         }
-        else
-        {
-            *must_free_path = CCAPI_FALSE;
-        }
-    }
-    else
-    {
-        local_path = full_path;
-        *must_free_path = CCAPI_FALSE;
     }
 
 done:
+    *must_free_path = free_path;
+
     return local_path;
 }
+
 
 static void free_local_path(char const * local_path)
 {
