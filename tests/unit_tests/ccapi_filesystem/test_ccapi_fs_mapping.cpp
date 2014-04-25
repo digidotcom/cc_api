@@ -53,7 +53,9 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
     ccapi_fs_error_t error;
     char const * const local_path = "/home/user";
     char const * const virtual_path = "my_data";
-    char const * const invalid_virtual_path = "/my_data";
+    char const * const invalid_virtual_dir = "/my_data";
+    char const * const invalid_virtual_dir_with_subdir = "my_data/subdir";
+    char const * const invalid_virtual_dir_with_backslash = "my_data\\subdir";
 
     error = ccapi_fs_add_virtual_dir("", local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
@@ -67,10 +69,19 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
     error = ccapi_fs_add_virtual_dir(virtual_path, NULL);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 
-    error = ccapi_fs_add_virtual_dir(invalid_virtual_path, NULL);
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir, NULL);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 
-    error = ccapi_fs_add_virtual_dir(invalid_virtual_path, local_path);
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
+
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir_with_subdir, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
+
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir_with_subdir, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
+
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir_with_backslash, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 }
 
