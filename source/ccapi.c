@@ -65,13 +65,12 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
 
     acquire_data.syncr_object = ccapi_data->initiate_action_syncr;
     acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
-    ASSERT_MSG_GOTO(ccimp_os_syncr_acquire(&acquire_data) == CCIMP_STATUS_OK, done);
+    ASSERT_MSG(ccimp_os_syncr_acquire(&acquire_data) == CCIMP_STATUS_OK);
 
     status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
     ASSERT_MSG(ccapi_syncr_release(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
 
-done:
     return status;
 }
 
