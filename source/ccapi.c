@@ -741,19 +741,9 @@ static char const * get_path_without_virtual_dir(char const * const full_path)
     char const * c;
     char const * const dir_name_start = full_path + 1; /* Skip leading '/' */
 
-    for (c = dir_name_start; c != NULL && *c != '\0' && *c != '/'; c++);
+    for (c = dir_name_start; *c != '\0' && *c != CCAPI_FS_DIR_SEPARATOR; c++);
 
     return c;
-}
-
-static unsigned int get_virtual_dir_name_length(char const * const full_path)
-{
-    char const * const dir_name_start = full_path + 1; /* skip the leading '/' */
-    char const * c;
-
-    for (c = dir_name_start; c != NULL && *c != '\0' && *c != '/'; c++);
-
-    return c - dir_name_start;
 }
 
 static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
@@ -761,20 +751,23 @@ static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, ch
     ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
     char const * local_path = NULL;
 
-    if (virtual_dirs_present == CCAPI_TRUE)
+    if (virtual_dirs_present)
     {
         char const * const path_without_virtual_dir = get_path_without_virtual_dir(full_path);
         char const * const virtual_dir_name_start = full_path + 1;
-        unsigned int const virtual_dir_name_length = get_virtual_dir_name_length(full_path);
+        size_t const virtual_dir_name_length = path_without_virtual_dir - full_path - sizeof (char);
         ccapi_fs_virtual_dir_t * const dir_entry = *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir_name_start, virtual_dir_name_length);
 
         if (dir_entry != NULL)
         {
             char * translated_path = NULL;
-            translated_path = ccapi_malloc(strlen(dir_entry->local_path) + strlen(path_without_virtual_dir) + 1);
+            size_t path_without_virtual_dir_length = strlen(path_without_virtual_dir);
+            translated_path = ccapi_malloc(dir_entry->local_path_length + path_without_virtual_dir_length + 1);
+
             ASSERT_MSG_GOTO(translated_path != 0, done);
-            strcpy(translated_path, dir_entry->local_path);
-            strcat(translated_path, path_without_virtual_dir);
+            memcpy(translated_path, dir_entry->local_path, strlen(dir_entry->local_path));
+            memcpy(translated_path + dir_entry->local_path_length, path_without_virtual_dir, path_without_virtual_dir_length);
+            translated_path[dir_entry->local_path_length + path_without_virtual_dir_length] = '\0';
             local_path = translated_path;
             *must_free_path = CCAPI_TRUE;
         }
@@ -882,7 +875,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 }
             }
 
-            if (must_free_local_path == CCAPI_TRUE)
+            if (must_free_local_path)
             {
                 free_local_path(local_path);
             }
@@ -1071,7 +1064,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                     break;
             }
 
-            if (must_free_local_path == CCAPI_TRUE)
+            if (must_free_local_path)
             {
                 free_local_path(local_path);
             }
@@ -1129,7 +1122,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccapi_data->service.file_system.imp_context = ccimp_dir_open_data.imp_context;
                 ccfsm_dir_open_data->handle = ccimp_dir_open_data.handle.pointer;
 
-                if (must_free_local_path == CCAPI_TRUE)
+                if (must_free_local_path)
                 {
                     free_local_path(local_path);
                 }
@@ -1214,7 +1207,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccfsm_dir_entry_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
                 ccfsm_dir_entry_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
 
-                if (must_free_local_path == CCAPI_TRUE)
+                if (must_free_local_path)
                 {
                     free_local_path(local_path);
                 }
@@ -1292,7 +1285,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
                 ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
                 ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_status_data.hash_alg.actual);
 
-                if (must_free_local_path == CCAPI_TRUE)
+                if (must_free_local_path)
                 {
                     free_local_path(local_path);
                 }
@@ -1324,7 +1317,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             ccfsm_hash_file_data->errnum = ccimp_hash_file_data.errnum.pointer;
             ccapi_data->service.file_system.imp_context = ccimp_hash_file_data.imp_context;
 
-            if (must_free_local_path == CCAPI_TRUE)
+            if (must_free_local_path)
             {
                 free_local_path(local_path);
             }
