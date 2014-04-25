@@ -48,6 +48,15 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
+ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
+{
+    ccimp_os_syncr_destroy_t destroy_data;
+
+    destroy_data.syncr_object = syncr_object;
+        
+    return ccimp_os_syncr_destroy(&destroy_data);
+}
+
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
 {
     connector_status_t status;

@@ -159,7 +159,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         {
             ccapi_free(send_info);
 
-            error = CCAPI_SEND_ERROR_SYNCR_ERROR;
+            error = CCAPI_SEND_ERROR_SYNCR_FAILED;
             goto done;
         }
 
@@ -206,7 +206,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
             if (result != CCIMP_STATUS_OK)
             {
                 ccapi_logging_line("ccxapi_send_data: lock_acquire failed");
-                error = CCAPI_SEND_ERROR_SYNCR_ERROR;
+                error = CCAPI_SEND_ERROR_SYNCR_FAILED;
             }
             else
             {
@@ -221,12 +221,8 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
     }
 
     /* Free resources */
-    {
-        ccimp_os_syncr_destroy_t destroy_data;
-        destroy_data.syncr_object = send_info->svc_send.send_syncr;
-    
-        ASSERT_MSG(ccimp_os_syncr_destroy(&destroy_data) == CCIMP_STATUS_OK);
-    }
+    ASSERT_MSG(ccapi_syncr_destroy(send_info->svc_send.send_syncr) == CCIMP_STATUS_OK);
+
     ccapi_free(send_info);
 
 done:

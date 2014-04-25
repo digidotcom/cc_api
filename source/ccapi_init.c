@@ -44,11 +44,8 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     reset_heap_ptr(&ccapi_data->thread.connector_run);
 
     if (ccapi_data->initiate_action_syncr != NULL)
-    {
-        ccimp_os_syncr_destroy_t destroy_data;
-        destroy_data.syncr_object = ccapi_data->initiate_action_syncr;
-    
-        ASSERT_MSG(ccimp_os_syncr_destroy(&destroy_data) == CCIMP_STATUS_OK);
+    {   
+        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
     }
 
 done:
