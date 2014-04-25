@@ -48,21 +48,19 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object)
     return ccimp_os_syncr_release(&release_data);
 }
 
-char * ccapi_strdup(char const * const string)
-{
-    size_t const string_size = strlen(string) + 1;
-    char * dup_string = ccapi_malloc(string_size);
-
-    if (dup_string != NULL)
-    {
-        memcpy(dup_string, string, string_size);
-    }
-
-    return dup_string;
-}
-
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
 {
+    ccimp_os_syncr_destroy_t destroy_data;
+
+    destroy_data.syncr_object = syncr_object;
+
+    return ccimp_os_syncr_destroy(&destroy_data);
+}
+
+connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
+{
+    connector_status_t status;
+
     ccimp_os_syncr_acquire_t acquire_data;
 
     acquire_data.syncr_object = ccapi_data->initiate_action_syncr;
@@ -74,6 +72,19 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
     ASSERT_MSG(ccapi_syncr_release(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
 
     return status;
+}
+
+char * ccapi_strdup(char const * const string)
+{
+    size_t const string_size = strlen(string) + 1;
+    char * dup_string = ccapi_malloc(string_size);
+
+    if (dup_string != NULL)
+    {
+        memcpy(dup_string, string, string_size);
+    }
+
+    return dup_string;
 }
 
 void ccapi_connector_run_thread(void * const argument)
