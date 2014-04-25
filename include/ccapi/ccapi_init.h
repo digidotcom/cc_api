@@ -4,7 +4,6 @@
 typedef void * ccapi_device_request_service_t; /* STUB */
 typedef void * ccapi_firmware_service_t; /* STUB */
 typedef void * ccapi_remote_config_service_t; /* STUB */
-typedef void * ccapi_filesystem_service_t; /* STUB */
 typedef void * ccapi_cli_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
 

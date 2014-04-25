@@ -42,6 +42,11 @@
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
 #define CCAPI_RUNNING(c) ((c) != NULL && (c)->thread.connector_run->status == CCAPI_THREAD_RUNNING)
 
+#define CCAPI_MAX_OF(a, b)          ((a) > (b) ? (a) : (b))
+#define CCAPI_MIN_OF(a, b)          ((a) < (b) ? (a) : (b))
+#define CCAPI_FS_DIR_SEPARATOR      '/'
+#define CCAPI_FS_ROOT_PATH          "/"
+
 typedef struct {
     uint32_t vendor_id;
     uint8_t device_id[16];
@@ -66,6 +71,14 @@ typedef struct {
     ccapi_thread_status_t status;
 } ccapi_thread_info_t;
 
+typedef struct ccapi_fs_virtual_dir {
+    char * virtual_dir;
+    char * local_path;
+    size_t virtual_dir_length;
+    size_t local_path_length;
+    struct ccapi_fs_virtual_dir * next;
+} ccapi_fs_virtual_dir_t;
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
@@ -73,6 +86,13 @@ typedef struct {
         ccapi_thread_info_t * connector_run;
     } thread;
     void * initiate_action_syncr;
+    struct {
+        struct {
+            ccapi_filesystem_service_t user_callbacks;
+            ccapi_fs_virtual_dir_t * virtual_dir_list;
+            void * imp_context;
+        } file_system;
+    } service;
     struct {
         ccapi_tcp_info_t * info;
         ccapi_bool_t connected;
@@ -105,11 +125,13 @@ extern void * logging_syncr;
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
+char * ccapi_strdup(char const * const string);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
+ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length);
 
 void ccapi_logging_line(char const * const format, ...);
 void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
