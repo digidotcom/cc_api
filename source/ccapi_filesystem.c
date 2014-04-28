@@ -72,18 +72,33 @@ done:
     return new_dir_entry;
 }
 
-static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const local_dir)
+static ccapi_fs_error_t check_if_path_is_a_dir(ccapi_data_t * const ccapi_data, char const * const local_dir)
 {
-    ccapi_bool_t is_dir = CCAPI_TRUE;
+    ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccimp_fs_dir_open_t ccimp_fs_dir_open_data = {0};
     ccimp_fs_dir_close_t ccimp_fs_dir_close_data = {0};
-    ccimp_status_t ccimp_status;
     ccapi_bool_t loop_done = CCAPI_FALSE;
+    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+    ccimp_status_t ccimp_status;
 
     ccimp_fs_dir_open_data.path = local_dir;
     ccimp_fs_dir_open_data.handle.pointer = NULL;
     ccimp_fs_dir_open_data.errnum.pointer = NULL;
     ccimp_fs_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
+
+    {
+        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+        switch (ccapi_syncr_acquire_status)
+        {
+            case CCIMP_STATUS_OK:
+                syncr_acquired = CCAPI_TRUE;
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                error = CCAPI_FS_ERROR_SYNCR_FAILED;
+                goto done;
+        }
+    }
 
     do {
         ccimp_status = ccimp_fs_dir_open(&ccimp_fs_dir_open_data);
@@ -91,6 +106,7 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
         {
             case CCIMP_STATUS_OK:
             case CCIMP_STATUS_ERROR:
+                ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
                 loop_done = CCAPI_TRUE;
                 break;
             case CCIMP_STATUS_BUSY:
@@ -99,15 +115,13 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
         ccimp_os_yield();
     } while (!loop_done);
 
-    ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
-
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            is_dir = CCAPI_FALSE;
+            error = CCAPI_FS_ERROR_NOT_A_DIR;
             goto done;
             break;
     }
@@ -122,8 +136,11 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
+                loop_done = CCAPI_TRUE;
+                break;
             case CCIMP_STATUS_ERROR:
                 loop_done = CCAPI_TRUE;
+                error = CCAPI_FS_ERROR_NOT_A_DIR;
                 break;
             case CCIMP_STATUS_BUSY:
                 break;
@@ -131,11 +148,24 @@ static ccapi_bool_t is_a_dir(ccapi_data_t * const ccapi_data, char const * const
         ccimp_os_yield();
     } while (!loop_done);
 
-    ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
     ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
 
 done:
-    return is_dir;
+    if (syncr_acquired)
+    {
+        ccimp_status_t const ccapi_syncr_release_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+
+        switch (ccapi_syncr_release_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                error = CCAPI_FS_ERROR_SYNCR_FAILED;
+                break;
+        }
+    }
+    return error;
 }
 
 ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char const * const virtual_dir, char const * const local_dir)
@@ -163,9 +193,9 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
-    if (!is_a_dir(ccapi_data, local_dir))
+    error = check_if_path_is_a_dir(ccapi_data, local_dir);
+    if (error != CCAPI_FS_ERROR_NONE)
     {
-        error = CCAPI_FS_ERROR_NOT_A_DIR;
         goto done;
     }
 

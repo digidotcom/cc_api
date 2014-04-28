@@ -864,6 +864,22 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 {
     connector_callback_status_t connector_status;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+
+    {
+        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+
+        switch (ccapi_syncr_acquire_status)
+        {
+            case CCIMP_STATUS_OK:
+                syncr_acquired = CCAPI_TRUE;
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                ccimp_status = ccapi_syncr_acquire_status;
+                goto done;
+        }
+    }
 
     switch (filesystem_request)
     {
@@ -1428,6 +1444,21 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
     }
 
 done:
+    if (syncr_acquired)
+    {
+        ccimp_status_t const ccapi_syncr_release_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+
+        switch (ccapi_syncr_release_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                ccimp_status = ccapi_syncr_release_status;
+                break;
+        }
+    }
+
     connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
     return connector_status;
 }
