@@ -30,9 +30,9 @@ TEST(test_ccapi_send_data_no_reply, testSEND_ERROR_NONE)
     ccapi_send_error_t error;
 
     connector_request_data_service_send_t header;
-    static char const data[] = DATA;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
@@ -56,9 +56,9 @@ TEST(test_ccapi_send_data_no_reply, testChunkSizeEqual)
     ccapi_send_error_t error;
 
     connector_request_data_service_send_t header;
-    static char const data[] = DATA;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
@@ -84,9 +84,9 @@ TEST(test_ccapi_send_data_no_reply, testChunkSizeSmall)
     ccapi_send_error_t error;
 
     connector_request_data_service_send_t header;
-    static char const data[] = DATA;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
@@ -115,8 +115,8 @@ TEST(test_ccapi_send_data_no_reply, testChunkSizeSmallBinary)
     #define TEST_SIZE 600
     static uint8_t data[TEST_SIZE];
     unsigned int i;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
 
     for( i=0 ; i < TEST_SIZE ; i++)
         data[i] = i;

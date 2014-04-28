@@ -30,9 +30,9 @@ TEST(test_ccapi_send_data_with_reply, testTimeoutOkNoHint)
     ccapi_send_error_t error;
 
     connector_request_data_service_send_t header;
-    static char const data[] = DATA;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
     unsigned long timeout = 10;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -57,10 +57,10 @@ TEST(test_ccapi_send_data_with_reply, testHint)
     ccapi_send_error_t error;
 
     connector_request_data_service_send_t header;
-    static char const data[] = DATA;
-    static char const cloud_path[] = CLOUD_PATH;
-    static char const content_type[] = CONTENT_TYPE;
-    static char const hint_check[] = "hello man";
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
+    char const hint_check[] = "hello man";
     unsigned long timeout = SEND_WAIT_FOREVER;
 
     ccapi_string_info_t hint;
@@ -94,7 +94,7 @@ TEST(test_ccapi_send_data_with_reply, testHintCanBeNull)
 {
     ccapi_send_error_t error;
 
-    static char const hint_check[] = "hello man";
+    char const hint_check[] = "hello man";
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
@@ -109,7 +109,7 @@ TEST(test_ccapi_send_data_with_reply, testHintNoEnoughtRoom)
 {
     ccapi_send_error_t error;
 
-    static char const hint_check[] = "testHintNoEnoughtRoom";
+    char const hint_check[] = "testHintNoEnoughtRoom";
 
     ccapi_string_info_t hint;
 
@@ -131,7 +131,7 @@ TEST(test_ccapi_send_data_with_reply, testHintJustEnoughtRoom)
 {
     ccapi_send_error_t error;
 
-    static char const hint_check[] = "testHintJustEnoughtRoom";
+    char const hint_check[] = "testHintJustEnoughtRoom";
 
     ccapi_string_info_t hint;
 
