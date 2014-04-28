@@ -1075,10 +1075,13 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
             break;
     }
 
-    if (svc_send->hint != NULL && resp_ptr->hint != NULL)
+    if (resp_ptr->hint != NULL)
     {
         ccapi_logging_line("Device Cloud response hint %s\n", resp_ptr->hint);
+    }
 
+    if (svc_send->hint != NULL && resp_ptr->hint != NULL)
+    {
         strncpy(svc_send->hint->string, resp_ptr->hint, svc_send->hint->length - 1);
         svc_send->hint->string[svc_send->hint->length - 1] = '\0';
     }
