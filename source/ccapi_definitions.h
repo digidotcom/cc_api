@@ -90,6 +90,7 @@ typedef struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
             ccapi_fs_virtual_dir_t * virtual_dir_list;
+            void * syncr_access;
             void * imp_context;
         } file_system;
     } service;
@@ -126,6 +127,9 @@ void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
 char * ccapi_strdup(char const * const string);
+
+void * ccapi_syncr_create(void);
+ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);

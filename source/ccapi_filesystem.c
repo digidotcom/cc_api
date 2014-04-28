@@ -5,10 +5,39 @@
 static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, ccapi_fs_virtual_dir_t * const new_entry)
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
-    ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
+    ccimp_status_t ccimp_status;
 
-    new_entry->next = next_entry;
-    ccapi_data->service.file_system.virtual_dir_list = new_entry;
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            goto done;
+    }
+
+    {
+        ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
+
+        new_entry->next = next_entry;
+        ccapi_data->service.file_system.virtual_dir_list = new_entry;
+    }
+
+    ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            goto done;
+    }
+
+done:
     return error;
 }
 
@@ -185,6 +214,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccapi_fs_virtual_dir_t * * p_dir_entry = NULL;
+    ccimp_status_t ccimp_status;
 
     if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
     {
@@ -207,6 +237,17 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            goto done;
+    }
+
     {
         ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
@@ -217,7 +258,16 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         *p_dir_entry = next_dir_entry;
     }
 
-
+    ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            goto done;
+    }
 done:
     return error;
 }
