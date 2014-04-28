@@ -33,6 +33,8 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_initiate_send_data_info.out.data = NULL;
             mock_info[i].connector_initiate_send_data_info.in.bytes = 0;
             mock_info[i].connector_initiate_send_data_info.out.bytes_used = 0;
+            mock_info[i].connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_success; 
+            mock_info[i].connector_initiate_send_data_info.in.hint = NULL;
             mock_info[i].connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_complete;
             mock_info[i].connector_initiate_send_data_info.out.more_data = connector_false;			
 
@@ -340,6 +342,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                     .withParameterOfType("connector_request_data_service_send_t", "request_data", (void *)request_data);
             }
 
+            /* Call data callback. It just call it once. Could be changed to call until more_data == false */
             {
                  connector_request_id_t request_id;
                  connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
@@ -370,18 +373,65 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                  mock_info->connector_initiate_send_data_info.out.bytes_used = data_service_send.bytes_used;
                  mock_info->connector_initiate_send_data_info.out.more_data = data_service_send.more_data;
             }
-
+            /* Call response callback */
             {
                  connector_request_id_t request_id;
                  connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
-                 connector_data_service_status_t data_service_status = {
-                                                       header->transport, header->user_context, 
-                                                       mock_info->connector_initiate_send_data_info.in.status==(int)connector_data_service_status_t::connector_data_service_status_complete?connector_data_service_status_t::connector_data_service_status_complete:connector_data_service_status_t::connector_data_service_status_session_error,
-                                                       connector_session_error_none
-                                                       };
+                 if (header->response_required == connector_true)
+                 {
+                     request_id.data_service_request = connector_request_id_data_service_send_response;
+
+                     #define HANDLE_RESPONSE(response) \
+                             { \
+                                 case (response): \
+                                     connector_data_service_send_response_t data_service_response = { \
+                                                               header->transport, header->user_context, \
+                                                               (response), \
+                                                               mock_info->connector_initiate_send_data_info.in.hint \
+                                                               }; \
+                                     ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_response, (void *)ccapi_data); \
+                                     break; \
+                             }
+
+                     switch (mock_info->connector_initiate_send_data_info.in.response)
+                     {
+                         HANDLE_RESPONSE(connector_data_service_send_response_t::connector_data_service_send_response_success);
+                         HANDLE_RESPONSE(connector_data_service_send_response_t::connector_data_service_send_response_bad_request);
+                         HANDLE_RESPONSE(connector_data_service_send_response_t::connector_data_service_send_response_unavailable);
+                         HANDLE_RESPONSE(connector_data_service_send_response_t::connector_data_service_send_response_cloud_error);
+                         HANDLE_RESPONSE(connector_data_service_send_response_t::connector_data_service_send_response_COUNT);
+                     }
+                }
+            }
+            /* Call status callback */
+            {
+                 connector_request_id_t request_id;
+                 connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
+
 
                  request_id.data_service_request = connector_request_id_data_service_send_status;
-                 ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_status, (void *)ccapi_data);
+
+
+                 #define HANDLE_STATUS(status) \
+                         { \
+                             case (status): \
+                                 connector_data_service_status_t data_service_status = { \
+                                                           header->transport, header->user_context, \
+                                                           (status), \
+                                                           connector_session_error_none \
+                                                           }; \
+                                 ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_status, (void *)ccapi_data); \
+                                 break; \
+                         }
+
+                 switch (mock_info->connector_initiate_send_data_info.in.status)
+                 {
+                     HANDLE_STATUS(connector_data_service_status_t::connector_data_service_status_complete);
+                     HANDLE_STATUS(connector_data_service_status_t::connector_data_service_status_cancel);
+                     HANDLE_STATUS(connector_data_service_status_t::connector_data_service_status_timeout);
+                     HANDLE_STATUS(connector_data_service_status_t::connector_data_service_status_session_error);
+                     HANDLE_STATUS(connector_data_service_status_t::connector_data_service_status_COUNT);
+                 }
             }
             break;
         }

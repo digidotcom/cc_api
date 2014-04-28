@@ -22,6 +22,8 @@ extern "C" {
 #include "ccapi_definitions.h"
 }
 
+typedef unsigned long int UINT32_C;
+
 extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 extern ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
 extern ccapi_bool_t ccapi_tcp_close_cb_called;

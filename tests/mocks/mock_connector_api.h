@@ -37,6 +37,8 @@ typedef struct  {
         struct {
             size_t bytes;
             int status;
+            int response;
+            const char * hint;
         } in;
         struct {
             void * data;
