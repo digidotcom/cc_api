@@ -44,16 +44,12 @@ TEST(test_ccapi_send_data_with_reply, testTimeoutOkNoHint)
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
 
-    mock_info->connector_initiate_send_data_info.in.bytes = strlen(data);
-
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
     error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(mock_info->connector_initiate_send_data_info.in.bytes == mock_info->connector_initiate_send_data_info.out.bytes_used);
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, mock_info->connector_initiate_send_data_info.in.bytes));
-    CHECK(mock_info->connector_initiate_send_data_info.out.more_data == connector_false);
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
 }
 
 TEST(test_ccapi_send_data_with_reply, testHint)
@@ -81,7 +77,6 @@ TEST(test_ccapi_send_data_with_reply, testHint)
     hint.length = 10;
     hint.string = (char*)malloc(hint.length);
 
-    mock_info->connector_initiate_send_data_info.in.bytes = strlen(data);
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
@@ -89,9 +84,7 @@ TEST(test_ccapi_send_data_with_reply, testHint)
     error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, &hint);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(mock_info->connector_initiate_send_data_info.in.bytes == mock_info->connector_initiate_send_data_info.out.bytes_used);
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, mock_info->connector_initiate_send_data_info.in.bytes));
-    CHECK(mock_info->connector_initiate_send_data_info.out.more_data == connector_false);
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
 
     CHECK(0 == strcmp(hint.string, hint_check));
 }

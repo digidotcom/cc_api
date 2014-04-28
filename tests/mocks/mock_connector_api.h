@@ -35,15 +35,13 @@ typedef struct  {
     } connector_initiate_transport_stop_info;
     struct {
         struct {
-            size_t bytes;
+            size_t chunk_size;
             int status;
             int response;
             const char * hint;
         } in;
         struct {
             void * data;
-            size_t bytes_used;
-            connector_bool_t more_data;
         } out;
     } connector_initiate_send_data_info;
 } mock_connector_api_info_t;
