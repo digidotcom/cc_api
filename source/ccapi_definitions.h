@@ -90,9 +90,7 @@ typedef struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
             ccapi_fs_virtual_dir_t * virtual_dir_list;
-            struct {
-                void * virtual_dir_list;
-            } syncr_access;
+            void * syncr_access;
             void * imp_context;
         } file_system;
     } service;

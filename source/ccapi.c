@@ -51,10 +51,11 @@ void * ccapi_syncr_create(void)
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            ccapi_logging_line("ccapi_syncr_create() failed!");
+            create_data.syncr_object = NULL;
             break;
     }
-done:
+
     return create_data.syncr_object;
 }
 
