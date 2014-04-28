@@ -5,10 +5,31 @@
 static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, ccapi_fs_virtual_dir_t * const new_entry)
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
-    ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
 
-    new_entry->next = next_entry;
-    ccapi_data->service.file_system.virtual_dir_list = new_entry;
+    if (ccapi_data->service.file_system.syncr_access.virtual_dir_list == NULL)
+    {
+        ccapi_data->service.file_system.syncr_access.virtual_dir_list = ccapi_syncr_create();
+        if (ccapi_data->service.file_system.syncr_access.virtual_dir_list == NULL)
+        {
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+    }
+    else
+    {
+        ASSERT(ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access.virtual_dir_list) == CCIMP_STATUS_OK);
+    }
+
+    {
+        ccapi_fs_virtual_dir_t * const next_entry = ccapi_data->service.file_system.virtual_dir_list;
+
+        new_entry->next = next_entry;
+        ccapi_data->service.file_system.virtual_dir_list = new_entry;
+    }
+
+    ccapi_syncr_release(ccapi_data->service.file_system.syncr_access.virtual_dir_list);
+
+done:
     return error;
 }
 
@@ -207,6 +228,20 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
+    if (ccapi_data->service.file_system.syncr_access.virtual_dir_list == NULL)
+    {
+        ccapi_data->service.file_system.syncr_access.virtual_dir_list = ccapi_syncr_create();
+        if (ccapi_data->service.file_system.syncr_access.virtual_dir_list == NULL)
+        {
+            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+    }
+    else
+    {
+        ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access.virtual_dir_list);
+    }
+
     {
         ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
         ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
@@ -216,7 +251,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_free(dir_entry);
         *p_dir_entry = next_dir_entry;
     }
-
+    ccapi_syncr_release(ccapi_data->service.file_system.syncr_access.virtual_dir_list);
 
 done:
     return error;

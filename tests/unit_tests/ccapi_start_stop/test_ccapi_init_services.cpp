@@ -49,5 +49,5 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.user_callbacks.changed_cb);
     CHECK(NULL == ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(NULL == ccapi_data_single_instance->service.file_system.virtual_dir_list);
-
+    CHECK(NULL == ccapi_data_single_instance->service.file_system.syncr_access.virtual_dir_list);
 }

@@ -39,6 +39,44 @@ ccimp_status_t ccapi_free(void * ptr)
     return ccimp_os_free(&free_info);
 }
 
+
+void * ccapi_syncr_create(void)
+{
+    ccimp_os_syncr_create_t create_data;
+    ccimp_status_t const ccimp_status = ccimp_os_syncr_create(&create_data);
+
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            break;
+    }
+done:
+    return create_data.syncr_object;
+}
+
+ccimp_status_t ccapi_syncr_acquire(void * syncr_object)
+{
+    ccimp_os_syncr_acquire_t acquire_data;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+
+    ASSERT_MSG_GOTO(syncr_object != NULL, done);
+    acquire_data.syncr_object = syncr_object;
+    acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
+
+    ccimp_status = ccimp_os_syncr_acquire(&acquire_data);
+    if (ccimp_status == CCIMP_STATUS_OK && acquire_data.acquired != CCAPI_TRUE)
+    {
+        ccimp_status = CCIMP_STATUS_ERROR;
+    }
+
+done:
+    return ccimp_status;
+}
+
 ccimp_status_t ccapi_syncr_release(void * syncr_object)
 {
     ccimp_os_syncr_release_t release_data;

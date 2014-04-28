@@ -141,6 +141,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         ccapi_data->service.file_system.user_callbacks.changed_cb = start->service.file_system->changed_cb;
         ccapi_data->service.file_system.imp_context = NULL;
         ccapi_data->service.file_system.virtual_dir_list = NULL;
+        ccapi_data->service.file_system.syncr_access.virtual_dir_list = NULL;
     }
     else
     {
