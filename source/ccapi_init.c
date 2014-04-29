@@ -35,9 +35,35 @@ done:
     return error;
 }
 
+static void free_filesystem_dir_entry_list(ccapi_data_t * const ccapi_data)
+{
+    ccapi_fs_virtual_dir_t * dir_entry = ccapi_data->service.file_system.virtual_dir_list;
+
+    do {
+        ccapi_fs_virtual_dir_t * const next_dir_entry = dir_entry->next;
+        ccapi_free(dir_entry->local_dir);
+        ccapi_free(dir_entry->virtual_dir);
+        ccapi_free(dir_entry);
+        dir_entry = next_dir_entry;
+    } while (dir_entry != NULL);
+}
+
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
+
+    if (ccapi_data->config.filesystem_supported)
+    {
+        if (ccapi_data->service.file_system.syncr_access != NULL)
+        {
+            ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+        }
+
+        if (ccapi_data->service.file_system.virtual_dir_list != NULL)
+        {
+            free_filesystem_dir_entry_list(ccapi_data);
+        }
+    }
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
@@ -85,6 +111,9 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
+    ccapi_data->initiate_action_syncr = NULL;
+    ccapi_data->service.file_system.virtual_dir_list = NULL;
+    ccapi_data->service.file_system.syncr_access = NULL;
     /* Initialize one single time for all connector instances the logging syncr object */
     if (logging_syncr == NULL)
     {
