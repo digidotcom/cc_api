@@ -237,12 +237,14 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                 firmware_supported->supported = ccapi_data->config.firmware_supported;
             }
             break;
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         case connector_request_id_config_file_system:
             {
                 connector_config_supported_t * filesystem_supported = data;
                 filesystem_supported->supported = ccapi_data->config.filesystem_supported;
             }
             break;
+#endif
         case connector_request_id_config_remote_configuration:
             {
                 connector_config_supported_t * rci_supported = data;
