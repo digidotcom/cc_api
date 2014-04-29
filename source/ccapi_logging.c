@@ -13,15 +13,11 @@ void * logging_syncr = NULL;
 
 static ccimp_status_t ccapi_logging_lock_acquire(void)
 {
-    ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t status = CCIMP_STATUS_ERROR;
     
     if (logging_syncr != NULL)
     {
-        acquire_data.syncr_object = logging_syncr;
-        acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
-
-        status = ccimp_os_syncr_acquire(&acquire_data);
+        status = ccapi_syncr_acquire(logging_syncr);
     }
 
     return status;

@@ -221,13 +221,13 @@ static ccapi_send_error_t call_send_common(ccapi_data_t * const ccapi_data, ccap
         ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE);
         if (result != CCIMP_STATUS_OK)
         {
-            ccapi_logging_line("ccxapi_send_data: lock_acquire failed");
+            ccapi_logging_line("call_send_common: lock_acquire failed");
             error = CCAPI_SEND_ERROR_SYNCR_FAILED;
         }
     }
     else
     {
-        ccapi_logging_line("ccxapi_send_data: ccfsm error %d", status);
+        ccapi_logging_line("call_send_common: ccfsm error %d", status);
         error = CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED;
     }
 
