@@ -15,13 +15,13 @@ typedef enum {
     CCAPI_SEND_ERROR_INVALID_HINT_POINTER,
     CCAPI_SEND_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_SEND_ERROR_SYNCR_FAILED,
-    CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED,    /* Error reported by ccfsm connector_initiate_action */ /* todo: change to _INITIATE_ACTION_FAILED */
-    CCAPI_SEND_ERROR_STATUS_CANCEL,             /* session is cancelled by the user */
-    CCAPI_SEND_ERROR_STATUS_TIMEOUT,            /* session timed out */
-    CCAPI_SEND_ERROR_STATUS_SESSION_ERROR,      /* error from lower communication layer  */
-    CCAPI_SEND_ERROR_RESPONSE_BAD_REQUEST,      /* at least some portion of the request is not valid */
-    CCAPI_SEND_ERROR_RESPONSE_UNAVAILABLE,      /* service not available, may retry later */
-    CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR       /* Device Cloud encountered error while handling the request */
+    CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED,
+    CCAPI_SEND_ERROR_STATUS_CANCEL,
+    CCAPI_SEND_ERROR_STATUS_TIMEOUT,
+    CCAPI_SEND_ERROR_STATUS_SESSION_ERROR,
+    CCAPI_SEND_ERROR_RESPONSE_BAD_REQUEST,
+    CCAPI_SEND_ERROR_RESPONSE_UNAVAILABLE,
+    CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR
 } ccapi_send_error_t;
 
 typedef enum {
