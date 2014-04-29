@@ -2,6 +2,7 @@
 
 #include "ccapi_definitions.h"
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, ccapi_fs_virtual_dir_t * const new_entry)
 {
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
@@ -323,3 +324,4 @@ ccapi_fs_error_t ccapi_fs_remove_virtual_dir(char const * const virtual_dir)
 {
     return ccxapi_fs_remove_virtual_dir(ccapi_data_single_instance, virtual_dir);
 }
+#endif

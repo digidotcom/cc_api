@@ -35,6 +35,7 @@ done:
     return error;
 }
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 static void free_filesystem_dir_entry_list(ccapi_data_t * const ccapi_data)
 {
     ccapi_fs_virtual_dir_t * dir_entry = ccapi_data->service.file_system.virtual_dir_list;
@@ -47,11 +48,13 @@ static void free_filesystem_dir_entry_list(ccapi_data_t * const ccapi_data)
         dir_entry = next_dir_entry;
     } while (dir_entry != NULL);
 }
+#endif
 
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
     if (ccapi_data->config.filesystem_supported)
     {
         if (ccapi_data->service.file_system.syncr_access != NULL)
@@ -64,6 +67,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             free_filesystem_dir_entry_list(ccapi_data);
         }
     }
+#endif
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
@@ -163,6 +167,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     ccapi_data->config.firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
     if (start->service.file_system != NULL)
     {
         ccapi_data->config.filesystem_supported = CCAPI_TRUE;
@@ -172,6 +177,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         ccapi_data->service.file_system.virtual_dir_list = NULL;
     }
     else
+#endif
     {
         ccapi_data->config.filesystem_supported = CCAPI_FALSE;
     }
@@ -214,6 +220,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         }
     }
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
     if (ccapi_data->config.filesystem_supported == CCAPI_TRUE)
     {
         ccapi_data->service.file_system.syncr_access = ccapi_syncr_create_and_release();
@@ -223,6 +230,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
             goto done;
         }
     }
+#endif
 
 done:
     switch (error)
