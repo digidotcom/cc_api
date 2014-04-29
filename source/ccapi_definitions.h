@@ -137,8 +137,11 @@ ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);
 
+connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status);
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length);
+connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data);
 
 void ccapi_logging_line(char const * const format, ...);
 void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
