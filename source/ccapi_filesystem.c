@@ -187,6 +187,12 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
+    if (!ccapi_data->config.filesystem_supported)
+    {
+        error = CCAPI_FS_ERROR_NO_FS_SUPPORT;
+        goto done;
+    }
+
     if (NULL != *get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir, strlen(virtual_dir)))
     {
         error = CCAPI_FS_ERROR_ALREADY_MAPPED;
@@ -251,6 +257,12 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         ccapi_logging_line("ccxapi_fs_remove_virtual_dir: CCAPI not started");
 
         error = CCAPI_FS_ERROR_CCAPI_STOPPED;
+        goto done;
+    }
+
+    if (!ccapi_data->config.filesystem_supported)
+    {
+        error = CCAPI_FS_ERROR_NO_FS_SUPPORT;
         goto done;
     }
 

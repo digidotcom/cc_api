@@ -20,6 +20,35 @@ TEST(test_ccapi_fs_mapping_no_CCAPI, testCcapiNotStarted)
 
     error = ccapi_fs_add_virtual_dir("my_virtual_dir", dir_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_CCAPI_STOPPED, error);
+
+    error = ccapi_fs_remove_virtual_dir("my_virtual_dir");
+    CHECK_EQUAL(CCAPI_FS_ERROR_CCAPI_STOPPED, error);
+}
+
+TEST_GROUP(test_ccapi_fs_mapping_no_filesystem)
+{
+    void setup()
+    {
+        Mock_create_all();
+        th_start_ccapi();
+    }
+
+    void teardown()
+    {
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccapi_fs_mapping_no_filesystem, testCcapiNotStarted)
+{
+    ccapi_fs_error_t error;
+    char const * const dir_path = "/home/user/my_directory";
+
+    error = ccapi_fs_add_virtual_dir("my_virtual_dir", dir_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_NO_FS_SUPPORT, error);
+
+    error = ccapi_fs_remove_virtual_dir("my_virtual_dir");
+    CHECK_EQUAL(CCAPI_FS_ERROR_NO_FS_SUPPORT, error);
 }
 
 TEST_GROUP(test_ccapi_fs_mapping)
