@@ -141,26 +141,6 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         ccapi_data->service.file_system.user_callbacks.changed_cb = start->service.file_system->changed_cb;
         ccapi_data->service.file_system.imp_context = NULL;
         ccapi_data->service.file_system.virtual_dir_list = NULL;
-        ccapi_data->service.file_system.syncr_access = ccapi_syncr_create();
-        if (ccapi_data->service.file_system.syncr_access == NULL)
-        {
-            error = CCAPI_START_ERROR_SYNCR_FAILED;
-            goto done;
-        }
-        {
-            ccimp_status_t const ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
-
-            switch(ccimp_status)
-            {
-                case CCIMP_STATUS_OK:
-                    break;
-                case CCIMP_STATUS_BUSY:
-                case CCIMP_STATUS_ERROR:
-                    error = CCAPI_START_ERROR_SYNCR_FAILED;
-                    goto done;
-            }
-        }
-
     }
     else
     {
@@ -197,15 +177,22 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     }
 
     {
-        ccimp_os_syncr_create_t create_data;
-    
-        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK || ccapi_syncr_release(create_data.syncr_object) != CCIMP_STATUS_OK)
+        ccapi_data->initiate_action_syncr = ccapi_syncr_create_and_release();
+        if (ccapi_data->initiate_action_syncr == NULL)
         {
             error = CCAPI_START_ERROR_SYNCR_FAILED;
             goto done;
         }
+    }
 
-        ccapi_data->initiate_action_syncr = create_data.syncr_object;
+    if (ccapi_data->config.filesystem_supported == CCAPI_TRUE)
+    {
+        ccapi_data->service.file_system.syncr_access = ccapi_syncr_create_and_release();
+        if (ccapi_data->service.file_system.syncr_access == NULL)
+        {
+            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            goto done;
+        }
     }
 
 done:
