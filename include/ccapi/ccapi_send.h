@@ -3,7 +3,7 @@
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 
-#define SEND_WAIT_FOREVER UINT32_C(0x0)
+#define SEND_WAIT_FOREVER ((unsigned long) 0)
 
 typedef enum {
     CCAPI_SEND_ERROR_NONE,

@@ -30,8 +30,6 @@ typedef struct {
 
 typedef int my_filesystem_context_t;
 typedef int my_filesystem_dir_handle_t;
-typedef unsigned long int UINT32_C;
-
 
 extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
 extern my_filesystem_dir_handle_t dir_handle; /* Defined in mock_ccimp_filesystem.cpp */
