@@ -59,6 +59,31 @@ void * ccapi_syncr_create(void)
     return create_data.syncr_object;
 }
 
+void * ccapi_syncr_create_and_release(void)
+{
+    ccimp_status_t ccimp_status;
+    void * syncr_object;
+    syncr_object = ccapi_syncr_create();
+    if (syncr_object == NULL)
+    {
+        goto done;
+    }
+
+    ccimp_status = ccapi_syncr_release(syncr_object);
+    switch(ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            syncr_object = NULL;
+            goto done;
+    }
+
+done:
+    return syncr_object;
+}
+
 ccimp_status_t ccapi_syncr_acquire(void * syncr_object)
 {
     ccimp_os_syncr_acquire_t acquire_data;

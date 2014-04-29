@@ -131,6 +131,7 @@ ccimp_status_t ccapi_free(void * ptr);
 char * ccapi_strdup(char const * const string);
 
 void * ccapi_syncr_create(void);
+void * ccapi_syncr_create_and_release(void);
 ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
