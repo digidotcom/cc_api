@@ -1284,6 +1284,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
             {
                 ccfsm_dir_entry_status_data->statbuf.flags = connector_file_system_file_type_is_dir;
                 ccfsm_dir_entry_status_data->statbuf.last_modified = 0;
+                ccfsm_dir_entry_status_data->statbuf.file_size = 0;
                 ccimp_status = CCIMP_STATUS_OK;
             }
             else
