@@ -71,6 +71,8 @@ int main (void)
 
     char const data[] = DATA;
     ccapi_send_error_t send_error;
+    char hint_string[100] = "";
+    ccapi_string_info_t hint_string_info;
 
     fill_start_structure_with_good_parameters(&start);
 
@@ -104,7 +106,7 @@ int main (void)
         goto done;
     }
 
-    send_error = ccapi_send_data(CCAPI_TRANSPORT_TCP, "test/test.txt", "text/plain", data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    send_error = ccapi_send_data(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data.txt", "text/plain", data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     if (send_error == CCAPI_SEND_ERROR_NONE)
     {
         printf("ccapi_send_data success\n");
@@ -112,6 +114,22 @@ int main (void)
     else
     {
         printf("ccapi_send_data failed with error %d\n", send_error);
+    }
+
+    hint_string_info.string = hint_string;
+    hint_string_info.length = sizeof(hint_string);
+
+    send_error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data_with_reply.txt", "text/plain", data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
+    if (send_error == CCAPI_SEND_ERROR_NONE)
+    {
+        printf("ccapi_send_data_with_reply success\n");
+    }
+    else
+    {
+        printf("ccapi_send_data_with_reply failed with error %d\n", send_error);
+
+        if (strlen(hint_string_info.string) != 0)
+            printf("ccapi_send_data_with_reply hint %s\n", hint_string_info.string);
     }
 
 done:

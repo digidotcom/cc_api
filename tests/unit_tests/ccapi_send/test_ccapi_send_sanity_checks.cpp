@@ -130,6 +130,29 @@ TEST(test_ccapi_send_common_sanity_checks, testLimitContentType)
     free(content_type);
 }
 
+TEST(test_ccapi_send_common_sanity_checks, testUdpTransportNotStarted)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_UDP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_UDP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+}
+
+TEST(test_ccapi_send_common_sanity_checks, testSmsTransportNotStarted)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_data(CCAPI_TRANSPORT_SMS, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_SMS, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+}
+
+
 TEST_GROUP(test_ccapi_send_data_sanity_checks)
 {
     static ccapi_send_error_t error;
@@ -157,6 +180,9 @@ TEST(test_ccapi_send_data_sanity_checks, testInvalidData)
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, NULL, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_DATA, error);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, NULL, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_DATA, error);
 }
 
 TEST(test_ccapi_send_data_sanity_checks, testInvalidBytes)
@@ -164,6 +190,9 @@ TEST(test_ccapi_send_data_sanity_checks, testInvalidBytes)
     ccapi_send_error_t error;
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, 0, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_DATA, error);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, 0, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_DATA, error);
 }
 
@@ -173,20 +202,67 @@ TEST(test_ccapi_send_data_sanity_checks, testOK)
 
     error = ccapi_send_data(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 }
 
-TEST(test_ccapi_send_data_sanity_checks, testUdpTransportNotStarted)
+TEST_GROUP(test_ccapi_send_with_reply_sanity_checks)
+{
+    static ccapi_send_error_t error;
+
+    void setup()
+    {
+        Mock_create_all();
+
+        th_start_ccapi();
+
+        th_start_tcp_lan_ipv4();
+    }
+
+    void teardown()
+    {
+        th_stop_ccapi(ccapi_data_single_instance);
+
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccapi_send_with_reply_sanity_checks, testInvalidHintString)
 {
     ccapi_send_error_t error;
 
-    error = ccapi_send_data(CCAPI_TRANSPORT_UDP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+    ccapi_string_info_t hint;
+
+    hint.length = 10;
+    hint.string = NULL;
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_HINT_POINTER, error);
 }
 
-TEST(test_ccapi_send_data_sanity_checks, testSmsTransportNotStarted)
+TEST(test_ccapi_send_with_reply_sanity_checks, testInvalidHintLenght)
 {
     ccapi_send_error_t error;
 
-    error = ccapi_send_data(CCAPI_TRANSPORT_SMS, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED, error);
+    ccapi_string_info_t hint;
+
+    hint.length = 0;
+    hint.string = (char*)malloc(10);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_HINT_POINTER, error);
+}
+
+TEST(test_ccapi_send_with_reply_sanity_checks, testOK)
+{
+    ccapi_send_error_t error;
+
+    ccapi_string_info_t hint;
+
+    hint.length = 10;
+    hint.string = (char*)malloc(hint.length);
+
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 }

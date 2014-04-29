@@ -1464,8 +1464,44 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_response(connector_data_service_send_response_t const * const resp_ptr)
 {
-    UNUSED_ARGUMENT(resp_ptr);
 
+    ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)resp_ptr->user_context;
+
+    /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
+
+    ccapi_logging_line("Received %s response from Device Cloud\n", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
+
+    switch (resp_ptr->response)
+    {
+        case connector_data_service_send_response_success:
+            svc_send->response_error = CCAPI_SEND_ERROR_NONE;
+            break;
+        case connector_data_service_send_response_bad_request:
+            svc_send->response_error = CCAPI_SEND_ERROR_RESPONSE_BAD_REQUEST;
+            break;
+        case connector_data_service_send_response_unavailable:
+            svc_send->response_error = CCAPI_SEND_ERROR_RESPONSE_UNAVAILABLE;
+            break;
+        case connector_data_service_send_response_cloud_error:
+            svc_send->response_error = CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR;
+            break;
+        case connector_data_service_send_response_COUNT:
+            ASSERT_MSG_GOTO(0, done);
+            break;
+    }
+
+    if (resp_ptr->hint != NULL)
+    {
+        ccapi_logging_line("Device Cloud response hint %s\n", resp_ptr->hint);
+    }
+
+    if (svc_send->hint != NULL && resp_ptr->hint != NULL)
+    {
+        strncpy(svc_send->hint->string, resp_ptr->hint, svc_send->hint->length - 1);
+        svc_send->hint->string[svc_send->hint->length - 1] = '\0';
+    }
+
+done:
     return connector_callback_continue;
 }
 
@@ -1475,8 +1511,25 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     connector_callback_status_t connector_status = connector_callback_error;
 
     ccapi_logging_line("Data service status: %d\n", status_ptr->status);
-
-    svc_send->error = (status_ptr->status == connector_data_service_status_complete) ? CCAPI_SEND_ERROR_NONE : CCAPI_SEND_ERROR_CCFSM_ERROR;
+   
+    switch (status_ptr->status)
+    {
+        case connector_data_service_status_complete:
+            svc_send->status_error = CCAPI_SEND_ERROR_NONE;
+            break;
+        case connector_data_service_status_cancel:
+            svc_send->status_error = CCAPI_SEND_ERROR_STATUS_CANCEL;
+            break;
+        case connector_data_service_status_timeout:
+            svc_send->status_error = CCAPI_SEND_ERROR_STATUS_TIMEOUT;
+            break;
+        case connector_data_service_status_session_error:
+            svc_send->status_error = CCAPI_SEND_ERROR_STATUS_SESSION_ERROR;
+            break;
+        case connector_data_service_status_COUNT:
+            ASSERT_MSG_GOTO(0, done);
+            break;
+    }
 
     ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
     
