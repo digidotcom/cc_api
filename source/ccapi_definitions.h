@@ -122,6 +122,21 @@ typedef struct
 } ccapi_svc_send_data_t;
 #endif
 
+#if defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+typedef enum {
+    CCAPI_FS_INTERNAL_ERROR_ACCESS_DENIED,
+    CCAPI_FS_INTERNAL_ERROR_INVALID_PATH
+} ccapi_fs_internal_error_t;
+
+typedef struct {
+    ccapi_bool_t error_is_internal;
+    struct {
+        void * ccimp_error;
+        ccapi_fs_internal_error_t ccapi_error;
+    } error;
+} ccapi_fs_error_handle_t;
+#endif
+
 extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;
 
