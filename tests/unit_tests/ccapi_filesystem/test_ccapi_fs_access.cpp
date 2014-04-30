@@ -73,14 +73,6 @@ TEST(test_ccapi_fs_access, testAccessRead)
     CHECK(ccfsm_open_data.handle != NULL);
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
-
-    /* Check access denied, no call to mocks */
-    ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
-    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_open_data, ccapi_data_single_instance);
-
-    CHECK_EQUAL(connector_callback_error, status);
-    CHECK(ccfsm_open_data.handle == NULL);
-    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
 }
 
 TEST(test_ccapi_fs_access, testAccessWrite)
@@ -197,13 +189,6 @@ TEST(test_ccapi_fs_access, testAccessRemove)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
-
-    /* Check access denied, no call to mocks */
-    ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
-    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_remove_data, ccapi_data_single_instance);
-
-    CHECK_EQUAL(connector_callback_error, status);
-    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
 }
 
 TEST(test_ccapi_fs_access, testAccessList)
@@ -239,12 +224,108 @@ TEST(test_ccapi_fs_access, testAccessList)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(NULL != ccfsm_dir_open_data.handle);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+}
+
+TEST(test_ccapi_fs_access, testAccessOpenDenied)
+{
+    connector_request_id_t request;
+    connector_file_system_open_t ccfsm_open_data;
+    connector_callback_status_t status;
+    ccapi_fs_error_handle_t * error_handle;
+
+    ccapi_fs_access_expected_path = "/tmp/hello.txt";
+    ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READ;
+
+    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.handle = NULL;
+    ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDONLY | CONNECTOR_FILE_O_APPEND;
+    ccfsm_open_data.path = ccapi_fs_access_expected_path;
+    ccfsm_open_data.user_context = NULL;
 
     /* Check access denied, no call to mocks */
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
+
+    request.file_system_request = connector_request_id_file_system_open;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_open_data, ccapi_data_single_instance);
+
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_open_data.errnum;
+
+    CHECK_EQUAL(connector_callback_error, status);
+    CHECK(ccfsm_open_data.handle == NULL);
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_ACCESS_DENIED, error_handle->error.ccapi_error);
+
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_open_data.errnum, connector_file_system_permission_denied);
+}
+
+TEST(test_ccapi_fs_access, testAccessListDenied)
+{
+    connector_request_id_t request;
+    connector_file_system_opendir_t ccfsm_dir_open_data;
+    connector_callback_status_t status;
+    int fs_context;
+    ccapi_fs_error_handle_t * error_handle;
+
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
+
+    ccapi_fs_access_expected_path = "/tmp/";
+    ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_LIST;
+    ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
+
+    ccfsm_dir_open_data.errnum = NULL;
+    ccfsm_dir_open_data.user_context = NULL;
+    ccfsm_dir_open_data.handle = NULL;
+    ccfsm_dir_open_data.path = ccapi_fs_access_expected_path;
+
+    request.file_system_request = connector_request_id_file_system_opendir;
+
+    /* Check access denied, no call to mocks */
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_dir_open_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_open_data.errnum;
+
+    CHECK_EQUAL(connector_callback_error, status);
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_ACCESS_DENIED, error_handle->error.ccapi_error);
 
     CHECK_EQUAL(connector_callback_error, status);
     CHECK(ccfsm_dir_open_data.handle == NULL);
     CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_dir_open_data.errnum, connector_file_system_permission_denied);
+}
+
+TEST(test_ccapi_fs_access, testAccessRemoveDenied)
+{
+    connector_request_id_t request;
+    connector_file_system_remove_t ccfsm_remove_data;
+    connector_callback_status_t status;
+    int fs_context;
+
+    /* Simulate that imp_context was previously set by other call (file_open) */
+    ccapi_data_single_instance->service.file_system.imp_context = &fs_context;
+
+    ccapi_fs_access_expected_path = "/tmp/hello.txt";
+    ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
+    ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
+
+    ccfsm_remove_data.errnum = NULL;
+    ccfsm_remove_data.user_context = NULL;
+    ccfsm_remove_data.path = ccapi_fs_access_expected_path;
+
+    request.file_system_request = connector_request_id_file_system_remove;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_remove_data, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_error, status);
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+
+    /* Check access denied, no call to mocks */
+    ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_remove_data, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_error, status);
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_fs_access_cb_called);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_remove_data.errnum, connector_file_system_permission_denied);
 }

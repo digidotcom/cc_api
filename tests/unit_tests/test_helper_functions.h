@@ -52,5 +52,6 @@ int th_stop_aux_thread(pthread_t pthread);
 ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connector_file_system_open_t * const ccfsm_open_data, int flags);
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
+void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error);
 
 #endif
