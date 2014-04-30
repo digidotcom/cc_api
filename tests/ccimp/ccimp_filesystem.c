@@ -296,7 +296,6 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir
     int result = stat(dir_entry_status_data->path, &statbuf);
     if (result == 0)
     {
-        dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
         dir_entry_status_data->status.last_modified = (uint32_t) statbuf.st_mtim.tv_sec;
         if (S_ISDIR(statbuf.st_mode))
         {
@@ -307,6 +306,10 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir
            dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
            dir_entry_status_data->status.file_size = (ccimp_file_offset_t) statbuf.st_size;
         }
+        else
+        {
+            dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+        }
     }
     else
     {
@@ -316,8 +319,9 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir
        }
        else
        {
-             dir_entry_status_data->errnum.value = errno;
-             status = CCIMP_STATUS_ERROR;
+           dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+           dir_entry_status_data->status.file_size = 0;
+           dir_entry_status_data->status.last_modified = 0;
        }
     }
     return status;
