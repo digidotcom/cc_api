@@ -135,6 +135,10 @@ void * ccapi_syncr_create_and_release(void);
 ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
+ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, void * * file_handler);
+ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, void * const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);
+ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, void * const file_handler);
+ccimp_status_t ccapi_fs_dir_entry_status(ccapi_data_t * const ccapi_data, char const * const local_path, ccimp_fs_stat_t * const fs_status);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);
 
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
