@@ -180,7 +180,7 @@ ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * 
 done:
     if (syncr_acquired)
     {
-        ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
     }
 
     return ccimp_status;
@@ -242,7 +242,7 @@ ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, void * const 
 done:
     if (syncr_acquired)
     {
-        ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
     }
 
     return ccimp_status;
@@ -298,7 +298,7 @@ ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, void * const
 done:
     if (syncr_acquired)
     {
-        ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
     }
 
     return ccimp_status;
@@ -358,7 +358,7 @@ ccimp_status_t ccapi_fs_dir_entry_status(ccapi_data_t * const ccapi_data, char c
 done:
     if (syncr_acquired)
     {
-        ccimp_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
+        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
     }
 
     return ccimp_status;
