@@ -234,21 +234,21 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_firmware_facility:
             {
                 connector_config_supported_t * firmware_supported = data;
-                firmware_supported->supported = ccapi_data->config.firmware_supported;
+                firmware_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.firmware_supported);
             }
             break;
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         case connector_request_id_config_file_system:
             {
                 connector_config_supported_t * filesystem_supported = data;
-                filesystem_supported->supported = ccapi_data->config.filesystem_supported;
+                filesystem_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.filesystem_supported);
             }
             break;
 #endif
         case connector_request_id_config_remote_configuration:
             {
                 connector_config_supported_t * rci_supported = data;
-                rci_supported->supported = ccapi_data->config.rci_supported;
+                rci_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.rci_supported);
             }
             break;
         case connector_request_id_config_data_service:
@@ -260,7 +260,15 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_connection_type:
             {
                 connector_config_connection_type_t * connection_type = data;
-                connection_type->type = ccapi_data->transport_tcp.info->connection.type;
+                switch (ccapi_data->transport_tcp.info->connection.type)
+                {
+                    case CCAPI_CONNECTION_LAN:
+                        connection_type->type = connector_connection_type_lan;
+                        break;
+                    case CCAPI_CONNECTION_WAN:
+                        connection_type->type = connector_connection_type_wan;
+                        break;
+                }
             }
             break;
         case connector_request_id_config_mac_addr:
@@ -539,7 +547,7 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
                 case connector_close_status_device_error:
                 case connector_close_status_no_keepalive:
                 {
-                    connector_close_data->reconnect = ask_user_if_reconnect(close_status, ccapi_data);
+                    connector_close_data->reconnect = CCAPI_BOOL_TO_CONNECTOR_BOOL(ask_user_if_reconnect(close_status, ccapi_data));
                     break;
                 }
                 case connector_close_status_device_stopped:

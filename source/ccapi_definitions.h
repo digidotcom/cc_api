@@ -42,6 +42,7 @@
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
 #define CCAPI_RUNNING(c) ((c) != NULL && (c)->thread.connector_run->status == CCAPI_THREAD_RUNNING)
 
+#define CCAPI_BOOL_TO_CONNECTOR_BOOL(a)     ((a) == CCAPI_TRUE ? connector_true : connector_false)
 #define CCAPI_MAX_OF(a, b)          ((a) > (b) ? (a) : (b))
 #define CCAPI_MIN_OF(a, b)          ((a) < (b) ? (a) : (b))
 #define CCAPI_FS_DIR_SEPARATOR      '/'
