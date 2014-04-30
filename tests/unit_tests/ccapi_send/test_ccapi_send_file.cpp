@@ -1,40 +1,9 @@
 #include "test_helper_functions.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <errno.h>
-
 #define CLOUD_PATH   "test/test.txt"
 #define CONTENT_TYPE "text/plain"
 #define DATA         "CCAPI send data sample\n"
 #define LOCAL_PATH   "./send_file.txt"
-
-void create_test_file(char const * const path, void const * const data, size_t bytes)
-{
-    int fd, result;
-
-    fd = open(path, O_CREAT | O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH); /* 0664 = Owner RW + Group RW + Others R */
-    CHECK (fd >= 0);
-
-    result = write(fd, data, bytes);
-    CHECK (result >= 0);
-
-    result = close(fd);
-    CHECK (result >= 0);
-}
-
-void destroy_test_file(char const * const path)
-{
-    int result = unlink(path);
-    CHECK (result >= 0);
-}
 
 TEST_GROUP(test_ccapi_send_file_no_reply)
 {

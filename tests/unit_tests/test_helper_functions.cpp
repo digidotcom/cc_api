@@ -2,6 +2,17 @@
 #include <stdio.h>
 #include <pthread.h>
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+
 ccapi_bool_t ccapi_tcp_keepalives_cb_called;
 ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
 
@@ -241,4 +252,24 @@ void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const cci
     ccimp_dir_close_data->errnum.pointer = NULL;
     ccimp_dir_close_data->imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_dir_close_data, CCIMP_STATUS_OK);
+}
+
+void create_test_file(char const * const path, void const * const data, size_t bytes)
+{
+    int fd, result;
+
+    fd = open(path, O_CREAT | O_RDWR, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH); /* 0664 = Owner RW + Group RW + Others R */
+    CHECK (fd >= 0);
+
+    result = write(fd, data, bytes);
+    CHECK (result >= 0);
+
+    result = close(fd);
+    CHECK (result >= 0);
+}
+
+void destroy_test_file(char const * const path)
+{
+    int result = unlink(path);
+    CHECK (result >= 0);
 }

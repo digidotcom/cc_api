@@ -53,4 +53,6 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
 
+void create_test_file(char const * const path, void const * const data, size_t bytes);
+void destroy_test_file(char const * const path);
 #endif
