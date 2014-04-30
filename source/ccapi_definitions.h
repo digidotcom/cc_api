@@ -113,7 +113,9 @@ typedef struct {
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 typedef struct
 {
+    ccapi_data_t * ccapi_data;
     void * next_data;
+    void * file_handler;
     size_t bytes_remaining;
     void * send_syncr;
     ccapi_send_error_t response_error;

@@ -1733,7 +1733,6 @@ done:
 #endif
 
 #ifdef CCIMP_DATA_SERVICE_ENABLED
-
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
     connector_callback_status_t status = connector_callback_abort;
@@ -1745,8 +1744,25 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         ASSERT_MSG_GOTO(svc_send != NULL, done);
         send_ptr->bytes_used = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
-        svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
+        if (svc_send->file_handler == NULL)
+        {
+            memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
+            svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
+        }
+        else
+        {
+            size_t bytes_used;
+
+            ccimp_status_t ccimp_status = ccapi_fs_file_read(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, send_ptr->bytes_used, &bytes_used);
+            if (ccimp_status != CCIMP_STATUS_OK)
+                goto done;
+
+            if (send_ptr->bytes_used == bytes_used)
+            {
+                send_ptr->bytes_used = bytes_used;
+                ASSERT_MSG(0); /* TODO: Remove later */
+            }
+        }
         svc_send->bytes_remaining -= send_ptr->bytes_used;
         send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
 
