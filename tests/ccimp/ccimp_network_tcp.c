@@ -225,6 +225,10 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
     if (data->handle == NULL)
     {
         pfd = (int *)malloc(sizeof(int));
+        if (pfd == NULL)
+        {
+            goto error;
+        }
         *pfd = -1;
         data->handle = pfd;
     }
