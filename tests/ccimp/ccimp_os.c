@@ -107,18 +107,26 @@ ccimp_status_t ccimp_os_yield(void)
 
 ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
 {
-
     ccimp_status_t status = CCIMP_STATUS_OK;
     sem_t * const sem = (sem_t *) malloc(sizeof(sem_t));
+
+    if (sem == NULL)
+    {
+        printf("ccimp_os_syncr_create insufficent memory\n");
+        status = CCIMP_STATUS_ERROR;
+        goto done;
+    }
 
     if (sem_init(sem, 0, 0) == -1)
     {
         printf("ccimp_os_syncr_create error\n");
-        return CCIMP_STATUS_ERROR;
+        free(sem);
+        status = CCIMP_STATUS_ERROR;
+        goto done;
     }
 
     data->syncr_object = sem;
-
+done:
     return status;
 }
 
