@@ -35,7 +35,6 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
         case CCIMP_STATUS_BUSY:
             error = CCAPI_FS_ERROR_SYNCR_FAILED;
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
-            goto done;
     }
 
 done:

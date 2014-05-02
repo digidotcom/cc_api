@@ -79,7 +79,7 @@ static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_f
 
 static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(connector_file_system_hash_algorithm_t ccimp_hash_alg)
 {
-    ccimp_fs_hash_alg_t ccimp_hash_algorithm = connector_file_system_hash_none;
+    ccimp_fs_hash_alg_t ccimp_hash_algorithm;
 
     switch (ccimp_hash_alg)
     {
@@ -133,7 +133,7 @@ static connector_file_system_error_t ccfsm_file_system_error_status_from_ccimp_f
 
 static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error(connector_session_error_t ccfsm_session_error)
 {
-    ccimp_session_error_status_t cccimp_session_error = connector_session_error_none;
+    ccimp_session_error_status_t cccimp_session_error;
 
     switch(ccfsm_session_error)
       {
@@ -228,7 +228,7 @@ static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, ch
             size_t path_without_virtual_dir_length = strlen(path_without_virtual_dir);
             translated_path = ccapi_malloc(dir_entry->local_dir_length + path_without_virtual_dir_length + 1);
 
-            ASSERT_MSG_GOTO(translated_path != 0, done);
+            ASSERT_MSG_GOTO(translated_path != NULL, done);
             memcpy(translated_path, dir_entry->local_dir, strlen(dir_entry->local_dir));
             memcpy(translated_path + dir_entry->local_dir_length, path_without_virtual_dir, path_without_virtual_dir_length);
             translated_path[dir_entry->local_dir_length + path_without_virtual_dir_length] = '\0';
