@@ -224,10 +224,14 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
     {
         ccimp_fs_stat_t fs_status;
 
-        if (ccapi_fs_dir_entry_status(ccapi_data, local_path, &fs_status) != CCIMP_STATUS_OK) 
+        switch (ccapi_fs_dir_entry_status(ccapi_data, local_path, &fs_status)) 
         {
-            error = CCAPI_SEND_ERROR_NOT_A_FILE;
-            goto done;
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                error = CCAPI_SEND_ERROR_NOT_A_FILE;
+                goto done;
         }
 
         switch (fs_status.type)
