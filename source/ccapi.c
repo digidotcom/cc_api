@@ -123,13 +123,10 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
 
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 
-/* TODO: handle errnum in ccapi_fs functions */
-
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
 {
     ccimp_fs_file_open_t ccimp_fs_file_open_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
     file_handler->pointer = NULL;
@@ -138,7 +135,6 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
-            syncr_acquired = CCAPI_TRUE;
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
@@ -165,6 +161,8 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
         ccimp_os_yield();
     } while (!loop_done);
 
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -172,17 +170,11 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
             goto done;
-            break;
     }
 
     *file_handler = ccimp_fs_file_open_data.handle;
 
 done:
-    if (syncr_acquired)
-    {
-        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
-    }
-
     return ccimp_status;
 }
 
@@ -190,7 +182,6 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
 {
     ccimp_fs_file_read_t ccimp_fs_file_read_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
     *bytes_used = 0;
@@ -199,7 +190,6 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
-            syncr_acquired = CCAPI_TRUE;
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
@@ -227,6 +217,8 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
         ccimp_os_yield();
     } while (!loop_done);
 
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -240,11 +232,6 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
     *bytes_used = ccimp_fs_file_read_data.bytes_used;
 
 done:
-    if (syncr_acquired)
-    {
-        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
-    }
-
     return ccimp_status;
 }
 
@@ -252,14 +239,12 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
 {
     ccimp_fs_file_close_t ccimp_fs_file_close_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
     ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
-            syncr_acquired = CCAPI_TRUE;
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
@@ -285,12 +270,9 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
         ccimp_os_yield();
     } while (!loop_done);
 
-done:
-    if (syncr_acquired)
-    {
-        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
-    }
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
 
+done:
     return ccimp_status;
 }
 
@@ -298,20 +280,16 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
 {
     ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    switch (ccimp_status)
     {
-        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
-        switch (ccapi_syncr_acquire_status)
-        {
-            case CCIMP_STATUS_OK:
-                syncr_acquired = CCAPI_TRUE;
-                break;
-            case CCIMP_STATUS_BUSY:
-            case CCIMP_STATUS_ERROR:
-                goto done;
-        }
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            goto done;
     }
 
     ccimp_fs_dir_entry_status_data.path = local_path;
@@ -333,6 +311,8 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
         ccimp_os_yield();
     } while (!loop_done);
 
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -340,17 +320,11 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
             goto done;
-            break;
     }
 
     memcpy(fs_status, &ccimp_fs_dir_entry_status_data.status, sizeof(ccimp_fs_stat_t));
 
 done:
-    if (syncr_acquired)
-    {
-        ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
-    }
-
     return ccimp_status;
 }
 #endif
