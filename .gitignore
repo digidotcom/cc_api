@@ -29,3 +29,5 @@ tests/samples/tcp_start/ccapi
 tests/samples/coverity/ccapi
 tests/samples/send_data/ccapi
 tests/samples/send_data_multiple/ccapi
+tests/samples/send_file/ccapi
+tests/samples/send_file_multiple/ccapi
