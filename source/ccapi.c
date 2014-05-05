@@ -1740,6 +1740,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
         }
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         else
         {
             size_t bytes_read;
@@ -1753,6 +1754,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
                 ASSERT_MSG(0); /* TODO: Remove later */
             }
         }
+#endif
 
         send_ptr->bytes_used = bytes_expected_to_read;
         svc_send->bytes_remaining -= send_ptr->bytes_used;

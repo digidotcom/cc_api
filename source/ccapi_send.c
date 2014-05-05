@@ -217,6 +217,7 @@ done:
     return error;
 }
 
+#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info, char const * const local_path)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
@@ -266,6 +267,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
 done:
     return error;
 }
+#endif
 
 #define setup_send_data_common(send_info, data, bytes) \
 { \
@@ -335,6 +337,8 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
         {
             ASSERT_MSG(ccapi_fs_file_close(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
         }
+#else
+        UNUSED_ARGUMENT(ccapi_data);
 #endif
 
         ccapi_free(send_info);
@@ -446,6 +450,12 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
     ccapi_send_t * send_info = NULL;
 
 #ifndef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+    UNUSED_ARGUMENT(transport);
+    UNUSED_ARGUMENT(local_path);
+    UNUSED_ARGUMENT(cloud_path);
+    UNUSED_ARGUMENT(content_type);
+    UNUSED_ARGUMENT(behavior);
+
     error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
     goto done;
 #else
@@ -502,6 +512,14 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
     ccapi_send_t * send_info = NULL;
 
 #ifndef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+    UNUSED_ARGUMENT(transport);
+    UNUSED_ARGUMENT(local_path);
+    UNUSED_ARGUMENT(cloud_path);
+    UNUSED_ARGUMENT(content_type);
+    UNUSED_ARGUMENT(behavior);
+    UNUSED_ARGUMENT(timeout);
+    UNUSED_ARGUMENT(hint);
+
     error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
     goto done;
 #else
