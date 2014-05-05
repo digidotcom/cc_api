@@ -1740,29 +1740,31 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
     if (send_ptr != NULL)
     {
         ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)send_ptr->user_context;
+        size_t bytes_expected_to_read;
 
         ASSERT_MSG_GOTO(svc_send != NULL, done);
-        send_ptr->bytes_used = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
+        bytes_expected_to_read = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
         if (svc_send->file_handler == NULL)
         {
-            memcpy(send_ptr->buffer, svc_send->next_data, send_ptr->bytes_used);
-            svc_send->next_data = ((char *)svc_send->next_data) + send_ptr->bytes_used;
+            memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
+            svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
         }
         else
         {
-            size_t bytes_used;
+            size_t bytes_read;
 
-            ccimp_status_t ccimp_status = ccapi_fs_file_read(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, send_ptr->bytes_used, &bytes_used);
-            if (ccimp_status != CCIMP_STATUS_OK)
-                goto done;
+            ccimp_status_t ccimp_status = ccapi_fs_file_read(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, bytes_expected_to_read, &bytes_read);
+            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
 
-            if (send_ptr->bytes_used == bytes_used)
+            if (bytes_expected_to_read != bytes_read)
             {
-                send_ptr->bytes_used = bytes_used;
+                bytes_expected_to_read = bytes_read;
                 ASSERT_MSG(0); /* TODO: Remove later */
             }
         }
+
+        send_ptr->bytes_used = bytes_expected_to_read;
         svc_send->bytes_remaining -= send_ptr->bytes_used;
         send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
 
