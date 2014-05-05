@@ -10,6 +10,7 @@
  * =======================================================================
  */
 #include <stdio.h>
+#include <pthread.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
@@ -58,6 +59,40 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     return reconnect;
 }
 
+static void * thread_send_file(void * argument)
+{
+    ccapi_send_error_t send_error;
+
+    char * local_path = (char*)argument;
+    char * cloud_path = (char*)argument;
+
+    send_error = ccapi_send_file(CCAPI_TRANSPORT_TCP, local_path, cloud_path, NULL, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    if (send_error == CCAPI_SEND_ERROR_NONE)
+    {
+        printf("ccapi_send_file success for %s\n", local_path);
+    }
+    else
+    {
+        printf("ccapi_send_file failed with error %d for %s\n", send_error, local_path);
+/*		assert(0);*/
+    }
+
+    return NULL;
+}
+
+pthread_t create_thread_send_file(void * argument)
+{
+    pthread_t pthread;
+    int ccode = pthread_create(&pthread, NULL, thread_send_file, argument);
+
+    if (ccode != 0)
+    {
+        printf("create_thread_send_file() error %d\n", ccode);
+    }
+
+    return pthread;
+}
+
 int main (void)
 {
     ccapi_start_t start = {0};
@@ -66,12 +101,11 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-
-    ccapi_send_error_t send_error;
-    char hint_string[100] = "";
-    ccapi_string_info_t hint_string_info;
+    ccapi_filesystem_service_t fs_service = {NULL, NULL};
 
     fill_start_structure_with_good_parameters(&start);
+
+    start.service.file_system = &fs_service;
 
     start_error = ccapi_start(&start);
 
@@ -103,33 +137,28 @@ int main (void)
         goto done;
     }
 
-    #define SEND_DATA         "CCAPI send_data() sample\n"
-    send_error = ccapi_send_data(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data.txt", "text/plain", SEND_DATA, strlen(SEND_DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
-    if (send_error == CCAPI_SEND_ERROR_NONE)
     {
-        printf("ccapi_send_data success\n");
-    }
-    else
-    {
-        printf("ccapi_send_data failed with error %d\n", send_error);
+        #define NUM_THREADS 10
+        pthread_t thread_h[NUM_THREADS];
+        char* thread_str[NUM_THREADS];
+        char thread_str_pattern[] = "thread_%d.txt";
+        int i;
+
+        for(i= 0; i < NUM_THREADS; i++)
+        {
+            thread_str[i]= (char*)malloc(sizeof(thread_str_pattern));
+            sprintf(thread_str[i], thread_str_pattern, i);
+
+            thread_h[i] = create_thread_send_file(thread_str[i]);
+        }
+
+        for(i= 0; i < NUM_THREADS; i++)
+        {
+            pthread_join(thread_h[i], NULL);
+        }
     }
 
-    hint_string_info.string = hint_string;
-    hint_string_info.length = sizeof(hint_string);
-
-    #define SEND_DATA_WITH_REPLY         "CCAPI send_data_with_reply() sample\n"
-    send_error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data_with_reply.txt", "text/plain", SEND_DATA_WITH_REPLY, strlen(SEND_DATA_WITH_REPLY), CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
-    if (send_error == CCAPI_SEND_ERROR_NONE)
-    {
-        printf("ccapi_send_data_with_reply success\n");
-    }
-    else
-    {
-        printf("ccapi_send_data_with_reply failed with error %d\n", send_error);
-
-        if (strlen(hint_string_info.string) != 0)
-            printf("ccapi_send_data_with_reply hint %s\n", hint_string_info.string);
-    }
+    printf("Test finished\n");
 
 done:
     return 0;

@@ -3,6 +3,7 @@
 #define CLOUD_PATH   "test/test.txt"
 #define CONTENT_TYPE "text/plain"
 #define DATA         "CCAPI send data sample\n"
+#define LOCAL_PATH   "/home/satest/hello.txt"
 
 /* This group doesn't call ccapi_start/stop functions */
 TEST_GROUP(ccapi_send_with_no_ccapi) 
@@ -264,5 +265,68 @@ TEST(test_ccapi_send_with_reply_sanity_checks, testOK)
     hint.string = (char*)malloc(hint.length);
 
     error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+}
+
+TEST_GROUP(test_ccapi_send_file_sanity_checks)
+{
+    static ccapi_send_error_t error;
+
+    void setup()
+    {
+        ccapi_start_t start = {0};
+        ccapi_start_error_t error;
+        ccapi_filesystem_service_t fs_service = {NULL, NULL};
+        Mock_create_all();
+
+        th_fill_start_structure_with_good_parameters(&start);
+        start.service.file_system = &fs_service;
+
+        error = ccapi_start(&start);
+        CHECK(error == CCAPI_START_ERROR_NONE);
+
+        th_start_tcp_lan_ipv4();
+    }
+
+    void teardown()
+    {
+        th_stop_ccapi(ccapi_data_single_instance);
+
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccapi_send_file_sanity_checks, testNullLocalPath)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, NULL, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_LOCAL_PATH, error);
+}
+
+TEST(test_ccapi_send_file_sanity_checks, testEmptyLocalPath)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, "", CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_INVALID_LOCAL_PATH, error);
+}
+
+TEST(test_ccapi_send_file_sanity_checks, testLocalPathIsNotFile)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, "/kkk", CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NOT_A_FILE, error);
+}
+
+TEST(test_ccapi_send_file_sanity_checks, testOK)
+{
+    ccapi_send_error_t error;
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+
+    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 }

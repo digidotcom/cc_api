@@ -16,6 +16,8 @@ void Mock_ccimp_fs_file_open_expectAndReturn(ccimp_fs_file_open_t * data, ccimp_
     mock("ccimp_fs_file_open").expectOneCall("ccimp_fs_file_open")
             .withParameterOfType("ccimp_fs_file_open_t", "data", data)
             .andReturnValue(retval);
+
+    mock("ccimp_fs_file_open").setData("behavior", MOCK_FS_FILE_OPEN_ENABLED);
 }
 
 /* * * ccimp_fs_file_read * * */
@@ -34,6 +36,8 @@ void Mock_ccimp_fs_file_read_expectAndReturn(ccimp_fs_file_read_t * data, ccimp_
     mock("ccimp_fs_file_read").expectOneCall("ccimp_fs_file_read")
             .withParameterOfType("ccimp_fs_file_read_t", "data", data)
             .andReturnValue(retval);
+
+    mock("ccimp_fs_file_read").setData("behavior", MOCK_FS_FILE_READ_ENABLED);
 }
 
 /* * * ccimp_fs_file_write * * */
@@ -88,6 +92,8 @@ void Mock_ccimp_fs_file_close_expectAndReturn(ccimp_fs_file_close_t * data, ccim
     mock("ccimp_fs_file_close").expectOneCall("ccimp_fs_file_close")
             .withParameterOfType("ccimp_fs_file_close_t", "data", data)
             .andReturnValue(retval);
+
+    mock("ccimp_fs_file_close").setData("behavior", MOCK_FS_FILE_CLOSE_ENABLED);
 }
 
 /* * * ccimp_fs_file_truncate * * */
@@ -178,6 +184,8 @@ void Mock_ccimp_fs_dir_entry_status_expectAndReturn(ccimp_fs_dir_entry_status_t 
     mock("ccimp_fs_dir_entry_status").expectOneCall("ccimp_fs_dir_entry_status")
             .withParameterOfType("ccimp_fs_dir_entry_status_t", "data", data)
             .andReturnValue(retval);
+
+    mock("ccimp_fs_dir_entry_status").setData("behavior", MOCK_FS_DIR_ENTRY_STATUS_ENABLED);
 }
 
 /* * * ccimp_fs_dir_close * * */
@@ -284,24 +292,38 @@ my_filesystem_dir_handle_t dir_handle;
 
 ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const data)
 {
-    mock_scope_c("ccimp_fs_file_open")->actualCall("ccimp_fs_file_open")->withParameterOfType("ccimp_fs_file_open_t", "data", (void *)data);
-    data->errnum.value = EAGAIN;
-    data->handle.value = 5;
-    data->imp_context = &my_fs_context;
+    if (mock_scope_c("ccimp_fs_file_open")->getData("behavior").value.intValue == MOCK_FS_FILE_OPEN_ENABLED)
+	{
+        mock_scope_c("ccimp_fs_file_open")->actualCall("ccimp_fs_file_open")->withParameterOfType("ccimp_fs_file_open_t", "data", (void *)data);
+        data->errnum.value = EAGAIN;
+        data->handle.value = 5;
+        data->imp_context = &my_fs_context;
 
-    return (ccimp_status_t)mock_scope_c("ccimp_fs_file_open")->returnValue().value.intValue;
+        return (ccimp_status_t)mock_scope_c("ccimp_fs_file_open")->returnValue().value.intValue;
+    }
+    else
+    {
+        return ccimp_fs_file_open_real(data);
+    }
 }
 
 ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const data)
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
 
-    mock_scope_c("ccimp_fs_file_read")->actualCall("ccimp_fs_file_read")->withParameterOfType("ccimp_fs_file_read_t", "data", (void *)data);
-    strcpy((char *)data->buffer, "testFileRead");
-    data->bytes_used = sizeof "testFileRead";
-    data->errnum.value = ETIMEDOUT;
-    *fs_context = 1;
-    return (ccimp_status_t)mock_scope_c("ccimp_fs_file_read")->returnValue().value.intValue;
+    if (mock_scope_c("ccimp_fs_file_read")->getData("behavior").value.intValue == MOCK_FS_FILE_READ_ENABLED)
+	{
+        mock_scope_c("ccimp_fs_file_read")->actualCall("ccimp_fs_file_read")->withParameterOfType("ccimp_fs_file_read_t", "data", (void *)data);
+        strcpy((char *)data->buffer, "testFileRead");
+        data->bytes_used = sizeof "testFileRead";
+        data->errnum.value = ETIMEDOUT;
+        *fs_context = 1;
+        return (ccimp_status_t)mock_scope_c("ccimp_fs_file_read")->returnValue().value.intValue;
+    }
+    else
+    {
+        return ccimp_fs_file_read_real(data);
+    }
 }
 
 ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const data)
@@ -330,10 +352,17 @@ ccimp_status_t ccimp_fs_file_close(ccimp_fs_file_close_t * const data)
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
 
-    mock_scope_c("ccimp_fs_file_close")->actualCall("ccimp_fs_file_close")->withParameterOfType("ccimp_fs_file_close_t", "data", (void *)data);
-    *fs_context = 4;
-    data->errnum.value = EROFS;
-    return (ccimp_status_t)mock_scope_c("ccimp_fs_file_close")->returnValue().value.intValue;
+    if (mock_scope_c("ccimp_fs_file_close")->getData("behavior").value.intValue == MOCK_FS_FILE_CLOSE_ENABLED)
+	{
+        mock_scope_c("ccimp_fs_file_close")->actualCall("ccimp_fs_file_close")->withParameterOfType("ccimp_fs_file_close_t", "data", (void *)data);
+        *fs_context = 4;
+        data->errnum.value = EROFS;
+        return (ccimp_status_t)mock_scope_c("ccimp_fs_file_close")->returnValue().value.intValue;
+    }
+    else
+    {
+        return ccimp_fs_file_close_real(data);
+    }
 }
 
 ccimp_status_t ccimp_fs_file_truncate(ccimp_fs_file_truncate_t * const data)
@@ -381,13 +410,20 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dat
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
 
-    mock_scope_c("ccimp_fs_dir_entry_status")->actualCall("ccimp_fs_dir_entry_status")->withParameterOfType("ccimp_fs_dir_entry_status_t", "data", (void *)data);
-    data->status.file_size = 1024;
-    data->status.last_modified = 1397488930;
-    data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
-    *fs_context = 8;
-    data->errnum.value = ENOMEM;
-    return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_entry_status")->returnValue().value.intValue;
+    if (mock_scope_c("ccimp_fs_dir_entry_status")->getData("behavior").value.intValue == MOCK_FS_DIR_ENTRY_STATUS_ENABLED)
+	{
+        mock_scope_c("ccimp_fs_dir_entry_status")->actualCall("ccimp_fs_dir_entry_status")->withParameterOfType("ccimp_fs_dir_entry_status_t", "data", (void *)data);
+        data->status.file_size = 1024;
+        data->status.last_modified = 1397488930;
+        data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
+        *fs_context = 8;
+        data->errnum.value = ENOMEM;
+        return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_entry_status")->returnValue().value.intValue;
+    }
+    else
+    {
+        return ccimp_fs_dir_entry_status_real(data);
+    }
 }
 
 ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const data)

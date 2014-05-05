@@ -66,12 +66,15 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+    ccapi_filesystem_service_t fs_service = {NULL, NULL};
 
     ccapi_send_error_t send_error;
     char hint_string[100] = "";
     ccapi_string_info_t hint_string_info;
 
     fill_start_structure_with_good_parameters(&start);
+
+    start.service.file_system = &fs_service;
 
     start_error = ccapi_start(&start);
 
@@ -103,32 +106,30 @@ int main (void)
         goto done;
     }
 
-    #define SEND_DATA         "CCAPI send_data() sample\n"
-    send_error = ccapi_send_data(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data.txt", "text/plain", SEND_DATA, strlen(SEND_DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    send_error = ccapi_send_file(CCAPI_TRANSPORT_TCP, "./local_send_file.txt", "test/ccapi_send_file.txt", "text/plain", CCAPI_SEND_BEHAVIOR_OVERWRITE);
     if (send_error == CCAPI_SEND_ERROR_NONE)
     {
-        printf("ccapi_send_data success\n");
+        printf("ccapi_send_file success\n");
     }
     else
     {
-        printf("ccapi_send_data failed with error %d\n", send_error);
+        printf("ccapi_send_file failed with error %d\n", send_error);
     }
 
     hint_string_info.string = hint_string;
     hint_string_info.length = sizeof(hint_string);
 
-    #define SEND_DATA_WITH_REPLY         "CCAPI send_data_with_reply() sample\n"
-    send_error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data_with_reply.txt", "text/plain", SEND_DATA_WITH_REPLY, strlen(SEND_DATA_WITH_REPLY), CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
+    send_error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, "./local_send_file_with_reply.txt", "test/ccapi_send_file_with_reply.txt", "text/plain", CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
     if (send_error == CCAPI_SEND_ERROR_NONE)
     {
-        printf("ccapi_send_data_with_reply success\n");
+        printf("ccapi_send_file_with_reply success\n");
     }
     else
     {
-        printf("ccapi_send_data_with_reply failed with error %d\n", send_error);
+        printf("ccapi_send_file_with_reply failed with error %d\n", send_error);
 
         if (strlen(hint_string_info.string) != 0)
-            printf("ccapi_send_data_with_reply hint %s\n", hint_string_info.string);
+            printf("ccapi_send_file_with_reply hint %s\n", hint_string_info.string);
     }
 
 done:

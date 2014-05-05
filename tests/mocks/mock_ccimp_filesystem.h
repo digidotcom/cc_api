@@ -1,6 +1,26 @@
 #ifndef _MOCK_CCIMP_FILESYSTEM_H_
 #define _MOCK_CCIMP_FILESYSTEM_H_
 
+enum {
+    MOCK_FS_FILE_OPEN_DISABLED,
+    MOCK_FS_FILE_OPEN_ENABLED
+};
+
+enum {
+    MOCK_FS_FILE_READ_DISABLED,
+    MOCK_FS_FILE_READ_ENABLED
+};
+
+enum {
+    MOCK_FS_FILE_CLOSE_DISABLED,
+    MOCK_FS_FILE_CLOSE_ENABLED
+};
+
+enum {
+    MOCK_FS_DIR_ENTRY_STATUS_DISABLED,
+    MOCK_FS_DIR_ENTRY_STATUS_ENABLED
+};
+
 void Mock_ccimp_fs_file_open_create(void);
 void Mock_ccimp_fs_file_open_destroy(void);
 void Mock_ccimp_fs_file_open_expectAndReturn(ccimp_fs_file_open_t * expect, ccimp_status_t retval);

@@ -114,7 +114,9 @@ typedef struct {
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 typedef struct
 {
+    ccapi_data_t * ccapi_data;
     void * next_data;
+    ccimp_fs_handle_t file_handler;
     size_t bytes_remaining;
     void * send_syncr;
     ccapi_send_error_t response_error;
@@ -136,6 +138,10 @@ void * ccapi_syncr_create_and_release(void);
 ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
+ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler);
+ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);
+ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler);
+ccimp_status_t ccapi_fs_dir_entry_status(ccapi_data_t * const ccapi_data, char const * const local_path, ccimp_fs_stat_t * const fs_status);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);
 
 connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status);
