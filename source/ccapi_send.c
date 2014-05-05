@@ -274,14 +274,14 @@ done:
     send_info->svc_send.file_handler.pointer = NULL; \
 }
 
-#define setup_send_no_reply_common() \
+#define setup_send_no_reply_common(send_info) \
 { \
     send_info->svc_send.hint = NULL; \
     send_info->header.response_required = connector_false; \
     send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER; \
 }
 
-#define setup_send_with_reply_common(hint, timeout) \
+#define setup_send_with_reply_common(send_info, hint, timeout) \
 { \
     send_info->svc_send.hint = hint; \
     send_info->header.response_required = connector_true; \
@@ -371,7 +371,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
 
     setup_send_data_common(send_info, data, bytes);
 
-    setup_send_no_reply_common();
+    setup_send_no_reply_common(send_info);
 
     error = call_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
@@ -424,7 +424,7 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
 
     setup_send_data_common(send_info, data, bytes);
 
-    setup_send_with_reply_common(hint, timeout);
+    setup_send_with_reply_common(send_info, hint, timeout);
 
     error = call_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
@@ -478,7 +478,7 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    setup_send_no_reply_common();
+    setup_send_no_reply_common(send_info);
 
     error = call_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
@@ -540,7 +540,7 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    setup_send_with_reply_common(hint, timeout);
+    setup_send_with_reply_common(send_info, hint, timeout);
 
     error = call_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)

@@ -285,16 +285,6 @@ ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, ccimp_fs_han
         ccimp_os_yield();
     } while (!loop_done);
 
-    switch (ccimp_status)
-    {
-        case CCIMP_STATUS_OK:
-            break;
-        case CCIMP_STATUS_ERROR:
-        case CCIMP_STATUS_BUSY:
-            goto done;
-            break;
-    }
-
 done:
     if (syncr_acquired)
     {
