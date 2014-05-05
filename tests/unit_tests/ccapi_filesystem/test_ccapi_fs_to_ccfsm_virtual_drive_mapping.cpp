@@ -185,6 +185,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirInvalid)
     connector_file_system_opendir_t ccfsm_dir_open_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR;
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.errnum = NULL;
@@ -193,9 +195,14 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirInvalid)
 
     request.file_system_request = connector_request_id_file_system_opendir;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_dir_open_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_open_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
-    CHECK(NULL == ccfsm_dir_open_data.handle);
+    CHECK(ccfsm_dir_open_data.handle == NULL);
+    CHECK(NULL != error_handle);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_dir_open_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDir)
@@ -257,6 +264,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntryInvalid)
     connector_file_system_stat_dir_entry_t ccfsm_dir_entry_status_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR;
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_dir_entry_status_data.errnum = NULL;
     ccfsm_dir_entry_status_data.user_context = NULL;
@@ -267,8 +276,13 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntryInvalid)
 
     request.file_system_request = connector_request_id_file_system_stat_dir_entry;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_dir_entry_status_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_entry_status_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
+    CHECK(NULL != error_handle);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_dir_entry_status_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntry)
@@ -310,6 +324,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirInvalid)
     connector_file_system_stat_t ccfsm_hash_status_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR "/file1.txt";
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_hash_status_data.errnum = NULL;
     ccfsm_hash_status_data.user_context = NULL;
@@ -322,8 +338,13 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirInvalid)
 
     request.file_system_request = connector_request_id_file_system_stat;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_hash_status_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_hash_status_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
+    CHECK(NULL != error_handle);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_hash_status_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDir)
@@ -369,6 +390,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRemoveFileFromVirtualDirInval
     connector_file_system_remove_t ccfsm_file_remove_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR DIR_SEPARATOR FILENAME;
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_file_remove_data.errnum = NULL;
     ccfsm_file_remove_data.user_context = NULL;
@@ -376,8 +399,13 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRemoveFileFromVirtualDirInval
 
     request.file_system_request = connector_request_id_file_system_remove;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_file_remove_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_file_remove_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
+    CHECK(NULL != error_handle);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_file_remove_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRemoveFileFromVirtualDir)
@@ -413,6 +441,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDirInvalid
     connector_file_system_open_t ccfsm_file_open_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR DIR_SEPARATOR FILENAME;
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_file_open_data.path = ccfsm_path;
     ccfsm_file_open_data.errnum = NULL;
@@ -422,8 +452,16 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDirInvalid
 
     request.file_system_request = connector_request_id_file_system_open;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_file_open_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_error, status);
+
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_file_open_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
+    CHECK(ccfsm_file_open_data.handle == NULL);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_file_open_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDir)
@@ -470,6 +508,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testHashFileFromVirtualDirInvalid
     connector_callback_status_t status;
     uint32_t hash_value = 0;
     char const * const ccfsm_path = ROOT_PATH NOT_MAPPED_VIRTUAL_DIR DIR_SEPARATOR FILENAME;
+    ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
+    Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccimp_hash_file_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
     ccimp_hash_file_data.errnum.pointer = NULL;
@@ -487,8 +527,13 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testHashFileFromVirtualDirInvalid
 
     request.file_system_request = connector_request_id_file_system_hash;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_hash_file_data, ccapi_data_single_instance);
+    error_handle = (ccapi_fs_error_handle_t *)ccfsm_hash_file_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
+    CHECK(NULL != error_handle);
+    CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
+    CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
+    th_call_ccimp_fs_error_desc_and_check_error(ccfsm_hash_file_data.errnum, connector_file_system_path_not_found);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testHashFileFromVirtualDir)

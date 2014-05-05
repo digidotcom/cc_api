@@ -273,3 +273,27 @@ void destroy_test_file(char const * const path)
     int result = unlink(path);
     CHECK (result >= 0);
 }
+
+void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error)
+{
+    connector_request_id_t request;
+    connector_callback_status_t status;
+    connector_file_system_get_error_t ccfsm_error_desc_data;
+    char buffer[10];
+
+    ccfsm_error_desc_data.errnum = ccfsm_errnum;
+    ccfsm_error_desc_data.user_context = NULL;
+    ccfsm_error_desc_data.buffer = buffer;
+    ccfsm_error_desc_data.bytes_available = sizeof buffer;
+    ccfsm_error_desc_data.bytes_used = 1;
+
+    Mock_ccimp_os_free_expectAndReturn(ccfsm_errnum, CCIMP_STATUS_OK);
+
+    request.file_system_request = connector_request_id_file_system_get_error;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_error_desc_data, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK(NULL != ccfsm_errnum);
+    CHECK_EQUAL(ccfsm_fs_error, ccfsm_error_desc_data.error_status);
+    CHECK_EQUAL(0, ccfsm_error_desc_data.bytes_used);
+}
