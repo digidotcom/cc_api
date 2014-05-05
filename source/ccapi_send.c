@@ -222,6 +222,13 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
+
+    if (ccapi_data->service.file_system.syncr_access == NULL)
+    {
+        error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
+        goto done;
+    }
+
     {
         ccimp_fs_stat_t fs_status;
 
