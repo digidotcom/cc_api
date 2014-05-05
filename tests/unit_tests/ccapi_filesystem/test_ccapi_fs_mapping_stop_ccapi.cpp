@@ -20,8 +20,7 @@ TEST_GROUP(test_ccapi_fs_mapping_stop_ccapi)
         ccapi_filesystem_service_t fs_service = {NULL, NULL};
         ccapi_start_error_t start_error;
         ccapi_fs_error_t ccapi_fs_error;
-        ccimp_fs_dir_open_t ccimp_dir_open_data_1, ccimp_dir_open_data_2;
-        ccimp_fs_dir_close_t ccimp_dir_close_data_1, ccimp_dir_close_data_2;
+        ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data_1, ccimp_fs_dir_entry_status_data_2;
         char const * const local_path_1 = "/home/user/my_directory";
         char const * const virtual_path_1 = "my_virtual_dir";
         char const * const local_path_2 = "/home/other_user/other_my_directory";
@@ -59,10 +58,8 @@ TEST_GROUP(test_ccapi_fs_mapping_stop_ccapi)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path_2) + 1, malloc_for_local_path_2);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path_2) + 1, malloc_for_virtual_path_2);
 
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, local_path_1);
-        th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, local_path_2);
-        th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
+        th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_1, local_path_1);
+        th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_2, local_path_2);
 
         ccapi_fs_error = ccapi_fs_add_virtual_dir(virtual_path_1, local_path_1);
         CHECK_EQUAL(CCAPI_FS_ERROR_NONE, ccapi_fs_error);

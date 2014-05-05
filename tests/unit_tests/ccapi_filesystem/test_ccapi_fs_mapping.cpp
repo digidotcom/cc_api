@@ -117,14 +117,9 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
 TEST(test_ccapi_fs_mapping, testMapAFile)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data;
 
-    ccimp_dir_open_data.errnum.pointer = NULL;
-    ccimp_dir_open_data.imp_context = &my_fs_context;
-    ccimp_dir_open_data.handle.pointer = NULL;
-    ccimp_dir_open_data.path = "/notadir.txt";
-
-    Mock_ccimp_fs_dir_open_expectAndReturn(&ccimp_dir_open_data, CCIMP_STATUS_ERROR);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data, "/notadir.txt");
 
     error = ccapi_fs_add_virtual_dir("my_virtual_dir", "/notadir.txt");
     CHECK_EQUAL(CCAPI_FS_ERROR_NOT_A_DIR, error);
@@ -133,8 +128,7 @@ TEST(test_ccapi_fs_mapping, testMapAFile)
 TEST(test_ccapi_fs_mapping, testMapDirNoMemory4DirEntry)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data;
-    ccimp_fs_dir_close_t ccimp_dir_close_data;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data;
     char const * const local_path = "/home/user/my_directory";
     char const * const virtual_path = "my_virtual_dir";
     /* Test Setup */
@@ -142,8 +136,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4DirEntry)
         void * malloc_for_dir_list_entry = NULL;
         Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_fs_virtual_dir_t), malloc_for_dir_list_entry);
     }
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, local_path);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data, local_path);
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -153,8 +147,7 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4DirEntry)
 TEST(test_ccapi_fs_mapping, testMapDirNoMemory4ActualPath)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data;
-    ccimp_fs_dir_close_t ccimp_dir_close_data;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data;
     char const * const local_path = "/home/user/my_directory";
     char const * const virtual_path = "my_virtual_dir";
     /* Test Setup */
@@ -166,8 +159,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4ActualPath)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path) + 1, malloc_for_local_path);
         Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry, CCIMP_STATUS_OK);
     }
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, local_path);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data, local_path);
+
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -177,8 +170,7 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4ActualPath)
 TEST(test_ccapi_fs_mapping, testMapDirNoMemory4VirtualPath)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data;
-    ccimp_fs_dir_close_t ccimp_dir_close_data;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data;
     char const * const local_path = "/home/user/my_directory";
     char const * const virtual_path = "my_virtual_dir";
     /* Test Setup */
@@ -193,8 +185,8 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4VirtualPath)
         Mock_ccimp_os_free_expectAndReturn(malloc_for_dir_list_entry, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(malloc_for_local_path, CCIMP_STATUS_OK);
     }
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, local_path);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data, local_path);
+
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INSUFFICIENT_MEMORY, error);
@@ -204,8 +196,7 @@ TEST(test_ccapi_fs_mapping, testMapDirNoMemory4VirtualPath)
 TEST(test_ccapi_fs_mapping, testMapDirOK)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data;
-    ccimp_fs_dir_close_t ccimp_dir_close_data;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data;
     char const * const local_path = "/home/user/my_directory";
     char const * const virtual_path = "my_virtual_dir";
     /* Test Setup */
@@ -218,8 +209,8 @@ TEST(test_ccapi_fs_mapping, testMapDirOK)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path) + 1, malloc_for_local_path);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path) + 1, malloc_for_virtual_path);
     }
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, local_path);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data, local_path);
+
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
@@ -239,8 +230,7 @@ TEST(test_ccapi_fs_mapping, testMapDirOK)
 TEST(test_ccapi_fs_mapping, testMapTwoDirs)
 {
     ccapi_fs_error_t error;
-    ccimp_fs_dir_open_t ccimp_dir_open_data_1, ccimp_dir_open_data_2;
-    ccimp_fs_dir_close_t ccimp_dir_close_data_1, ccimp_dir_close_data_2;
+    ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data_1, ccimp_fs_dir_entry_status_data_2;
     char const * const local_path_1 = "/home/user/my_directory";
     char const * const virtual_path_1 = "my_virtual_dir";
     char const * const local_path_2 = "/home/other_user/other_my_directory";
@@ -261,10 +251,9 @@ TEST(test_ccapi_fs_mapping, testMapTwoDirs)
         Mock_ccimp_os_malloc_expectAndReturn(strlen(local_path_2) + 1, malloc_for_local_path_2);
         Mock_ccimp_os_malloc_expectAndReturn(strlen(virtual_path_2) + 1, malloc_for_virtual_path_2);
     }
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, local_path_1);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
-    th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, local_path_2);
-    th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_1, local_path_1);
+    th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_2, local_path_2);
+
     /* Test */
     error = ccapi_fs_add_virtual_dir(virtual_path_1, local_path_1);
     CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);

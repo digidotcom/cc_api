@@ -237,6 +237,17 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
     return (ccapi_fs_file_handle_t *)ccfsm_open_data->handle;
 }
 
+void th_filesystem_prepare_ccimp_dir_entry_status_call(ccimp_fs_dir_entry_status_t * const ccimp_fs_dir_entry_status_data, char const * const path)
+{
+    ccimp_fs_dir_entry_status_data->errnum.pointer = NULL;
+    ccimp_fs_dir_entry_status_data->imp_context = &my_fs_context;
+    ccimp_fs_dir_entry_status_data->path = path;
+    ccimp_fs_dir_entry_status_data->status.file_size = 0;
+    ccimp_fs_dir_entry_status_data->status.last_modified = 0;
+    ccimp_fs_dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+    Mock_ccimp_fs_dir_entry_status_expectAndReturn(ccimp_fs_dir_entry_status_data, CCIMP_STATUS_OK);
+}
+
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path)
 {
     ccimp_dir_open_data->errnum.pointer = NULL;

@@ -413,9 +413,18 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dat
     if (mock_scope_c("ccimp_fs_dir_entry_status")->getData("behavior").value.intValue == MOCK_FS_DIR_ENTRY_STATUS_ENABLED)
 	{
         mock_scope_c("ccimp_fs_dir_entry_status")->actualCall("ccimp_fs_dir_entry_status")->withParameterOfType("ccimp_fs_dir_entry_status_t", "data", (void *)data);
-        data->status.file_size = 1024;
-        data->status.last_modified = 1397488930;
-        data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
+
+        if (strstr(data->path, ".txt") != NULL)
+        {
+            data->status.file_size = 1024;
+            data->status.last_modified = 1397488930;
+            data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
+        }
+        else
+        {
+            data->status.type = CCIMP_FS_DIR_ENTRY_DIR;
+        }
+
         *fs_context = 8;
         data->errnum.value = ENOMEM;
         return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_entry_status")->returnValue().value.intValue;

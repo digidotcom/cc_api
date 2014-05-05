@@ -22,8 +22,7 @@ TEST_GROUP(test_ccapi_fs_virtual_drive_map_to_ccfsm)
         ccapi_start_error_t start_error;
         ccapi_filesystem_service_t fs_service = {NULL, NULL};
         ccapi_fs_error_t error;
-        ccimp_fs_dir_open_t ccimp_dir_open_data_1, ccimp_dir_open_data_2;
-        ccimp_fs_dir_close_t ccimp_dir_close_data_1, ccimp_dir_close_data_2;
+        ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data_1, ccimp_fs_dir_entry_status_data_2;
         void * malloc_for_dir_list_entry_1 = malloc(sizeof (ccapi_fs_virtual_dir_t));
         void * malloc_for_local_path_1 = malloc(sizeof LOCAL_PATH_1);
         void * malloc_for_virtual_path_1 = malloc(sizeof VIRTUAL_PATH_1);
@@ -48,10 +47,8 @@ TEST_GROUP(test_ccapi_fs_virtual_drive_map_to_ccfsm)
         Mock_ccimp_os_malloc_expectAndReturn(sizeof LOCAL_PATH_2, malloc_for_local_path_2);
         Mock_ccimp_os_malloc_expectAndReturn(sizeof VIRTUAL_PATH_2, malloc_for_virtual_path_2);
 
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_1, LOCAL_PATH_1);
-        th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_1);
-        th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data_2, LOCAL_PATH_2);
-        th_filesystem_prepare_ccimp_dir_close_call(&ccimp_dir_close_data_2);
+        th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_1, LOCAL_PATH_1);
+        th_filesystem_prepare_ccimp_dir_entry_status_call(&ccimp_fs_dir_entry_status_data_2, LOCAL_PATH_2);
 
         error = ccapi_fs_add_virtual_dir(VIRTUAL_PATH_1, LOCAL_PATH_1);
         CHECK_EQUAL(CCAPI_FS_ERROR_NONE, error);
