@@ -125,7 +125,7 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
 
 /* TODO: handle errnum in ccapi_fs functions */
 
-ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
+ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
 {
     ccimp_fs_file_open_t ccimp_fs_file_open_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -186,7 +186,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
+ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
 {
     ccimp_fs_file_read_t ccimp_fs_file_read_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -248,7 +248,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler)
+ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler)
 {
     ccimp_fs_file_close_t ccimp_fs_file_close_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -294,7 +294,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_fs_dir_entry_status(ccapi_data_t * const ccapi_data, char const * const local_path, ccimp_fs_stat_t * const fs_status)
+ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char const * const local_path, ccimp_fs_stat_t * const fs_status)
 {
     ccimp_fs_dir_entry_status_t ccimp_fs_dir_entry_status_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -902,7 +902,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         {
             size_t bytes_read;
 
-            ccimp_status_t ccimp_status = ccapi_fs_file_read(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, bytes_expected_to_read, &bytes_read);
+            ccimp_status_t ccimp_status = ccapi_read_file(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, bytes_expected_to_read, &bytes_read);
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
 
             if (bytes_expected_to_read != bytes_read)

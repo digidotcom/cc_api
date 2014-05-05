@@ -232,7 +232,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
     {
         ccimp_fs_stat_t fs_status;
 
-        switch (ccapi_fs_dir_entry_status(ccapi_data, local_path, &fs_status)) 
+        switch (ccapi_get_dir_entry_status(ccapi_data, local_path, &fs_status)) 
         {
             case CCIMP_STATUS_OK:
                 break;
@@ -258,7 +258,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
     {
         ccimp_fs_handle_t file_handler;
 
-        error = ccapi_fs_file_open(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
+        error = ccapi_open_file(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
         if (error != CCAPI_SEND_ERROR_NONE)
         {
             goto done;
@@ -342,7 +342,7 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
         if (send_info->svc_send.file_handler.pointer != NULL)
         {
-            ASSERT_MSG(ccapi_fs_file_close(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
+            ASSERT_MSG(ccapi_close_file(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
         }
 #else
         UNUSED_ARGUMENT(ccapi_data);
