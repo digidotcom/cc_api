@@ -248,7 +248,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
     }
 
     {
-        void * file_handler = NULL;
+        ccimp_fs_handle_t file_handler;
 
         error = ccapi_fs_file_open(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
         if (error != CCAPI_SEND_ERROR_NONE)
@@ -259,7 +259,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
         send_info->svc_send.file_handler = file_handler;
     }
 
-    ccapi_logging_line("file_size=%d, file_handler=%p\n", send_info->svc_send.bytes_remaining, send_info->svc_send.file_handler);
+    ccapi_logging_line("file_size=%d, file_handler=%p\n", send_info->svc_send.bytes_remaining, send_info->svc_send.file_handler.pointer);
 
     send_info->svc_send.next_data = NULL;
 
@@ -271,7 +271,7 @@ done:
 { \
     send_info->svc_send.next_data = (void *)data; \
     send_info->svc_send.bytes_remaining = bytes; \
-    send_info->svc_send.file_handler = NULL; \
+    send_info->svc_send.file_handler.pointer = NULL; \
 }
 
 #define setup_send_no_reply_common() \
@@ -331,7 +331,7 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
         }
 
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
-        if (send_info->svc_send.file_handler != NULL)
+        if (send_info->svc_send.file_handler.pointer != NULL)
         {
             ASSERT_MSG(ccapi_fs_file_close(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
         }

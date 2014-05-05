@@ -125,14 +125,14 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
 
 /* TODO: handle errnum in ccapi_fs functions */
 
-ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, void * * file_handler)
+ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
 {
     ccimp_fs_file_open_t ccimp_fs_file_open_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccapi_bool_t syncr_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    *file_handler = NULL;
+    file_handler->pointer = NULL;
 
     ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
     switch (ccimp_status)
@@ -175,7 +175,7 @@ ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, char const * 
             break;
     }
 
-    *file_handler = ccimp_fs_file_open_data.handle.pointer;
+    *file_handler = ccimp_fs_file_open_data.handle;
 
 done:
     if (syncr_acquired)
@@ -186,7 +186,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, void * const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
+ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
 {
     ccimp_fs_file_read_t ccimp_fs_file_read_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -206,7 +206,7 @@ ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, void * const 
             goto done;
     }
 
-    ccimp_fs_file_read_data.handle.pointer = file_handler;
+    ccimp_fs_file_read_data.handle = file_handler;
     ccimp_fs_file_read_data.buffer = data;
     ccimp_fs_file_read_data.bytes_available = bytes_available;
     ccimp_fs_file_read_data.errnum.pointer = NULL;
@@ -248,7 +248,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, void * const file_handler)
+ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler)
 {
     ccimp_fs_file_close_t ccimp_fs_file_close_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -266,7 +266,7 @@ ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, void * const
             goto done;
     }
 
-    ccimp_fs_file_close_data.handle.pointer = file_handler;
+    ccimp_fs_file_close_data.handle = file_handler;
     ccimp_fs_file_close_data.errnum.pointer = NULL;
     ccimp_fs_file_close_data.imp_context = ccapi_data->service.file_system.imp_context;
 
@@ -1745,7 +1745,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         ASSERT_MSG_GOTO(svc_send != NULL, done);
         bytes_expected_to_read = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        if (svc_send->file_handler == NULL)
+        if (svc_send->file_handler.pointer == NULL)
         {
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
