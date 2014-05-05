@@ -72,100 +72,33 @@ done:
     return new_dir_entry;
 }
 
-static ccapi_fs_error_t check_if_path_is_a_dir(ccapi_data_t * const ccapi_data, char const * const local_dir)
+static ccapi_bool_t path_is_a_dir(ccapi_data_t * const ccapi_data, char const * const local_path)
 {
-    ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
-    ccimp_fs_dir_open_t ccimp_fs_dir_open_data = {0};
-    ccimp_fs_dir_close_t ccimp_fs_dir_close_data = {0};
-    ccapi_bool_t loop_done = CCAPI_FALSE;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+    ccapi_bool_t path_is_a_dir = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
+    ccimp_fs_stat_t fs_status;
 
-    ccimp_fs_dir_open_data.path = local_dir;
-    ccimp_fs_dir_open_data.handle.pointer = NULL;
-    ccimp_fs_dir_open_data.errnum.pointer = NULL;
-    ccimp_fs_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
-
-    {
-        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
-        switch (ccapi_syncr_acquire_status)
-        {
-            case CCIMP_STATUS_OK:
-                syncr_acquired = CCAPI_TRUE;
-                break;
-            case CCIMP_STATUS_BUSY:
-            case CCIMP_STATUS_ERROR:
-                error = CCAPI_FS_ERROR_SYNCR_FAILED;
-                goto done;
-        }
-    }
-
-    do {
-        ccimp_status = ccimp_fs_dir_open(&ccimp_fs_dir_open_data);
-        switch (ccimp_status)
-        {
-            case CCIMP_STATUS_OK:
-            case CCIMP_STATUS_ERROR:
-                ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
-                loop_done = CCAPI_TRUE;
-                break;
-            case CCIMP_STATUS_BUSY:
-                break;
-        }
-        ccimp_os_yield();
-    } while (!loop_done);
-
+    ccimp_status = ccapi_get_dir_entry_status(ccapi_data, local_path, &fs_status);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
             break;
-        case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_FS_ERROR_NOT_A_DIR;
+        case CCIMP_STATUS_ERROR:
             goto done;
-            break;
     }
 
-    ccimp_fs_dir_close_data.errnum.pointer = NULL;
-    ccimp_fs_dir_close_data.handle.pointer = ccimp_fs_dir_open_data.handle.pointer;
-    ccimp_fs_dir_close_data.imp_context = ccapi_data->service.file_system.imp_context;
-
-    loop_done = CCAPI_FALSE;
-    do {
-        ccimp_status = ccimp_fs_dir_close(&ccimp_fs_dir_close_data);
-        switch (ccimp_status)
-        {
-            case CCIMP_STATUS_OK:
-                loop_done = CCAPI_TRUE;
-                break;
-            case CCIMP_STATUS_ERROR:
-                loop_done = CCAPI_TRUE;
-                error = CCAPI_FS_ERROR_NOT_A_DIR;
-                break;
-            case CCIMP_STATUS_BUSY:
-                break;
-        }
-        ccimp_os_yield();
-    } while (!loop_done);
-
-    ccapi_data->service.file_system.imp_context = ccimp_fs_dir_open_data.imp_context;
-
-done:
-    if (syncr_acquired)
+    switch (fs_status.type)
     {
-        ccimp_status_t const ccapi_syncr_release_status = ccapi_syncr_release(ccapi_data->service.file_system.syncr_access);
-
-        switch (ccapi_syncr_release_status)
-        {
-            case CCIMP_STATUS_OK:
-                break;
-            case CCIMP_STATUS_BUSY:
-            case CCIMP_STATUS_ERROR:
-                error = CCAPI_FS_ERROR_SYNCR_FAILED;
-                break;
-        }
+        case CCIMP_FS_DIR_ENTRY_DIR:
+            break;
+        case CCIMP_FS_DIR_ENTRY_FILE:
+        case CCIMP_FS_DIR_ENTRY_UNKNOWN:
+            goto done;
     }
-    return error;
+    path_is_a_dir = CCAPI_TRUE;
+done:
+    return path_is_a_dir;
 }
 
 ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char const * const virtual_dir, char const * const local_dir)
@@ -199,9 +132,9 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
         goto done;
     }
 
-    error = check_if_path_is_a_dir(ccapi_data, local_dir);
-    if (error != CCAPI_FS_ERROR_NONE)
+    if (!path_is_a_dir(ccapi_data, local_dir))
     {
+        error = CCAPI_FS_ERROR_NOT_A_DIR;
         goto done;
     }
 
