@@ -15,7 +15,7 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_c
         goto done;
     }
 
-    collection = ccapi_malloc(sizeof **dp_collection);
+    collection = ccapi_malloc(sizeof *collection);
 
     if (collection == NULL)
     {
