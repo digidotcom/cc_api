@@ -292,3 +292,89 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
 
     destroy_test_file(LOCAL_PATH);
 }
+
+TEST(test_ccapi_send_file_with_reply, testOpenSEND_ERROR_ACCESSING_FILE)
+{
+    ccapi_send_error_t error;
+
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
+
+    create_test_file(LOCAL_PATH, DATA, strlen(DATA));
+
+    {
+        ccimp_fs_file_open_t ccimp_open_data;
+
+        ccimp_open_data.errnum.pointer = NULL;
+        ccimp_open_data.imp_context = NULL;
+        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
+        ccimp_open_data.path = LOCAL_PATH;
+
+        Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_ERROR);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
+    }
+
+    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
+
+    destroy_test_file(LOCAL_PATH);
+}
+
+TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
+{
+    ccapi_send_error_t error;
+
+    char const data[] = DATA;
+    char const cloud_path[] = CLOUD_PATH;
+    char const content_type[] = CONTENT_TYPE;
+
+    create_test_file(LOCAL_PATH, data, strlen(data));
+
+    {
+        connector_request_data_service_send_t header;
+
+        header.transport = connector_transport_tcp;
+        header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
+        header.path  = cloud_path;
+        header.content_type = content_type;
+        header.response_required = connector_true;
+        header.timeout_in_seconds = SEND_WAIT_FOREVER;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
+    }
+
+    {
+        ccimp_fs_file_open_t ccimp_open_data;
+
+        ccimp_open_data.errnum.pointer = NULL;
+        ccimp_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
+        ccimp_open_data.path = LOCAL_PATH;
+
+        Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
+    }
+
+    {
+        ccimp_fs_file_read_t ccimp_read_data;
+
+        ccimp_read_data.errnum.pointer = NULL;
+        ccimp_read_data.imp_context = &my_fs_context;
+        ccimp_read_data.handle.value = 5;
+        ccimp_read_data.bytes_available = strlen(data);
+        ccimp_read_data.bytes_used = 0;
+
+        Mock_ccimp_fs_file_read_expectAndReturn(&ccimp_read_data, CCIMP_STATUS_ERROR);
+    }
+
+    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
+
+    destroy_test_file(LOCAL_PATH);
+}
