@@ -129,8 +129,6 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    file_handler->pointer = NULL;
-
     ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
     switch (ccimp_status)
     {
@@ -866,7 +864,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         ASSERT_MSG_GOTO(svc_send != NULL, done);
         bytes_expected_to_read = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        if (svc_send->file_handler.pointer == NULL)
+        if (svc_send->sending_file == CCAPI_FALSE)
         {
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;

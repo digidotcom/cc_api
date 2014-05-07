@@ -115,6 +115,7 @@ typedef struct {
 typedef struct
 {
     ccapi_data_t * ccapi_data;
+    ccapi_bool_t sending_file;
     void * next_data;
     ccimp_fs_handle_t file_handler;
     size_t bytes_remaining;
