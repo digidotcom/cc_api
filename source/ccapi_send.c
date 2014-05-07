@@ -207,6 +207,7 @@ static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, cca
     }
 
     send_info->svc_send.ccapi_data = ccapi_data;
+    send_info->svc_send.request_error = CCAPI_SEND_ERROR_NONE;
     send_info->svc_send.response_error = CCAPI_SEND_ERROR_NONE;
     send_info->svc_send.status_error = CCAPI_SEND_ERROR_NONE;
     send_info->header.path = cloud_path;
@@ -222,6 +223,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
+    send_info->svc_send.file_handler.pointer = NULL;
 
     if (ccapi_data->service.file_system.syncr_access == NULL)
     {
@@ -258,9 +260,10 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
     {
         ccimp_fs_handle_t file_handler;
 
-        error = ccapi_open_file(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
-        if (error != CCAPI_SEND_ERROR_NONE)
+        ccimp_status_t ccimp_status = ccapi_open_file(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
+        if (ccimp_status != CCIMP_STATUS_OK)
         {
+            error = CCAPI_SEND_ERROR_ACCESSING_FILE;
             goto done;
         }
 
@@ -391,7 +394,8 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
     }
 
     /* tcp transport will update response_error even if not requested but we ignore it here */
-    error = send_info->svc_send.status_error;
+    error = send_info->svc_send.request_error != CCAPI_SEND_ERROR_NONE ? send_info->svc_send.request_error:
+            send_info->svc_send.status_error;
 
 done:
     finish_send_common(ccapi_data, send_info);
@@ -443,7 +447,9 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    error = send_info->svc_send.response_error==CCAPI_SEND_ERROR_NONE?send_info->svc_send.status_error:send_info->svc_send.response_error;
+    error = send_info->svc_send.request_error  != CCAPI_SEND_ERROR_NONE ? send_info->svc_send.request_error:
+            send_info->svc_send.response_error != CCAPI_SEND_ERROR_NONE ? send_info->svc_send.response_error:
+            send_info->svc_send.status_error;
 
 done:
     finish_send_common(ccapi_data, send_info);
@@ -504,7 +510,8 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
     }
 
     /* tcp transport will update response_error even if not requested but we ignore it here */
-    error = send_info->svc_send.status_error;
+    error = send_info->svc_send.request_error != CCAPI_SEND_ERROR_NONE ? send_info->svc_send.request_error:
+            send_info->svc_send.status_error;
 #endif
 
 done:
@@ -573,7 +580,9 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    error = send_info->svc_send.response_error==CCAPI_SEND_ERROR_NONE?send_info->svc_send.status_error:send_info->svc_send.response_error;
+    error = send_info->svc_send.request_error!=CCAPI_SEND_ERROR_NONE?send_info->svc_send.request_error:
+            send_info->svc_send.response_error!=CCAPI_SEND_ERROR_NONE?send_info->svc_send.response_error:
+            send_info->svc_send.status_error;
 #endif
 
 done:

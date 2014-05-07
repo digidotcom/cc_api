@@ -119,6 +119,7 @@ typedef struct
     ccimp_fs_handle_t file_handler;
     size_t bytes_remaining;
     void * send_syncr;
+    ccapi_send_error_t request_error;
     ccapi_send_error_t response_error;
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;

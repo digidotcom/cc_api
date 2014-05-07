@@ -856,7 +856,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
 #ifdef CCIMP_DATA_SERVICE_ENABLED
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
-    connector_callback_status_t status = connector_callback_abort;
+    connector_callback_status_t status = connector_callback_error;
 	
     if (send_ptr != NULL)
     {
@@ -877,7 +877,11 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
             size_t bytes_read;
 
             ccimp_status_t ccimp_status = ccapi_read_file(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, bytes_expected_to_read, &bytes_read);
-            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            if (ccimp_status != CCIMP_STATUS_OK)
+            {
+                svc_send->request_error = CCAPI_SEND_ERROR_ACCESSING_FILE;
+                goto done;
+            }
 
             if (bytes_expected_to_read != bytes_read)
             {
