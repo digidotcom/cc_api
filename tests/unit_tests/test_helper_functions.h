@@ -54,7 +54,9 @@ void th_filesystem_prepare_ccimp_dir_entry_status_call(ccimp_fs_dir_entry_status
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
 void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error);
-
 void create_test_file(char const * const path, void const * const data, size_t bytes);
 void destroy_test_file(char const * const path);
+
+void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free);
+
 #endif
