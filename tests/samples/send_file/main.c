@@ -66,15 +66,12 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    ccapi_filesystem_service_t fs_service = {NULL, NULL};
 
     ccapi_send_error_t send_error;
     char hint_string[100] = "";
     ccapi_string_info_t hint_string_info;
 
     fill_start_structure_with_good_parameters(&start);
-
-    start.service.file_system = &fs_service;
 
     start_error = ccapi_start(&start);
 

@@ -11,16 +11,9 @@ TEST_GROUP(test_ccapi_send_file_with_reply)
 
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {NULL, NULL};
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        start.service.file_system = &fs_service;
-
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
+        th_start_ccapi();
 
         th_start_tcp_lan_ipv4();
     }

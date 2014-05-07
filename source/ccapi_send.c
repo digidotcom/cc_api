@@ -223,12 +223,6 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
-    if (ccapi_data->service.file_system.syncr_access == NULL)
-    {
-        error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
-        goto done;
-    }
-
     {
         ccimp_fs_stat_t fs_status;
 
@@ -469,7 +463,7 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
     UNUSED_ARGUMENT(content_type);
     UNUSED_ARGUMENT(behavior);
 
-    error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
+    error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_SUPPORTED;
     goto done;
 #else
     error = checkargs_send_common(ccapi_data, transport, cloud_path, content_type);
@@ -534,7 +528,7 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
     UNUSED_ARGUMENT(timeout);
     UNUSED_ARGUMENT(hint);
 
-    error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING;
+    error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_SUPPORTED;
     goto done;
 #else
     error = checkargs_send_common(ccapi_data, transport, cloud_path, content_type);

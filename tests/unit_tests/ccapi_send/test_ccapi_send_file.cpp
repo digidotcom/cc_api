@@ -11,16 +11,9 @@ TEST_GROUP(test_ccapi_send_file_no_reply)
 
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {NULL, NULL};
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        start.service.file_system = &fs_service;
-
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
+        th_start_ccapi();
 
         th_start_tcp_lan_ipv4();
     }
@@ -234,6 +227,9 @@ TEST(test_ccapi_send_file_no_reply, testOpenSEND_ERROR_ACCESSING_FILE)
         ccimp_open_data.path = LOCAL_PATH;
 
         Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_ERROR);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
     }
 
     error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE);
@@ -263,6 +259,9 @@ TEST(test_ccapi_send_file_no_reply, testReadSEND_ERROR_ACCESSING_FILE)
         header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
         Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
     }
 
     {
