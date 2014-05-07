@@ -121,7 +121,7 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
     return ccimp_os_syncr_destroy(&destroy_data);
 }
 
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
 {
@@ -445,7 +445,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                 firmware_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.firmware_supported);
             }
             break;
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         case connector_request_id_config_file_system:
             {
                 connector_config_supported_t * filesystem_supported = data;
@@ -835,12 +835,12 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
                     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
                     break;
                 }
-#if defined CONNECTOR_TRANSPORT_UDP
+#if (defined CONNECTOR_TRANSPORT_UDP)
                 case connector_transport_udp:
                     /* TODO */
                     break;
 #endif
-#if defined CONNECTOR_TRANSPORT_SMS
+#if (defined CONNECTOR_TRANSPORT_SMS)
                 case connector_transport_sms:
                     /* TODO */
                     break;
@@ -853,7 +853,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
     return connector_status;
 }
 
-#ifdef CCIMP_DATA_SERVICE_ENABLED
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
     connector_callback_status_t status = connector_callback_abort;
@@ -871,7 +871,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
         }
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         else
         {
             size_t bytes_read;
@@ -1041,12 +1041,12 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
         case connector_class_id_status:
             status = ccapi_status_handler(request_id.status_request, data, ccapi_data);
             break;
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         case connector_class_id_file_system:
             status = ccapi_filesystem_handler(request_id.file_system_request, data, ccapi_data);
             break;
 #endif
-#ifdef CCIMP_DATA_SERVICE_ENABLED
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
         case connector_class_id_data_service:
             status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
             break;

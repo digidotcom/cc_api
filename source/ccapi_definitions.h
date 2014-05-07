@@ -5,7 +5,7 @@
  *      Author: spastor
  */
 
-#ifndef _CCAPI_DEFINITIONS_H_
+#if !(defined _CCAPI_DEFINITIONS_H_)
 #define _CCAPI_DEFINITIONS_H_
 
 #include "connector_config.h"
@@ -99,19 +99,19 @@ typedef struct {
         ccapi_tcp_info_t * info;
         ccapi_bool_t connected;
     } transport_tcp;
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     struct {
         ccapi_bool_t started;
     } transport_udp;
 #endif
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     struct {
         ccapi_bool_t started;
     } transport_sms;
 #endif
 } ccapi_data_t;
 
-#ifdef CCIMP_DATA_SERVICE_ENABLED
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
 typedef struct
 {
     ccapi_data_t * ccapi_data;
@@ -125,7 +125,7 @@ typedef struct
 } ccapi_svc_send_data_t;
 #endif
 
-#if defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 typedef enum {
     CCAPI_FS_INTERNAL_ERROR_ACCESS_DENIED,
     CCAPI_FS_INTERNAL_ERROR_INVALID_PATH
@@ -164,7 +164,7 @@ connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_st
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context);
 ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length);
 
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 

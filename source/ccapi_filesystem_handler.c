@@ -2,7 +2,7 @@
 
 #include "ccapi_definitions.h"
 
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
 typedef struct {
     ccimp_fs_handle_t ccimp_handle;

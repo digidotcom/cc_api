@@ -2,7 +2,7 @@
 
 #include "ccapi_definitions.h"
 
-#ifdef CCIMP_DATA_SERVICE_ENABLED
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
 
 typedef struct
 {
@@ -36,12 +36,12 @@ static connector_transport_t ccapi_to_connector_transport(ccapi_transport_t cons
             connector_transport = connector_transport_tcp;
             break;
         case CCAPI_TRANSPORT_UDP:
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
             connector_transport = connector_transport_udp;
 #endif
             break;
         case CCAPI_TRANSPORT_SMS:
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
             connector_transport = connector_transport_sms;
 #endif
             break;
@@ -88,12 +88,12 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
             p_transport_started = &ccapi_data->transport_tcp.connected;
             break;
         case CCAPI_TRANSPORT_UDP:
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
             p_transport_started = &ccapi_data->transport_udp.started;
 #endif
             break;
         case CCAPI_TRANSPORT_SMS:
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
             p_transport_started = &ccapi_data->transport_udp.started;
 #endif
             break;
@@ -217,7 +217,7 @@ done:
     return error;
 }
 
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info, char const * const local_path)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
@@ -339,7 +339,7 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
             ASSERT_MSG(ccapi_syncr_destroy(send_info->svc_send.send_syncr) == CCIMP_STATUS_OK);
         }
 
-#ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         if (send_info->svc_send.file_handler.pointer != NULL)
         {
             ASSERT_MSG(ccapi_close_file(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
@@ -456,7 +456,7 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
     ccapi_send_error_t error;
     ccapi_send_t * send_info = NULL;
 
-#ifndef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if !(defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     UNUSED_ARGUMENT(transport);
     UNUSED_ARGUMENT(local_path);
     UNUSED_ARGUMENT(cloud_path);
@@ -518,7 +518,7 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
     ccapi_send_error_t error;
     ccapi_send_t * send_info = NULL;
 
-#ifndef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
+#if !(defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     UNUSED_ARGUMENT(transport);
     UNUSED_ARGUMENT(local_path);
     UNUSED_ARGUMENT(cloud_path);
