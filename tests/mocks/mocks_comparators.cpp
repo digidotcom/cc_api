@@ -202,8 +202,6 @@ static bool ccimp_fs_file_read_t_IsEqual(void * object1, void * object2)
         return false;
     if (ccimp_fs_file_read_1->handle.pointer != ccimp_fs_file_read_2->handle.pointer)
         return false;
-    if (ccimp_fs_file_read_1->buffer != ccimp_fs_file_read_2->buffer)
-        return false;
     if (ccimp_fs_file_read_1->bytes_available != ccimp_fs_file_read_2->bytes_available)
         return false;
     if (ccimp_fs_file_read_1->bytes_used != ccimp_fs_file_read_2->bytes_used)

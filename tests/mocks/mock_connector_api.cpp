@@ -342,6 +342,7 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 
             /* Call data callback */
             {
+                 connector_callback_status_t connector_status;
                  connector_request_id_t request_id;
                  connector_request_data_service_send_t * header = (connector_request_data_service_send_t *)request_data;
 
@@ -366,11 +367,11 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
                                                            };
 
                      request_id.data_service_request = connector_request_id_data_service_send_data;
-                     ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_send, (void *)ccapi_data);
+                     connector_status = ccapi_connector_callback(connector_class_id_data_service, request_id, &data_service_send, (void *)ccapi_data);
 
                      mock_info->connector_initiate_send_data_info.out.data = (void*)buffer;
                      more_data = data_service_send.more_data;
-                 } while (more_data == connector_true);
+                 } while (more_data == connector_true && connector_status == connector_callback_continue);
 
             }
             /* Call response callback */
