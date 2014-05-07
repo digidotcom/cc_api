@@ -273,25 +273,25 @@ done:
 }
 #endif
 
-#define setup_send_data_common(send_info, data, bytes) \
-{ \
-    send_info->svc_send.next_data = (void *)data; \
-    send_info->svc_send.bytes_remaining = bytes; \
-    send_info->svc_send.sending_file = CCAPI_FALSE; \
+static void setup_send_data_common(ccapi_send_t * send_info, void const * const data, size_t bytes)
+{
+    send_info->svc_send.next_data = (void *)data;
+    send_info->svc_send.bytes_remaining = bytes;
+    send_info->svc_send.sending_file = CCAPI_FALSE;
 }
 
-#define setup_send_no_reply_common(send_info) \
-{ \
-    send_info->svc_send.hint = NULL; \
-    send_info->header.response_required = connector_false; \
-    send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER; \
+static void setup_send_no_reply_common(ccapi_send_t * send_info)
+{
+    send_info->svc_send.hint = NULL;
+    send_info->header.response_required = connector_false;
+    send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER;
 }
 
-#define setup_send_with_reply_common(send_info, hint, timeout) \
-{ \
-    send_info->svc_send.hint = hint; \
-    send_info->header.response_required = connector_true; \
-    send_info->header.timeout_in_seconds = timeout; \
+static void setup_send_with_reply_common(ccapi_send_t * send_info, ccapi_string_info_t * const hint, unsigned long const timeout)
+{
+    send_info->svc_send.hint = hint;
+    send_info->header.response_required = connector_true;
+    send_info->header.timeout_in_seconds = timeout;
 }
 
 static ccapi_send_error_t call_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
