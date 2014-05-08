@@ -55,9 +55,9 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
-    if (ccapi_data->service.file_system.syncr_access != NULL)
+    if (ccapi_data->file_system_syncr != NULL)
     {
-        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
     }
 
     if (ccapi_data->config.filesystem_supported)
@@ -117,7 +117,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 
     ccapi_data->initiate_action_syncr = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
-    ccapi_data->service.file_system.syncr_access = NULL;
+    ccapi_data->file_system_syncr = NULL;
     /* Initialize one single time for all connector instances the logging syncr object */
     if (logging_syncr == NULL)
     {
@@ -219,8 +219,8 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     }
 
 #ifdef CCIMP_FILE_SYSTEM_SERVICE_ENABLED
-    ccapi_data->service.file_system.syncr_access = ccapi_syncr_create_and_release();
-    if (ccapi_data->service.file_system.syncr_access == NULL)
+    ccapi_data->file_system_syncr = ccapi_syncr_create_and_release();
+    if (ccapi_data->file_system_syncr == NULL)
     {
         error = CCAPI_START_ERROR_SYNCR_FAILED;
         goto done;

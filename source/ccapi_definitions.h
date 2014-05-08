@@ -87,11 +87,11 @@ typedef struct {
         ccapi_thread_info_t * connector_run;
     } thread;
     void * initiate_action_syncr;
+    void * file_system_syncr;
     struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
             ccapi_fs_virtual_dir_t * virtual_dir_list;
-            void * syncr_access;
             void * imp_context;
         } file_system;
     } service;
