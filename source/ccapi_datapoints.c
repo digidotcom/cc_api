@@ -288,12 +288,38 @@ done:
     return arg_list;
 }
 
+static char const * get_next_keyword(char * * const next_token, char * const string, char const * const delim)
+{
+    char * token_start = string != NULL ? string : *next_token;
+
+    if (*token_start == '\0')
+    {
+        token_start = NULL;
+        goto done;
+    }
+
+    *next_token = strchr(token_start, delim[0]);
+    if (*next_token != NULL)
+    {
+        **next_token = '\0';
+        (*next_token)++;
+    }
+    else
+    {
+        *next_token = token_start + strlen(token_start);
+    }
+
+done:
+    return token_start;
+}
+
 static ccapi_dp_error_t get_arg_list_from_format_string(char const * const format_string, ccapi_dp_argument_t * * const arg_list, size_t * const arg_list_count)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
-    char * keyword;
+    char const * keyword;
     char const * const keyword_separator = " ";
     char * format_string_copy;
+    char * next_keyword = NULL;
     ccapi_dp_argument_t temp_arg_list[4] = {CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID};
     size_t temp_arg_list_count = 0;
 
@@ -304,7 +330,7 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
         goto done;
     }
 
-    keyword = strtok(format_string_copy, keyword_separator);
+    keyword = get_next_keyword(&next_keyword, format_string_copy, keyword_separator);
     while (keyword != NULL)
     {
         if (temp_arg_list_count > 3)
@@ -359,7 +385,7 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
             temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_INVALID;
         }
 
-        keyword = strtok(NULL, keyword_separator);
+        keyword = get_next_keyword(&next_keyword, NULL, keyword_separator);
     }
 
     if (!valid_arg_list(temp_arg_list, temp_arg_list_count))
