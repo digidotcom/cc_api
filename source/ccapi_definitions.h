@@ -133,7 +133,7 @@ typedef enum {
 
 typedef struct {
     ccapi_bool_t error_is_internal;
-    struct {
+    union {
         void * ccimp_error;
         ccapi_fs_internal_error_t ccapi_error;
     } error;
