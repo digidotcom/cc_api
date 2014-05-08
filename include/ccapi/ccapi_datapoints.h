@@ -5,32 +5,43 @@
 
 #define CCAPI_NO_ELEVATION   -6378000 /* Negative maximum Earth's radio */
 
+#define CCAPI_DP_KEY_DATA_INT32     "int32"
+#define CCAPI_DP_KEY_DATA_INT64     "int64"
+#define CCAPI_DP_KEY_DATA_FLOAT     "float"
+#define CCAPI_DP_KEY_DATA_DOUBLE    "double"
+#define CCAPI_DP_KEY_DATA_STRING    "string"
+
+#define CCAPI_DP_KEY_TS_EPOCH       "ts_epoch"
+#define CCAPI_DP_KEY_TS_EPOCHMS     "ts_epoch_ms"
+#define CCAPI_DP_KEY_TS_ISO8601     "ts_iso"
+
+#define CCAPI_DP_KEY_LOCATION       "loc"
+#define CCAPI_DP_KEY_QUALITY        "qual"
+
 typedef enum {
     CCAPI_DP_ERROR_NONE,
     CCAPI_DP_ERROR_INVALID_ARGUMENT,
+    CCAPI_DP_ERROR_INVALID_STREAM_ID,
+    CCAPI_DP_ERROR_INVALID_FORMAT,
+    CCAPI_DP_ERROR_INVALID_UNITS,
+    CCAPI_DP_ERROR_INVALID_FORWARD_TO,
     CCAPI_DP_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_DP_ERROR_SYNCR_FAILED
 } ccapi_dp_error_t;
 
 typedef enum {
-    CCAPI_CSV_DATA,
-    CCAPI_CSV_TIMESTAMP,
-    CCAPI_CSV_QUALITY,
-    CCAPI_CSV_DESCRIPTION,
-    CCAPI_CSV_LOCATION,
-    CCAPI_CSV_TYPE,
-    CCAPI_CSV_UNITS,
-    CCAPI_CSV_FORWARD_TO,
-    CCAPI_CSV_STREAM_ID,
-    CCAPI_CSV_COUNT
-} csv_fields_t;
-
-typedef enum {
-    CCAPI_TS_CLOUD,
-    CCAPI_TS_EPOCH,
-    CCAPI_TS_EPOCH_MSEC,
-    CCAPI_TS_ISO8601
-} ccapi_timestamp_t;
+    CCAPI_DP_ARG_DATA_INT32,
+    CCAPI_DP_ARG_DATA_INT64,
+    CCAPI_DP_ARG_DATA_FLOAT,
+    CCAPI_DP_ARG_DATA_DOUBLE,
+    CCAPI_DP_ARG_DATA_STRING,
+    CCAPI_DP_ARG_TIME_EPOCH,
+    CCAPI_DP_ARG_TIME_EPOCH_MSEC,
+    CCAPI_DP_ARG_TIME_ISO8601,
+    CCAPI_DP_ARG_LOC,
+    CCAPI_DP_ARG_QUAL,
+    CCAPI_DP_ARG_INVALID
+} ccapi_dp_argument_t;
 
 typedef struct {
     float latitude;
@@ -40,20 +51,12 @@ typedef struct {
 
 typedef struct {
     char const * stream_id;
-    char const * unit;
+    char const * units;
     char const * forward_to;
-    enum {
-        INT32,
-        INT64,
-        FLOAT,
-        DOUBLE,
-        STRING,
-        BINARY
-    } type;
-    csv_fields_t csv_order[CCAPI_CSV_COUNT];
-    size_t csv_fields_count;
-    ccapi_timestamp_t timestamp_format;
-    ccapi_bool_t location_present;
+    struct {
+        ccapi_dp_argument_t * list;
+        size_t count;
+    } arguments;
 } ccapi_dp_data_stream_t;
 
 typedef struct ccapi_data_point {
@@ -67,15 +70,15 @@ typedef struct ccapi_data_point {
 
     union {
         struct {
-            uint32_t epoch;
-            uint32_t msec;
+            uint32_t seconds;
+            uint32_t milliseconds;
         } epoch;
         uint64_t epoch_msec;
         char const * iso8601;
     } timestamp;
 
     ccapi_location_t location;
-    int quality;
+    int32_t quality;
 
     struct ccapi_data_point * next;
 } ccapi_data_point_t;
@@ -95,8 +98,9 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
 ccapi_dp_error_t ccapi_dp_destroy_collection(ccapi_dp_collection_t * const dp_collection);
 ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection);
 
-ccapi_dp_error_t ccapi_dp_create_data_stream(ccapi_dp_data_stream_t * const stream_info, char const * const stream_id, char const * const format_string);
-ccapi_dp_error_t ccapi_dp_destroy_data_stream(ccapi_dp_data_stream_t stream_info);
+ccapi_dp_error_t ccapi_dp_create_data_stream(ccapi_dp_data_stream_t * * const stream_info, char const * const stream_id, char const * const format_string);
+ccapi_dp_error_t ccapi_dp_create_data_stream_extra(ccapi_dp_data_stream_t * * const stream_info, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to);
+ccapi_dp_error_t ccapi_dp_destroy_data_stream(ccapi_dp_data_stream_t * const stream_info);
 
 ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t collection, ccapi_dp_data_stream_t stream_info, ...);
 #endif

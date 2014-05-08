@@ -41,11 +41,10 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionInvalidArgument)
 
 TEST(test_ccapi_dp_collection, testCreateCollectionNotEnoughMemory)
 {
-    void * malloc_for_dp_collection = NULL;
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
 
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NULL, false);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INSUFFICIENT_MEMORY, dp_error);
@@ -54,12 +53,10 @@ TEST(test_ccapi_dp_collection, testCreateCollectionNotEnoughMemory)
 
 TEST(test_ccapi_dp_collection, testCreateCollectionSyncrFailed)
 {
-    void * malloc_for_dp_collection = malloc(sizeof (ccapi_dp_collection_t));
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
 
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_dp_collection, CCIMP_STATUS_OK);
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, true);
     Mock_ccimp_os_syncr_create_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
@@ -69,11 +66,10 @@ TEST(test_ccapi_dp_collection, testCreateCollectionSyncrFailed)
 
 TEST(test_ccapi_dp_collection, testCreateCollectionOk)
 {
-    void * malloc_for_dp_collection = malloc(sizeof (ccapi_dp_collection_t));
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
 
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection != NULL);
@@ -135,12 +131,10 @@ TEST(test_ccapi_dp_collection, testClearCollectionOK)
 
 TEST(test_ccapi_dp_collection, testDestroyEmptyCollectionOk)
 {
-    void * malloc_for_dp_collection = malloc(sizeof (ccapi_dp_collection_t));
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
 
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_dp_collection, CCIMP_STATUS_OK);
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, true);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
@@ -150,11 +144,10 @@ TEST(test_ccapi_dp_collection, testDestroyEmptyCollectionOk)
 
 TEST(test_ccapi_dp_collection, testDestroyCollectionAcquireFailed)
 {
-    void * malloc_for_dp_collection = malloc(sizeof (ccapi_dp_collection_t));
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
 
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
     Mock_ccimp_os_syncr_acquire_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
@@ -165,11 +158,9 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionAcquireFailed)
 
 TEST(test_ccapi_dp_collection, testDestroyCollectionOk)
 {
-    void * malloc_for_dp_collection = malloc(sizeof (ccapi_dp_collection_t));
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
     ccapi_dp_error_t dp_error;
-
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_dp_collection_t), malloc_for_dp_collection);
+    void * malloc_for_dp_collection = th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);

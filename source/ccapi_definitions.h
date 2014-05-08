@@ -8,6 +8,8 @@
 #ifndef _CCAPI_DEFINITIONS_H_
 #define _CCAPI_DEFINITIONS_H_
 
+#include <ctype.h>
+
 #include "connector_config.h"
 #include "ccapi/ccapi.h"
 #include "ccimp/ccimp_hal.h"
