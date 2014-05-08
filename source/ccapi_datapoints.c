@@ -1,9 +1,8 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
-#include <ctype.h>
 
-#if defined(CCIMP_DATA_SERVICE_ENABLED)
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
 
 ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_collection)
 {
