@@ -114,12 +114,12 @@ static int app_tcp_create_socket(void)
     {
         int enabled = 1;
 
-        if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof(enabled)) < 0)
+        if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enabled, sizeof enabled) < 0)
         {
             printf("open_socket: setsockopt SO_KEEPALIVE failed, errno %d\n", errno);
         }
 
-        if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof(enabled)) < 0)
+        if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enabled, sizeof enabled) < 0)
         {
             printf("open_socket: setsockopt TCP_NODELAY failed, errno %d\n", errno);
         }
@@ -152,7 +152,7 @@ static ccimp_status_t app_tcp_connect(int const fd, in_addr_t const ip_addr)
     printf("app_tcp_connect: fd %d\n", fd);
 
 
-    if (connect(fd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+    if (connect(fd, (struct sockaddr *)&sin, sizeof sin) < 0)
     {
         int const err = errno;
         switch (err)
@@ -224,7 +224,7 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
 
     if (data->handle == NULL)
     {
-        pfd = (int *)malloc(sizeof(int));
+        pfd = (int *)malloc(sizeof *pfd);
         if (pfd == NULL)
         {
             goto error;
@@ -267,7 +267,7 @@ ccimp_status_t ccimp_network_tcp_open(ccimp_network_open_t * const data)
     }
 
     /* Get socket info of connected interface */
-    interface_addr_len = sizeof(interface_addr);
+    interface_addr_len = sizeof interface_addr;
     if (getsockname(*pfd, (struct sockaddr *)&interface_addr, &interface_addr_len))
     {
         printf("network_connect: getsockname error, errno %d\n", errno);
