@@ -157,7 +157,7 @@ static bool connector_request_data_service_send_t_IsEqual(void * object1, void *
 
     if (connector_request_data_service_send_t_1->transport != connector_request_data_service_send_t_2->transport)
         return false;
-    if (connector_request_data_service_send_t_1->path != connector_request_data_service_send_t_2->path)
+    if (strcmp(connector_request_data_service_send_t_1->path, connector_request_data_service_send_t_2->path) != 0)
         return false;
     if (connector_request_data_service_send_t_1->content_type != connector_request_data_service_send_t_2->content_type)
         return false;
