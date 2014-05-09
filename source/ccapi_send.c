@@ -366,7 +366,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    if (!valid_malloc((void**)&send_info, sizeof(ccapi_send_t), &error))
+    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
     {
         goto done;
     }
@@ -426,7 +426,7 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    if (!valid_malloc((void**)&send_info, sizeof(ccapi_send_t), &error))
+    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
     {
         goto done;
     }
@@ -493,7 +493,7 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    if (!valid_malloc((void**)&send_info, sizeof(ccapi_send_t), &error))
+    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
     {
         goto done;
     }
@@ -570,7 +570,7 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    if (!valid_malloc((void**)&send_info, sizeof(ccapi_send_t), &error))
+    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
     {
         goto done;
     }

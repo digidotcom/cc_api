@@ -320,7 +320,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
             goto done;
     }
 
-    memcpy(fs_status, &ccimp_fs_dir_entry_status_data.status, sizeof(ccimp_fs_stat_t));
+    memcpy(fs_status, &ccimp_fs_dir_entry_status_data.status, sizeof *fs_status);
 
 done:
     return ccimp_status;
