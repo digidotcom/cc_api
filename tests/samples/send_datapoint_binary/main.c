@@ -114,7 +114,7 @@ int main (void)
 			data[i] = 'a';
         }
 
-        dp_b_error = ccapi_dp_send_binary(CCAPI_TRANSPORT_TCP, "DataPoint/ccapi_send_dp_binary.bin", data, SEND_DP_BINARY_SIZE_OK);
+        dp_b_error = ccapi_dp_send_binary(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary", data, SEND_DP_BINARY_SIZE_OK);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
             printf("ccapi_dp_send_binary success\n");
@@ -132,7 +132,7 @@ int main (void)
         hint_string_info.string = hint_string;
         hint_string_info.length = sizeof(hint_string);
 
-        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "DataPoint/ccapi_send_dp_binary_with_reply.bin", data, SEND_DP_BINARY_SIZE_OK, SEND_WAIT_FOREVER, &hint_string_info);
+        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply", data, SEND_DP_BINARY_SIZE_OK, SEND_WAIT_FOREVER, &hint_string_info);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
             printf("ccapi_dp_send_binary_with_reply success\n");
@@ -160,7 +160,7 @@ int main (void)
         hint_string_info.string = hint_string;
         hint_string_info.length = sizeof(hint_string);
 
-        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "DataPoint/ccapi_send_dp_binary_with_reply_error.bin", data, SEND_DP_BINARY_SIZE_ERROR, SEND_WAIT_FOREVER, &hint_string_info);
+        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply_error", data, SEND_DP_BINARY_SIZE_ERROR, SEND_WAIT_FOREVER, &hint_string_info);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
             printf("ccapi_dp_send_binary_with_reply success\n");
