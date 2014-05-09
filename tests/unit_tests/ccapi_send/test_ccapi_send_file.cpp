@@ -2,7 +2,8 @@
 
 #define CLOUD_PATH   "test/test.txt"
 #define CONTENT_TYPE "text/plain"
-#define DATA         "CCAPI send data sample\n"
+#define DATA  { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
+                0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f }
 #define LOCAL_PATH   "./send_file.txt"
 
 TEST_GROUP(test_ccapi_send_file_no_reply)
@@ -11,16 +12,9 @@ TEST_GROUP(test_ccapi_send_file_no_reply)
 
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {NULL, NULL};
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        start.service.file_system = &fs_service;
-
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
+        th_start_ccapi();
 
         th_start_tcp_lan_ipv4();
     }
@@ -39,26 +33,24 @@ TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_NONE)
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
-    create_test_file(LOCAL_PATH, data, strlen(data));
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_false;
     header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
     destroy_test_file(LOCAL_PATH);
 }
@@ -69,28 +61,26 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeEqual)
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
 
-    create_test_file(LOCAL_PATH, data, strlen(data));
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_false;
     header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
-    mock_info->connector_initiate_send_data_info.in.chunk_size = strlen(data);
+    mock_info->connector_initiate_send_data_info.in.chunk_size = sizeof data;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
     destroy_test_file(LOCAL_PATH);
 }
@@ -101,28 +91,26 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeSmall)
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
 
-    create_test_file(LOCAL_PATH, data, strlen(data));
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_false;
     header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
-    mock_info->connector_initiate_send_data_info.in.chunk_size = strlen(data) / 4 - 1; /* Don't allocate enough space so data callback is called several times */
+    mock_info->connector_initiate_send_data_info.in.chunk_size = sizeof data / 4 - 1; /* Don't allocate enough space so data callback is called several times */
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
     destroy_test_file(LOCAL_PATH);
 }
@@ -135,8 +123,6 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeSmallBinary)
     #define TEST_SIZE 600
     static uint8_t data[TEST_SIZE];
     unsigned int i;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
 
     for( i=0 ; i < TEST_SIZE ; i++)
         data[i] = i;
@@ -147,8 +133,8 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeSmallBinary)
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_false;
     header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
@@ -156,7 +142,7 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeSmallBinary)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, cloud_path, content_type, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, TEST_SIZE));
@@ -167,8 +153,9 @@ TEST(test_ccapi_send_file_no_reply, testChunkSizeSmallBinary)
 TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_CANCEL)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
-    create_test_file(LOCAL_PATH, DATA, TEST_SIZE);
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -184,8 +171,9 @@ TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_CANCEL)
 TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_TIMEOUT)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
-    create_test_file(LOCAL_PATH, DATA, TEST_SIZE);
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -201,8 +189,9 @@ TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_TIMEOUT)
 TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
-    create_test_file(LOCAL_PATH, DATA, TEST_SIZE);
+    create_test_file(LOCAL_PATH, data, sizeof data);
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -211,6 +200,88 @@ TEST(test_ccapi_send_file_no_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
 
     error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_SESSION_ERROR, error);
+
+    destroy_test_file(LOCAL_PATH);
+}
+
+TEST(test_ccapi_send_file_no_reply, testOpenSEND_ERROR_ACCESSING_FILE)
+{
+    ccapi_send_error_t error;
+    char const data[] = DATA;
+
+    create_test_file(LOCAL_PATH, data, sizeof data);
+
+    {
+        ccimp_fs_file_open_t ccimp_open_data;
+
+        ccimp_open_data.errnum.pointer = NULL;
+        ccimp_open_data.imp_context = NULL;
+        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
+        ccimp_open_data.path = LOCAL_PATH;
+
+        Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_ERROR);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
+    }
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
+
+    destroy_test_file(LOCAL_PATH);
+}
+
+TEST(test_ccapi_send_file_no_reply, testReadSEND_ERROR_ACCESSING_FILE)
+{
+    ccapi_send_error_t error;
+
+    char const data[] = DATA;
+
+    create_test_file(LOCAL_PATH, data, sizeof data);
+
+    {
+        connector_request_data_service_send_t header;
+
+        header.transport = connector_transport_tcp;
+        header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
+        header.path  = CLOUD_PATH;
+        header.content_type = CONTENT_TYPE;
+        header.response_required = connector_false;
+        header.timeout_in_seconds = SEND_WAIT_FOREVER;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
+
+        if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
+            ccapi_data_single_instance->service.file_system.imp_context = NULL;
+    }
+
+    {
+        ccimp_fs_file_open_t ccimp_open_data;
+
+        ccimp_open_data.errnum.pointer = NULL;
+        ccimp_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
+        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
+        ccimp_open_data.path = LOCAL_PATH;
+
+        Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
+    }
+
+    {
+        ccimp_fs_file_read_t ccimp_read_data;
+
+        ccimp_read_data.errnum.pointer = NULL;
+        ccimp_read_data.imp_context = &my_fs_context;
+        ccimp_read_data.handle.value = 5;
+        ccimp_read_data.bytes_available = sizeof data;
+        ccimp_read_data.bytes_used = 0;
+
+        Mock_ccimp_fs_file_read_expectAndReturn(&ccimp_read_data, CCIMP_STATUS_ERROR);
+    }
+
+    error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
 
     destroy_test_file(LOCAL_PATH);
 }

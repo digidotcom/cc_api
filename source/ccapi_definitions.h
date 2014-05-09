@@ -87,11 +87,11 @@ typedef struct {
         ccapi_thread_info_t * connector_run;
     } thread;
     void * initiate_action_syncr;
+    void * file_system_syncr;
     struct {
         struct {
             ccapi_filesystem_service_t user_callbacks;
             ccapi_fs_virtual_dir_t * virtual_dir_list;
-            void * syncr_access;
             void * imp_context;
         } file_system;
     } service;
@@ -115,10 +115,12 @@ typedef struct {
 typedef struct
 {
     ccapi_data_t * ccapi_data;
+    ccapi_bool_t sending_file;
     void * next_data;
     ccimp_fs_handle_t file_handler;
     size_t bytes_remaining;
     void * send_syncr;
+    ccapi_send_error_t request_error;
     ccapi_send_error_t response_error;
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;

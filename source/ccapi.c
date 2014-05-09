@@ -129,9 +129,7 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    file_handler->pointer = NULL;
-
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -161,7 +159,7 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
         ccimp_os_yield();
     } while (!loop_done);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
 
     switch (ccimp_status)
     {
@@ -186,7 +184,7 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
 
     *bytes_used = 0;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -217,7 +215,7 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
         ccimp_os_yield();
     } while (!loop_done);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
 
     switch (ccimp_status)
     {
@@ -241,7 +239,7 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -270,7 +268,7 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
         ccimp_os_yield();
     } while (!loop_done);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
 
 done:
     return ccimp_status;
@@ -282,7 +280,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.file_system.syncr_access);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -311,7 +309,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
         ccimp_os_yield();
     } while (!loop_done);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->service.file_system.syncr_access) == CCIMP_STATUS_OK);
+    ASSERT_MSG(ccapi_syncr_release(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
 
     switch (ccimp_status)
     {
@@ -322,7 +320,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
             goto done;
     }
 
-    memcpy(fs_status, &ccimp_fs_dir_entry_status_data.status, sizeof(ccimp_fs_stat_t));
+    memcpy(fs_status, &ccimp_fs_dir_entry_status_data.status, sizeof *fs_status);
 
 done:
     return ccimp_status;
@@ -856,7 +854,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
 {
-    connector_callback_status_t status = connector_callback_abort;
+    connector_callback_status_t status = connector_callback_error;
 	
     if (send_ptr != NULL)
     {
@@ -866,7 +864,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         ASSERT_MSG_GOTO(svc_send != NULL, done);
         bytes_expected_to_read = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        if (svc_send->file_handler.pointer == NULL)
+        if (svc_send->sending_file == CCAPI_FALSE)
         {
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
@@ -877,7 +875,11 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
             size_t bytes_read;
 
             ccimp_status_t ccimp_status = ccapi_read_file(svc_send->ccapi_data, svc_send->file_handler, send_ptr->buffer, bytes_expected_to_read, &bytes_read);
-            ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            if (ccimp_status != CCIMP_STATUS_OK)
+            {
+                svc_send->request_error = CCAPI_SEND_ERROR_ACCESSING_FILE;
+                goto done;
+            }
 
             if (bytes_expected_to_read != bytes_read)
             {

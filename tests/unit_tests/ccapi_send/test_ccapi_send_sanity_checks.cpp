@@ -3,7 +3,7 @@
 #define CLOUD_PATH   "test/test.txt"
 #define CONTENT_TYPE "text/plain"
 #define DATA         "CCAPI send data sample\n"
-#define LOCAL_PATH   "/home/satest/hello.txt"
+#define LOCAL_PATH   "./test_ccapi_send_common_sanity_checks.txt"
 
 /* This group doesn't call ccapi_start/stop functions */
 TEST_GROUP(ccapi_send_with_no_ccapi) 
@@ -274,16 +274,9 @@ TEST_GROUP(test_ccapi_send_file_sanity_checks)
 
     void setup()
     {
-        ccapi_start_t start = {0};
-        ccapi_start_error_t error;
-        ccapi_filesystem_service_t fs_service = {NULL, NULL};
         Mock_create_all();
 
-        th_fill_start_structure_with_good_parameters(&start);
-        start.service.file_system = &fs_service;
-
-        error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_NONE);
+        th_start_ccapi();
 
         th_start_tcp_lan_ipv4();
     }
@@ -324,9 +317,13 @@ TEST(test_ccapi_send_file_sanity_checks, testOK)
 {
     ccapi_send_error_t error;
 
+    create_test_file(LOCAL_PATH, DATA, strlen(DATA));
+
     error = ccapi_send_file(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
     error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+
+    destroy_test_file(LOCAL_PATH);
 }

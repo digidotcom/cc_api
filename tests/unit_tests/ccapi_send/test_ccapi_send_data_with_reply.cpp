@@ -2,7 +2,8 @@
 
 #define CLOUD_PATH   "test/test.txt"
 #define CONTENT_TYPE "text/plain"
-#define DATA         "CCAPI send data sample\n"
+#define DATA  { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
+                0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f }
 
 TEST_GROUP(test_ccapi_send_data_with_reply)
 {
@@ -31,25 +32,23 @@ TEST(test_ccapi_send_data_with_reply, testTimeoutOkNoHint)
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
     unsigned long timeout = 10;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 }
 
 TEST(test_ccapi_send_data_with_reply, testHint)
@@ -58,8 +57,6 @@ TEST(test_ccapi_send_data_with_reply, testHint)
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
-    char const cloud_path[] = CLOUD_PATH;
-    char const content_type[] = CONTENT_TYPE;
     char const hint_check[] = "hello man";
     unsigned long timeout = SEND_WAIT_FOREVER;
 
@@ -69,8 +66,8 @@ TEST(test_ccapi_send_data_with_reply, testHint)
 
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
-    header.path  = cloud_path;
-    header.content_type = content_type;
+    header.path  = CLOUD_PATH;
+    header.content_type = CONTENT_TYPE;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
 
@@ -81,10 +78,10 @@ TEST(test_ccapi_send_data_with_reply, testHint)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, cloud_path, content_type, data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, &hint);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, &hint);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
-    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, strlen(data)));
+    CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
     CHECK(0 == strcmp(hint.string, hint_check));
 }
@@ -93,6 +90,7 @@ TEST(test_ccapi_send_data_with_reply, testHint)
 TEST(test_ccapi_send_data_with_reply, testHintCanBeNull)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     char const hint_check[] = "hello man";
 
@@ -100,7 +98,7 @@ TEST(test_ccapi_send_data_with_reply, testHintCanBeNull)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
 }
@@ -108,6 +106,7 @@ TEST(test_ccapi_send_data_with_reply, testHintCanBeNull)
 TEST(test_ccapi_send_data_with_reply, testHintNoEnoughtRoom)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     char const hint_check[] = "testHintNoEnoughtRoom";
 
@@ -120,7 +119,7 @@ TEST(test_ccapi_send_data_with_reply, testHintNoEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
@@ -130,6 +129,7 @@ TEST(test_ccapi_send_data_with_reply, testHintNoEnoughtRoom)
 TEST(test_ccapi_send_data_with_reply, testHintJustEnoughtRoom)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     char const hint_check[] = "testHintJustEnoughtRoom";
 
@@ -142,7 +142,7 @@ TEST(test_ccapi_send_data_with_reply, testHintJustEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
     CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
@@ -153,45 +153,49 @@ TEST(test_ccapi_send_data_with_reply, testHintJustEnoughtRoom)
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_RESPONSE_BAD_REQUEST)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_bad_request;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_BAD_REQUEST, error);
 }
 
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_RESPONSE_UNAVAILABLE)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_unavailable;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_UNAVAILABLE, error);
 }
 
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_RESPONSE_CLOUD_ERROR)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_cloud_error;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR, error);
 }
 
 TEST(test_ccapi_send_data_with_reply, testResponseErrorHasPriorityOverStatusError)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -199,7 +203,7 @@ TEST(test_ccapi_send_data_with_reply, testResponseErrorHasPriorityOverStatusErro
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR, error);
 }
 
@@ -207,38 +211,41 @@ TEST(test_ccapi_send_data_with_reply, testResponseErrorHasPriorityOverStatusErro
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_STATUS_CANCEL)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_cancel;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_CANCEL, error);
 }
 
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_STATUS_TIMEOUT)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_TIMEOUT, error);
 }
 
 TEST(test_ccapi_send_data_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
 {
     ccapi_send_error_t error;
+    char const data[] = DATA;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_session_error;
     }
 
-    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, DATA, strlen(DATA), CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
+    error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, CLOUD_PATH, CONTENT_TYPE, data, sizeof data, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_SESSION_ERROR, error);
 }
