@@ -1,7 +1,7 @@
 #ifndef _CCAPI_SEND_H_
 #define _CCAPI_SEND_H_
 
-#ifdef CCIMP_DATA_SERVICE_ENABLED
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
 
 #define SEND_WAIT_FOREVER ((unsigned long) 0)
 

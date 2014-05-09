@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include <errno.h>
 
-#ifdef UNIT_TEST
+#if (defined UNIT_TEST)
 #define ccimp_fs_error_desc                 ccimp_fs_error_desc_real
 #define ccimp_fs_session_error              ccimp_fs_session_error_real
 #define ccimp_fs_file_open                  ccimp_fs_file_open_real

@@ -12,7 +12,7 @@
 #include <semaphore.h>
 #include <errno.h>
 
-#ifdef UNIT_TEST
+#if (defined UNIT_TEST)
 #define ccimp_os_malloc             ccimp_os_malloc_real
 #define ccimp_os_free               ccimp_os_free_real
 #define ccimp_os_realloc            ccimp_os_realloc_real

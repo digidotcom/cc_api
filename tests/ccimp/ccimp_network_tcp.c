@@ -1,7 +1,7 @@
 #include "ccimp/ccimp_network.h"
 #include "ccimp/ccimp_os.h"
 
-#ifdef UNIT_TEST
+#if (defined UNIT_TEST)
 #define ccimp_network_tcp_open       ccimp_network_tcp_open_real
 #define ccimp_network_tcp_send       ccimp_network_tcp_send_real
 #define ccimp_network_tcp_receive    ccimp_network_tcp_receive_real

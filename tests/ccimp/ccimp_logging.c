@@ -6,7 +6,7 @@
  */
 #include "ccimp/ccimp_logging.h"
 
-#ifdef UNIT_TEST
+#if (defined UNIT_TEST)
 #define ccimp_hal_logging_vprintf       ccimp_hal_logging_vprintf_real
 #endif
 

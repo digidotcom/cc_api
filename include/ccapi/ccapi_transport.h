@@ -9,11 +9,11 @@ typedef enum {
 
 #include "ccapi/ccapi_transport_tcp.h"
 
-#ifdef CCIMP_UDP_TRANSPORT_ENABLED
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
 #include "ccapi/ccapi_transport_udp.h"
 #endif
 
-#ifdef CCIMP_SMS_TRANSPORT_ENABLED
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
 #include "ccapi/ccapi_transport_sms.h"
 #endif
 

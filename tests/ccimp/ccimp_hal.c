@@ -11,7 +11,7 @@
 #include <linux/reboot.h>
 #include <sys/reboot.h>
 
-#ifdef UNIT_TEST
+#if (defined UNIT_TEST)
 #define ccimp_hal_halt       ccimp_hal_halt_real
 #define ccimp_hal_reset      ccimp_hal_reset_real
 #endif
