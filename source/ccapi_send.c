@@ -294,7 +294,7 @@ static void setup_send_with_reply_common(ccapi_send_t * send_info, ccapi_string_
     send_info->header.timeout_in_seconds = timeout;
 }
 
-static ccapi_send_error_t call_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
+static ccapi_send_error_t perform_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
 {
     connector_status_t status;
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
@@ -313,13 +313,13 @@ static ccapi_send_error_t call_send_common(ccapi_data_t * const ccapi_data, ccap
         ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE);
         if (result != CCIMP_STATUS_OK)
         {
-            ccapi_logging_line("call_send_common: lock_acquire failed");
+            ccapi_logging_line("perform_send_common: lock_acquire failed");
             error = CCAPI_SEND_ERROR_SYNCR_FAILED;
         }
     }
     else
     {
-        ccapi_logging_line("call_send_common: ccfsm error %d", status);
+        ccapi_logging_line("perform_send_common: ccfsm error %d", status);
         error = CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED;
     }
 
@@ -381,7 +381,7 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
 
     setup_send_no_reply_common(send_info);
 
-    error = call_send_common(ccapi_data, send_info);
+    error = perform_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -441,7 +441,7 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
 
     setup_send_with_reply_common(send_info, hint, timeout);
 
-    error = call_send_common(ccapi_data, send_info);
+    error = perform_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -512,7 +512,7 @@ ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_trans
 
     setup_send_no_reply_common(send_info);
 
-    error = call_send_common(ccapi_data, send_info);
+    error = perform_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -589,7 +589,7 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
 
     setup_send_with_reply_common(send_info, hint, timeout);
 
-    error = call_send_common(ccapi_data, send_info);
+    error = perform_send_common(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
