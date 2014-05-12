@@ -58,8 +58,17 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
         case CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED:
             dp_b_error = CCAPI_DP_B_ERROR_TRANSPORT_NOT_STARTED;
             break;
+        case CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING:  /* TODO: changed to NOT_SUPPORTED */
+            dp_b_error = CCAPI_DP_B_ERROR_FILESYSTEM_NOT_SUPPORTED;
+            break;
         case CCAPI_SEND_ERROR_INVALID_DATA:
             dp_b_error = CCAPI_DP_B_ERROR_INVALID_DATA;
+            break;
+        case CCAPI_SEND_ERROR_INVALID_LOCAL_PATH:
+            dp_b_error = CCAPI_DP_B_ERROR_INVALID_LOCAL_PATH;
+            break;
+        case CCAPI_SEND_ERROR_NOT_A_FILE:
+            dp_b_error = CCAPI_DP_B_ERROR_NOT_A_FILE;
             break;
         case CCAPI_SEND_ERROR_INVALID_HINT_POINTER:
             dp_b_error = CCAPI_DP_B_ERROR_INVALID_HINT_POINTER;
@@ -92,11 +101,8 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
             dp_b_error = CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR;
             break;
         /* These errors should not happen */
-        case CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING:
         case CCAPI_SEND_ERROR_INVALID_CLOUD_PATH:
         case CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE:
-        case CCAPI_SEND_ERROR_INVALID_LOCAL_PATH:
-        case CCAPI_SEND_ERROR_NOT_A_FILE:
             dp_b_error = CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR;
             ASSERT_MSG_GOTO(0, done);
             break;
@@ -150,6 +156,50 @@ done:
     return dp_b_error;
 }
 
+ccapi_dp_b_error_t ccxapi_dp_send_file_binary(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id)
+{
+    ccapi_send_error_t send_data_error;
+    ccapi_dp_b_error_t dp_b_error;
+    char * dp_path;
+
+    dp_b_error = add_dp_prefix_sufix(stream_id, &dp_path);
+    if (dp_b_error != CCAPI_DP_B_ERROR_NONE)
+    {
+        goto done;
+    }
+
+    send_data_error = ccxapi_send_file(ccapi_handle, transport, local_path, dp_path, NULL, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+
+    dp_b_error = send_data_error_to_dp_binary_error(send_data_error);
+
+    ccapi_free(dp_path);
+
+done:
+    return dp_b_error;
+}
+
+ccapi_dp_b_error_t ccxapi_dp_send_file_binary_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    ccapi_send_error_t send_data_error;
+    ccapi_dp_b_error_t dp_b_error;
+    char * dp_path;
+
+    dp_b_error = add_dp_prefix_sufix(stream_id, &dp_path);
+    if (dp_b_error != CCAPI_DP_B_ERROR_NONE)
+    {
+        goto done;
+    }
+
+    send_data_error = ccxapi_send_file_with_reply(ccapi_handle, transport, local_path, dp_path, NULL, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, hint);
+
+    dp_b_error = send_data_error_to_dp_binary_error(send_data_error);
+
+    ccapi_free(dp_path);
+
+done:
+    return dp_b_error;
+}
+
 ccapi_dp_b_error_t ccapi_dp_send_binary(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes)
 {
     return ccxapi_dp_send_binary((ccapi_handle_t)ccapi_data_single_instance, transport, stream_id, data, bytes);
@@ -158,6 +208,16 @@ ccapi_dp_b_error_t ccapi_dp_send_binary(ccapi_transport_t const transport, char 
 ccapi_dp_b_error_t ccapi_dp_send_binary_with_reply(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     return ccxapi_dp_send_binary_with_reply((ccapi_handle_t)ccapi_data_single_instance, transport, stream_id, data, bytes, timeout, hint);
+}
+
+ccapi_dp_b_error_t ccapi_dp_send_file_binary(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id)
+{
+    return ccxapi_dp_send_file_binary((ccapi_handle_t)ccapi_data_single_instance, transport, local_path, stream_id);
+}
+
+ccapi_dp_b_error_t ccapi_dp_send_file_binary_with_reply(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return ccxapi_dp_send_file_binary_with_reply((ccapi_handle_t)ccapi_data_single_instance, transport, local_path, stream_id, timeout, hint);
 }
 
 #endif
