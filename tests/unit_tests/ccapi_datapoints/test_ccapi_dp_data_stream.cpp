@@ -172,7 +172,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataInt32)
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_INT32;
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_INT32;
-    int const expected_arg_count = 1;
+    unsigned int const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -197,7 +197,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataInt64)
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_INT64;
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_INT64;
-    int const expected_arg_count = 1;
+    unsigned int const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -222,7 +222,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataFloat)
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_FLOAT;
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_FLOAT;
-    int const expected_arg_count = 1;
+    unsigned int const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -247,7 +247,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataDouble)
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_DOUBLE;
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_DOUBLE;
-    int const expected_arg_count = 1;
+    unsigned int const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -272,7 +272,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataString)
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_STRING;
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
-    int const expected_arg_count = 1;
+    unsigned int const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -299,7 +299,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpoch)
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH;
-    int const expected_arg_count = 2;
+    unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -327,7 +327,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpochMsec)
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH_MSEC;
-    int const expected_arg_count = 2;
+    unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -355,7 +355,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampISO8601)
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_STRING;
-    int const expected_arg_count = 2;
+    unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -383,7 +383,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamLocation)
     ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_INT32;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_INT32;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
-    int const expected_arg_count = 2;
+    unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -412,7 +412,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamQuality)
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 3;
+    unsigned int const expected_arg_count = 3;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -446,7 +446,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraFull)
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -482,7 +482,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamFull)
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
@@ -512,7 +512,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4StreamID)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
 
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
@@ -533,7 +533,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4Units)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
 
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
@@ -555,7 +555,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4ForwardTo)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
 
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
@@ -692,7 +692,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDestroyOk)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    unsigned int const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
     ccapi_dp_data_stream_t * data_stream = NULL;
 
