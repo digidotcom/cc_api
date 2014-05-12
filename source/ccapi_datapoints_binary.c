@@ -4,8 +4,7 @@
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED) && (defined CCIMP_DATA_POINTS_ENABLED)
 
-ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior);
-ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
+#include "ccapi/ccxapi.h"
 
 static ccapi_dp_b_error_t add_dp_prefix_sufix(char const * const stream_id, char * * dp_path)
 {
@@ -102,7 +101,7 @@ done:
     return dp_b_error;
 }
 
-ccapi_dp_b_error_t ccxapi_dp_send_binary(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes)
+ccapi_dp_b_error_t ccxapi_dp_send_binary(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes)
 {
     ccapi_send_error_t send_data_error;
     ccapi_dp_b_error_t dp_b_error;
@@ -114,7 +113,7 @@ ccapi_dp_b_error_t ccxapi_dp_send_binary(ccapi_data_t * const ccapi_data, ccapi_
         goto done;
     }
 
-    send_data_error = ccxapi_send_data(ccapi_data, transport, dp_path, NULL, data, bytes, CCAPI_SEND_BEHAVIOR_OVERWRITE);
+    send_data_error = ccxapi_send_data(ccapi_handle, transport, dp_path, NULL, data, bytes, CCAPI_SEND_BEHAVIOR_OVERWRITE);
 
     dp_b_error = send_data_error_to_dp_binary_error(send_data_error);
 
@@ -124,7 +123,7 @@ done:
     return dp_b_error;
 }
 
-ccapi_dp_b_error_t ccxapi_dp_send_binary_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_dp_b_error_t ccxapi_dp_send_binary_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_send_error_t send_data_error;
     ccapi_dp_b_error_t dp_b_error;
@@ -136,7 +135,7 @@ ccapi_dp_b_error_t ccxapi_dp_send_binary_with_reply(ccapi_data_t * const ccapi_d
         goto done;
     }
 
-    send_data_error = ccxapi_send_data_with_reply(ccapi_data, transport, dp_path, NULL, data, bytes, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, hint);
+    send_data_error = ccxapi_send_data_with_reply(ccapi_handle, transport, dp_path, NULL, data, bytes, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, hint);
 
     dp_b_error = send_data_error_to_dp_binary_error(send_data_error);
 
@@ -148,12 +147,12 @@ done:
 
 ccapi_dp_b_error_t ccapi_dp_send_binary(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes)
 {
-    return ccxapi_dp_send_binary(ccapi_data_single_instance, transport, stream_id, data, bytes);
+    return ccxapi_dp_send_binary((ccapi_handle_t)ccapi_data_single_instance, transport, stream_id, data, bytes);
 }
 
 ccapi_dp_b_error_t ccapi_dp_send_binary_with_reply(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_dp_send_binary_with_reply(ccapi_data_single_instance, transport, stream_id, data, bytes, timeout, hint);
+    return ccxapi_dp_send_binary_with_reply((ccapi_handle_t)ccapi_data_single_instance, transport, stream_id, data, bytes, timeout, hint);
 }
 
 #endif
