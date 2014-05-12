@@ -44,7 +44,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testTimeoutOkNoHint)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, timeout, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, timeout, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
@@ -77,7 +77,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testHint)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, timeout, &hint);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, timeout, &hint);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
@@ -97,7 +97,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testHintCanBeNull)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
 }
@@ -118,7 +118,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testHintNoEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, &hint);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, &hint);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
@@ -141,7 +141,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testHintJustEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, &hint);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, &hint);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
@@ -159,7 +159,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_RESPONSE_BAD_REQUEST
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_bad_request;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_BAD_REQUEST, error);
 }
 
@@ -173,7 +173,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_RESPONSE_UNAVAILABLE
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_unavailable;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_UNAVAILABLE, error);
 }
 
@@ -187,7 +187,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_RESPONSE_CLOUD_ERROR
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_cloud_error;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR, error);
 }
 
@@ -202,7 +202,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testResponseErrorHasPriorityOverSta
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR, error);
 }
 
@@ -217,7 +217,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_STATUS_CANCEL)
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_cancel;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_CANCEL, error);
 }
 
@@ -231,7 +231,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_STATUS_TIMEOUT)
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_TIMEOUT, error);
 }
 
@@ -245,6 +245,6 @@ TEST(test_ccapi_datapoint_binary_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_session_error;
     }
 
-    error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
+    error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, STREAM_ID, data, sizeof data, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_SESSION_ERROR, error);
 }

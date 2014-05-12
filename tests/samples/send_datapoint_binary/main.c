@@ -114,14 +114,14 @@ int main (void)
 			data[i] = 'a';
         }
 
-        dp_b_error = ccapi_dp_send_binary(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary", data, SEND_DP_BINARY_SIZE_OK);
+        dp_b_error = ccapi_dp_binary_send_data(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary", data, SEND_DP_BINARY_SIZE_OK);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
-            printf("ccapi_dp_send_binary success\n");
+            printf("ccapi_dp_binary_send_data success\n");
         }
         else
         {
-            printf("ccapi_dp_send_binary failed with error %d\n", dp_b_error);
+            printf("ccapi_dp_binary_send_data failed with error %d\n", dp_b_error);
         }
 
         for (i=0 ; i < SEND_DP_BINARY_SIZE_OK ; i++)
@@ -132,17 +132,17 @@ int main (void)
         hint_string_info.string = hint_string;
         hint_string_info.length = sizeof(hint_string);
 
-        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply", data, SEND_DP_BINARY_SIZE_OK, SEND_WAIT_FOREVER, &hint_string_info);
+        dp_b_error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply", data, SEND_DP_BINARY_SIZE_OK, SEND_WAIT_FOREVER, &hint_string_info);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
-            printf("ccapi_dp_send_binary_with_reply success\n");
+            printf("ccapi_dp_binary_send_data_with_reply success\n");
         }
         else
         {
-            printf("ccapi_dp_send_binary_with_reply failed with error %d\n", dp_b_error);
+            printf("ccapi_dp_binary_send_data_with_reply failed with error %d\n", dp_b_error);
 
             if (strlen(hint_string_info.string) != 0)
-                printf("ccapi_dp_send_binary_with_reply hint %s\n", hint_string_info.string);
+                printf("ccapi_dp_binary_send_data_with_reply hint %s\n", hint_string_info.string);
         }
     }
 
@@ -160,17 +160,17 @@ int main (void)
         hint_string_info.string = hint_string;
         hint_string_info.length = sizeof(hint_string);
 
-        dp_b_error = ccapi_dp_send_binary_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply_error", data, SEND_DP_BINARY_SIZE_ERROR, SEND_WAIT_FOREVER, &hint_string_info);
+        dp_b_error = ccapi_dp_binary_send_data_with_reply(CCAPI_TRANSPORT_TCP, "ccapi_send_dp_binary_with_reply_error", data, SEND_DP_BINARY_SIZE_ERROR, SEND_WAIT_FOREVER, &hint_string_info);
         if (dp_b_error == CCAPI_DP_B_ERROR_NONE)
         {
-            printf("ccapi_dp_send_binary_with_reply success\n");
+            printf("ccapi_dp_binary_send_data_with_reply success\n");
         }
         else
         {
-            printf("ccapi_dp_send_binary_with_reply failed with error %d\n", dp_b_error);
+            printf("ccapi_dp_binary_send_data_with_reply failed with error %d\n", dp_b_error);
 
             if (strlen(hint_string_info.string) != 0)
-                printf("ccapi_dp_send_binary_with_reply hint %s\n", hint_string_info.string);
+                printf("ccapi_dp_binary_send_data_with_reply hint %s\n", hint_string_info.string);
         }
     }
 done:

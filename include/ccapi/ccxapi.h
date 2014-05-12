@@ -38,10 +38,10 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_handle_t const ccapi_handle, ch
 ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_handle_t const ccapi_data, char const * const virtual_dir);
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED) && (defined CCIMP_DATA_POINTS_ENABLED)
-ccapi_dp_b_error_t ccxapi_dp_send_binary(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes);
-ccapi_dp_b_error_t ccxapi_dp_send_binary_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint);
-ccapi_dp_b_error_t ccxapi_dp_send_file_binary(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
-ccapi_dp_b_error_t ccxapi_dp_send_file_binary_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_data(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
 #endif
 
 #endif
