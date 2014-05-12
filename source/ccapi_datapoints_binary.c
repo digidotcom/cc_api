@@ -10,8 +10,11 @@ static ccapi_dp_b_error_t add_dp_prefix_sufix(char const * const stream_id, char
 {
     ccapi_dp_b_error_t dp_b_error = CCAPI_DP_B_ERROR_NONE;
 
-    char const * const dp_prefix = "DataPoint/";
-    char const * const dp_sufix = ".bin";
+    char const dp_prefix[] = "DataPoint/";
+    char const dp_sufix[] = ".bin";
+    const size_t dp_prefix_lenght = sizeof dp_prefix - 1; 
+    const size_t dp_sufix_lenght = sizeof dp_sufix - 1;
+    size_t stream_id_lenght;
     char * tmp_dp_path;
 
     if (stream_id == NULL || *stream_id == '\0')
@@ -22,16 +25,18 @@ static ccapi_dp_b_error_t add_dp_prefix_sufix(char const * const stream_id, char
         goto done;
     }
 
-    tmp_dp_path = ccapi_malloc(strlen(dp_prefix) + strlen(stream_id) + strlen(dp_sufix) + 1);
+    stream_id_lenght = strlen(stream_id);
+
+    tmp_dp_path = ccapi_malloc(dp_prefix_lenght + stream_id_lenght + dp_sufix_lenght + 1);
     if (tmp_dp_path == NULL)
     {
         dp_b_error = CCAPI_DP_B_ERROR_INSUFFICIENT_MEMORY;
         goto done;
     }
 
-    strcpy(tmp_dp_path, dp_prefix);
-    strcat(tmp_dp_path, stream_id);
-    strcat(tmp_dp_path, dp_sufix);
+    memcpy(&tmp_dp_path[0], dp_prefix, dp_prefix_lenght);
+    memcpy(&tmp_dp_path[dp_prefix_lenght], stream_id, stream_id_lenght);
+    memcpy(&tmp_dp_path[dp_prefix_lenght + stream_id_lenght], dp_sufix, dp_sufix_lenght + 1);
 
     *dp_path = tmp_dp_path;
 done:
