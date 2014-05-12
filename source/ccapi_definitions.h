@@ -127,6 +127,43 @@ typedef struct
 } ccapi_svc_send_data_t;
 #endif
 
+#ifdef CCIMP_DATA_POINTS_ENABLED
+
+typedef enum {
+    CCAPI_DP_ARG_DATA_INT32,
+    CCAPI_DP_ARG_DATA_INT64,
+    CCAPI_DP_ARG_DATA_FLOAT,
+    CCAPI_DP_ARG_DATA_DOUBLE,
+    CCAPI_DP_ARG_DATA_STRING,
+    CCAPI_DP_ARG_TIME_EPOCH,
+    CCAPI_DP_ARG_TIME_EPOCH_MSEC,
+    CCAPI_DP_ARG_TIME_ISO8601,
+    CCAPI_DP_ARG_LOC,
+    CCAPI_DP_ARG_QUAL,
+    CCAPI_DP_ARG_INVALID
+} ccapi_dp_argument_t;
+
+typedef struct ccapi_dp_data_stream {
+    connector_data_stream_t * ccfsm_data_stream;
+    struct {
+        ccapi_dp_argument_t * list;
+        size_t count;
+    } arguments;
+    struct ccapi_dp_data_stream * next;
+} ccapi_dp_data_stream_t;
+
+typedef struct stream_seen {
+    char * stream_id;
+    struct stream_seen * next;
+} stream_seen_t;
+
+typedef struct ccapi_dp_collection {
+    ccapi_dp_data_stream_t * ccapi_data_stream_list;
+    void * syncr;
+} ccapi_dp_collection_t;
+
+#endif
+
 #if defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED
 typedef enum {
     CCAPI_FS_INTERNAL_ERROR_ACCESS_DENIED,

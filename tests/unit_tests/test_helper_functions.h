@@ -62,7 +62,6 @@ void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_
 void create_test_file(char const * const path, void const * const data, size_t bytes);
 void destroy_test_file(char const * const path);
 
-ccapi_dp_argument_t get_dp_type_from_arg_list(ccapi_dp_argument_t * list, size_t count);
 void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free);
 
 #endif

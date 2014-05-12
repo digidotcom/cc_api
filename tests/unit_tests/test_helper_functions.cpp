@@ -309,49 +309,6 @@ void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_
     CHECK_EQUAL(0, ccfsm_error_desc_data.bytes_used);
 }
 
-ccapi_dp_argument_t get_dp_type_from_arg_list(ccapi_dp_argument_t * list, size_t count)
-{
-    ccapi_dp_argument_t type = CCAPI_DP_ARG_INVALID;
-    ccapi_bool_t found = CCAPI_FALSE;
-    size_t i;
-
-    for (i = 0; i < count && !found; i++)
-    {
-        switch (list[i])
-        {
-            case CCAPI_DP_ARG_DATA_INT32:
-                found = CCAPI_TRUE;
-                break;
-            case CCAPI_DP_ARG_DATA_INT64:
-                found = CCAPI_TRUE;
-                break;
-            case CCAPI_DP_ARG_DATA_FLOAT:
-                found = CCAPI_TRUE;
-                break;
-            case CCAPI_DP_ARG_DATA_DOUBLE:
-                found = CCAPI_TRUE;
-                break;
-            case CCAPI_DP_ARG_DATA_STRING:
-                found = CCAPI_TRUE;
-                break;
-            case CCAPI_DP_ARG_TIME_EPOCH:
-            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
-            case CCAPI_DP_ARG_TIME_ISO8601:
-            case CCAPI_DP_ARG_LOC:
-            case CCAPI_DP_ARG_QUAL:
-            case CCAPI_DP_ARG_INVALID:
-                CHECK(list[i] != CCAPI_DP_ARG_INVALID);
-                break;
-        }
-        if (found)
-        {
-            type = list[i];
-        }
-    }
-
-    return type;
-}
-
 void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free)
 {
     void * ptr;
