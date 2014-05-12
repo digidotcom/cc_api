@@ -75,7 +75,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeEqual)
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 }
 
-TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeSmall_x)
+TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeSmall)
 {
     ccapi_dp_b_error_t error;
 
