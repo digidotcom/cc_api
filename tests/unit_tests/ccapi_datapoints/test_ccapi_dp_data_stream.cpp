@@ -158,7 +158,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataInt32)
     char const * const format_string = CCAPI_DP_KEY_DATA_INT32;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_INT32;
     connector_data_point_type_t const expected_type = connector_data_point_type_integer;
-    int const expected_arg_count = 1;
+    size_t const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -185,7 +185,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataInt64)
     char const * const format_string = CCAPI_DP_KEY_DATA_INT64;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_INT64;
     connector_data_point_type_t const expected_type = connector_data_point_type_long;
-    int const expected_arg_count = 1;
+    size_t const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -212,7 +212,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataFloat)
     char const * const format_string = CCAPI_DP_KEY_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_FLOAT;
     connector_data_point_type_t const expected_type = connector_data_point_type_float;
-    int const expected_arg_count = 1;
+    size_t const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -239,7 +239,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataDouble)
     char const * const format_string = CCAPI_DP_KEY_DATA_DOUBLE;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_DOUBLE;
     connector_data_point_type_t const expected_type = connector_data_point_type_double;
-    int const expected_arg_count = 1;
+    size_t const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -266,7 +266,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamDataString)
     char const * const format_string = CCAPI_DP_KEY_DATA_STRING;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_STRING;
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
-    int const expected_arg_count = 1;
+    size_t const expected_arg_count = 1;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -294,7 +294,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpoch)
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH;
-    int const expected_arg_count = 2;
+    size_t const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -325,10 +325,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpochMsec)
 {
     char const * const stream_id = "stream_1";
     char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCHMS;
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
+    connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH_MSEC;
-    int const expected_arg_count = 2;
+    size_t const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -358,10 +358,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampISO8601)
 {
     char const * const stream_id = "myISO8601-stream";
     char const * const format_string = CCAPI_DP_KEY_TS_ISO8601 " " CCAPI_DP_KEY_DATA_STRING;
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_STRING;
+    connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_STRING;
-    int const expected_arg_count = 2;
+    size_t const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -391,10 +391,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamLocation)
 {
     char const * const stream_id = "myISO8601-stream";
     char const * const format_string = CCAPI_DP_KEY_DATA_INT32 " " CCAPI_DP_KEY_LOCATION;
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_INT32;
+    connector_data_point_type_t const expected_type = connector_data_point_type_integer;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_INT32;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
-    int const expected_arg_count = 2;
+    size_t const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -424,11 +424,11 @@ TEST(test_ccapi_dp_data_stream, testDataStreamQuality)
 {
     char const * const stream_id = "qualitystream[1]";
     char const * const format_string = CCAPI_DP_KEY_DATA_FLOAT " " CCAPI_DP_KEY_LOCATION " " CCAPI_DP_KEY_QUALITY;
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_FLOAT;
+    connector_data_point_type_t const expected_type = connector_data_point_type_float;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 3;
+    size_t const expected_arg_count = 3;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -458,12 +458,12 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraFull)
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
 
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_FLOAT;
+    connector_data_point_type_t const expected_type = connector_data_point_type_float;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -498,12 +498,12 @@ TEST(test_ccapi_dp_data_stream, testDataStreamFull)
     char const * const format_string = CCAPI_DP_KEY_TS_ISO8601 " " CCAPI_DP_KEY_DATA_FLOAT " " CCAPI_DP_KEY_LOCATION " " CCAPI_DP_KEY_QUALITY;
     char const * const stream_id = "temperature";
 
-    ccapi_dp_argument_t const expected_type = CCAPI_DP_ARG_DATA_FLOAT;
+    connector_data_point_type_t const expected_type = connector_data_point_type_float;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
     ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
     ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -535,7 +535,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4StreamID)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -555,7 +555,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4Units)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -576,7 +576,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraNoMemory4ForwardTo)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -732,7 +732,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemove1of1)
     char const * const stream_id = "temperature";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -759,7 +759,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemoveInexistent)
     char const * const inexistent_stream_id = "inexistent_stream_id";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
@@ -787,7 +787,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemove1of3)
     char const * const stream_id_3 = "el-de-la-moto";
     char const * const units = "temperature_math";
     char const * const forward_to = "Kelvin";
-    int const expected_arg_count = 4;
+    size_t const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
