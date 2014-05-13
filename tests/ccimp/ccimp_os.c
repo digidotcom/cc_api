@@ -19,6 +19,8 @@
 #define ccimp_os_create_thread      ccimp_os_create_thread_real
 #define ccimp_os_get_system_time    ccimp_os_get_system_time_real
 #define ccimp_os_yield              ccimp_os_yield_real
+#define ccimp_os_syncr_create       ccimp_os_syncr_create_real
+#define ccimp_os_syncr_acquire      ccimp_os_syncr_acquire_real
 #endif
 
 #define ccapi_logging_line_info(message) /* TODO */

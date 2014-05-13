@@ -31,6 +31,11 @@ typedef struct {
 typedef int my_filesystem_context_t;
 typedef int my_filesystem_dir_handle_t;
 
+typedef enum {
+    TH_MALLOC_RETURN_NORMAL,
+    TH_MALLOC_RETURN_NULL
+} th_malloc_behavior_t;
+
 extern my_filesystem_context_t my_fs_context; /* Defined in mock_ccimp_filesystem.cpp */
 extern my_filesystem_dir_handle_t dir_handle; /* Defined in mock_ccimp_filesystem.cpp */
 extern ccapi_bool_t ccapi_tcp_keepalives_cb_called;
@@ -54,7 +59,9 @@ void th_filesystem_prepare_ccimp_dir_entry_status_call(ccimp_fs_dir_entry_status
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path);
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data);
 void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error);
-
 void create_test_file(char const * const path, void const * const data, size_t bytes);
 void destroy_test_file(char const * const path);
+
+void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free);
+
 #endif

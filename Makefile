@@ -70,7 +70,8 @@ CPPOBJS = $(CPPSRCS:.cpp=.o)
 
 test: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
-
+	./$@
+	
 .cpp.o:
 	$(CPP) -DUNIT_TEST $(CFLAGS) -c $< -o $@
 

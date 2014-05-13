@@ -264,6 +264,12 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
         case connector_initiate_session_cancel_all:
             break;
 #endif
+#ifdef CONNECTOR_DATA_POINTS
+        case connector_initiate_data_point_single:
+        case connector_initiate_data_point_multiple:
+        case connector_initiate_data_point_binary:
+            break;
+#endif
         case connector_initiate_terminate:
             mock("connector_initiate_action").expectOneCall("connector_initiate_action")
                      .withParameter("handle", handle)
@@ -440,8 +446,14 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
         case connector_initiate_ping_request:
         case connector_initiate_session_cancel:
         case connector_initiate_session_cancel_all:
-#endif
             break;
+#endif
+#ifdef CONNECTOR_DATA_POINTS
+        case connector_initiate_data_point_single:
+        case connector_initiate_data_point_multiple:
+        case connector_initiate_data_point_binary:
+            break;
+#endif
     }
 
 

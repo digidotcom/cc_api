@@ -308,3 +308,26 @@ void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_
     CHECK_EQUAL(ccfsm_fs_error, ccfsm_error_desc_data.error_status);
     CHECK_EQUAL(0, ccfsm_error_desc_data.bytes_used);
 }
+
+void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free)
+{
+    void * ptr;
+
+    switch (behavior)
+    {
+        case TH_MALLOC_RETURN_NORMAL:
+            ptr = malloc(size);
+            if (expect_free)
+            {
+                Mock_ccimp_os_free_expectAndReturn(ptr, CCIMP_STATUS_OK);
+            }
+            break;
+        case TH_MALLOC_RETURN_NULL:
+            ptr = NULL;
+            break;
+    }
+
+    Mock_ccimp_os_malloc_expectAndReturn(size, ptr);
+
+    return ptr;
+}
