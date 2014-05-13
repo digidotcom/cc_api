@@ -58,7 +58,7 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
         case CCAPI_SEND_ERROR_TRANSPORT_NOT_STARTED:
             dp_b_error = CCAPI_DP_B_ERROR_TRANSPORT_NOT_STARTED;
             break;
-        case CCAPI_SEND_ERROR_FILESYSTEM_NOT_RUNNING:  /* TODO: changed to NOT_SUPPORTED */
+        case CCAPI_SEND_ERROR_FILESYSTEM_NOT_SUPPORTED:
             dp_b_error = CCAPI_DP_B_ERROR_FILESYSTEM_NOT_SUPPORTED;
             break;
         case CCAPI_SEND_ERROR_INVALID_DATA:
@@ -69,6 +69,9 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
             break;
         case CCAPI_SEND_ERROR_NOT_A_FILE:
             dp_b_error = CCAPI_DP_B_ERROR_NOT_A_FILE;
+            break;
+        case CCAPI_SEND_ERROR_ACCESSING_FILE:
+            dp_b_error = CCAPI_DP_B_ERROR_ACCESSING_FILE;
             break;
         case CCAPI_SEND_ERROR_INVALID_HINT_POINTER:
             dp_b_error = CCAPI_DP_B_ERROR_INVALID_HINT_POINTER;

@@ -273,8 +273,7 @@ TEST(test_ccapi_dp_binary_send_file_sanity_checks, testEmptyLocalPath)
     CHECK_EQUAL(CCAPI_DP_B_ERROR_INVALID_LOCAL_PATH, error);
 }
 
-/* TODO: Will work on master */
-IGNORE_TEST(test_ccapi_dp_binary_send_file_sanity_checks, testLocalPathIsNotFile)
+TEST(test_ccapi_dp_binary_send_file_sanity_checks, testLocalPathIsNotFile)
 {
     ccapi_dp_b_error_t error;
 
@@ -282,8 +281,7 @@ IGNORE_TEST(test_ccapi_dp_binary_send_file_sanity_checks, testLocalPathIsNotFile
     CHECK_EQUAL(CCAPI_DP_B_ERROR_NOT_A_FILE, error);
 }
 
-/* TODO: Will work on master */
-IGNORE_TEST(test_ccapi_dp_binary_send_file_sanity_checks, testOK)
+TEST(test_ccapi_dp_binary_send_file_sanity_checks, testOK)
 {
     ccapi_dp_b_error_t error;
 
