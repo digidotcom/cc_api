@@ -15,6 +15,8 @@ static ccapi_dp_b_error_t add_dp_prefix_sufix(char const * const stream_id, char
     const size_t dp_prefix_lenght = sizeof dp_prefix - 1; 
     const size_t dp_sufix_lenght = sizeof dp_sufix - 1;
     size_t stream_id_lenght;
+    static char const dp_prefix[] = "DataPoint/";
+    static char const dp_sufix[] = ".bin";
     char * tmp_dp_path;
 
     if (stream_id == NULL || *stream_id == '\0')
