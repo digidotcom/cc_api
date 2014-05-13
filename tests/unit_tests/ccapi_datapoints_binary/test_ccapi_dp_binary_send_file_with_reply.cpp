@@ -1,12 +1,12 @@
 #include "test_helper_functions.h"
 
-#define CLOUD_PATH   "test/test.txt"
-#define CONTENT_TYPE "text/plain"
+#define STREAM_ID   "test_stream"
+#define CLOUD_PATH   "DataPoint/test_stream.bin"
 #define DATA  { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f }
-#define LOCAL_PATH   "./send_file_with_reply.txt"
+#define LOCAL_PATH   "./datapoint_binary_send_file_with_reply.txt"
 
-TEST_GROUP(test_ccapi_send_file_with_reply)
+TEST_GROUP(test_ccapi_datapoint_binary_file_with_reply)
 {
     void setup()
     {
@@ -25,9 +25,9 @@ TEST_GROUP(test_ccapi_send_file_with_reply)
     }
 };
 
-TEST(test_ccapi_send_file_with_reply, testTimeoutOkNoHint)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testTimeoutOkNoHint)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
@@ -40,23 +40,23 @@ TEST(test_ccapi_send_file_with_reply, testTimeoutOkNoHint)
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
     header.path  = CLOUD_PATH;
-    header.content_type = CONTENT_TYPE;
+    header.content_type = NULL;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, timeout, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testHint)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testHint)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
 
     connector_request_data_service_send_t header;
     char const data[] = DATA;
@@ -72,7 +72,7 @@ TEST(test_ccapi_send_file_with_reply, testHint)
     header.transport = connector_transport_tcp;
     header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
     header.path  = CLOUD_PATH;
-    header.content_type = CONTENT_TYPE;
+    header.content_type = NULL;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
 
@@ -83,8 +83,8 @@ TEST(test_ccapi_send_file_with_reply, testHint)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, timeout, &hint);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, timeout, &hint);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(data, mock_info->connector_initiate_send_data_info.out.data, sizeof data));
 
@@ -94,9 +94,9 @@ TEST(test_ccapi_send_file_with_reply, testHint)
 }
 
 /* This test compared with 'testHint': Forces ccfsm to call response with a hint but the user has not provided a hint buffer */
-TEST(test_ccapi_send_file_with_reply, testHintCanBeNull)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testHintCanBeNull)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     char const hint_check[] = "hello man";
@@ -107,15 +107,15 @@ TEST(test_ccapi_send_file_with_reply, testHintCanBeNull)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testHintNoEnoughtRoom)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testHintNoEnoughtRoom)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     char const hint_check[] = "testHintNoEnoughtRoom";
@@ -131,8 +131,8 @@ TEST(test_ccapi_send_file_with_reply, testHintNoEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, &hint);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
     CHECK('\0' == hint.string[hint.length - 1]);
@@ -140,9 +140,9 @@ TEST(test_ccapi_send_file_with_reply, testHintNoEnoughtRoom)
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testHintJustEnoughtRoom)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testHintJustEnoughtRoom)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     char const hint_check[] = "testHintJustEnoughtRoom";
@@ -158,8 +158,8 @@ TEST(test_ccapi_send_file_with_reply, testHintJustEnoughtRoom)
 
     mock_info->connector_initiate_send_data_info.in.hint = hint_check;
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, &hint);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_NONE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, &hint);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_NONE, error);
 
     CHECK(0 == memcmp(hint.string, hint_check,  hint.length - 1));
     CHECK('\0' == hint.string[hint.length - 1]);
@@ -168,9 +168,9 @@ TEST(test_ccapi_send_file_with_reply, testHintJustEnoughtRoom)
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_BAD_REQUEST)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_RESPONSE_BAD_REQUEST)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -180,15 +180,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_BAD_REQUEST)
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_bad_request;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_BAD_REQUEST, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_BAD_REQUEST, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_UNAVAILABLE)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_RESPONSE_UNAVAILABLE)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -198,15 +198,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_UNAVAILABLE)
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_unavailable;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_UNAVAILABLE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_UNAVAILABLE, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_CLOUD_ERROR)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_RESPONSE_CLOUD_ERROR)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -216,15 +216,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_RESPONSE_CLOUD_ERROR)
         mock_info->connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_cloud_error;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testResponseErrorHasPriorityOverStatusError)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testResponseErrorHasPriorityOverStatusError)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -235,16 +235,16 @@ TEST(test_ccapi_send_file_with_reply, testResponseErrorHasPriorityOverStatusErro
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_CANCEL)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_STATUS_CANCEL)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -254,15 +254,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_CANCEL)
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_cancel;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_CANCEL, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_CANCEL, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_TIMEOUT)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_STATUS_TIMEOUT)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -272,15 +272,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_TIMEOUT)
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_timeout;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_TIMEOUT, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_TIMEOUT, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -290,15 +290,15 @@ TEST(test_ccapi_send_file_with_reply, testSEND_ERROR_STATUS_SESSION_ERROR)
         mock_info->connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_session_error;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_STATUS_SESSION_ERROR, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_STATUS_SESSION_ERROR, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testOpenSEND_ERROR_ACCESSING_FILE)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testOpenSEND_ERROR_ACCESSING_FILE)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
     char const data[] = DATA;
 
     create_test_file(LOCAL_PATH, data, sizeof data);
@@ -318,15 +318,15 @@ TEST(test_ccapi_send_file_with_reply, testOpenSEND_ERROR_ACCESSING_FILE)
             ccapi_data_single_instance->service.file_system.imp_context = NULL;
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_ACCESSING_FILE, error);
 
     destroy_test_file(LOCAL_PATH);
 }
 
-TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
+TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
 {
-    ccapi_send_error_t error;
+    ccapi_dp_b_error_t error;
 
     char const data[] = DATA;
 
@@ -338,7 +338,7 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
         header.transport = connector_transport_tcp;
         header.option = connector_request_data_service_send_t::connector_data_service_send_option_overwrite;
         header.path  = CLOUD_PATH;
-        header.content_type = CONTENT_TYPE;
+        header.content_type = NULL;
         header.response_required = connector_true;
         header.timeout_in_seconds = SEND_WAIT_FOREVER;
 
@@ -372,8 +372,8 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
         Mock_ccimp_fs_file_read_expectAndReturn(&ccimp_read_data, CCIMP_STATUS_ERROR);
     }
 
-    error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
-    CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
+    error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
+    CHECK_EQUAL(CCAPI_DP_B_ERROR_ACCESSING_FILE, error);
 
     destroy_test_file(LOCAL_PATH);
 }
