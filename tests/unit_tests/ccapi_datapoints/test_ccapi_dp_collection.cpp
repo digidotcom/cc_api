@@ -225,3 +225,62 @@ TEST(test_ccapi_dp_collection_destroy_and_clear, testDestroyCollectionOk)
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 }
 
+TEST_GROUP(test_ccapi_dp_collection_destroy_strings)
+{
+    ccapi_dp_collection_t * dp_collection;
+    void setup()
+    {
+        Mock_create_all();
+    }
+
+    void teardown()
+    {
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccapi_dp_collection_destroy_strings, testDestroyCollectionWithStringDP)
+{
+    ccapi_dp_error_t dp_error;
+
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, true);
+
+    dp_error = ccapi_dp_create_collection(&dp_collection);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    th_expect_malloc(sizeof "string ts_iso", TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(2 * sizeof (ccapi_dp_argument_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof (ccapi_dp_data_stream_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof (connector_data_stream_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "stream1", TH_MALLOC_RETURN_NORMAL, true);
+
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, "stream1", CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_ISO8601);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_destroy_collection(dp_collection);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+}
+
+TEST(test_ccapi_dp_collection_destroy_strings, testDestroyCollectionWithDataStreamUnitsForward)
+{
+    ccapi_dp_error_t dp_error;
+
+    th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, true);
+
+    dp_error = ccapi_dp_create_collection(&dp_collection);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    th_expect_malloc(sizeof "string ts_iso", TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(2 * sizeof (ccapi_dp_argument_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof (ccapi_dp_data_stream_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof (connector_data_stream_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "stream1", TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "mph", TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "speed", TH_MALLOC_RETURN_NORMAL, true);
+
+    dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, "stream1", CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_ISO8601, "mph", "speed");
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_destroy_collection(dp_collection);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+}
