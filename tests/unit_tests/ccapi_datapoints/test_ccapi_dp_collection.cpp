@@ -145,6 +145,8 @@ TEST_GROUP(test_ccapi_dp_collection_destroy_and_clear)
         /* Fill collection with dummy values */
         connector_data_stream_t * data_stream_1 = (connector_data_stream_t *)malloc(sizeof *data_stream_1);
         connector_data_stream_t * data_stream_2 = (connector_data_stream_t *)malloc(sizeof *data_stream_2);
+        char * stream_id_1 = (char *)malloc(sizeof "stream1");
+        char * stream_id_2 = (char *)malloc(sizeof "stream2");
         connector_data_point_t * ds_1_dp1 = (connector_data_point_t *)malloc(sizeof *ds_1_dp1);
         connector_data_point_t * ds_1_dp2 = (connector_data_point_t *)malloc(sizeof *ds_1_dp2);
         connector_data_point_t * ds_2_dp1 = (connector_data_point_t *)malloc(sizeof *ds_2_dp1);
@@ -156,6 +158,8 @@ TEST_GROUP(test_ccapi_dp_collection_destroy_and_clear)
 
         Mock_ccimp_os_free_expectAndReturn(data_stream_1, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(data_stream_2, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(stream_id_1, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(stream_id_2, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(ds_1_dp1, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(ds_1_dp2, CCIMP_STATUS_OK);
         Mock_ccimp_os_free_expectAndReturn(ds_2_dp1, CCIMP_STATUS_OK);
@@ -182,8 +186,17 @@ TEST_GROUP(test_ccapi_dp_collection_destroy_and_clear)
         data_stream_1->next = NULL;
         data_stream_2->next = NULL;
 
+        strcpy(stream_id_1, "stream1");
+        strcpy(stream_id_2, "stream2");
+
         ccapi_ds_1->ccfsm_data_stream = data_stream_1;
+        ccapi_ds_1->ccfsm_data_stream->stream_id = stream_id_1;
+        ccapi_ds_1->ccfsm_data_stream->forward_to = NULL;
+        ccapi_ds_1->ccfsm_data_stream->unit = NULL;
         ccapi_ds_2->ccfsm_data_stream = data_stream_2;
+        ccapi_ds_2->ccfsm_data_stream->stream_id = stream_id_2;
+        ccapi_ds_2->ccfsm_data_stream->forward_to = NULL;
+        ccapi_ds_2->ccfsm_data_stream->unit = NULL;
         dp_collection->ccapi_data_stream_list = ccapi_ds_1;
 
     }
@@ -211,3 +224,4 @@ TEST(test_ccapi_dp_collection_destroy_and_clear, testDestroyCollectionOk)
     dp_error = ccapi_dp_destroy_collection(dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 }
+

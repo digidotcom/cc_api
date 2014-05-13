@@ -55,6 +55,23 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
     }
 }
 
+static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
+{
+    if (ccfsm_stream_info->stream_id != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->stream_id);
+    }
+    if (ccfsm_stream_info->unit != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->unit);
+    }
+    if (ccfsm_stream_info->forward_to != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->forward_to);
+    }
+    ccapi_free(ccfsm_stream_info);
+}
+
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
 {
     ccimp_status_t ccimp_status;
@@ -87,7 +104,8 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
 
             free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
-            ccapi_free(ccapi_data_stream->ccfsm_data_stream);
+            free_ccfsm_stream(ccapi_data_stream->ccfsm_data_stream);
+
             ccapi_free(ccapi_data_stream->arguments.list);
             ccapi_free(ccapi_data_stream);
             ccapi_data_stream = next_data_stream;
@@ -492,6 +510,20 @@ static void free_ccapi_data_stream(ccapi_dp_data_stream_t * const ccapi_data_str
     ccapi_free(ccapi_data_stream);
 }
 
+static void free_ccfsm_data_point(connector_data_point_t * const ccfsm_datapoint)
+{
+    if (ccfsm_datapoint->data.element.native.string_value != NULL)
+    {
+        ccapi_free(ccfsm_datapoint->data.element.native.string_value);
+    }
+    if (ccfsm_datapoint->time.value.iso8601_string != NULL)
+    {
+        ccapi_free(ccfsm_datapoint->time.value.iso8601_string);
+    }
+
+    ccapi_free(ccfsm_datapoint);
+}
+
 static ccapi_dp_data_stream_t * find_stream_id_in_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id)
 {
     ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
@@ -643,19 +675,7 @@ done:
         }
         if (ccfsm_stream_info != NULL)
         {
-            if (ccfsm_stream_info->stream_id)
-            {
-                ccapi_free(ccfsm_stream_info->stream_id);
-            }
-            if (ccfsm_stream_info->unit)
-            {
-                ccapi_free(ccfsm_stream_info->unit);
-            }
-            if (ccfsm_stream_info->forward_to)
-            {
-                ccapi_free(ccfsm_stream_info->forward_to);
-            }
-            ccapi_free(ccfsm_stream_info);
+            free_ccfsm_stream(ccfsm_stream_info);
         }
     }
 
