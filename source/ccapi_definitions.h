@@ -129,7 +129,7 @@ typedef struct
 } ccapi_svc_send_data_t;
 #endif
 
-#ifdef CCIMP_DATA_POINTS_ENABLED
+#if (defined CCIMP_DATA_POINTS_ENABLED)
 
 typedef enum {
     CCAPI_DP_ARG_DATA_INT32,
