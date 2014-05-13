@@ -2,8 +2,6 @@
 
 TEST_GROUP(test_ccapi_dp_collection)
 {
-    static ccapi_send_error_t error;
-
     void setup()
     {
         Mock_create_all();
@@ -74,7 +72,7 @@ TEST(test_ccapi_dp_collection, testCreateCollectionOk)
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection != NULL);
     CHECK(dp_collection->syncr != NULL);
-    CHECK(dp_collection->data_points_list == NULL);
+    CHECK(dp_collection->ccapi_data_stream_list == NULL);
 }
 
 TEST(test_ccapi_dp_collection, testClearCollectionSyncrFailed)
@@ -99,31 +97,6 @@ TEST(test_ccapi_dp_collection, testClearEmptyCollection)
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection != NULL);
-
-    dp_error = ccapi_dp_clear_collection(dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
-}
-
-TEST(test_ccapi_dp_collection, testClearCollectionOK)
-{
-    ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
-    ccapi_dp_error_t dp_error;
-
-    dp_error = ccapi_dp_create_collection(&dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
-    CHECK(dp_collection != NULL);
-
-    /* Fill collection with dummy values */
-    ccapi_data_point_t * first_dp = (ccapi_data_point_t *)malloc(sizeof *first_dp);
-    ccapi_data_point_t * second_dp = (ccapi_data_point_t *)malloc(sizeof *second_dp);
-
-    first_dp->next = second_dp;
-    second_dp->next = NULL;
-
-    dp_collection->data_points_list = first_dp;
-
-    Mock_ccimp_os_free_expectAndReturn(first_dp, CCIMP_STATUS_OK);
-    Mock_ccimp_os_free_expectAndReturn(second_dp, CCIMP_STATUS_OK);
 
     dp_error = ccapi_dp_clear_collection(dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
@@ -156,37 +129,84 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionAcquireFailed)
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
 }
 
-TEST(test_ccapi_dp_collection, testDestroyCollectionOk)
+TEST_GROUP(test_ccapi_dp_collection_destroy_and_clear)
 {
-    ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
+    ccapi_dp_collection_t * dp_collection;
+    void setup()
+    {
+        Mock_create_all();
+        ccapi_dp_error_t dp_error;
+
+        th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
+        dp_error = ccapi_dp_create_collection(&dp_collection);
+        CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+        CHECK(dp_collection != NULL);
+
+        /* Fill collection with dummy values */
+        connector_data_stream_t * data_stream_1 = (connector_data_stream_t *)malloc(sizeof *data_stream_1);
+        connector_data_stream_t * data_stream_2 = (connector_data_stream_t *)malloc(sizeof *data_stream_2);
+        connector_data_point_t * ds_1_dp1 = (connector_data_point_t *)malloc(sizeof *ds_1_dp1);
+        connector_data_point_t * ds_1_dp2 = (connector_data_point_t *)malloc(sizeof *ds_1_dp2);
+        connector_data_point_t * ds_2_dp1 = (connector_data_point_t *)malloc(sizeof *ds_2_dp1);
+
+        ccapi_dp_data_stream_t * ccapi_ds_1 = (ccapi_dp_data_stream_t *)malloc(sizeof *ccapi_ds_1);
+        ccapi_dp_argument_t * ccapi_ds_1_args = (ccapi_dp_argument_t *)malloc(sizeof * ccapi_ds_1_args);
+        ccapi_dp_data_stream_t * ccapi_ds_2 = (ccapi_dp_data_stream_t *)malloc(sizeof *ccapi_ds_2);
+        ccapi_dp_argument_t * ccapi_ds_2_args = (ccapi_dp_argument_t *)malloc(sizeof * ccapi_ds_2_args);
+
+        Mock_ccimp_os_free_expectAndReturn(data_stream_1, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(data_stream_2, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ds_1_dp1, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ds_1_dp2, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ds_2_dp1, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ccapi_ds_1, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ccapi_ds_1_args, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ccapi_ds_2, CCIMP_STATUS_OK);
+        Mock_ccimp_os_free_expectAndReturn(ccapi_ds_2_args, CCIMP_STATUS_OK);
+
+        ccapi_ds_1->arguments.list = ccapi_ds_1_args;
+        ccapi_ds_1->ccfsm_data_stream = data_stream_1;
+        ccapi_ds_1->next = ccapi_ds_2;
+
+        ccapi_ds_2->arguments.list = ccapi_ds_2_args;
+        ccapi_ds_2->ccfsm_data_stream = data_stream_2;
+        ccapi_ds_2->next = NULL;
+
+        data_stream_1->point = ds_1_dp1;
+        ds_1_dp1->next = ds_1_dp2;
+        ds_1_dp2->next = NULL;
+
+        data_stream_2->point = ds_2_dp1;
+        ds_2_dp1->next = NULL;
+
+        data_stream_1->next = NULL;
+        data_stream_2->next = NULL;
+
+        ccapi_ds_1->ccfsm_data_stream = data_stream_1;
+        ccapi_ds_2->ccfsm_data_stream = data_stream_2;
+        dp_collection->ccapi_data_stream_list = ccapi_ds_1;
+
+    }
+
+    void teardown()
+    {
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccapi_dp_collection_destroy_and_clear, testClearCollectionOK)
+{
     ccapi_dp_error_t dp_error;
-    void * malloc_for_dp_collection = th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
 
-    dp_error = ccapi_dp_create_collection(&dp_collection);
+    dp_error = ccapi_dp_clear_collection(dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+}
 
-    /* Fill collection with dummy values */
-    ccapi_data_point_t * first_dp = (ccapi_data_point_t *)malloc(sizeof *first_dp);
-    ccapi_data_point_t * second_dp = (ccapi_data_point_t *)malloc(sizeof *second_dp);
-    stream_seen_t * first_stream = (stream_seen_t *)malloc(sizeof *first_stream);
-    stream_seen_t * second_stream = (stream_seen_t *)malloc(sizeof *second_stream);
+TEST(test_ccapi_dp_collection_destroy_and_clear, testDestroyCollectionOk)
+{
+    ccapi_dp_error_t dp_error;
 
-    first_dp->next = second_dp;
-    second_dp->next = NULL;
-
-    first_stream->stream_id = (char *)malloc(sizeof "Stream_1");
-    second_stream->stream_id =(char *) malloc(sizeof "Stream_2");
-    strcpy(first_stream->stream_id, "Stream_1");
-    strcpy(second_stream->stream_id, "Stream_2");
-
-    first_stream->next = second_stream;
-    second_stream->next = NULL;
-
-    dp_collection->data_points_list = first_dp;
-
-    Mock_ccimp_os_free_expectAndReturn(first_dp, CCIMP_STATUS_OK);
-    Mock_ccimp_os_free_expectAndReturn(second_dp, CCIMP_STATUS_OK);
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_dp_collection, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn((void*)dp_collection, CCIMP_STATUS_OK);
 
     dp_error = ccapi_dp_destroy_collection(dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);

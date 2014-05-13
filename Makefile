@@ -60,7 +60,7 @@ EXEC_NAME = test
 
 # since each of the samples shares private and platform files, do a clean each time we make
 .PHONY:all
-all: clean $(EXEC_NAME)
+all: $(EXEC_NAME)
 
 # Linking Flags.
 LDFLAGS += $(DFLAGS) -Wl,-Map,$(EXEC_NAME).map,--sort-common
@@ -70,7 +70,8 @@ CPPOBJS = $(CPPSRCS:.cpp=.o)
 
 test: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
-
+	./$@
+	
 .cpp.o:
 	$(CPP) -DUNIT_TEST $(CFLAGS) -c $< -o $@
 

@@ -2,7 +2,7 @@
 
 #include "ccapi_definitions.h"
 
-#if (defined CCIMP_DATA_SERVICE_ENABLED)
+#if (defined CCIMP_DATA_SERVICE_ENABLED) && (defined CCIMP_DATA_POINTS_ENABLED)
 
 ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_collection)
 {
@@ -31,7 +31,7 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_c
         goto done;
     }
 
-    collection->data_points_list = NULL;
+    collection->ccapi_data_stream_list = NULL;
 
 done:
     if (dp_collection != NULL)
@@ -40,6 +40,19 @@ done:
     }
 
     return error;
+}
+
+static void free_data_points_in_data_stream(connector_data_stream_t * data_stream)
+{
+    connector_data_point_t * data_point = data_stream->point;
+
+    while (data_point != NULL)
+    {
+        connector_data_point_t * const next_point = data_point->next;
+        ccapi_free(data_point);
+
+        data_point = next_point;
+    }
 }
 
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
@@ -59,22 +72,26 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_ERROR:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
-            /* No break */
         case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
             goto done;
     }
 
-    if (dp_collection->data_points_list != NULL)
+    if (dp_collection->ccapi_data_stream_list != NULL)
     {
-        ccapi_data_point_t * data_point = dp_collection->data_points_list;
+        ccapi_dp_data_stream_t * ccapi_data_stream = dp_collection->ccapi_data_stream_list;
 
-        do {
-            ccapi_data_point_t * const next_data_point = data_point->next;
-            ccapi_free(data_point);
+        while (ccapi_data_stream != NULL) {
+            ccapi_dp_data_stream_t * const next_data_stream = ccapi_data_stream->next;
 
-            data_point = next_data_point;
-        } while (data_point != NULL);
+            ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
+
+            free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
+            ccapi_free(ccapi_data_stream->ccfsm_data_stream);
+            ccapi_free(ccapi_data_stream->arguments.list);
+            ccapi_free(ccapi_data_stream);
+            ccapi_data_stream = next_data_stream;
+        }
     }
 
     ccimp_status = ccapi_syncr_release(dp_collection->syncr);
@@ -83,9 +100,8 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_ERROR:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
-            /* No break */
         case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
             goto done;
     }
 
@@ -413,12 +429,99 @@ done:
     return error;
 }
 
-ccapi_dp_error_t ccapi_dp_create_data_stream_extra(ccapi_dp_data_stream_t * * const p_stream_info, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to)
+static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t * list, size_t count)
+{
+    connector_data_point_type_t type;
+    ccapi_bool_t found = CCAPI_FALSE;
+    size_t i;
+
+    for (i = 0; i < count && !found; i++)
+    {
+        switch (list[i])
+        {
+            case CCAPI_DP_ARG_DATA_INT32:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_integer;
+                break;
+            case CCAPI_DP_ARG_DATA_INT64:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_long;
+                break;
+            case CCAPI_DP_ARG_DATA_FLOAT:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_float;
+                break;
+            case CCAPI_DP_ARG_DATA_DOUBLE:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_double;
+                break;
+            case CCAPI_DP_ARG_DATA_STRING:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_string;
+                break;
+            case CCAPI_DP_ARG_TIME_EPOCH:
+            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
+            case CCAPI_DP_ARG_TIME_ISO8601:
+            case CCAPI_DP_ARG_LOC:
+            case CCAPI_DP_ARG_QUAL:
+            case CCAPI_DP_ARG_INVALID:
+                break;
+        }
+    }
+    ASSERT(found == CCAPI_TRUE);
+
+    return type;
+}
+
+static void free_ccapi_data_stream(ccapi_dp_data_stream_t * const ccapi_data_stream)
+{
+    ASSERT(ccapi_data_stream != NULL);
+    ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
+    ccapi_free(ccapi_data_stream->arguments.list);
+    ccapi_free(ccapi_data_stream->ccfsm_data_stream->stream_id);
+
+    if (ccapi_data_stream->ccfsm_data_stream->unit != NULL)
+    {
+        ccapi_free(ccapi_data_stream->ccfsm_data_stream->unit);
+    }
+    if (ccapi_data_stream->ccfsm_data_stream->forward_to)
+    {
+        ccapi_free(ccapi_data_stream->ccfsm_data_stream->forward_to);
+    }
+    ccapi_free(ccapi_data_stream->ccfsm_data_stream);
+    ccapi_free(ccapi_data_stream);
+}
+
+static ccapi_dp_data_stream_t * find_stream_id_in_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id)
+{
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+    ccapi_dp_data_stream_t * data_stream = NULL;
+
+    while (current_data_stream != NULL)
+    {
+        if (strcmp(stream_id, current_data_stream->ccfsm_data_stream->stream_id) == 0)
+        {
+            data_stream = current_data_stream;
+            goto done;
+        }
+        current_data_stream = current_data_stream->next;
+    }
+
+done:
+    return data_stream;
+}
+
+ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collection_t * const dp_collection, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
-    ccapi_dp_data_stream_t * stream_info = NULL;
+    ccapi_dp_argument_t * arg_list = NULL;
+    size_t arg_count;
+    ccapi_dp_data_stream_t * ccapi_stream_info = NULL;
+    connector_data_stream_t * ccfsm_stream_info = NULL;
+    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+    ccimp_status_t ccimp_status;
 
-    if (p_stream_info == NULL)
+    if (dp_collection == NULL)
     {
         error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
         goto done;
@@ -448,113 +551,218 @@ ccapi_dp_error_t ccapi_dp_create_data_stream_extra(ccapi_dp_data_stream_t * * co
         goto done;
     }
 
+    error = get_arg_list_from_format_string(format_string, &arg_list, &arg_count);
+    if (error != CCAPI_DP_ERROR_NONE)
     {
-        ccapi_dp_argument_t * arg_list;
-        size_t arg_count;
-        error = get_arg_list_from_format_string(format_string, &arg_list, &arg_count);
-        if (error != CCAPI_DP_ERROR_NONE)
-        {
-            goto done;
-        }
-
-        stream_info = ccapi_malloc(sizeof *stream_info);
-        if (stream_info == NULL)
-        {
-            ccapi_free(arg_list);
-            error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
-            goto done;
-        }
-
-        stream_info->arguments.count = arg_count;
-        stream_info->arguments.list = arg_list;
+        goto done;
     }
 
-    stream_info->stream_id = ccapi_strdup(stream_id);
-    if (stream_info->stream_id == NULL)
+    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+    switch (ccimp_status)
     {
-        ccapi_free(stream_info->arguments.list);
-        reset_heap_ptr(&stream_info);
+        case CCIMP_STATUS_OK:
+            syncr_acquired = CCAPI_TRUE;
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            goto done;
+    }
+
+    if (find_stream_id_in_collection(dp_collection, stream_id) != NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
+        goto done;
+    }
+
+    ccapi_stream_info = ccapi_malloc(sizeof *ccapi_stream_info);
+    if (ccapi_stream_info == NULL)
+    {
         error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
         goto done;
     }
 
-    if (units == NULL)
+    ccfsm_stream_info = ccapi_malloc(sizeof *ccfsm_stream_info);
+    if (ccfsm_stream_info == NULL)
     {
-        stream_info->units = units;
+        error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+        goto done;
     }
-    else
+
+    ccapi_stream_info->arguments.list = arg_list;
+    ccapi_stream_info->arguments.count = arg_count;
+    ccapi_stream_info->ccfsm_data_stream = ccfsm_stream_info;
+
+    ccfsm_stream_info->forward_to = NULL;
+    ccfsm_stream_info->unit = NULL;
+
+    ccfsm_stream_info->stream_id = ccapi_strdup(stream_id); /* TODO */
+    if (ccfsm_stream_info->stream_id == NULL)
     {
-        stream_info->units = ccapi_strdup(units);
-        if (stream_info->units == NULL)
+        error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+        goto done;
+    }
+
+    if (units != NULL)
+    {
+        ccfsm_stream_info->unit = ccapi_strdup(units);
+        if (ccfsm_stream_info->unit == NULL)
         {
             error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
-            ccapi_free((void *)stream_info->stream_id);
-            ccapi_free(stream_info->arguments.list);
-            reset_heap_ptr(&stream_info);
             goto done;
         }
     }
 
-    if (forward_to == NULL)
+    if (forward_to != NULL)
     {
-        stream_info->forward_to = forward_to;
-    }
-    else
-    {
-        stream_info->forward_to = ccapi_strdup(forward_to);
-        if (stream_info->forward_to == NULL)
+        ccfsm_stream_info->forward_to = ccapi_strdup(forward_to);
+        if (ccfsm_stream_info->forward_to == NULL)
         {
             error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
-            if (units != NULL)
-            {
-                ccapi_free((void *)stream_info->units);
-            }
-            ccapi_free((void *)stream_info->stream_id);
-            ccapi_free(stream_info->arguments.list);
-            reset_heap_ptr(&stream_info);
             goto done;
         }
     }
+
+    ccfsm_stream_info->point = NULL;
+    ccfsm_stream_info->type = get_data_stream_type_from_arg_list(arg_list, arg_count);
+    ccfsm_stream_info->next = NULL;
+
+    ccapi_stream_info->next = dp_collection->ccapi_data_stream_list;
+    dp_collection->ccapi_data_stream_list = ccapi_stream_info;
 
 done:
-    if (p_stream_info != NULL)
+    if (error != CCAPI_DP_ERROR_NONE)
     {
-        *p_stream_info = stream_info;
+        if (arg_list != NULL)
+        {
+            ccapi_free(arg_list);
+        }
+        if (ccapi_stream_info != NULL)
+        {
+            ccapi_free(ccapi_stream_info);
+        }
+        if (ccfsm_stream_info != NULL)
+        {
+            if (ccfsm_stream_info->stream_id)
+            {
+                ccapi_free(ccfsm_stream_info->stream_id);
+            }
+            if (ccfsm_stream_info->unit)
+            {
+                ccapi_free(ccfsm_stream_info->unit);
+            }
+            if (ccfsm_stream_info->forward_to)
+            {
+                ccapi_free(ccfsm_stream_info->forward_to);
+            }
+            ccapi_free(ccfsm_stream_info);
+        }
+    }
+
+    if (syncr_acquired)
+    {
+        ccimp_status = ccapi_syncr_release(dp_collection->syncr);
+        switch (ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_ERROR:
+            case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+        }
     }
 
     return error;
 }
 
-ccapi_dp_error_t ccapi_dp_destroy_data_stream(ccapi_dp_data_stream_t * const stream_info)
+ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    ccapi_bool_t found = CCAPI_FALSE;
 
-    if (stream_info == NULL || stream_info->stream_id == NULL || stream_info->arguments.list == NULL)
+    if (dp_collection == NULL || !valid_stream_id(stream_id))
     {
         error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
         goto done;
     }
 
-    ccapi_free((void*)stream_info->stream_id);
-    ccapi_free(stream_info->arguments.list);
-
-    if (stream_info->units != NULL)
+    if (dp_collection->ccapi_data_stream_list == NULL)
     {
-        ccapi_free((void*)stream_info->units);
+        error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
+        goto done;
     }
 
-    if (stream_info->forward_to != NULL)
     {
-        ccapi_free((void*)stream_info->forward_to);
+        ccimp_status_t ccimp_status;
+
+        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+        switch (ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_ERROR:
+            case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                goto done;
+        }
+    }
+
+    {
+        ccapi_dp_data_stream_t * * const p_start_of_linked_list = &dp_collection->ccapi_data_stream_list;
+        ccapi_dp_data_stream_t * current_data_stream = *p_start_of_linked_list;
+        ccapi_dp_data_stream_t * previous_data_stream = NULL;
+
+        while (current_data_stream != NULL)
+        {
+            if (strcmp(current_data_stream->ccfsm_data_stream->stream_id, stream_id) == 0)
+            {
+                found = CCAPI_TRUE;
+
+                if (previous_data_stream == NULL)
+                {
+                    *p_start_of_linked_list = NULL;
+                }
+                else
+                {
+                    previous_data_stream->next = current_data_stream->next;
+                }
+
+                free_data_points_in_data_stream(current_data_stream->ccfsm_data_stream);
+                free_ccapi_data_stream(current_data_stream);
+            }
+
+            previous_data_stream = current_data_stream;
+            current_data_stream = current_data_stream->next;
+        }
+    }
+
+    {
+        ccimp_status_t ccimp_status;
+
+        ccimp_status = ccapi_syncr_release(dp_collection->syncr);
+        switch (ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_ERROR:
+            case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                goto done;
+        }
+    }
+
+    if (!found)
+    {
+        error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
+        goto done;
     }
 
 done:
     return error;
 }
 
-ccapi_dp_error_t ccapi_dp_create_data_stream(ccapi_dp_data_stream_t * * const p_stream_info, char const * const stream_id, char const * const format_string)
+ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id, char const * const format_string)
 {
-    return ccapi_dp_create_data_stream_extra(p_stream_info, stream_id, format_string, NULL, NULL);
+    return ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id, format_string, NULL, NULL);
 }
-
 #endif
