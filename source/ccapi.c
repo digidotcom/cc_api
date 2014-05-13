@@ -967,6 +967,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
             break;
         case connector_data_service_status_session_error:
             svc_send->status_error = CCAPI_SEND_ERROR_STATUS_SESSION_ERROR;
+            ccapi_logging_line("Data service status: session_error=%d\n", status_ptr->session_error);
             break;
         case connector_data_service_status_COUNT:
             ASSERT_MSG_GOTO(0, done);
