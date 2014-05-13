@@ -803,8 +803,6 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemove1of3)
     th_expect_malloc(sizeof (connector_data_stream_t), TH_MALLOC_RETURN_NORMAL, true);
     th_expect_malloc(expected_arg_count * sizeof (ccapi_dp_argument_t), TH_MALLOC_RETURN_NORMAL, true);
     th_expect_malloc(strlen(stream_id_2) + 1, TH_MALLOC_RETURN_NORMAL, true);
-    th_expect_malloc(strlen(units) + 1, TH_MALLOC_RETURN_NORMAL, true);
-    th_expect_malloc(strlen(forward_to) + 1, TH_MALLOC_RETURN_NORMAL, true);
 
     th_expect_malloc(strlen(format_string) + 1, TH_MALLOC_RETURN_NORMAL, true);
     th_expect_malloc(sizeof (ccapi_dp_data_stream_t), TH_MALLOC_RETURN_NORMAL, false);
@@ -817,7 +815,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemove1of3)
     dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id_1, format_string, units, forward_to);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 
-    dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id_2, format_string, units, forward_to);
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, stream_id_2, format_string);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 
     dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id_3, format_string, units, forward_to);

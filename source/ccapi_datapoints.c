@@ -2,7 +2,7 @@
 
 #include "ccapi_definitions.h"
 
-#if (defined CCIMP_DATA_SERVICE_ENABLED)
+#if (defined CCIMP_DATA_SERVICE_ENABLED) && (defined CCIMP_DATA_POINTS_ENABLED)
 
 ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_collection)
 {
@@ -52,7 +52,7 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
         ccapi_free(data_point);
 
         data_point = next_point;
-    };
+    }
 }
 
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
@@ -72,9 +72,8 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_ERROR:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
-            /* No break */
         case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
             goto done;
     }
 
@@ -82,19 +81,17 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
     {
         ccapi_dp_data_stream_t * ccapi_data_stream = dp_collection->ccapi_data_stream_list;
 
-        do {
+        while (ccapi_data_stream != NULL) {
             ccapi_dp_data_stream_t * const next_data_stream = ccapi_data_stream->next;
 
-            if (ccapi_data_stream->ccfsm_data_stream != NULL) /* TODO, probably this check is unnecessary */
-            {
-                free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
-                ccapi_free(ccapi_data_stream->ccfsm_data_stream);
-            }
+            ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
 
+            free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
+            ccapi_free(ccapi_data_stream->ccfsm_data_stream);
             ccapi_free(ccapi_data_stream->arguments.list);
             ccapi_free(ccapi_data_stream);
             ccapi_data_stream = next_data_stream;
-        } while (ccapi_data_stream != NULL);
+        }
     }
 
     ccimp_status = ccapi_syncr_release(dp_collection->syncr);
@@ -103,9 +100,8 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_ERROR:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
-            /* No break */
         case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
             goto done;
     }
 
@@ -472,35 +468,47 @@ static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_a
                 break;
         }
     }
+    ASSERT(found == CCAPI_TRUE);
 
     return type;
 }
 
 static void free_ccapi_data_stream(ccapi_dp_data_stream_t * const ccapi_data_stream)
 {
+    ASSERT(ccapi_data_stream != NULL);
+    ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
     ccapi_free(ccapi_data_stream->arguments.list);
     ccapi_free(ccapi_data_stream->ccfsm_data_stream->stream_id);
-    ccapi_free(ccapi_data_stream->ccfsm_data_stream->unit);
-    ccapi_free(ccapi_data_stream->ccfsm_data_stream->forward_to);
+
+    if (ccapi_data_stream->ccfsm_data_stream->unit != NULL)
+    {
+        ccapi_free(ccapi_data_stream->ccfsm_data_stream->unit);
+    }
+    if (ccapi_data_stream->ccfsm_data_stream->forward_to)
+    {
+        ccapi_free(ccapi_data_stream->ccfsm_data_stream->forward_to);
+    }
     ccapi_free(ccapi_data_stream->ccfsm_data_stream);
     ccapi_free(ccapi_data_stream);
 }
 
-static ccapi_bool_t stream_id_present_in_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id)
+static ccapi_dp_data_stream_t * find_stream_id_in_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id)
 {
-    ccapi_bool_t present = CCAPI_FALSE;
-    ccapi_dp_data_stream_t * data_stream = dp_collection->ccapi_data_stream_list;
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+    ccapi_dp_data_stream_t * data_stream = NULL;
 
-    while (data_stream != NULL && !present)
+    while (current_data_stream != NULL)
     {
-        if (strcmp(stream_id, data_stream->ccfsm_data_stream->stream_id) == 0)
+        if (strcmp(stream_id, current_data_stream->ccfsm_data_stream->stream_id) == 0)
         {
-            present = CCAPI_TRUE;
+            data_stream = current_data_stream;
+            goto done;
         }
-        data_stream = data_stream->next;
-    };
+        current_data_stream = current_data_stream->next;
+    }
 
-    return present;
+done:
+    return data_stream;
 }
 
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collection_t * const dp_collection, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to)
@@ -561,7 +569,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
             goto done;
     }
 
-    if (stream_id_present_in_collection(dp_collection, stream_id))
+    if (find_stream_id_in_collection(dp_collection, stream_id) != NULL)
     {
         error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
         goto done;
@@ -693,9 +701,8 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
             case CCIMP_STATUS_OK:
                 break;
             case CCIMP_STATUS_ERROR:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
-                /* no break */
             case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
                 goto done;
         }
     }
@@ -726,7 +733,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
 
             previous_data_stream = current_data_stream;
             current_data_stream = current_data_stream->next;
-        };
+        }
     }
 
     {
@@ -738,9 +745,8 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
             case CCIMP_STATUS_OK:
                 break;
             case CCIMP_STATUS_ERROR:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
-                /* no break */
             case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
                 goto done;
         }
     }
