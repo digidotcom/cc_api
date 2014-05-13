@@ -1,8 +1,6 @@
 #ifndef _CCAPI_DATAPOINTS_BINARY_H_
 #define _CCAPI_DATAPOINTS_BINARY_H_
 
-#if (defined CCIMP_DATA_SERVICE_ENABLED) && (defined CCIMP_DATA_POINTS_ENABLED)
-
 typedef enum {
     CCAPI_DP_B_ERROR_NONE,
     CCAPI_DP_B_ERROR_CCAPI_NOT_RUNNING,
@@ -28,7 +26,5 @@ ccapi_dp_b_error_t ccapi_dp_binary_send_data(ccapi_transport_t const transport, 
 ccapi_dp_b_error_t ccapi_dp_binary_send_data_with_reply(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint);
 ccapi_dp_b_error_t ccapi_dp_binary_send_file(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
 ccapi_dp_b_error_t ccapi_dp_binary_send_file_with_reply(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
-
-#endif
 
 #endif

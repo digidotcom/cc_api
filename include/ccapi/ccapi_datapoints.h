@@ -1,8 +1,6 @@
 #ifndef _CCAPI_DATAPOINTS_H_
 #define _CCAPI_DATAPOINTS_H_
 
-#ifdef CCIMP_DATA_SERVICE_ENABLED
-
 #define CCAPI_NO_ELEVATION   -6378000 /* Negative maximum Earth's radio */
 
 #define CCAPI_DP_KEY_DATA_INT32     "int32"
@@ -103,6 +101,5 @@ ccapi_dp_error_t ccapi_dp_create_data_stream_extra(ccapi_dp_data_stream_t * * co
 ccapi_dp_error_t ccapi_dp_destroy_data_stream(ccapi_dp_data_stream_t * const stream_info);
 
 ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t collection, ccapi_dp_data_stream_t stream_info, ...);
-#endif
 
 #endif
