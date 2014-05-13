@@ -1,8 +1,6 @@
 #ifndef _CCAPI_SEND_H_
 #define _CCAPI_SEND_H_
 
-#if (defined CCIMP_DATA_SERVICE_ENABLED)
-
 #define SEND_WAIT_FOREVER ((unsigned long) 0)
 
 typedef enum {
@@ -42,6 +40,5 @@ ccapi_send_error_t ccapi_send_data(ccapi_transport_t const transport, char const
 ccapi_send_error_t ccapi_send_data_with_reply(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
 ccapi_send_error_t ccapi_send_file(ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior);
 ccapi_send_error_t ccapi_send_file_with_reply(ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
-#endif
 
 #endif

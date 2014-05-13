@@ -8,13 +8,7 @@ typedef enum {
 } ccapi_transport_t;
 
 #include "ccapi/ccapi_transport_tcp.h"
-
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
 #include "ccapi/ccapi_transport_udp.h"
-#endif
-
-#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
 #include "ccapi/ccapi_transport_sms.h"
-#endif
 
 #endif

@@ -48,4 +48,5 @@ typedef struct {
 
 ccapi_start_error_t ccapi_start(ccapi_start_t const * const start);
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior);
+
 #endif
