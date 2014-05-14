@@ -1049,6 +1049,91 @@ done:
 }
 #endif
 
+#if (defined CCIMP_DATA_POINTS_ENABLED)
+connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_point_t const data_point_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_continue;
+
+    UNUSED_ARGUMENT(ccapi_data);
+
+    switch (data_point_request)
+    {
+        case connector_request_id_data_point_multiple_response:
+        {
+            connector_data_point_response_t * data_point_response = data;
+            ccapi_dp_transaction_info_t * const transaction_info = data_point_response->user_context;
+
+            switch (data_point_response->response)
+            {
+                case connector_data_point_response_success:
+                    transaction_info->response_error = CCAPI_DP_ERROR_NONE;
+                    break;
+                case connector_data_point_response_bad_request:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_BAD_REQUEST;
+                    break;
+                case connector_data_point_response_unavailable:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_UNAVAILABLE;
+                    break;
+                case connector_data_point_response_cloud_error:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR;
+                    break;
+            }
+            break;
+        }
+        case connector_request_id_data_point_multiple_status:
+        {
+            connector_data_point_status_t * data_point_status = data;
+            ccapi_dp_transaction_info_t * const transaction_info = data_point_status->user_context;
+
+            switch (data_point_status->status)
+            {
+                case connector_data_point_status_complete:
+                    transaction_info->status = CCAPI_DP_ERROR_NONE;
+                    break;
+                case connector_data_point_status_cancel:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_CANCEL;
+                    break;
+                case connector_data_point_status_timeout:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_TIMEOUT;
+                    break;
+                case connector_data_point_status_invalid_data:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_INVALID_DATA;
+                    break;
+                case connector_data_point_status_session_error:
+                    ccapi_logging_line("Data Points status: session_error = %d\n", data_point_status->session_error);
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_SESSION_ERROR;
+                    break;
+            }
+
+            switch(ccapi_syncr_release(transaction_info->syncr))
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_BUSY:
+                    connector_status = connector_callback_busy;
+                    goto done;
+                case CCIMP_STATUS_ERROR:
+                    connector_status = connector_callback_error;
+                    goto done;
+            }
+            break;
+        }
+        case connector_request_id_data_point_binary_response:
+        case connector_request_id_data_point_binary_status:
+        case connector_request_id_data_point_single_response:
+        case connector_request_id_data_point_single_status:
+        {
+            connector_status = connector_callback_unrecognized;
+            goto done;
+        }
+    }
+
+done:
+    return connector_status;
+
+}
+#endif
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
     connector_callback_status_t status = connector_callback_error;
@@ -1076,6 +1161,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         case connector_class_id_data_service:
             status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
+            break;
+#endif
+#if (defined CCIMP_DATA_POINTS_ENABLED)
+        case connector_class_id_data_point:
+            status = ccapi_data_points_handler(request_id.data_point_request, data, ccapi_data);
             break;
 #endif
         default:

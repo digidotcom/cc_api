@@ -164,6 +164,12 @@ typedef struct ccapi_dp_collection {
     void * syncr;
 } ccapi_dp_collection_t;
 
+typedef struct {
+    void * syncr;
+    ccapi_dp_error_t response_error;
+    ccapi_dp_error_t status;
+} ccapi_dp_transaction_info_t;
+
 #endif
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
