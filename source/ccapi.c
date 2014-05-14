@@ -354,13 +354,32 @@ done:
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
 {
     connector_status_t status;
+    ccimp_status_t ccimp_status;
 
-    ASSERT_MSG(ccapi_syncr_acquire(ccapi_data->initiate_action_syncr, OS_SYNCR_ACQUIRE_INFINITE) == CCIMP_STATUS_OK);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->initiate_action_syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            goto done;
+    }
 
     status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+    ccimp_status = ccapi_syncr_release(ccapi_data->initiate_action_syncr);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            goto done;
+    }
 
+done:
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
     return status;
 }
 
@@ -1180,9 +1199,10 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 #endif
         default:
             status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0, done);
             break;
     }
+
+    ASSERT_MSG_GOTO(status != connector_callback_unrecognized, done);
 
 done:
     return status;
