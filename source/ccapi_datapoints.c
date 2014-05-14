@@ -106,6 +106,26 @@ static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
     ccapi_free(ccfsm_stream_info);
 }
 
+static void clear_collection(ccapi_dp_collection_t * const dp_collection)
+{
+    if (dp_collection->ccapi_data_stream_list != NULL)
+    {
+        ccapi_dp_data_stream_t * ccapi_data_stream = dp_collection->ccapi_data_stream_list;
+
+        while (ccapi_data_stream != NULL) {
+            ccapi_dp_data_stream_t * const next_data_stream = ccapi_data_stream->next;
+
+            ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
+
+            free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
+            free_ccfsm_stream(ccapi_data_stream->ccfsm_data_stream);
+            ccapi_free(ccapi_data_stream->arguments.list);
+            ccapi_free(ccapi_data_stream);
+            ccapi_data_stream = next_data_stream;
+        }
+    }
+}
+
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
 {
     ccimp_status_t ccimp_status;
@@ -128,23 +148,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             goto done;
     }
 
-    if (dp_collection->ccapi_data_stream_list != NULL)
-    {
-        ccapi_dp_data_stream_t * ccapi_data_stream = dp_collection->ccapi_data_stream_list;
-
-        while (ccapi_data_stream != NULL) {
-            ccapi_dp_data_stream_t * const next_data_stream = ccapi_data_stream->next;
-
-            ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
-
-            free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
-            free_ccfsm_stream(ccapi_data_stream->ccfsm_data_stream);
-
-            ccapi_free(ccapi_data_stream->arguments.list);
-            ccapi_free(ccapi_data_stream);
-            ccapi_data_stream = next_data_stream;
-        }
-    }
+    clear_collection(dp_collection);
 
     ccimp_status = ccapi_syncr_release(dp_collection->syncr);
     switch (ccimp_status)
@@ -1017,6 +1021,26 @@ error:
     return error;
 }
 
+static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_collection)
+{
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+
+    while (current_data_stream != NULL)
+    {
+        connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
+        ccapi_dp_data_stream_t * const next_data_stream = current_data_stream->next;
+
+        if (next_data_stream != NULL)
+        {
+            ccfsm_data_stream->next = next_data_stream->ccfsm_data_stream;
+        }
+
+        free_data_points_in_data_stream(ccfsm_data_stream);
+        ccfsm_data_stream->point = NULL;
+        current_data_stream = current_data_stream->next;
+    }
+}
+
 static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
@@ -1135,6 +1159,8 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_d
                 goto done;
             }
         }
+
+        free_data_points_from_collection(dp_collection);
     }
 
 done:

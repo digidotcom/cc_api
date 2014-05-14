@@ -21,10 +21,6 @@ TEST_GROUP(test_ccapi_dp_send_collection)
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
         dp_error = ccapi_dp_add(dp_collection, STREAM_ID, 1);
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
-        dp_error = ccapi_dp_add(dp_collection, STREAM_ID, 2);
-        CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
-        dp_error = ccapi_dp_add(dp_collection, STREAM_ID, 3);
-        CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     }
 
     void teardown()
@@ -158,8 +154,12 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPOk)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
+    Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point->next, CCIMP_STATUS_OK);
+
     dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseCloudError)
@@ -454,6 +454,9 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionWithReplyTCPOk)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
+    Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point->next, CCIMP_STATUS_OK);
+
     ccapi_string_info_t hint;
     char buffer[128];
 
@@ -462,6 +465,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionWithReplyTCPOk)
 
     dp_error = ccapi_dp_send_collection_with_reply(dp_collection, CCAPI_TRANSPORT_TCP, 30, &hint);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
     STRCMP_EQUAL(ccfsm_response.hint, hint.string);
     CHECK_EQUAL(strlen(ccfsm_response.hint), hint.length);
 }
