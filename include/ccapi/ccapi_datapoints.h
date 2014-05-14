@@ -59,8 +59,8 @@ typedef struct ccapi_dp_data_stream * ccapi_dp_data_stream_handle_t;
 ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_handle_t * const dp_collection);
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_handle_t const dp_collection);
 ccapi_dp_error_t ccapi_dp_destroy_collection(ccapi_dp_collection_handle_t const dp_collection);
-ccapi_dp_error_t ccapi_dp_send_collection(ccapi_dp_collection_handle_t const dp_collection, ccapi_transport_t transport);
-ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_dp_collection_handle_t const dp_collection, ccapi_transport_t transport, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_handle_t const dp_collection);
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport, ccapi_dp_collection_handle_t const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint);
 
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string);
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to);

@@ -77,7 +77,7 @@ TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTC
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->next->ccfsm_data_stream->point, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->next->ccfsm_data_stream->point->next, CCIMP_STATUS_OK);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream != NULL);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);

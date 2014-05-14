@@ -1060,7 +1060,7 @@ static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_co
     }
 }
 
-static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
+static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     ccapi_bool_t * p_transport_started = NULL;
@@ -1204,23 +1204,23 @@ done:
     return error;
 }
 
-ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport)
+ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
 {
-    return send_collection(ccapi_data, dp_collection, transport, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
+    return send_collection(ccapi_data, transport, dp_collection, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
 }
 
-ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return send_collection(ccapi_data, dp_collection, transport, CCAPI_TRUE, timeout, hint);
+    return send_collection(ccapi_data, transport, dp_collection, CCAPI_TRUE, timeout, hint);
 }
 
-ccapi_dp_error_t ccapi_dp_send_collection(ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport)
+ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
 {
-    return ccxapi_dp_send_collection(ccapi_data_single_instance, dp_collection, transport);
+    return ccxapi_dp_send_collection(ccapi_data_single_instance, transport, dp_collection);
 }
 
-ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_dp_send_collection_with_reply(ccapi_data_single_instance, dp_collection, transport, timeout, hint);
+    return ccxapi_dp_send_collection_with_reply(ccapi_data_single_instance, transport, dp_collection , timeout, hint);
 }
 #endif

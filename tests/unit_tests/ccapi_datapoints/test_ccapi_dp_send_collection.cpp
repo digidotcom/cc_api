@@ -33,20 +33,20 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionInvalidArgument)
 {
     ccapi_dp_error_t dp_error;
 
-    dp_error = ccapi_dp_send_collection(NULL, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, NULL);
     CHECK_EQUAL(CCAPI_DP_ERROR_INVALID_ARGUMENT, dp_error);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_CCAPI_NOT_RUNNING, dp_error);
 
     th_start_ccapi();
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED, dp_error);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_UDP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_UDP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED, dp_error);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_SMS);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_SMS, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED, dp_error);
 }
 
@@ -58,7 +58,7 @@ TEST(test_ccapi_dp_send_collection, testSendEmptyCollection)
     dp_error = ccapi_dp_create_collection(&empty_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 
-    dp_error = ccapi_dp_send_collection(empty_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, empty_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INVALID_ARGUMENT, dp_error);
 }
 
@@ -70,7 +70,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionNoMemory4Transaction)
     th_start_tcp_lan_ipv4();
 
     th_expect_malloc(sizeof (ccapi_dp_transaction_info_t), TH_MALLOC_RETURN_NULL, false);
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INSUFFICIENT_MEMORY, dp_error);
 }
 
@@ -84,7 +84,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCreateSyncrFailed)
     th_expect_malloc(sizeof (ccapi_dp_transaction_info_t), TH_MALLOC_RETURN_NORMAL, true);
     Mock_ccimp_os_syncr_create_return(CCIMP_STATUS_ERROR);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
 }
 
@@ -117,7 +117,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCCFSMFailure)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_unavailable);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INITIATE_ACTION_FAILED, dp_error);
 }
 
@@ -157,7 +157,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPOk)
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point->next, CCIMP_STATUS_OK);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
 }
@@ -195,7 +195,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseCloudError)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR, dp_error);
 }
 
@@ -232,7 +232,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorUnavailabl
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_UNAVAILABLE, dp_error);
 }
 
@@ -269,7 +269,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorBadRequest
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_BAD_REQUEST, dp_error);
 }
 
@@ -306,7 +306,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusCancel)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_CANCEL, dp_error);
 }
 
@@ -343,7 +343,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusInvalidData)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_INVALID_DATA, dp_error);
 }
 
@@ -380,7 +380,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusTimeout)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_TIMEOUT, dp_error);
 }
 
@@ -417,7 +417,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusSessionError)
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
 
-    dp_error = ccapi_dp_send_collection(dp_collection, CCAPI_TRANSPORT_TCP);
+    dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_SESSION_ERROR, dp_error);
 }
 
@@ -463,7 +463,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionWithReplyTCPOk)
     hint.string = buffer;
     hint.length = sizeof buffer;
 
-    dp_error = ccapi_dp_send_collection_with_reply(dp_collection, CCAPI_TRANSPORT_TCP, 30, &hint);
+    dp_error = ccapi_dp_send_collection_with_reply(CCAPI_TRANSPORT_TCP, dp_collection, 30, &hint);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
     STRCMP_EQUAL(ccfsm_response.hint, hint.string);
