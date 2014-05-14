@@ -21,4 +21,14 @@ typedef enum {
     CCIMP_STATUS_ERROR
 } ccimp_status_t;
 
+typedef struct {
+    char * string;
+    size_t length;
+} ccapi_string_info_t;
+
+typedef struct {
+    void * buffer;
+    size_t length;
+} ccapi_buffer_info_t;
+
 #endif /* CCIMP_TYPES_H_ */

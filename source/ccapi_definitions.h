@@ -96,6 +96,9 @@ typedef struct {
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
+        struct {
+            ccapi_receive_service_t user_callbacks;
+        } receive;
     } service;
     struct {
         ccapi_tcp_info_t * info;

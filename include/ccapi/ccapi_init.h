@@ -1,7 +1,6 @@
 #ifndef _CCAPI_INIT_H_
 #define _CCAPI_INIT_H_
 
-typedef void * ccapi_device_request_service_t; /* STUB */
 typedef void * ccapi_firmware_service_t; /* STUB */
 typedef void * ccapi_remote_config_service_t; /* STUB */
 typedef void * ccapi_cli_service_t; /* STUB */
@@ -38,7 +37,7 @@ typedef struct {
         char const * device_cloud_url;         /* Shared for TCP and UDP transports, meaningless for SMS */
         ccapi_status_callback_t status_callback;
         struct {
-                ccapi_device_request_service_t * receive; /* See Device Request section, this structure will need more pointers */
+                ccapi_receive_service_t * receive;
                 ccapi_firmware_service_t * firmware; /* EDPoTCP only */
                 ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDPoTCP only */
                 ccapi_filesystem_service_t * file_system;

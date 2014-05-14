@@ -163,7 +163,6 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
     ccapi_data->config.cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_data->config.receive_supported = start->service.receive == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
@@ -180,6 +179,20 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 #endif
     {
         ccapi_data->config.filesystem_supported = CCAPI_FALSE;
+    }
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (start->service.receive != NULL)
+    {
+        ccapi_data->config.receive_supported = CCAPI_TRUE;
+        ccapi_data->service.receive.user_callbacks.accept_cb = start->service.receive->accept_cb;
+        ccapi_data->service.receive.user_callbacks.request_cb = start->service.receive->request_cb;
+        ccapi_data->service.receive.user_callbacks.response_cb = start->service.receive->response_cb;
+    }
+    else
+#endif
+    {
+        ccapi_data->config.receive_supported = CCAPI_FALSE;
     }
 
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
