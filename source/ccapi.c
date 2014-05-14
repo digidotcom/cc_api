@@ -122,6 +122,29 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
 }
 
 connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
+{
+    connector_transport_t connector_transport = connector_transport_all;
+
+    switch(ccapi_transport)
+    {
+        case CCAPI_TRANSPORT_TCP:
+            connector_transport = connector_transport_tcp;
+            break;
+        case CCAPI_TRANSPORT_UDP:
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+            connector_transport = connector_transport_udp;
+#endif
+            break;
+        case CCAPI_TRANSPORT_SMS:
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+            connector_transport = connector_transport_sms;
+#endif
+            break;
+    }
+
+    return connector_transport;
+}
+
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
