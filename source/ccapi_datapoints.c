@@ -204,9 +204,10 @@ static ccapi_bool_t valid_stream_id(char const * const stream_id)
         goto done;
     }
 
-    /*  [_\-\[\]:a-zA-Z0-9.!/]+ */
     while (stream_id[i] != '\0') {
-        if (!isalnum(stream_id[i]) && stream_id[i] != '_' && stream_id[i] != '-' && stream_id[i] != '.' && stream_id[i] != '/' && stream_id[i] != '[' && stream_id[i] != ']' && stream_id[i] != '!' && stream_id[i] != '+')
+        static char const * const valid_special = "_-./[]!+:";
+
+        if (!isalnum(stream_id[i]) && (strchr(valid_special, stream_id[i]) == NULL))
         {
             goto done;
         }
