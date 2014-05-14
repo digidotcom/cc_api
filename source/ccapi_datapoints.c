@@ -1024,7 +1024,6 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_d
     ccapi_dp_transaction_info_t * transaction_info = NULL;
     ccapi_bool_t collection_lock_acquired = CCAPI_FALSE;
 
-    UNUSED_ARGUMENT(hint);
     if (dp_collection == NULL || dp_collection->ccapi_data_stream_list == NULL)
     {
         error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
@@ -1073,6 +1072,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_d
             goto done;
         }
 
+        transaction_info->hint = hint;
         transaction_info->syncr =  ccapi_syncr_create();
         if (transaction_info->syncr == NULL)
         {
@@ -1163,8 +1163,18 @@ ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccap
     return send_collection(ccapi_data, dp_collection, transport, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
 }
 
+ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return send_collection(ccapi_data, dp_collection, transport, CCAPI_TRUE, timeout, hint);
+}
+
 ccapi_dp_error_t ccapi_dp_send_collection(ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport)
 {
     return ccxapi_dp_send_collection(ccapi_data_single_instance, dp_collection, transport);
+}
+
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_dp_collection_t * const dp_collection, ccapi_transport_t transport, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return ccxapi_dp_send_collection_with_reply(ccapi_data_single_instance, dp_collection, transport, timeout, hint);
 }
 #endif

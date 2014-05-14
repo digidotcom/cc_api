@@ -166,6 +166,7 @@ typedef struct ccapi_dp_collection {
 
 typedef struct {
     void * syncr;
+    ccapi_string_info_t * hint;
     ccapi_dp_error_t response_error;
     ccapi_dp_error_t status;
 } ccapi_dp_transaction_info_t;

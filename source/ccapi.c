@@ -1078,6 +1078,12 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
                     transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR;
                     break;
             }
+
+            if (data_point_response->hint != NULL && transaction_info->hint != NULL)
+            {
+                transaction_info->hint->length = strlen(data_point_response->hint);
+                memcpy(transaction_info->hint->string, data_point_response->hint, transaction_info->hint->length);
+            }
             break;
         }
         case connector_request_id_data_point_multiple_status:
