@@ -49,10 +49,61 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
     while (data_point != NULL)
     {
         connector_data_point_t * const next_point = data_point->next;
+
+        switch(data_stream->type)
+        {
+            case connector_data_point_type_string:
+            {
+                if (data_point->data.element.native.string_value != NULL)
+                {
+                    ccapi_free(data_point->data.element.native.string_value);
+                }
+                break;
+            }
+            case connector_data_point_type_integer:
+            case connector_data_point_type_long:
+            case connector_data_point_type_float:
+            case connector_data_point_type_double:
+            case connector_data_point_type_binary:
+                break;
+        }
+
+        switch(data_point->time.source)
+        {
+            case connector_time_local_iso8601:
+            {
+                if (data_point->time.value.iso8601_string != NULL)
+                {
+                    ccapi_free(data_point->time.value.iso8601_string);
+                }
+                break;
+            }
+            case connector_time_cloud:
+            case connector_time_local_epoch_fractional:
+            case connector_time_local_epoch_whole:
+                break;
+        }
         ccapi_free(data_point);
 
         data_point = next_point;
     }
+}
+
+static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
+{
+    if (ccfsm_stream_info->stream_id != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->stream_id);
+    }
+    if (ccfsm_stream_info->unit != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->unit);
+    }
+    if (ccfsm_stream_info->forward_to != NULL)
+    {
+        ccapi_free(ccfsm_stream_info->forward_to);
+    }
+    ccapi_free(ccfsm_stream_info);
 }
 
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
@@ -87,7 +138,8 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
 
             free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
-            ccapi_free(ccapi_data_stream->ccfsm_data_stream);
+            free_ccfsm_stream(ccapi_data_stream->ccfsm_data_stream);
+
             ccapi_free(ccapi_data_stream->arguments.list);
             ccapi_free(ccapi_data_stream);
             ccapi_data_stream = next_data_stream;
@@ -226,53 +278,53 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, size_
             case CCAPI_DP_ARG_DATA_FLOAT:
             case CCAPI_DP_ARG_DATA_DOUBLE:
             case CCAPI_DP_ARG_DATA_STRING:
-                if (!type_found)
+                if (type_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'type' keyword");
-                    type_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    type_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_TIME_EPOCH:
             case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
             case CCAPI_DP_ARG_TIME_ISO8601:
-                if (!timestamp_found)
+                if (timestamp_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'timestamp' keyword");
-                    timestamp_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    timestamp_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_LOC:
-                if (!location_found)
+                if (location_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_LOCATION "' order");
-                    location_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    location_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_QUAL:
-                if (!quality_found)
+                if (quality_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_QUALITY "' order");
-                    quality_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    quality_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_INVALID:
@@ -492,6 +544,20 @@ static void free_ccapi_data_stream(ccapi_dp_data_stream_t * const ccapi_data_str
     ccapi_free(ccapi_data_stream);
 }
 
+static void free_ccfsm_data_point(connector_data_point_t * const ccfsm_datapoint)
+{
+    if (ccfsm_datapoint->data.element.native.string_value != NULL)
+    {
+        ccapi_free(ccfsm_datapoint->data.element.native.string_value);
+    }
+    if (ccfsm_datapoint->time.value.iso8601_string != NULL)
+    {
+        ccapi_free(ccfsm_datapoint->time.value.iso8601_string);
+    }
+
+    ccapi_free(ccfsm_datapoint);
+}
+
 static ccapi_dp_data_stream_t * find_stream_id_in_collection(ccapi_dp_collection_t * const dp_collection, char const * const stream_id)
 {
     ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
@@ -643,19 +709,7 @@ done:
         }
         if (ccfsm_stream_info != NULL)
         {
-            if (ccfsm_stream_info->stream_id)
-            {
-                ccapi_free(ccfsm_stream_info->stream_id);
-            }
-            if (ccfsm_stream_info->unit)
-            {
-                ccapi_free(ccfsm_stream_info->unit);
-            }
-            if (ccfsm_stream_info->forward_to)
-            {
-                ccapi_free(ccfsm_stream_info->forward_to);
-            }
-            ccapi_free(ccfsm_stream_info);
+            free_ccfsm_stream(ccfsm_stream_info);
         }
     }
 
@@ -765,4 +819,202 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_t * 
 {
     return ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id, format_string, NULL, NULL);
 }
+
+static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_stream_t * const data_stream, va_list arg_list, connector_data_point_t * * const new_data_point)
+{
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    ccapi_dp_argument_t * arg = data_stream->arguments.list;
+    size_t const arg_count =  data_stream->arguments.count;
+    connector_data_point_t * ccfsm_datapoint = ccapi_malloc(sizeof *ccfsm_datapoint);
+    size_t i;
+
+    if (ccfsm_datapoint == NULL)
+    {
+        error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+        goto done;
+    }
+
+    ccfsm_datapoint->data.type = connector_data_type_native;
+    ccfsm_datapoint->quality.type = connector_quality_type_ignore;
+    ccfsm_datapoint->location.type = connector_location_type_ignore;
+    ccfsm_datapoint->time.source = connector_time_cloud;
+
+    ccfsm_datapoint->data.element.native.string_value = NULL;
+    ccfsm_datapoint->time.value.iso8601_string = NULL;
+
+    for (i = 0; i < arg_count; i++)
+    {
+        switch(arg[i])
+        {
+            case CCAPI_DP_ARG_DATA_INT32:
+            {
+                ccfsm_datapoint->data.element.native.int_value = va_arg(arg_list, int32_t);
+                break;
+            }
+
+            case CCAPI_DP_ARG_DATA_INT64:
+            {
+                ccfsm_datapoint->data.element.native.long_value = va_arg(arg_list, int64_t);
+                break;
+            }
+
+            case CCAPI_DP_ARG_DATA_FLOAT:
+            {
+                double aux = va_arg(arg_list, double); /* ‘float’ is promoted to ‘double’ when passed through ‘...’ */
+                ccfsm_datapoint->data.element.native.float_value = (float)aux;
+                break;
+            }
+
+            case CCAPI_DP_ARG_DATA_DOUBLE:
+            {
+                ccfsm_datapoint->data.element.native.double_value = va_arg(arg_list, double);
+                break;
+            }
+
+            case CCAPI_DP_ARG_DATA_STRING:
+            {
+                char const * const string_dp = va_arg(arg_list, char const * const);
+                ccfsm_datapoint->data.element.native.string_value = ccapi_strdup(string_dp);
+
+                if (ccfsm_datapoint->data.element.native.string_value == NULL)
+                {
+                    free_ccfsm_data_point(ccfsm_datapoint);
+                    error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+                    goto done;
+                }
+                break;
+            }
+
+            case CCAPI_DP_ARG_TIME_EPOCH:
+            {
+                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+
+                ccfsm_datapoint->time.source = connector_time_local_epoch_fractional;
+                ccfsm_datapoint->time.value.since_epoch_fractional.seconds = timestamp->epoch.seconds;
+                ccfsm_datapoint->time.value.since_epoch_fractional.milliseconds = timestamp->epoch.milliseconds;
+                break;
+            }
+
+            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
+            {
+                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+
+                ccfsm_datapoint->time.source = connector_time_local_epoch_whole;
+                ccfsm_datapoint->time.value.since_epoch_whole.milliseconds = timestamp->epoch_msec;
+                break;
+            }
+
+            case CCAPI_DP_ARG_TIME_ISO8601:
+            {
+                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+
+                ccfsm_datapoint->time.source = connector_time_local_iso8601;
+                ccfsm_datapoint->time.value.iso8601_string = ccapi_strdup(timestamp->iso8601);
+
+                if (ccfsm_datapoint->time.value.iso8601_string == NULL)
+                {
+                    free_ccfsm_data_point(ccfsm_datapoint);
+                    error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+                    goto done;
+                }
+                break;
+            }
+            case CCAPI_DP_ARG_LOC:
+            {
+                ccapi_location_t * location = va_arg(arg_list, ccapi_location_t *);
+
+                ccfsm_datapoint->location.type = connector_location_type_native;
+                ccfsm_datapoint->location.value.native.latitude = location->latitude;
+                ccfsm_datapoint->location.value.native.longitude = location->longitude;
+                ccfsm_datapoint->location.value.native.elevation = location->elevation;
+                break;
+            }
+            case CCAPI_DP_ARG_QUAL:
+            {
+                ccfsm_datapoint->quality.type = connector_quality_type_native;
+                ccfsm_datapoint->quality.value = (int)va_arg(arg_list, int32_t);
+                break;
+            }
+            case CCAPI_DP_ARG_INVALID:
+            {
+                ASSERT_MSG_GOTO(arg[i] != CCAPI_DP_ARG_INVALID, done);
+                break;
+            }
+        }
+    }
+
+done:
+    *new_data_point = ccfsm_datapoint;
+    return error;
+}
+
+ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char const * const stream_id, ...)
+{
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    ccapi_dp_data_stream_t * data_stream;
+
+    if (dp_collection == NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
+        goto done;
+    }
+
+
+    switch (ccapi_syncr_acquire(dp_collection->syncr))
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            goto error;
+    }
+
+    if (!valid_stream_id(stream_id))
+    {
+        error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
+        goto done;
+    }
+
+    data_stream = find_stream_id_in_collection(dp_collection, stream_id);
+
+    if (data_stream == NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_STREAM_ID;
+        goto done;
+    }
+
+    {
+        connector_data_point_t * ccfsm_datapoint = NULL;
+        va_list arg_list;
+
+        va_start(arg_list, stream_id);
+        error = parse_argument_list_and_create_data_point(data_stream, arg_list, &ccfsm_datapoint);
+        va_end(arg_list);
+
+        if (error != CCAPI_DP_ERROR_NONE)
+        {
+            goto done;
+        }
+
+        ASSERT(ccfsm_datapoint != NULL);
+        ccfsm_datapoint->next = data_stream->ccfsm_data_stream->point;
+        data_stream->ccfsm_data_stream->point = ccfsm_datapoint;
+    }
+
+done:
+    switch (ccapi_syncr_release(dp_collection->syncr))
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            goto error;
+    }
+
+error:
+    return error;
+}
+
 #endif
