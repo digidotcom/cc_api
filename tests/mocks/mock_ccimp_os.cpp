@@ -125,6 +125,23 @@ void Mock_ccimp_os_syncr_acquire_return(unsigned long retval)
     mock("ccimp_os_syncr_acquire").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
+void Mock_ccimp_os_syncr_release_create(void)
+{
+    mock("ccimp_os_syncr_release").setData("behavior", MOCK_MALLOC_DISABLED);
+    return;
+}
+
+void Mock_ccimp_os_syncr_release_destroy(void)
+{
+    mock("ccimp_os_syncr_release").checkExpectations();
+}
+
+void Mock_ccimp_os_syncr_release_return(unsigned long retval)
+{
+    mock("ccimp_os_syncr_release").expectOneCall("ccimp_os_syncr_release").andReturnValue((int)retval);
+    mock("ccimp_os_syncr_release").setData("behavior", MOCK_MALLOC_ENABLED);
+}
+
 extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
@@ -283,5 +300,22 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
     return ccimp_status;
 }
 
+ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data)
+{
+    int const behavior = mock_scope_c("ccimp_os_syncr_release")->getData("behavior").value.intValue;
+    ccimp_status_t ccimp_status;
+    switch (behavior)
+    {
+        case MOCK_SYNCR_DISABLED:
+            ccimp_status = ccimp_os_syncr_release_real(data);
+            break;
+        default:
+            mock_scope_c("ccimp_os_syncr_release")->actualCall("ccimp_os_syncr_release");
+            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_syncr_release")->returnValue().value.intValue;
+            break;
+    }
+
+    return ccimp_status;
 }
 
+}

@@ -27,6 +27,7 @@ ValueToStringFunction(ccimp_fs_hash_status_t)
 ValueToStringFunction(ccimp_fs_hash_file_t)
 ValueToStringFunction(ccimp_fs_error_desc_t)
 ValueToStringFunction(ccimp_fs_session_error_t)
+ValueToStringFunction(connector_request_data_point_multiple_t)
 
 static SimpleString ccimp_create_thread_info_t_ValueToString(void* object)
 {
@@ -457,6 +458,28 @@ static bool ccimp_fs_session_error_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
+static bool connector_request_data_point_multiple_t_IsEqual(void * object1, void * object2)
+{
+    connector_request_data_point_multiple_t * connector_request_data_point_multiple_1 = (connector_request_data_point_multiple_t *)object1;
+    connector_request_data_point_multiple_t * connector_request_data_point_multiple_2 = (connector_request_data_point_multiple_t *)object2;
+
+    compare_pointers(object1, object2);
+
+    if (connector_request_data_point_multiple_1->request_id != connector_request_data_point_multiple_2->request_id)
+        return false;
+    if (connector_request_data_point_multiple_1->response_required != connector_request_data_point_multiple_2->response_required)
+        return false;
+    if (connector_request_data_point_multiple_1->stream != connector_request_data_point_multiple_2->stream)
+        return false;
+    if (connector_request_data_point_multiple_1->timeout_in_seconds != connector_request_data_point_multiple_2->timeout_in_seconds)
+        return false;
+    if (connector_request_data_point_multiple_1->transport != connector_request_data_point_multiple_2->transport)
+        return false;
+    if (connector_request_data_point_multiple_1->user_context != connector_request_data_point_multiple_2->user_context)
+        return false;
+    return true;
+}
+
 MockFunctionComparator ccimp_network_open_t_comparator(ccimp_network_open_t_IsEqual, ccimp_network_open_t_ValueToString);
 MockFunctionComparator ccimp_network_send_t_comparator(ccimp_network_send_t_IsEqual, ccimp_network_send_t_ValueToString);
 MockFunctionComparator ccimp_network_receive_t_comparator(ccimp_network_receive_t_IsEqual, ccimp_network_receive_t_ValueToString);
@@ -480,3 +503,5 @@ MockFunctionComparator ccimp_fs_hash_status_t_comparator(ccimp_fs_hash_status_t_
 MockFunctionComparator ccimp_fs_hash_file_t_comparator(ccimp_fs_hash_file_t_IsEqual, ccimp_fs_hash_file_t_ValueToString);
 MockFunctionComparator ccimp_fs_error_desc_t_comparator(ccimp_fs_error_desc_t_IsEqual, ccimp_fs_error_desc_t_ValueToString);
 MockFunctionComparator ccimp_fs_session_error_t_comparator(ccimp_fs_session_error_t_IsEqual, ccimp_fs_session_error_t_ValueToString);
+MockFunctionComparator connector_request_data_point_multiple_t_comparator(connector_request_data_point_multiple_t_IsEqual, connector_request_data_point_multiple_t_ValueToString);
+
