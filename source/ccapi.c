@@ -1079,10 +1079,14 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
                     break;
             }
 
-            if (data_point_response->hint != NULL && transaction_info->hint != NULL)
+            if (data_point_response->hint)
             {
-                transaction_info->hint->length = strlen(data_point_response->hint);
-                memcpy(transaction_info->hint->string, data_point_response->hint, transaction_info->hint->length);
+                ccapi_logging_line("data point request response hint: '%s'", data_point_response->hint);
+                if (transaction_info->hint != NULL)
+                {
+                    transaction_info->hint->length = strlen(data_point_response->hint);
+                    memcpy(transaction_info->hint->string, data_point_response->hint, transaction_info->hint->length);
+                }
             }
             break;
         }
