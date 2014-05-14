@@ -278,53 +278,53 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, size_
             case CCAPI_DP_ARG_DATA_FLOAT:
             case CCAPI_DP_ARG_DATA_DOUBLE:
             case CCAPI_DP_ARG_DATA_STRING:
-                if (!type_found)
+                if (type_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'type' keyword");
-                    type_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    type_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_TIME_EPOCH:
             case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
             case CCAPI_DP_ARG_TIME_ISO8601:
-                if (!timestamp_found)
+                if (timestamp_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'timestamp' keyword");
-                    timestamp_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    timestamp_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_LOC:
-                if (!location_found)
+                if (location_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_LOCATION "' order");
-                    location_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    location_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_QUAL:
-                if (!quality_found)
+                if (quality_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_QUALITY "' order");
-                    quality_found = CCAPI_TRUE;
+                    is_valid = CCAPI_FALSE;
+                    goto done;
                 }
                 else
                 {
-                    is_valid = CCAPI_FALSE;
-                    goto done;
+                    quality_found = CCAPI_TRUE;
                 }
                 break;
             case CCAPI_DP_ARG_INVALID:
@@ -820,7 +820,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_t * 
     return ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id, format_string, NULL, NULL);
 }
 
-static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_stream_t * const data_stream, va_list arg_list, connector_data_point_t * * const returned_data_stream)
+static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_stream_t * const data_stream, va_list arg_list, connector_data_point_t * * const new_data_point)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     ccapi_dp_argument_t * arg = data_stream->arguments.list;
@@ -944,7 +944,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
     }
 
 done:
-    *returned_data_stream = ccfsm_datapoint;
+    *new_data_point = ccfsm_datapoint;
     return error;
 }
 
