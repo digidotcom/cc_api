@@ -184,6 +184,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
     {
+        /* TODO: If we decide any callback is compulsory check it here */
         ccapi_data->config.receive_supported = CCAPI_TRUE;
         ccapi_data->service.receive.user_callbacks.accept_cb = start->service.receive->accept_cb;
         ccapi_data->service.receive.user_callbacks.request_cb = start->service.receive->request_cb;

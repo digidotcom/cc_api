@@ -11,4 +11,11 @@ typedef struct {
     ccapi_receive_response_cb_t response_cb;
 } ccapi_receive_service_t;
 
+typedef enum {
+    CCAPI_RECEIVE_ERROR_NONE,
+    CCAPI_RECEIVE_ERROR_CCAPI_STOPPED,
+    CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT,
+    CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY
+} ccapi_receive_error_t;
+
 #endif

@@ -130,6 +130,13 @@ typedef struct
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
 } ccapi_svc_send_data_t;
+
+typedef struct
+{
+    ccapi_data_t * ccapi_data;
+    char * target;
+    ccapi_receive_error_t target_error;
+} ccapi_svc_receive_t;
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
