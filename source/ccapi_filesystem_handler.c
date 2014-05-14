@@ -990,7 +990,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
     ccapi_bool_t syncr_acquired = CCAPI_FALSE;
 
     {
-        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
 
         switch (ccapi_syncr_acquire_status)
         {

@@ -84,14 +84,14 @@ done:
     return syncr_object;
 }
 
-ccimp_status_t ccapi_syncr_acquire(void * syncr_object)
+ccimp_status_t ccapi_syncr_acquire(void * syncr_object, unsigned long const timeout)
 {
     ccimp_os_syncr_acquire_t acquire_data;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
     ASSERT_MSG_GOTO(syncr_object != NULL, done);
     acquire_data.syncr_object = syncr_object;
-    acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
+    acquire_data.timeout_ms = timeout;
 
     ccimp_status = ccimp_os_syncr_acquire(&acquire_data);
     if (ccimp_status == CCIMP_STATUS_OK && acquire_data.acquired != CCAPI_TRUE)
@@ -121,6 +121,7 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
     return ccimp_os_syncr_destroy(&destroy_data);
 }
 
+connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)
@@ -129,7 +130,7 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -184,7 +185,7 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
 
     *bytes_used = 0;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -239,7 +240,7 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -280,7 +281,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
     ccapi_bool_t loop_done = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -331,7 +332,7 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
 {
     connector_status_t status;
 
-    ASSERT_MSG(ccapi_syncr_acquire(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+    ASSERT_MSG(ccapi_syncr_acquire(ccapi_data->initiate_action_syncr, OS_SYNCR_ACQUIRE_INFINITE) == CCIMP_STATUS_OK);
 
     status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
