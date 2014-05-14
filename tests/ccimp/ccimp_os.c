@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <stdarg.h>
 
 #if (defined UNIT_TEST)
 #define ccimp_os_malloc             ccimp_os_malloc_real
@@ -21,11 +22,56 @@
 #define ccimp_os_yield              ccimp_os_yield_real
 #define ccimp_os_syncr_create       ccimp_os_syncr_create_real
 #define ccimp_os_syncr_acquire      ccimp_os_syncr_acquire_real
+#define ccimp_os_syncr_release      ccimp_os_syncr_release_real
 #endif
 
 #define ccapi_logging_line_info(message) /* TODO */
 
 /******************** LINUX IMPLEMENTATION ********************/
+
+int connector_snprintf(char * const str, size_t const size, char const * const format, ...)
+{
+    va_list args;
+    int result;
+
+    va_start(args, format);
+
+#if __STDC_VERSION__ >= 199901L
+    result = vsnprintf(str, size, format, args);
+#else
+    /**************************************************************************************
+    * NOTE: This is an example snprintf() implementation for environments                 *
+    * that do not provide one.                                                            *
+    * The following buffer should hold the longest possible string that can be generated. *
+    * Consider the common case to be only one format specifier at once.                   *
+    * WARNING: If an application is using double Data Point types, this value can be as   *
+    * big as:                                                                             *
+    *                 max_digits = 3 + DBL_MANT_DIG - DBL_MIN_EXP                         *
+    * The above expression evaluates to 1077 in a 64-bit Linux machine for GCC 4.8.1.     *
+    **************************************************************************************/
+    #define SAFE_BUFFER_BYTES 64
+
+    if (size >= SAFE_BUFFER_BYTES)
+    {
+        result = vsprintf(str, format, args);
+    }
+    else
+    {
+        char local_buffer[SAFE_BUFFER_BYTES];
+        ssize_t const bytes_needed = vsprintf(local_buffer, format, args);
+
+        if (bytes_needed < (ssize_t)size)
+        {
+            memcpy(str, local_buffer, bytes_needed + 1); /* Don't forget the \0 */
+        }
+        result = bytes_needed;
+    }
+    #undef SAFE_BUFFER_BYTES
+#endif
+    va_end(args);
+
+    return result;
+}
 
 ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info)
 {
