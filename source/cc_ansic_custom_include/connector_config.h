@@ -35,8 +35,6 @@
 #undef CONNECTOR_FIRMWARE_SUPPORT
 #undef CONNECTOR_FILE_SYSTEM_SUPPORT
 
-#define CONNECTOR_DATA_POINTS
-
 #define CONNECTOR_SM_CLI
 
 /* Limits */
@@ -69,7 +67,7 @@
 #endif
 
 #ifdef CCIMP_DATA_POINTS_ENABLED
-/* We don't enable layer1 datapoints */
+#define CONNECTOR_DATA_POINTS
 #endif
 
 #ifdef CCIMP_RCI_SERVICE_ENABLED
