@@ -1021,6 +1021,24 @@ error:
     return error;
 }
 
+static void chain_collection_ccfsm_data_streams(ccapi_dp_collection_t * const dp_collection)
+{
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+
+    while (current_data_stream != NULL)
+    {
+        connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
+        ccapi_dp_data_stream_t * const next_data_stream = current_data_stream->next;
+
+        if (next_data_stream != NULL)
+        {
+            ccfsm_data_stream->next = next_data_stream->ccfsm_data_stream;
+        }
+
+        current_data_stream = current_data_stream->next;
+    }
+}
+
 static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_collection)
 {
     ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
@@ -1104,14 +1122,6 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_d
             goto done;
         }
 
-        ccfsm_request.request_id = NULL;
-        ccfsm_request.response_required = with_reply ? connector_true : connector_false;
-        ccfsm_request.timeout_in_seconds = timeout;
-        ccfsm_request.transport = ccapi_to_connector_transport(transport);
-        ccfsm_request.user_context = transaction_info;
-        ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
-
-
         {
             switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
             {
@@ -1124,6 +1134,15 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_d
                     goto done;
             }
         }
+
+        chain_collection_ccfsm_data_streams(dp_collection);
+
+        ccfsm_request.request_id = NULL;
+        ccfsm_request.response_required = with_reply ? connector_true : connector_false;
+        ccfsm_request.timeout_in_seconds = timeout;
+        ccfsm_request.transport = ccapi_to_connector_transport(transport);
+        ccfsm_request.user_context = transaction_info;
+        ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
 
         ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point_multiple, &ccfsm_request);
         if (ccfsm_status != connector_success)
