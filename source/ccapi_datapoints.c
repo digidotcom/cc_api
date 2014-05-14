@@ -254,14 +254,14 @@ done:
     return is_valid;
 }
 
-static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, size_t const count)
+static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsigned int const count)
 {
     ccapi_bool_t is_valid = CCAPI_TRUE;
     ccapi_bool_t type_found = CCAPI_FALSE;
     ccapi_bool_t timestamp_found = CCAPI_FALSE;
     ccapi_bool_t location_found = CCAPI_FALSE;
     ccapi_bool_t quality_found = CCAPI_FALSE;
-    size_t i;
+    unsigned int i;
 
     if (count < 1 || count > 4)
     {
@@ -336,10 +336,10 @@ done:
     return is_valid;
 }
 
-static ccapi_dp_argument_t * arg_list_dup(ccapi_dp_argument_t const * const original_arg_list, size_t const count)
+static ccapi_dp_argument_t * arg_list_dup(ccapi_dp_argument_t const * const original_arg_list, unsigned int const count)
 {
     ccapi_dp_argument_t * const arg_list = ccapi_malloc(count * sizeof *arg_list);
-    size_t i;
+    unsigned int i;
 
     if (arg_list == NULL)
     {
@@ -380,7 +380,7 @@ done:
     return token_start;
 }
 
-static ccapi_dp_error_t get_arg_list_from_format_string(char const * const format_string, ccapi_dp_argument_t * * const arg_list, size_t * const arg_list_count)
+static ccapi_dp_error_t get_arg_list_from_format_string(char const * const format_string, ccapi_dp_argument_t * * const arg_list, unsigned int * const arg_list_count)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     char const * keyword;
@@ -388,7 +388,7 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
     char * format_string_copy;
     char * next_keyword = NULL;
     ccapi_dp_argument_t temp_arg_list[4] = {CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID};
-    size_t temp_arg_list_count = 0;
+    unsigned int temp_arg_list_count = 0;
 
     format_string_copy = ccapi_strdup(format_string);
     if (format_string_copy == NULL)
@@ -481,11 +481,11 @@ done:
     return error;
 }
 
-static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t * list, size_t count)
+static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t * list, unsigned int count)
 {
     connector_data_point_type_t type;
     ccapi_bool_t found = CCAPI_FALSE;
-    size_t i;
+    unsigned int i;
 
     for (i = 0; i < count && !found; i++)
     {
@@ -581,7 +581,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     ccapi_dp_argument_t * arg_list = NULL;
-    size_t arg_count;
+    unsigned int arg_count;
     ccapi_dp_data_stream_t * ccapi_stream_info = NULL;
     connector_data_stream_t * ccfsm_stream_info = NULL;
     ccapi_bool_t syncr_acquired = CCAPI_FALSE;
@@ -824,9 +824,9 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     ccapi_dp_argument_t * arg = data_stream->arguments.list;
-    size_t const arg_count =  data_stream->arguments.count;
+    unsigned int const arg_count =  data_stream->arguments.count;
     connector_data_point_t * ccfsm_datapoint = ccapi_malloc(sizeof *ccfsm_datapoint);
-    size_t i;
+    unsigned int i;
 
     if (ccfsm_datapoint == NULL)
     {

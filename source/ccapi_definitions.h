@@ -149,7 +149,7 @@ typedef struct ccapi_dp_data_stream {
     connector_data_stream_t * ccfsm_data_stream;
     struct {
         ccapi_dp_argument_t * list;
-        size_t count;
+        unsigned int count;
     } arguments;
     struct ccapi_dp_data_stream * next;
 } ccapi_dp_data_stream_t;
