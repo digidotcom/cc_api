@@ -1102,12 +1102,13 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
     if (resp_ptr->hint != NULL)
     {
         ccapi_logging_line("Device Cloud response hint %s\n", resp_ptr->hint);
-    }
+        if (svc_send->hint != NULL)
+        {
+            size_t const max_hint_length = svc_send->hint->length - 1;
 
-    if (svc_send->hint != NULL && resp_ptr->hint != NULL)
-    {
-        strncpy(svc_send->hint->string, resp_ptr->hint, svc_send->hint->length - 1);
-        svc_send->hint->string[svc_send->hint->length - 1] = '\0';
+            strncpy(svc_send->hint->string, resp_ptr->hint, max_hint_length);
+            svc_send->hint->string[max_hint_length] = '\0';
+        }
     }
 
 done:
@@ -1143,7 +1144,16 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
 
     ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
     
-    connector_status = (ccapi_syncr_release(svc_send->send_syncr) == CCIMP_STATUS_OK) ? connector_callback_continue : connector_callback_error;
+    switch (ccapi_syncr_release(svc_send->send_syncr))
+    {
+        case CCIMP_STATUS_OK:
+            connector_status = connector_callback_continue;
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            connector_status = connector_callback_error;
+            break;
+    }
 
 done:
     return connector_status;
