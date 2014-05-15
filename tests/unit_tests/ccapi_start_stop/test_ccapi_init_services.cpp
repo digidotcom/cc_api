@@ -1,11 +1,11 @@
 #include "test_helper_functions.h"
 
-static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request, ccapi_buffer_info_t * const response, ccapi_receive_error_t receive_error)
+static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
     (void)target;
     (void)transport;
-    (void)request;
-    (void)response;
+    (void)request_buffer_info;
+    (void)response_buffer_info;
     (void)receive_error;
 }
 

@@ -65,7 +65,7 @@ static ccapi_bool_t app_receive_accept_cb(char const * const target, ccapi_trans
     return CCAPI_TRUE;
 }
 
-static void app_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request, ccapi_buffer_info_t * const response, ccapi_receive_error_t receive_error)
+static void app_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
     printf("app_receive_data_cb: target = \"%s\". transport = %d. Error = %d\n", target, transport, receive_error);
 
@@ -74,23 +74,25 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
     {
         size_t i;
 
-        for (i=0 ; i < request->length ; i++)
+        for (i=0 ; i < request_buffer_info->length ; i++)
         {
-            printf("%c", ((char*)request->buffer)[i]);
+            printf("%c", ((char*)request_buffer_info->buffer)[i]);
         }
-        printf("\nTotal=%d bytes\n", request->length);
+        printf("\nTotal=%d bytes\n", request_buffer_info->length);
     }
 
     /* Provide response */
-    response->buffer = malloc(200);
+    {
+        response_buffer_info->buffer = malloc(200);
 
-    if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
-    {
-        response->length = sprintf(response->buffer, "Error %d while handling target %s", receive_error, target);
-    } 
-    else
-    {
-        response->length = sprintf(response->buffer, "Thanks for the info");
+        if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
+        {
+            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
+        } 
+        else
+        {
+            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Thanks for the info");
+        }
     }
 
     return;

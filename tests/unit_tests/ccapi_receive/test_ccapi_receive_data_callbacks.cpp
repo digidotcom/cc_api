@@ -14,12 +14,12 @@ static ccapi_buffer_info_t * ccapi_receive_data_expected_response = NULL;
 static ccapi_receive_error_t ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
 
-static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request, ccapi_buffer_info_t * const response, ccapi_receive_error_t receive_error)
+static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
     STRCMP_EQUAL(ccapi_receive_data_expected_target, target);
     CHECK_EQUAL(ccapi_receive_data_expected_transport, transport);
-    CHECK_EQUAL(ccapi_receive_data_expected_request, request);
-    CHECK_EQUAL(ccapi_receive_data_expected_response, response);
+    CHECK_EQUAL(ccapi_receive_data_expected_request, request_buffer_info);
+    CHECK_EQUAL(ccapi_receive_data_expected_response, response_buffer_info);
     CHECK_EQUAL(ccapi_receive_data_expected_receive_error, receive_error);
 
     ccapi_receive_data_cb_called = CCAPI_TRUE;
