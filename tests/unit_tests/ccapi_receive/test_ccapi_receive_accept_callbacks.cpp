@@ -289,6 +289,37 @@ TEST(test_ccapi_receive_accept_callback, testOK)
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK_EQUAL(svc_receive->response_required, CCAPI_TRUE);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_accept_cb_called);
+}
+
+TEST(test_ccapi_receive_accept_callback, testOK_ResponseNotRequired)
+{
+    connector_request_id_t request;
+    connector_data_service_receive_target_t ccfsm_receive_target_data;
+    connector_callback_status_t status;
+    
+    ccapi_receive_accept_expected_target = TEST_TARGET;
+    ccapi_receive_accept_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_receive_accept_retval = CCAPI_TRUE;
+
+    ccfsm_receive_target_data.transport = connector_transport_tcp;
+    ccfsm_receive_target_data.user_context = NULL;
+    ccfsm_receive_target_data.target = TEST_TARGET;
+    ccfsm_receive_target_data.response_required = connector_false;
+
+    request.data_service_request = connector_request_id_data_service_receive_target;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_target_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_target_data.user_context != NULL);
+
+    {
+        ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
+        CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK_EQUAL(svc_receive->response_required, CCAPI_FALSE);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_accept_cb_called);

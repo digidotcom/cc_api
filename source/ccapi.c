@@ -1009,8 +1009,6 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
     /* TODO: Check if it's a registered target */
 
-    /* TODO: Do something with response_required ? */
-
     if (target_ptr->user_context != NULL)
     {
         /* TODO: any reason to get here a previous user_context if we never return busy?
@@ -1036,6 +1034,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->response_buffer_info.buffer = NULL;
         svc_receive->response_buffer_info.length = 0;
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
+
+        svc_receive->response_required = target_ptr->response_required == connector_true ? CCAPI_TRUE : CCAPI_FALSE;
 
         /* CCAPI_RECEIVE_ERROR_CCAPI_STOPPED is not handled here. We assume that if we get a request
            means that ccapi is running. That error will be used in add_receive_target()
@@ -1127,11 +1127,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
  
         {
-            const connector_bool_t response_required = connector_true; /* TODO */
-
             ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
                                                                &svc_receive->request_buffer_info, 
-                                                               response_required == connector_true ? &svc_receive->response_buffer_info : NULL, 
+                                                               svc_receive->response_required == CCAPI_TRUE ? &svc_receive->response_buffer_info : NULL, 
                                                                svc_receive->receive_error);
         }
     }

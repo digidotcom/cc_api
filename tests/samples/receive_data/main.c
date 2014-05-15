@@ -82,6 +82,7 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
     }
 
     /* Provide response */
+    if (response_buffer_info != NULL)
     {
         response_buffer_info->buffer = malloc(200);
 

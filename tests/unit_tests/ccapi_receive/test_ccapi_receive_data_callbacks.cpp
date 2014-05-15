@@ -170,6 +170,7 @@ TEST(test_ccapi_receive_data_callback, testOK_BufferNULL)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -210,6 +211,7 @@ TEST(test_ccapi_receive_data_callback, testOK_OneCall)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -250,6 +252,7 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoCall)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -284,7 +287,49 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoCall)
         CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
         CHECK(svc_receive.request_buffer_info.buffer != NULL);
         CHECK(svc_receive.request_buffer_info.length == 2 * sizeof data);
-        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0); /* TODO: second part */
+        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0);
+        CHECK(memcmp(((uint8_t*)svc_receive.request_buffer_info.buffer) + sizeof data, data, sizeof data) == 0);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
+}
+
+TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
+{
+    connector_request_id_t request;
+    connector_data_service_receive_data_t ccfsm_receive_data_data;
+    connector_callback_status_t status;
+
+    uint8_t const data[] = DATA;
+
+    ccapi_svc_receive_t svc_receive = {0};
+    const char target[] = TEST_TARGET;
+    svc_receive.target = (char*)target;
+    svc_receive.response_required = CCAPI_FALSE;
+    
+    ccapi_receive_data_expected_target = TEST_TARGET;
+    ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_receive_data_expected_request_not_null = CCAPI_TRUE;
+    ccapi_receive_data_expected_request = &svc_receive.request_buffer_info;
+    ccapi_receive_data_expected_response = NULL;
+    ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
+
+    ccfsm_receive_data_data.transport = connector_transport_tcp;
+    ccfsm_receive_data_data.user_context = &svc_receive;
+    ccfsm_receive_data_data.buffer = data;
+    ccfsm_receive_data_data.bytes_used = sizeof data;
+    ccfsm_receive_data_data.more_data = connector_false;
+
+    request.data_service_request = connector_request_id_data_service_receive_data;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
+    {
+        CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK(svc_receive.request_buffer_info.buffer != NULL);
+        CHECK(svc_receive.request_buffer_info.length == sizeof data);
+        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
