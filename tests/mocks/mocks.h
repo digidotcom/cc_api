@@ -23,6 +23,7 @@ extern "C" {
 #include "mock_connector_api.h"
 #include "mock_ccimp_network_tcp.h"
 #include "mock_ccimp_network_udp.h"
+#include "mock_ccimp_network_sms.h"
 #include "mocks_comparators.h"
 
 void Mock_create_all(void);
