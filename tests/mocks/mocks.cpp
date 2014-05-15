@@ -28,6 +28,9 @@ void Mock_create_all()
     Mock_ccimp_network_udp_send_create();
     Mock_ccimp_network_udp_receive_create();
     Mock_ccimp_network_udp_close_create();
+    Mock_ccimp_network_sms_send_create();
+    Mock_ccimp_network_sms_receive_create();
+    Mock_ccimp_network_sms_close_create();
     Mock_ccimp_os_get_system_time_create();
     Mock_ccimp_os_syncr_create_create();
     Mock_ccimp_os_syncr_acquire_create();
@@ -76,6 +79,9 @@ void Mock_destroy_all()
     Mock_ccimp_network_udp_send_destroy();
     Mock_ccimp_network_udp_receive_destroy();
     Mock_ccimp_network_udp_close_destroy();
+    Mock_ccimp_network_sms_send_destroy();
+    Mock_ccimp_network_sms_receive_destroy();
+    Mock_ccimp_network_sms_close_destroy();
     Mock_ccimp_os_get_system_time_destroy();
     Mock_ccimp_fs_file_open_destroy();
     Mock_ccimp_fs_file_read_destroy();
