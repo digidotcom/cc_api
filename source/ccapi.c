@@ -1103,8 +1103,11 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
                 ccapi_logging_line("data point request response hint: '%s'", data_point_response->hint);
                 if (transaction_info->hint != NULL)
                 {
+                    size_t const max_hint_length = transaction_info->hint->length - 1;
+
                     transaction_info->hint->length = strlen(data_point_response->hint);
-                    memcpy(transaction_info->hint->string, data_point_response->hint, transaction_info->hint->length);
+                    strncpy(transaction_info->hint->string, data_point_response->hint, max_hint_length);
+                    transaction_info->hint->string[max_hint_length] = '\0';
                 }
             }
             break;

@@ -1123,17 +1123,15 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
             goto done;
         }
 
+        switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
         {
-            switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
-            {
-                case CCIMP_STATUS_OK:
-                    collection_lock_acquired = CCAPI_TRUE;
-                    break;
-                case CCIMP_STATUS_ERROR:
-                case CCIMP_STATUS_BUSY:
-                    error = CCAPI_DP_ERROR_SYNCR_FAILED;
-                    goto done;
-            }
+            case CCIMP_STATUS_OK:
+                collection_lock_acquired = CCAPI_TRUE;
+                break;
+            case CCIMP_STATUS_ERROR:
+            case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                goto done;
         }
 
         chain_collection_ccfsm_data_streams(dp_collection);
