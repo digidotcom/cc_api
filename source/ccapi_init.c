@@ -244,7 +244,6 @@ done:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
-        case CCAPI_START_ERROR_COUNT:
             if (ccapi_data != NULL)
             {
                 free_ccapi_data_internal_resources(ccapi_data);
@@ -352,7 +351,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
-        case CCAPI_START_ERROR_COUNT:
             ccapi_data_single_instance = NULL;
             break;
     }

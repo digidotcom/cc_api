@@ -1095,7 +1095,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
             svc_send->response_error = CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR;
             break;
         case connector_data_service_send_response_COUNT:
-            ASSERT_MSG_GOTO(0, done);
+            ASSERT_MSG_GOTO(resp_ptr->response != connector_data_service_send_response_COUNT, done);
             break;
     }
 
@@ -1137,7 +1137,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
             ccapi_logging_line("Data service status: session_error=%d\n", status_ptr->session_error);
             break;
         case connector_data_service_status_COUNT:
-            ASSERT_MSG_GOTO(0, done);
+            ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
             break;
     }
 

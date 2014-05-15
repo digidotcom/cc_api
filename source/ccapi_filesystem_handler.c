@@ -136,7 +136,7 @@ static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error
     ccimp_session_error_status_t cccimp_session_error;
 
     switch(ccfsm_session_error)
-      {
+    {
         case connector_session_error_none:
             cccimp_session_error = CCIMP_FS_SESSION_ERROR_NONE;
             break;
@@ -183,7 +183,7 @@ static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error
             cccimp_session_error = CCIMP_FS_SESSION_ERROR_NO_SERVICE;
             break;
         case connector_session_error_count:
-            cccimp_session_error = CCIMP_FS_SESSION_ERROR_COUNT;
+            ASSERT(ccfsm_session_error != connector_session_error_count);
             break;
       }
 
