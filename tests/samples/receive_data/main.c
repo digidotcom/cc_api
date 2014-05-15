@@ -60,9 +60,40 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 
 static ccapi_bool_t app_receive_accept_cb(char const * const target, ccapi_transport_t const transport)
 {
-    printf("app_receive_accept_cb: target = \"%s\". transport %d\n", target, transport);
+    printf("app_receive_accept_cb: target = \"%s\". transport = %d\n", target, transport);
 
     return CCAPI_TRUE;
+}
+
+static void app_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request, ccapi_buffer_info_t * const response, ccapi_receive_error_t receive_error)
+{
+    printf("app_receive_data_cb: target = \"%s\". transport = %d. Error = %d\n", target, transport, receive_error);
+
+    /* Print data */
+    if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
+    {
+        size_t i;
+
+        for (i=0 ; i < request->length ; i++)
+        {
+            printf("%c", ((char*)request->buffer)[i]);
+        }
+        printf("\nTotal=%d bytes\n", request->length);
+    }
+
+    /* Provide response */
+    response->buffer = malloc(200);
+
+    if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
+    {
+        response->length = sprintf(response->buffer, "Error %d while handling target %s", receive_error, target);
+    } 
+    else
+    {
+        response->length = sprintf(response->buffer, "Thanks for the info");
+    }
+
+    return;
 }
 
 int main (void)
@@ -73,7 +104,7 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    ccapi_receive_service_t receive_service = {app_receive_accept_cb, NULL, NULL};
+    ccapi_receive_service_t receive_service = {app_receive_accept_cb, app_receive_data_cb, NULL};
 
     fill_start_structure_with_good_parameters(&start);
     start.service.receive = &receive_service;

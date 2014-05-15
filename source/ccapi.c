@@ -1001,12 +1001,11 @@ static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receiv
 static connector_callback_status_t ccapi_process_device_request_target(connector_data_service_receive_target_t * const target_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_receive_error_t error;
     ccapi_svc_receive_t * svc_receive = NULL;
 
     ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
 
-    ccapi_logging_line("Device request target = \"%s\"\n", target_ptr->target);
+    ccapi_logging_line("ccapi_process_device_request_target for target = \"%s\"\n", target_ptr->target);
 
     /* TODO: Check if it's a registered target */
 
@@ -1023,7 +1022,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
     {
         const size_t target_size = strlen(target_ptr->target) + 1;
 
-        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &error))
+        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
         {
             /* TODO: SIMULATE! what will happen later? is status callback called without user_context? */
             goto done;
@@ -1031,22 +1030,27 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
         target_ptr->user_context = svc_receive;
 
+        svc_receive->target = NULL;
+        svc_receive->request_buffer_info.buffer = NULL;
+        svc_receive->request_buffer_info.length = 0;
+        svc_receive->response_buffer_info.buffer = NULL;
+        svc_receive->response_buffer_info.length = 0;
+        svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
+
         /* CCAPI_RECEIVE_ERROR_CCAPI_STOPPED is not handled here. We assume that if we get a request
            means that ccapi is running. That error will be used in add_receive_target()
          */
-       
+
         if (ccapi_data->config.receive_supported != CCAPI_TRUE)
         {
-            svc_receive->target_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
             goto done;
         }
 
-        if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &error))
+        if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
         {
-            svc_receive->target_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
             goto done;
         }
-
         memcpy(svc_receive->target, target_ptr->target, target_size);
 
         /* Ask user if accepts target */
@@ -1066,22 +1070,75 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             {
                 connector_status = connector_callback_continue;
             }
+            else
+            {
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET;
+            }
         }
-
-        /* Doesn't mutter if user accepts the target or not, no error so far */
-        svc_receive->target_error = CCAPI_RECEIVE_ERROR_NONE;
     }
 
 done:
     return connector_status;
 }
 
-static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr)
+static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
 
-    (void)data_ptr;
+    if (data_ptr->user_context == NULL)
+    {
+        ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
+    }
+    else
+    {
+        svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+    }
 
+    ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"\n", svc_receive->target);
+
+    if (ccapi_data->config.receive_supported != CCAPI_TRUE)
+    {
+        svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+        goto done;
+    }
+
+    {
+        ccimp_os_realloc_t ccimp_realloc_data;
+
+        ccimp_realloc_data.new_size = svc_receive->request_buffer_info.length + data_ptr->bytes_used;
+        ccimp_realloc_data.old_size = svc_receive->request_buffer_info.length;
+        ccimp_realloc_data.ptr = svc_receive->request_buffer_info.buffer;
+        if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
+        {
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+            goto done;
+        }
+        svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
+ 
+        memcpy(&((uint8_t*)svc_receive->request_buffer_info.buffer)[svc_receive->request_buffer_info.length], data_ptr->buffer, data_ptr->bytes_used);
+        svc_receive->request_buffer_info.length += data_ptr->bytes_used;
+    }
+
+    if (data_ptr->more_data == connector_false)
+    {
+
+        /* We just assert as this was already checked in ccapi_start */
+        ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
+ 
+        {
+            const connector_bool_t response_required = connector_true; /* TODO */
+
+            ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
+                                                               &svc_receive->request_buffer_info, 
+                                                               response_required == connector_true ? &svc_receive->response_buffer_info : NULL, 
+                                                               svc_receive->receive_error);
+        }
+    }
+
+    connector_status = connector_callback_continue;
+
+done:
     return connector_status;
 }
 
@@ -1146,7 +1203,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         {
             connector_data_service_receive_data_t * const data_ptr = data;
 
-            connector_status = ccapi_process_device_request_data(data_ptr);
+            connector_status = ccapi_process_device_request_data(data_ptr, ccapi_data);
 
             break;
         }

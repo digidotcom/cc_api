@@ -184,11 +184,17 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
     {
-        /* TODO: If we decide any callback is compulsory check it here */
+        /* TODO: Check if we want other callbacks compulsory here */
+        if (start->service.receive->data_cb == NULL)
+        {
+            error = CCAPI_START_ERROR_INVALID_RECEIVE_CALLBACKS;
+            goto done;
+        }
+
         ccapi_data->config.receive_supported = CCAPI_TRUE;
         ccapi_data->service.receive.user_callbacks.accept_cb = start->service.receive->accept_cb;
-        ccapi_data->service.receive.user_callbacks.request_cb = start->service.receive->request_cb;
-        ccapi_data->service.receive.user_callbacks.response_cb = start->service.receive->response_cb;
+        ccapi_data->service.receive.user_callbacks.data_cb = start->service.receive->data_cb;
+        ccapi_data->service.receive.user_callbacks.status_cb = start->service.receive->status_cb;
     }
     else
 #endif
@@ -251,6 +257,7 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_RECEIVE_CALLBACKS:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
@@ -359,6 +366,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_RECEIVE_CALLBACKS:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:

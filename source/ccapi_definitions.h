@@ -129,13 +129,14 @@ typedef struct
     ccapi_send_error_t response_error;
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
-} ccapi_svc_send_data_t;
+} ccapi_svc_send_data_t; /* TODO: Change name to ccapi_svc_send_t */
 
 typedef struct
 {
-    ccapi_data_t * ccapi_data;
     char * target;
-    ccapi_receive_error_t target_error;
+    ccapi_buffer_info_t request_buffer_info;
+    ccapi_buffer_info_t response_buffer_info;
+    ccapi_receive_error_t receive_error;
 } ccapi_svc_receive_t;
 #endif
 
