@@ -17,9 +17,9 @@ TEST_GROUP(test_ccapi_sms)
 TEST(test_ccapi_sms, testSmsOpen)
 {
     connector_request_id_t request;
-    connector_network_open_t connector_open_data = {{"login.etherios.com"}, NULL};
+    connector_network_open_t connector_open_data = {{"666666666"}, NULL};
     connector_callback_status_t status;
-    ccimp_network_open_t ccimp_open_data = {{"login.etherios.com"}, NULL};
+    ccimp_network_open_t ccimp_open_data = {{"666666666"}, NULL};
 
     Mock_ccimp_network_sms_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
 

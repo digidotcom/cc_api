@@ -951,7 +951,7 @@ connector_callback_status_t ccapi_network_sms_handler(connector_request_id_netwo
             connector_network_open_t * connector_open_data = data;
             ccimp_network_open_t ccimp_open_data;
 
-            ccimp_open_data.device_cloud.url = connector_open_data->device_cloud.url;
+            ccimp_open_data.device_cloud.phone = connector_open_data->device_cloud.phone;
             ccimp_open_data.handle = connector_open_data->handle;
 
             ccimp_status = ccimp_network_sms_open(&ccimp_open_data);
