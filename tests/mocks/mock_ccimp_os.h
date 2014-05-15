@@ -57,6 +57,10 @@ void Mock_ccimp_os_syncr_acquire_create(void);
 void Mock_ccimp_os_syncr_acquire_destroy(void);
 void Mock_ccimp_os_syncr_acquire_return(unsigned long retval);
 
+void Mock_ccimp_os_syncr_release_create(void);
+void Mock_ccimp_os_syncr_release_destroy(void);
+void Mock_ccimp_os_syncr_release_return(unsigned long retval);
+
 extern "C" {
 ccimp_status_t ccimp_os_malloc_real(ccimp_os_malloc_t * malloc_info);
 ccimp_status_t ccimp_os_free_real(ccimp_os_free_t * free_info);
@@ -66,6 +70,7 @@ ccimp_status_t ccimp_os_get_system_time_real(ccimp_os_system_up_time_t * const s
 ccimp_status_t ccimp_os_yield_real(void);
 ccimp_status_t ccimp_os_syncr_create_real(ccimp_os_syncr_create_t * const data);
 ccimp_status_t ccimp_os_syncr_acquire_real(ccimp_os_syncr_acquire_t * const data);
+ccimp_status_t ccimp_os_syncr_release_real(ccimp_os_syncr_release_t * const data);
 
 }
 

@@ -154,7 +154,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamNoMemory4ArgList)
 
 TEST(test_ccapi_dp_data_stream, testDataStreamDataInt32)
 {
-    char const * const stream_id = "stream_1";
+    char const * const stream_id = "stream:1";
     char const * const format_string = CCAPI_DP_KEY_DATA_INT32;
     ccapi_dp_argument_t const expected_arg = CCAPI_DP_ARG_DATA_INT32;
     connector_data_point_type_t const expected_type = connector_data_point_type_integer;

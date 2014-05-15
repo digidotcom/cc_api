@@ -26,30 +26,6 @@ static ccapi_bool_t valid_malloc(void * * ptr, size_t size, ccapi_send_error_t *
     return success;
 }
 
-static connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
-{
-    connector_transport_t connector_transport = connector_transport_all;
-
-    switch(ccapi_transport)
-    {
-        case CCAPI_TRANSPORT_TCP:
-            connector_transport = connector_transport_tcp;
-            break;
-        case CCAPI_TRANSPORT_UDP:
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
-            connector_transport = connector_transport_udp;
-#endif
-            break;
-        case CCAPI_TRANSPORT_SMS:
-#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
-            connector_transport = connector_transport_sms;
-#endif
-            break;
-    }
-
-    return connector_transport;
-}
-
 static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_info, unsigned long const timeout_ms)
 {
     ccimp_os_syncr_acquire_t acquire_data;

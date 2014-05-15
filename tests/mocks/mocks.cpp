@@ -27,6 +27,7 @@ void Mock_create_all()
     Mock_ccimp_os_get_system_time_create();
     Mock_ccimp_os_syncr_create_create();
     Mock_ccimp_os_syncr_acquire_create();
+    Mock_ccimp_os_syncr_release_create();
     Mock_ccimp_fs_file_open_create();
     Mock_ccimp_fs_file_read_create();
     Mock_ccimp_fs_file_write_create();
@@ -61,6 +62,7 @@ void Mock_destroy_all()
     Mock_ccimp_os_create_thread_destroy();
     Mock_ccimp_os_syncr_create_destroy();
     Mock_ccimp_os_syncr_acquire_destroy();
+    Mock_ccimp_os_syncr_release_destroy();
     Mock_connector_init_destroy();
     Mock_connector_run_destroy();
     Mock_connector_initiate_action_destroy();

@@ -106,28 +106,8 @@ static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
     ccapi_free(ccfsm_stream_info);
 }
 
-ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
+static void clear_collection(ccapi_dp_collection_t * const dp_collection)
 {
-    ccimp_status_t ccimp_status;
-    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
-
-    if (dp_collection == NULL)
-    {
-        error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
-        goto done;
-    }
-
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
-    switch (ccimp_status)
-    {
-        case CCIMP_STATUS_OK:
-            break;
-        case CCIMP_STATUS_ERROR:
-        case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
-            goto done;
-    }
-
     if (dp_collection->ccapi_data_stream_list != NULL)
     {
         ccapi_dp_data_stream_t * ccapi_data_stream = dp_collection->ccapi_data_stream_list;
@@ -139,12 +119,36 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
 
             free_data_points_in_data_stream(ccapi_data_stream->ccfsm_data_stream);
             free_ccfsm_stream(ccapi_data_stream->ccfsm_data_stream);
-
             ccapi_free(ccapi_data_stream->arguments.list);
             ccapi_free(ccapi_data_stream);
             ccapi_data_stream = next_data_stream;
         }
     }
+}
+
+ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_collection)
+{
+    ccimp_status_t ccimp_status;
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+
+    if (dp_collection == NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
+        goto done;
+    }
+
+    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            goto done;
+    }
+
+    clear_collection(dp_collection);
 
     ccimp_status = ccapi_syncr_release(dp_collection->syncr);
     switch (ccimp_status)
@@ -200,9 +204,10 @@ static ccapi_bool_t valid_stream_id(char const * const stream_id)
         goto done;
     }
 
-    /*  [_\-\[\]:a-zA-Z0-9.!/]+ */
     while (stream_id[i] != '\0') {
-        if (!isalnum(stream_id[i]) && stream_id[i] != '_' && stream_id[i] != '-' && stream_id[i] != '.' && stream_id[i] != '/' && stream_id[i] != '[' && stream_id[i] != ']' && stream_id[i] != '!' && stream_id[i] != '+')
+        static char const * const valid_special = "_-./[]!+:";
+
+        if (!isalnum(stream_id[i]) && (strchr(valid_special, stream_id[i]) == NULL))
         {
             goto done;
         }
@@ -623,7 +628,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -749,7 +754,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
     {
         ccimp_status_t ccimp_status;
 
-        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -960,7 +965,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
     }
 
 
-    switch (ccapi_syncr_acquire(dp_collection->syncr))
+    switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
     {
         case CCIMP_STATUS_OK:
             break;
@@ -1017,4 +1022,205 @@ error:
     return error;
 }
 
+static void chain_collection_ccfsm_data_streams(ccapi_dp_collection_t * const dp_collection)
+{
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+
+    while (current_data_stream != NULL)
+    {
+        connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
+        ccapi_dp_data_stream_t * const next_data_stream = current_data_stream->next;
+
+        if (next_data_stream != NULL)
+        {
+            ccfsm_data_stream->next = next_data_stream->ccfsm_data_stream;
+        }
+
+        current_data_stream = current_data_stream->next;
+    }
+}
+
+static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_collection)
+{
+    ccapi_dp_data_stream_t * current_data_stream = dp_collection->ccapi_data_stream_list;
+
+    while (current_data_stream != NULL)
+    {
+        connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
+        ccapi_dp_data_stream_t * const next_data_stream = current_data_stream->next;
+
+        if (next_data_stream != NULL)
+        {
+            ccfsm_data_stream->next = next_data_stream->ccfsm_data_stream;
+        }
+
+        free_data_points_in_data_stream(ccfsm_data_stream);
+        ccfsm_data_stream->point = NULL;
+        current_data_stream = current_data_stream->next;
+    }
+}
+
+static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    ccapi_bool_t * p_transport_started = NULL;
+    ccapi_dp_transaction_info_t * transaction_info = NULL;
+    ccapi_bool_t collection_lock_acquired = CCAPI_FALSE;
+
+    if (dp_collection == NULL || dp_collection->ccapi_data_stream_list == NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
+        goto done;
+    }
+
+    if (!CCAPI_RUNNING(ccapi_data))
+    {
+        ccapi_logging_line("ccapi_dp_send_collection: CCAPI not started");
+        error = CCAPI_DP_ERROR_CCAPI_NOT_RUNNING;
+        goto done;
+    }
+
+    switch (transport)
+    {
+        case CCAPI_TRANSPORT_TCP:
+            p_transport_started = &ccapi_data->transport_tcp.connected;
+            break;
+        case CCAPI_TRANSPORT_UDP:
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+            p_transport_started = &ccapi_data->transport_udp.started;
+#endif
+            break;
+        case CCAPI_TRANSPORT_SMS:
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+            p_transport_started = &ccapi_data->transport_udp.started;
+#endif
+            break;
+    }
+
+    if (p_transport_started == NULL || *p_transport_started == CCAPI_FALSE)
+    {
+        ccapi_logging_line("ccapi_dp_send_collection: Transport not started");
+        error = CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED;
+        goto done;
+    }
+
+    {
+        connector_request_data_point_multiple_t ccfsm_request;
+        connector_status_t ccfsm_status;
+
+        transaction_info = ccapi_malloc(sizeof *transaction_info);
+        if (transaction_info == NULL)
+        {
+            error = CCAPI_DP_ERROR_INSUFFICIENT_MEMORY;
+            goto done;
+        }
+
+        transaction_info->hint = hint;
+        transaction_info->syncr =  ccapi_syncr_create();
+        if (transaction_info->syncr == NULL)
+        {
+            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+
+        {
+            switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
+            {
+                case CCIMP_STATUS_OK:
+                    collection_lock_acquired = CCAPI_TRUE;
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                    goto done;
+            }
+        }
+
+        chain_collection_ccfsm_data_streams(dp_collection);
+
+        ccfsm_request.request_id = NULL;
+        ccfsm_request.response_required = with_reply ? connector_true : connector_false;
+        ccfsm_request.timeout_in_seconds = timeout;
+        ccfsm_request.transport = ccapi_to_connector_transport(transport);
+        ccfsm_request.user_context = transaction_info;
+        ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
+
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point_multiple, &ccfsm_request);
+        if (ccfsm_status != connector_success)
+        {
+            ccapi_logging_line("ccapi_dp_send_collection: failure when calling connector_initiate_action, error %d", ccfsm_status);
+            error = CCAPI_DP_ERROR_INITIATE_ACTION_FAILED;
+            goto done;
+        }
+
+        {
+            ccimp_status_t ccimp_status = ccapi_syncr_acquire(transaction_info->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_BUSY:
+                case CCIMP_STATUS_ERROR:
+                    ccapi_logging_line("ccapi_dp_send_collection: lock_acquire failed");
+                    error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                    goto done;
+            }
+
+            if (transaction_info->response_error != CCAPI_DP_ERROR_NONE)
+            {
+                error = transaction_info->response_error;
+                goto done;
+            }
+
+            if (transaction_info->status != CCAPI_DP_ERROR_NONE)
+            {
+                error = transaction_info->status;
+                goto done;
+            }
+        }
+
+        free_data_points_from_collection(dp_collection);
+    }
+
+done:
+    if (transaction_info != NULL)
+    {
+        ccapi_free(transaction_info);
+    }
+
+    if (collection_lock_acquired)
+    {
+        switch (ccapi_syncr_release(dp_collection->syncr))
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_ERROR:
+            case CCIMP_STATUS_BUSY:
+                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+        }
+    }
+
+    return error;
+}
+
+ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
+{
+    return send_collection(ccapi_data, transport, dp_collection, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
+}
+
+ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return send_collection(ccapi_data, transport, dp_collection, CCAPI_TRUE, timeout, hint);
+}
+
+ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
+{
+    return ccxapi_dp_send_collection(ccapi_data_single_instance, transport, dp_collection);
+}
+
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return ccxapi_dp_send_collection_with_reply(ccapi_data_single_instance, transport, dp_collection , timeout, hint);
+}
 #endif
