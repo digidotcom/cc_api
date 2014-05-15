@@ -93,7 +93,9 @@ ccimp_status_t ccimp_network_udp_open(ccimp_network_open_t * const data)
     {
         fd=udp_create_socket();
         if (fd==-1)
+        {
             return CCIMP_STATUS_ERROR;
+        }
         status= udp_connect(fd, ip_addr);
         if ( status < 0)
         {
@@ -115,10 +117,14 @@ ccimp_status_t ccimp_network_udp_send(ccimp_network_send_t * const data)
     else
     {
         if (errno == EAGAIN)
+        {
             status = CCIMP_STATUS_BUSY;
+        }
         else
+        {
             printf("ccimp_network_udp_send: send() failed, errno %d\n", errno);
             status = CCIMP_STATUS_ERROR;
+        }
     }
     return status;
 }

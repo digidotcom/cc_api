@@ -816,12 +816,6 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
             }
             break;
         }
-
-        default:
-        {
-            ccimp_status = CCIMP_STATUS_ERROR;
-            break;
-        }
     }
 
 done:
@@ -850,8 +844,9 @@ connector_callback_status_t ccapi_network_udp_handler(connector_request_id_netwo
             ccimp_status = ccimp_network_udp_open(&ccimp_open_data);
 
             if(ccimp_status == CCIMP_STATUS_OK)
+            {
                 ccapi_data->transport_udp.started = CCAPI_TRUE;
-
+            }
             connector_open_data->handle = ccimp_open_data.handle;
 
             break;
@@ -895,6 +890,7 @@ connector_callback_status_t ccapi_network_udp_handler(connector_request_id_netwo
             connector_network_close_t * connector_close_data = data;
             ccimp_network_close_t close_data;
             connector_close_status_t const close_status = connector_close_data->status;
+
             close_data.handle = connector_close_data->handle;
             ccimp_status = ccimp_network_udp_close(&close_data);
 
@@ -930,12 +926,6 @@ connector_callback_status_t ccapi_network_udp_handler(connector_request_id_netwo
                 break;
 
             }
-            break;
-        }
-
-        default:
-        {
-            ccimp_status = CCIMP_STATUS_ERROR;
             break;
         }
     }

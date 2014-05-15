@@ -227,7 +227,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
     if (tcp_start == NULL)
     {
-        ccapi_logging_line("ccxapi_start_transport_tcp: invalid argument %p", (void *)tcp_start);
+        ccapi_logging_line("ccxapi_start_transport_tcp: invalid argument");
         error = CCAPI_TCP_START_ERROR_NULL_POINTER;
         goto done;
     }
@@ -285,7 +285,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_TCP_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(connector_status != connector_success, done);
                 break;
         }
     }
@@ -365,7 +365,7 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_TCP_STOP_ERROR_CCFSM;
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(connector_status != connector_success, done);
                 break;
         }
     }

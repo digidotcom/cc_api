@@ -195,6 +195,7 @@ void th_start_udp(void)
 {
     ccapi_udp_start_error_t error;
     ccapi_udp_info_t udp_start = {{0}};
+    ccapi_udp_close_cb_called = CCAPI_FALSE;
 
     udp_start.callback.close = ccapi_udp_close_cb;
     connector_transport_t connector_transport = connector_transport_udp;

@@ -31,26 +31,26 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
     ccapi_udp_start_error_t error = CCAPI_UDP_START_ERROR_NONE;
 
     if (!CCAPI_RUNNING(ccapi_data))
-        {
-            ccapi_logging_line("ccxapi_start_transport_udp: CCAPI not started");
+    {
+        ccapi_logging_line("ccxapi_start_transport_udp: CCAPI not started");
 
-            error = CCAPI_UDP_START_ERROR_CCAPI_STOPPED;
-            goto done;
-        }
+        error = CCAPI_UDP_START_ERROR_CCAPI_STOPPED;
+        goto done;
+    }
 
     if (udp_start == NULL)
-        {
-            ccapi_logging_line("ccxapi_start_transport_udp: invalid argument %p", (void *)udp_start);
-            error = CCAPI_UDP_START_ERROR_NULL_POINTER;
-            goto done;
-        }
+    {
+        ccapi_logging_line("ccxapi_start_transport_udp: invalid argument");
+        error = CCAPI_UDP_START_ERROR_NULL_POINTER;
+        goto done;
+    }
 
     if (udp_start->limit.max_sessions > CCAPI_SM_MAX_SESSIONS_LIMIT)
-        {
-            ccapi_logging_line("ccxapi_start_transport_udp: invalid argument MAX SESSIONS");
-            error = CCAPI_UDP_START_ERROR_MAX_SESSIONS;
-            goto done;
-        }
+    {
+        ccapi_logging_line("ccxapi_start_transport_udp: invalid argument MAX SESSIONS");
+        error = CCAPI_UDP_START_ERROR_MAX_SESSIONS;
+        goto done;
+    }
 
     ccapi_data->transport_udp.info = ccapi_malloc(sizeof *ccapi_data->transport_udp.info);
     if (!valid_malloc(ccapi_data->transport_udp.info, &error))
@@ -92,7 +92,7 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_UDP_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(connector_status != connector_success, done);
                 break;
         }
     }
@@ -135,7 +135,7 @@ ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data
 {
     ccapi_udp_stop_error_t error = CCAPI_UDP_STOP_ERROR_NONE;
 
-    if ((ccapi_data == NULL)|| !ccapi_data->transport_udp.started)
+    if (!CCAPI_RUNNING(ccapi_data)|| !ccapi_data->transport_udp.started)
     {
         error = CCAPI_UDP_STOP_ERROR_NOT_STARTED;
         goto done;
@@ -172,7 +172,7 @@ ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_UDP_STOP_ERROR_CCFSM;
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(connector_status != connector_success, done);
                 break;
         }
     }
