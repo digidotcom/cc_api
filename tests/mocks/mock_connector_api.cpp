@@ -285,40 +285,82 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 {
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(handle);
     ccapi_data_t * ccapi_data = (ccapi_data_t *)mock_info->ccapi_handle;
-
     assert(ccapi_data != NULL);
-
     switch (request)
     {
         case connector_initiate_transport_stop:
         {
+            connector_initiate_stop_request_t * closedata = (connector_initiate_stop_request_t *)request_data;
             mock("connector_initiate_action").actualCall("connector_initiate_action")
                     .withParameter("handle", handle)
                     .withParameter("request", request)
                     .withParameterOfType("connector_initiate_stop_request_t", "request_data", (void *)request_data);
-            if (ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_stop_info.stop_transport)
+            switch(closedata->transport)
             {
-                 connector_request_id_t request_id;
-                 connector_initiate_stop_request_t stop_status = {connector_transport_tcp, connector_wait_sessions_complete, NULL};
+                case connector_transport_tcp:
+                    if (ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_stop_info.stop_transport)
+                    {
+                        connector_request_id_t request_id;
+                        connector_initiate_stop_request_t stop_status = {connector_transport_tcp, connector_wait_sessions_complete, NULL};
 
-                 request_id.status_request = connector_request_id_status_stop_completed;
-                 ccapi_connector_callback(connector_class_id_status, request_id, &stop_status, (void *)ccapi_data);
+                        request_id.status_request = connector_request_id_status_stop_completed;
+                        ccapi_connector_callback(connector_class_id_status, request_id, &stop_status, (void *)ccapi_data);
+                    }
+                    break;
+#if (defined CONNECTOR_TRANSPORT_UDP)
+                case connector_transport_udp:
+                    if ((ccapi_data->transport_udp.started) && mock_info->connector_initiate_transport_stop_info.stop_transport)
+                    {
+                        connector_request_id_t request_id;
+                        connector_initiate_stop_request_t stop_status = {connector_transport_udp, connector_wait_sessions_complete, NULL};
+
+                        request_id.status_request = connector_request_id_status_stop_completed;
+                        ccapi_connector_callback(connector_class_id_status, request_id, &stop_status, (void *)ccapi_data);
+                    }
+                    break;
+#endif
+#if (defined CONNECTOR_TRANSPORT_SMS)
+                case connector_transport_sms:
+                    break;
+#endif
+                case connector_transport_all:
+                    break;
             }
             break;
         }
         case connector_initiate_transport_start:
         {
+            connector_transport_t * transport = (connector_transport_t *)request_data;
             mock("connector_initiate_action").actualCall("connector_initiate_action")
                     .withParameter("handle", handle)
                     .withParameter("request", request)
                     .withParameterOfType("connector_transport_t", "request_data", (void *)request_data);
-            if (!ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_start_info.init_transport)
+            switch(*transport)
             {
-                 connector_request_id_t request_id;
-                 connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
+                case connector_transport_tcp:
+                    if (!ccapi_data->transport_tcp.connected && mock_info->connector_initiate_transport_start_info.init_transport)
+                    {
+                        connector_request_id_t request_id;
+                        connector_status_tcp_event_t tcp_status = {connector_tcp_communication_started};
 
-                 request_id.status_request = connector_request_id_status_tcp;
-                 ccapi_connector_callback(connector_class_id_status, request_id, &tcp_status, (void *)ccapi_data);
+                        request_id.status_request = connector_request_id_status_tcp;
+                        ccapi_connector_callback(connector_class_id_status, request_id, &tcp_status, (void *)ccapi_data);
+                    }
+                    break;
+#if (defined CONNECTOR_TRANSPORT_UDP)
+                case connector_transport_udp:
+                    if (!ccapi_data->transport_udp.started && mock_info->connector_initiate_transport_start_info.init_transport)
+                    {
+                        ccapi_data->transport_udp.started = CCAPI_TRUE;
+                    }
+                    break;
+#endif
+#if (defined CONNECTOR_TRANSPORT_SMS)
+                case connector_transport_sms:
+                    break;
+#endif
+                case connector_transport_all:
+                    break;
             }
             break;
         }

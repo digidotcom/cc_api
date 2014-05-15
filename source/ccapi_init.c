@@ -188,6 +188,9 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
         goto done;
 
     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+    ccapi_data->transport_udp.started = CCAPI_FALSE;
+#endif
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);
