@@ -101,11 +101,13 @@ typedef struct {
     } transport_tcp;
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     struct {
+        ccapi_udp_info_t * info;
         ccapi_bool_t started;
     } transport_udp;
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     struct {
+        ccapi_sms_info_t * info;
         ccapi_bool_t started;
     } transport_sms;
 #endif

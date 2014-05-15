@@ -43,4 +43,9 @@ ccimp_status_t ccimp_network_tcp_send(ccimp_network_send_t * const data);
 ccimp_status_t ccimp_network_tcp_receive(ccimp_network_receive_t * const data);
 ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const data);
 
+ccimp_status_t ccimp_network_udp_open(ccimp_network_open_t * const data);
+ccimp_status_t ccimp_network_udp_send(ccimp_network_send_t * const data);
+ccimp_status_t ccimp_network_udp_receive(ccimp_network_receive_t * const data);
+ccimp_status_t ccimp_network_udp_close(ccimp_network_close_t * const data);
+
 #endif /* CCIMP_NETWORK_H_ */

@@ -11,7 +11,7 @@
 /* Cloud Connector Configuration Categories */
 
 /* Transports */
-#undef  CCIMP_UDP_TRANSPORT_ENABLED
+#define CCIMP_UDP_TRANSPORT_ENABLED
 #undef  CCIMP_SMS_TRANSPORT_ENABLED
 
 /* Services */

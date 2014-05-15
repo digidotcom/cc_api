@@ -19,6 +19,28 @@ ccapi_keepalive_status_t ccapi_tcp_keepalives_cb_argument;
 ccapi_bool_t ccapi_tcp_close_cb_called;
 ccapi_tcp_close_cause_t ccapi_tcp_close_cb_argument;
 
+
+ccapi_bool_t ccapi_udp_close_cb_called;
+ccapi_udp_close_cause_t ccapi_udp_close_cb_argument;
+
+static ccapi_bool_t ccapi_udp_close_cb(ccapi_udp_close_cause_t cause)
+{
+    ccapi_bool_t reconnect;
+    ccapi_udp_close_cb_argument = cause;
+    ccapi_udp_close_cb_called = CCAPI_TRUE;
+    switch (cause)
+    {
+        case CCAPI_UDP_CLOSE_DISCONNECTED:
+            reconnect = CCAPI_TRUE;
+            break;
+
+        case CCAPI_UDP_CLOSE_DATA_ERROR:
+            reconnect = CCAPI_FALSE;
+            break;
+    }
+    return reconnect;
+}
+
 static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 {
     ccapi_bool_t reconnect;
@@ -41,6 +63,7 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     }
     return reconnect;
 }
+
 
 static void ccapi_tcp_keepalives_cb(ccapi_keepalive_status_t status)
 {
@@ -166,6 +189,19 @@ void th_start_tcp_lan_ipv6_password_keepalives(void)
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,connector_success);
     tcp_error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, tcp_error);
+}
+
+void th_start_udp(void)
+{
+    ccapi_udp_start_error_t error;
+    ccapi_udp_info_t udp_start = {{0}};
+
+    udp_start.callback.close = ccapi_udp_close_cb;
+    connector_transport_t connector_transport = connector_transport_udp;
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    error = ccapi_start_transport_udp(&udp_start);
+    CHECK_EQUAL(CCAPI_UDP_START_ERROR_NONE, error);
 }
 
 static void * thread_wrapper(void * argument)
