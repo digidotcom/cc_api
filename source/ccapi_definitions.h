@@ -109,8 +109,7 @@ typedef struct {
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     struct {
-        /*This thing does not exist yet */
-        /* ccapi_sms_info_t * info;*/
+        ccapi_sms_info_t * info;
         ccapi_bool_t started;
     } transport_sms;
 #endif

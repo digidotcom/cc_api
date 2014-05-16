@@ -51,7 +51,7 @@ TEST(test_ccapi_udp_start_sanity_checks, testDefaults)
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
     error = ccapi_start_transport_udp(&udp_start);
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_NONE, error);
-    CHECK_EQUAL(CCAPI_SM_MAX_SESSIONS_DEFAULT, ccapi_data_single_instance->transport_udp.info->limit.max_sessions);
+    CHECK_EQUAL(CCAPI_SM_UDP_MAX_SESSIONS_DEFAULT, ccapi_data_single_instance->transport_udp.info->limit.max_sessions);
 }
 
 TEST(test_ccapi_udp_start_sanity_checks, testMaxSessions)
