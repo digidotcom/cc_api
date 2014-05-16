@@ -137,7 +137,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -628,7 +628,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -754,7 +754,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
     {
         ccimp_status_t ccimp_status;
 
-        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -966,7 +966,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
     }
 
 
-    switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
+    switch (ccapi_syncr_acquire(dp_collection->syncr))
     {
         case CCIMP_STATUS_OK:
             break;
@@ -1124,7 +1124,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
             goto done;
         }
 
-        switch (ccapi_syncr_acquire(dp_collection->syncr, OS_SYNCR_ACQUIRE_INFINITE))
+        switch (ccapi_syncr_acquire(dp_collection->syncr))
         {
             case CCIMP_STATUS_OK:
                 collection_lock_acquired = CCAPI_TRUE;
@@ -1153,7 +1153,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         {
-            ccimp_status_t ccimp_status = ccapi_syncr_acquire(transaction_info->syncr, OS_SYNCR_ACQUIRE_INFINITE);
+            ccimp_status_t ccimp_status = ccapi_syncr_acquire(transaction_info->syncr);
 
             switch (ccimp_status)
             {

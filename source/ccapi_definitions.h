@@ -198,7 +198,7 @@ char * ccapi_strdup(char const * const string);
 
 void * ccapi_syncr_create(void);
 void * ccapi_syncr_create_and_release(void);
-ccimp_status_t ccapi_syncr_acquire(void * syncr_object, unsigned long const timeout);
+ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler);

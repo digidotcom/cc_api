@@ -17,7 +17,7 @@ static ccimp_status_t ccapi_logging_lock_acquire(void)
     
     if (logging_syncr != NULL)
     {
-        status = ccapi_syncr_acquire(logging_syncr, OS_SYNCR_ACQUIRE_INFINITE);
+        status = ccapi_syncr_acquire(logging_syncr);
     }
 
     return status;

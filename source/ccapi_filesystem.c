@@ -8,7 +8,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -212,7 +212,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr, OS_SYNCR_ACQUIRE_INFINITE);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
