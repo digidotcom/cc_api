@@ -348,7 +348,6 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
             ccapi_data_single_instance->service.file_system.imp_context = NULL;
     }
 
-    {
         ccimp_fs_file_open_t ccimp_open_data;
 
         ccimp_open_data.errnum.pointer = NULL;
@@ -358,9 +357,7 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
         ccimp_open_data.path = LOCAL_PATH;
 
         Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
-    }
 
-    {
         ccimp_fs_file_read_t ccimp_read_data;
 
         ccimp_read_data.errnum.pointer = NULL;
@@ -370,7 +367,6 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
         ccimp_read_data.bytes_used = 0;
 
         Mock_ccimp_fs_file_read_expectAndReturn(&ccimp_read_data, CCIMP_STATUS_ERROR);
-    }
 
     error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, CLOUD_PATH, CONTENT_TYPE, CCAPI_SEND_BEHAVIOR_OVERWRITE, 0, NULL);
     CHECK_EQUAL(CCAPI_SEND_ERROR_ACCESSING_FILE, error);
