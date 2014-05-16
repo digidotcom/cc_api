@@ -85,6 +85,7 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
     if (response_buffer_info != NULL)
     {
         response_buffer_info->buffer = malloc(200);
+        printf("app_receive_data_cb: Providing response in buffer at %p\n", response_buffer_info->buffer);
 
         if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
         {
@@ -99,6 +100,19 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
     return;
 }
 
+static void app_receive_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+{
+    printf("app_receive_status_cb: target = \"%s\". transport = %d. Error = %d\n", target, transport, receive_error);
+
+    if (response_buffer_info != NULL)
+    {
+        printf("Freeing response buffer at %p\n", response_buffer_info->buffer);
+        free(response_buffer_info->buffer);
+    }
+
+    (void)response_buffer_info;
+}
+
 int main (void)
 {
     ccapi_start_t start = {0};
@@ -107,7 +121,7 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    ccapi_receive_service_t receive_service = {app_receive_accept_cb, app_receive_data_cb, NULL};
+    ccapi_receive_service_t receive_service = {app_receive_accept_cb, app_receive_data_cb, app_receive_status_cb};
 
     fill_start_structure_with_good_parameters(&start);
     start.service.receive = &receive_service;

@@ -1202,7 +1202,47 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
         svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
     }
 
-    ccapi_logging_line("ccapi_process_device_request_status for target = \"%s\"\n", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_status for target = \"%s\"", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
+
+    /* Prior reported errors by ccapi have priority over the ones reported by the cloud */
+    if (svc_receive->receive_error == CCAPI_RECEIVE_ERROR_NONE)
+    {
+        switch (status_ptr->status)
+        {
+            case connector_data_service_status_complete:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
+                break;
+            case connector_data_service_status_cancel:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_CANCEL;
+                break;
+            case connector_data_service_status_timeout:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT;
+                break;
+            case connector_data_service_status_session_error:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR;
+                ccapi_logging_line("ccapi_process_device_request_status: session_error=%d", status_ptr->session_error);
+                break;
+            case connector_data_service_status_COUNT:
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+    }
+
+    /* Call the user so he can free allocated response memory and handle errors  */
+    if (ccapi_data->service.receive.user_callbacks.status_cb != NULL)
+    {
+       ccapi_data->service.receive.user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
+                           svc_receive->response_required == CCAPI_TRUE && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
+                           svc_receive->receive_error);
+    }
+
+    /* Free resources */
+    if (svc_receive->target != NULL)
+    {
+        ccapi_free(svc_receive->target);
+    }
+    ccapi_free(svc_receive);
 
     connector_status = connector_callback_continue;
 
