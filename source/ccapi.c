@@ -897,7 +897,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
     }
     else
     {
-        ccapi_logging_line("process_send_data_request: no app data set to send\n");
+        ccapi_logging_line("process_send_data_request: no app data set to send");
     }
 
 done:
@@ -911,7 +911,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
-    ccapi_logging_line("Received %s response from Device Cloud\n", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
+    ccapi_logging_line("Received %s response from Device Cloud", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
 
     switch (resp_ptr->response)
     {
@@ -934,7 +934,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 
     if (resp_ptr->hint != NULL)
     {
-        ccapi_logging_line("Device Cloud response hint %s\n", resp_ptr->hint);
+        ccapi_logging_line("Device Cloud response hint %s", resp_ptr->hint);
     }
 
     if (svc_send->hint != NULL && resp_ptr->hint != NULL)
@@ -952,7 +952,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ccapi_logging_line("Data service status: %d\n", status_ptr->status);
+    ccapi_logging_line("ccapi_process_send_data_status: %d", status_ptr->status);
    
     switch (status_ptr->status)
     {
@@ -967,7 +967,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
             break;
         case connector_data_service_status_session_error:
             svc_send->status_error = CCAPI_SEND_ERROR_STATUS_SESSION_ERROR;
-            ccapi_logging_line("Data service status: session_error=%d\n", status_ptr->session_error);
+            ccapi_logging_line("ccapi_process_send_data_status: session_error=%d", status_ptr->session_error);
             break;
         case connector_data_service_status_COUNT:
             ASSERT_MSG_GOTO(0, done);
@@ -1005,7 +1005,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
     ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
 
-    ccapi_logging_line("ccapi_process_device_request_target for target = \"%s\"\n", target_ptr->target);
+    ccapi_logging_line("ccapi_process_device_request_target for target = \"%s\"", target_ptr->target);
 
     /* TODO: Check if it's a registered target */
 
@@ -1095,7 +1095,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
     }
 
-    ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"\n", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"", svc_receive->target);
 
     if (ccapi_data->config.receive_supported != CCAPI_TRUE)
     {
@@ -1111,6 +1111,8 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         ccimp_realloc_data.ptr = svc_receive->request_buffer_info.buffer;
         if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
         {
+            ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+
             svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
             goto done;
         }
@@ -1125,7 +1127,8 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
         /* We just assert as this was already checked in ccapi_start */
         ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
- 
+
+        /* Pass data to the user and get possible response from user */ 
         {
             ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
                                                                &svc_receive->request_buffer_info, 
@@ -1161,7 +1164,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
         svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
     }
 
-    ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"\n", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"", svc_receive->target);
 
     if (svc_receive->response_required == CCAPI_FALSE)
     {
