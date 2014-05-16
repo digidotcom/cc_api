@@ -1133,6 +1133,11 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                                                                svc_receive->receive_error);
 
             ccapi_free(svc_receive->request_buffer_info.buffer);
+
+            if (svc_receive->response_required == CCAPI_TRUE)
+            {
+                memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
+            }
         }
     }
 
@@ -1142,21 +1147,66 @@ done:
     return connector_status;
 }
 
-static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr)
-{
-    connector_callback_status_t connector_status = connector_callback_error;
-
-    (void)status_ptr;
-
-    return connector_status;
-}
-
 static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr)
 {
     connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
 
-    (void)reply_ptr;
+    if (reply_ptr->user_context == NULL)
+    {
+        ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
+    }
+    else
+    {
+        svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+    }
 
+    ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"\n", svc_receive->target);
+
+    if (svc_receive->response_required == CCAPI_FALSE)
+    {
+        goto done;
+    }
+
+    {
+        size_t bytes_to_send = svc_receive->response_processing.length > reply_ptr->bytes_available ? 
+                                                 reply_ptr->bytes_available : svc_receive->response_processing.length;
+
+        memcpy(reply_ptr->buffer, svc_receive->response_processing.buffer, bytes_to_send);
+        svc_receive->response_processing.buffer = ((char *)svc_receive->response_processing.buffer) + bytes_to_send;
+ 
+        reply_ptr->bytes_used = bytes_to_send;
+        svc_receive->response_processing.length -= reply_ptr->bytes_used;
+        reply_ptr->more_data = (svc_receive->response_processing.length > 0) ? connector_true : connector_false;
+    }
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
+static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
+
+    (void)ccapi_data;
+
+    if (status_ptr->user_context == NULL)
+    {
+        ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
+    }
+    else
+    {
+        svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+    }
+
+    ccapi_logging_line("ccapi_process_device_request_status for target = \"%s\"\n", svc_receive->target);
+
+    connector_status = connector_callback_continue;
+
+done:
     return connector_status;
 }
 
@@ -1197,21 +1247,12 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
             connector_status = ccapi_process_device_request_target(target_ptr, ccapi_data);
 
             break;
-        }
-            
+        }           
         case connector_request_id_data_service_receive_data:
         {
             connector_data_service_receive_data_t * const data_ptr = data;
 
             connector_status = ccapi_process_device_request_data(data_ptr, ccapi_data);
-
-            break;
-        }
-        case connector_request_id_data_service_receive_status:
-        {
-            connector_data_service_status_t const * const status_ptr = data;
-
-            connector_status = ccapi_process_device_request_status(status_ptr);
 
             break;
         }
@@ -1223,7 +1264,14 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
 
             break;
         }
+        case connector_request_id_data_service_receive_status:
+        {
+            connector_data_service_status_t const * const status_ptr = data;
 
+            connector_status = ccapi_process_device_request_status(status_ptr, ccapi_data);
+
+            break;
+        }
         case connector_request_id_data_service_receive_reply_length:
         {
             break;
