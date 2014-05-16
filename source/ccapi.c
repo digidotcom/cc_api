@@ -1131,6 +1131,8 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                                                                &svc_receive->request_buffer_info, 
                                                                svc_receive->response_required == CCAPI_TRUE ? &svc_receive->response_buffer_info : NULL, 
                                                                svc_receive->receive_error);
+
+            ccapi_free(svc_receive->request_buffer_info.buffer);
         }
     }
 

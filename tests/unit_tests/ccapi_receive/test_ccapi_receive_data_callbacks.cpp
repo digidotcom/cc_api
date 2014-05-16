@@ -4,10 +4,14 @@
 #define DATA  { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f }
 
+#define DATA2 { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
+                0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, \
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, \
+                0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f }
+
 static char const * ccapi_receive_data_expected_target = NULL;
 static ccapi_transport_t ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
 static ccapi_bool_t ccapi_receive_data_cb_called = CCAPI_FALSE;
-static ccapi_bool_t ccapi_receive_data_expected_request_not_null = CCAPI_FALSE;
 
 static ccapi_buffer_info_t * ccapi_receive_data_expected_request = NULL;
 static ccapi_buffer_info_t * ccapi_receive_data_expected_response = NULL;
@@ -18,7 +22,10 @@ static void test_receive_data_cb(char const * const target, ccapi_transport_t co
 {
     STRCMP_EQUAL(ccapi_receive_data_expected_target, target);
     CHECK_EQUAL(ccapi_receive_data_expected_transport, transport);
-    CHECK_EQUAL(ccapi_receive_data_expected_request, request_buffer_info);
+
+    CHECK_EQUAL(ccapi_receive_data_expected_request->length, request_buffer_info->length);
+    CHECK(memcmp(ccapi_receive_data_expected_request->buffer, request_buffer_info->buffer, request_buffer_info->length) == 0);
+
     CHECK_EQUAL(ccapi_receive_data_expected_response, response_buffer_info);
     CHECK_EQUAL(ccapi_receive_data_expected_receive_error, receive_error);
 
@@ -174,7 +181,6 @@ TEST(test_ccapi_receive_data_callback, testOK_BufferNULL)
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
-    ccapi_receive_data_expected_request_not_null = CCAPI_TRUE;
     ccapi_receive_data_expected_request = &svc_receive.request_buffer_info;
     ccapi_receive_data_expected_response = &svc_receive.response_buffer_info;
     ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
@@ -207,16 +213,19 @@ TEST(test_ccapi_receive_data_callback, testOK_OneCall)
     connector_callback_status_t status;
 
     uint8_t const data[] = DATA;
+    ccapi_buffer_info_t expected_request;
 
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
     svc_receive.response_required = CCAPI_TRUE;
     
+
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
-    ccapi_receive_data_expected_request_not_null = CCAPI_TRUE;
-    ccapi_receive_data_expected_request = &svc_receive.request_buffer_info;
+    expected_request.buffer = (void *)data;
+    expected_request.length = sizeof data;
+    ccapi_receive_data_expected_request = &expected_request;
     ccapi_receive_data_expected_response = &svc_receive.response_buffer_info;
     ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
@@ -235,7 +244,6 @@ TEST(test_ccapi_receive_data_callback, testOK_OneCall)
         CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
         CHECK(svc_receive.request_buffer_info.buffer != NULL);
         CHECK(svc_receive.request_buffer_info.length == sizeof data);
-        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
@@ -248,6 +256,8 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoCall)
     connector_callback_status_t status;
 
     uint8_t const data[] = DATA;
+    uint8_t const data2[] = DATA2;
+    ccapi_buffer_info_t expected_request;
 
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
@@ -256,8 +266,9 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoCall)
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
-    ccapi_receive_data_expected_request_not_null = CCAPI_TRUE;
-    ccapi_receive_data_expected_request = &svc_receive.request_buffer_info;
+    expected_request.buffer = (void *)data2;
+    expected_request.length = sizeof data2;
+    ccapi_receive_data_expected_request = &expected_request;
     ccapi_receive_data_expected_response = &svc_receive.response_buffer_info;
     ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
@@ -287,8 +298,6 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoCall)
         CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
         CHECK(svc_receive.request_buffer_info.buffer != NULL);
         CHECK(svc_receive.request_buffer_info.length == 2 * sizeof data);
-        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0);
-        CHECK(memcmp(((uint8_t*)svc_receive.request_buffer_info.buffer) + sizeof data, data, sizeof data) == 0);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
@@ -301,6 +310,7 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
     connector_callback_status_t status;
 
     uint8_t const data[] = DATA;
+    ccapi_buffer_info_t expected_request;
 
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
@@ -309,8 +319,9 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
     
     ccapi_receive_data_expected_target = TEST_TARGET;
     ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
-    ccapi_receive_data_expected_request_not_null = CCAPI_TRUE;
-    ccapi_receive_data_expected_request = &svc_receive.request_buffer_info;
+    expected_request.buffer = (void *)data;
+    expected_request.length = sizeof data;
+    ccapi_receive_data_expected_request = &expected_request;
     ccapi_receive_data_expected_response = NULL;
     ccapi_receive_data_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
@@ -329,7 +340,6 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
         CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
         CHECK(svc_receive.request_buffer_info.buffer != NULL);
         CHECK(svc_receive.request_buffer_info.length == sizeof data);
-        CHECK(memcmp(svc_receive.request_buffer_info.buffer, data, sizeof data) == 0);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
