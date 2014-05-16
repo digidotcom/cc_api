@@ -348,7 +348,6 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
             ccapi_data_single_instance->service.file_system.imp_context = NULL;
     }
 
-    {
         ccimp_fs_file_open_t ccimp_open_data;
 
         ccimp_open_data.errnum.pointer = NULL;
@@ -358,9 +357,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
         ccimp_open_data.path = LOCAL_PATH;
 
         Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_open_data, CCIMP_STATUS_OK);
-    }
 
-    {
         ccimp_fs_file_read_t ccimp_read_data;
 
         ccimp_read_data.errnum.pointer = NULL;
@@ -370,7 +367,6 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
         ccimp_read_data.bytes_used = 0;
 
         Mock_ccimp_fs_file_read_expectAndReturn(&ccimp_read_data, CCIMP_STATUS_ERROR);
-    }
 
     error = ccapi_dp_binary_send_file_with_reply(CCAPI_TRANSPORT_TCP, LOCAL_PATH, STREAM_ID, 0, NULL);
     CHECK_EQUAL(CCAPI_DP_B_ERROR_ACCESSING_FILE, error);
