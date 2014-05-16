@@ -357,6 +357,10 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 #endif
 #if (defined CONNECTOR_TRANSPORT_SMS)
                 case connector_transport_sms:
+                    if (!ccapi_data->transport_sms.started && mock_info->connector_initiate_transport_start_info.init_transport)
+                    {
+                        ccapi_data->transport_sms.started = CCAPI_TRUE;
+                    }
                     break;
 #endif
                 case connector_transport_all:
