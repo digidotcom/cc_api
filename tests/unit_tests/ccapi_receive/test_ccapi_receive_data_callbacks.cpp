@@ -121,7 +121,7 @@ TEST_GROUP(test_ccapi_receive_data_callback_MissingDataCallback)
         clean_ccapi_receive_data();
 
         error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_INVALID_RECEIVE_CALLBACKS);
+        CHECK(error == CCAPI_START_ERROR_INVALID_RECEIVE_STATUS_CB);
     }
 
     void teardown()
