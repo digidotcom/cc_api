@@ -844,6 +844,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
     ccfsm_datapoint->location.type = connector_location_type_ignore;
     ccfsm_datapoint->time.source = connector_time_cloud;
 
+    ccfsm_datapoint->description = NULL;
     ccfsm_datapoint->data.element.native.string_value = NULL;
     ccfsm_datapoint->time.value.iso8601_string = NULL;
 

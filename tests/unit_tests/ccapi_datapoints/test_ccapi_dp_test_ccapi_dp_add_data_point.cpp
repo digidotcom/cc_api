@@ -70,6 +70,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddEpochInt32LocQual)
     CHECK(connector_data_point_t::time::connector_time_local_epoch_fractional == ccfsm_data_point->time.source);
     CHECK_EQUAL(temperature, ccfsm_data_point->data.element.native.int_value);
     CHECK_EQUAL(quality, ccfsm_data_point->quality.value);
+    CHECK(NULL == ccfsm_data_point->description);
 
     CHECK_EQUAL(location.latitude, ccfsm_data_point->location.value.native.latitude);
     CHECK_EQUAL(location.longitude, ccfsm_data_point->location.value.native.longitude);
@@ -103,6 +104,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddInt64LocEpochMS)
     CHECK(connector_data_point_t::location::connector_location_type_native == ccfsm_data_point->location.type);
     CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
     CHECK(connector_data_point_t::time::connector_time_local_epoch_whole == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
 
     CHECK_EQUAL(integer, ccfsm_data_point->data.element.native.long_value);
 
@@ -133,6 +135,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddFloat)
     CHECK(connector_data_point_t::location::connector_location_type_ignore == ccfsm_data_point->location.type);
     CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
     CHECK(connector_data_point_t::time::connector_time_cloud == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
 
     CHECK_EQUAL(flt_number, ccfsm_data_point->data.element.native.float_value);
 }
@@ -157,6 +160,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddDouble)
     CHECK(connector_data_point_t::location::connector_location_type_ignore == ccfsm_data_point->location.type);
     CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
     CHECK(connector_data_point_t::time::connector_time_cloud == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
 
     CHECK_EQUAL(double_number, ccfsm_data_point->data.element.native.double_value);
 }
@@ -189,6 +193,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddStringTimeISO)
     CHECK(connector_data_point_t::location::connector_location_type_ignore == ccfsm_data_point->location.type);
     CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
     CHECK(connector_data_point_t::time::connector_time_local_iso8601 == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
 
     STRCMP_EQUAL(string_data, ccfsm_data_point->data.element.native.string_value);
     STRCMP_EQUAL(timestamp_iso, ccfsm_data_point->time.value.iso8601_string);
