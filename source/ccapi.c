@@ -1037,7 +1037,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
            means that ccapi is running. That error will be used in add_receive_target()
          */
 
-        if (ccapi_data->config.receive_supported != CCAPI_TRUE)
+        if (!ccapi_data->config.receive_supported)
         {
             svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
             goto done;
@@ -1058,7 +1058,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             }
             else
             {
-                /* TODO: What we do if user didn't provide an accept callback? We accept it always? */
+                /* User didn't provide an accept callback. We accept it always */
                 user_accepts = CCAPI_TRUE;
             }
 
@@ -1088,7 +1088,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
     ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"", svc_receive->target);
 
-    if (ccapi_data->config.receive_supported != CCAPI_TRUE)
+    if (!ccapi_data->config.receive_supported)
     {
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
         goto done;
@@ -1109,26 +1109,26 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         }
         svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
  
-        memcpy(&((uint8_t*)svc_receive->request_buffer_info.buffer)[svc_receive->request_buffer_info.length], data_ptr->buffer, data_ptr->bytes_used);
+        {
+            uint8_t * const dest_addr = (uint8_t *)svc_receive->request_buffer_info.buffer + svc_receive->request_buffer_info.length;
+            memcpy(dest_addr, data_ptr->buffer, data_ptr->bytes_used);
+        }
         svc_receive->request_buffer_info.length += data_ptr->bytes_used;
     }
 
     if (data_ptr->more_data == connector_false)
     {
-
-        /* We just assert as this was already checked in ccapi_start */
         ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
 
         /* Pass data to the user and get possible response from user */ 
         {
             ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
                                                                &svc_receive->request_buffer_info, 
-                                                               svc_receive->response_required == CCAPI_TRUE ? &svc_receive->response_buffer_info : NULL, 
+                                                               svc_receive->response_required ? &svc_receive->response_buffer_info : NULL, 
                                                                svc_receive->receive_error);
 
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
-            if (svc_receive->response_required == CCAPI_TRUE)
             {
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
@@ -1152,7 +1152,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
 
     ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"", svc_receive->target);
 
-    if (svc_receive->response_required == CCAPI_FALSE)
+    if (!svc_receive->response_required)
     {
         goto done;
     }
@@ -1166,7 +1166,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
  
         reply_ptr->bytes_used = bytes_to_send;
         svc_receive->response_processing.length -= reply_ptr->bytes_used;
-        reply_ptr->more_data = (svc_receive->response_processing.length > 0) ? connector_true : connector_false;
+        reply_ptr->more_data = svc_receive->response_processing.length > 0 ? connector_true : connector_false;
     }
 
     connector_status = connector_callback_continue;
@@ -1215,7 +1215,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     if (ccapi_data->config.receive_supported && ccapi_data->service.receive.user_callbacks.status_cb != NULL)
     {
        ccapi_data->service.receive.user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
-                           svc_receive->response_required == CCAPI_TRUE && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
+                           svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
     }
 

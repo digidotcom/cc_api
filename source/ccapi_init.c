@@ -184,7 +184,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
     {
-        /* TODO: Check if we want other callbacks compulsory here */
+        /* Only data_cb is compulsory */
         if (start->service.receive->data_cb == NULL)
         {
             error = CCAPI_START_ERROR_INVALID_RECEIVE_STATUS_CB;
