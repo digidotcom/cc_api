@@ -78,10 +78,18 @@ void * ccapi_malloc(size_t size)
 ccimp_status_t ccapi_free(void * ptr)
 {
     ccimp_os_free_t free_info;
+    ccimp_status_t ccimp_status = CCIMP_STATUS_OK;
+
+    if (ptr == NULL)
+    {
+        goto done;
+    }
 
     free_info.ptr = ptr;
+    ccimp_status = ccimp_os_free(&free_info);
 
-    return ccimp_os_free(&free_info);
+done:
+    return ccimp_status;
 }
 
 

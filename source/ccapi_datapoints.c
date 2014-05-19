@@ -54,10 +54,7 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
         {
             case connector_data_point_type_string:
             {
-                if (data_point->data.element.native.string_value != NULL)
-                {
-                    ccapi_free(data_point->data.element.native.string_value);
-                }
+                ccapi_free(data_point->data.element.native.string_value);
                 break;
             }
             case connector_data_point_type_integer:
@@ -72,10 +69,7 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
         {
             case connector_time_local_iso8601:
             {
-                if (data_point->time.value.iso8601_string != NULL)
-                {
-                    ccapi_free(data_point->time.value.iso8601_string);
-                }
+                ccapi_free(data_point->time.value.iso8601_string);
                 break;
             }
             case connector_time_cloud:
@@ -91,19 +85,13 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
 
 static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
 {
-    if (ccfsm_stream_info->stream_id != NULL)
+    if (ccfsm_stream_info != NULL)
     {
         ccapi_free(ccfsm_stream_info->stream_id);
-    }
-    if (ccfsm_stream_info->unit != NULL)
-    {
         ccapi_free(ccfsm_stream_info->unit);
-    }
-    if (ccfsm_stream_info->forward_to != NULL)
-    {
         ccapi_free(ccfsm_stream_info->forward_to);
+        ccapi_free(ccfsm_stream_info);
     }
-    ccapi_free(ccfsm_stream_info);
 }
 
 static void clear_collection(ccapi_dp_collection_t * const dp_collection)
@@ -478,10 +466,7 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
 
 
 done:
-    if (format_string_copy != NULL)
-    {
-        ccapi_free(format_string_copy);
-    }
+    ccapi_free(format_string_copy);
 
     return error;
 }
@@ -536,30 +521,16 @@ static void free_ccapi_data_stream(ccapi_dp_data_stream_t * const ccapi_data_str
     ASSERT(ccapi_data_stream->ccfsm_data_stream != NULL);
     ccapi_free(ccapi_data_stream->arguments.list);
     ccapi_free(ccapi_data_stream->ccfsm_data_stream->stream_id);
-
-    if (ccapi_data_stream->ccfsm_data_stream->unit != NULL)
-    {
-        ccapi_free(ccapi_data_stream->ccfsm_data_stream->unit);
-    }
-    if (ccapi_data_stream->ccfsm_data_stream->forward_to)
-    {
-        ccapi_free(ccapi_data_stream->ccfsm_data_stream->forward_to);
-    }
+    ccapi_free(ccapi_data_stream->ccfsm_data_stream->unit);
+    ccapi_free(ccapi_data_stream->ccfsm_data_stream->forward_to);
     ccapi_free(ccapi_data_stream->ccfsm_data_stream);
     ccapi_free(ccapi_data_stream);
 }
 
 static void free_ccfsm_data_point(connector_data_point_t * const ccfsm_datapoint)
 {
-    if (ccfsm_datapoint->data.element.native.string_value != NULL)
-    {
-        ccapi_free(ccfsm_datapoint->data.element.native.string_value);
-    }
-    if (ccfsm_datapoint->time.value.iso8601_string != NULL)
-    {
-        ccapi_free(ccfsm_datapoint->time.value.iso8601_string);
-    }
-
+    ccapi_free(ccfsm_datapoint->data.element.native.string_value);
+    ccapi_free(ccfsm_datapoint->time.value.iso8601_string);
     ccapi_free(ccfsm_datapoint);
 }
 
@@ -704,18 +675,9 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
 done:
     if (error != CCAPI_DP_ERROR_NONE)
     {
-        if (arg_list != NULL)
-        {
-            ccapi_free(arg_list);
-        }
-        if (ccapi_stream_info != NULL)
-        {
-            ccapi_free(ccapi_stream_info);
-        }
-        if (ccfsm_stream_info != NULL)
-        {
-            free_ccfsm_stream(ccfsm_stream_info);
-        }
+        ccapi_free(arg_list);
+        ccapi_free(ccapi_stream_info);
+        free_ccfsm_stream(ccfsm_stream_info);
     }
 
     if (syncr_acquired)
@@ -1183,10 +1145,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
     }
 
 done:
-    if (transaction_info != NULL)
-    {
-        ccapi_free(transaction_info);
-    }
+    ccapi_free(transaction_info);
 
     if (collection_lock_acquired)
     {
