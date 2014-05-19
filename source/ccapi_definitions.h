@@ -96,6 +96,9 @@ typedef struct {
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
+        struct {
+            ccapi_receive_service_t user_callbacks;
+        } receive;
     } service;
     struct {
         ccapi_tcp_info_t * info;
@@ -127,6 +130,16 @@ typedef struct
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
 } ccapi_svc_send_data_t;
+
+typedef struct
+{
+    char * target;
+    ccapi_bool_t response_required;
+    ccapi_buffer_info_t request_buffer_info;
+    ccapi_buffer_info_t response_buffer_info;
+    ccapi_buffer_info_t response_processing;
+    ccapi_receive_error_t receive_error;
+} ccapi_svc_receive_t;
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
