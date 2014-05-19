@@ -57,7 +57,15 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     if (ccapi_data->file_system_syncr != NULL)
     {
-        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->file_system_syncr) == CCIMP_STATUS_OK);
+        ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->file_system_syncr);
+        switch (ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+        }
     }
 
     if (ccapi_data->config.filesystem_supported)
@@ -75,7 +83,15 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
     if (ccapi_data->initiate_action_syncr != NULL)
     {   
-        ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+        ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->initiate_action_syncr);
+        switch (ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+                break;
+            case CCIMP_STATUS_BUSY:
+            case CCIMP_STATUS_ERROR:
+                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+        }
     }
 
 done:

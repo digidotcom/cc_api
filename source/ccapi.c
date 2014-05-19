@@ -671,9 +671,9 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
 #endif
         default:
             status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0, done);
             break;
     }
+    ASSERT_MSG_GOTO(status != connector_callback_unrecognized, done);
 done:
     return status;
 }
@@ -777,7 +777,7 @@ static ccapi_bool_t ask_user_if_reconnect(connector_close_status_t const close_s
             case connector_close_status_device_stopped:
             case connector_close_status_device_terminated:
             case connector_close_status_abort:
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(close_status != connector_close_status_cloud_disconnected, done);
                 break;
         }
         reconnect = close_cb(ccapi_close_cause);
@@ -808,7 +808,7 @@ static ccapi_bool_t ask_user_if_reconnect_udp(connector_close_status_t const clo
             case connector_close_status_device_stopped:
             case connector_close_status_device_terminated:
             case connector_close_status_abort:
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(close_status != connector_close_status_cloud_disconnected, done);
                 break;
         }
         reconnect = close_cb(ccapi_close_cause);
@@ -1125,7 +1125,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         size_t bytes_expected_to_read;
 
         ASSERT_MSG_GOTO(svc_send != NULL, done);
-        bytes_expected_to_read = (send_ptr->bytes_available > svc_send->bytes_remaining) ? svc_send->bytes_remaining : send_ptr->bytes_available;
+        bytes_expected_to_read = send_ptr->bytes_available > svc_send->bytes_remaining ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
         if (svc_send->sending_file == CCAPI_FALSE)
         {
@@ -1144,11 +1144,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
                 goto done;
             }
 
-            if (bytes_expected_to_read != bytes_read)
-            {
-                bytes_expected_to_read = bytes_read;
-                ASSERT_MSG(0); /* TODO: Remove later */
-            }
+            ASSERT_MSG(bytes_expected_to_read == bytes_read);
         }
 #endif
 
@@ -1298,9 +1294,10 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
         default:
             connector_status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0, done);
             break;
     }
+
+    ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
 
 done:
     return connector_status;

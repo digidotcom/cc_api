@@ -107,7 +107,7 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
         case CCAPI_SEND_ERROR_INVALID_CLOUD_PATH:
         case CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE:
             dp_b_error = CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR;
-            ASSERT_MSG_GOTO(0, done);
+            ASSERT_MSG_GOTO(send_data_error != CCAPI_SEND_ERROR_NONE, done);
             break;
     }
 

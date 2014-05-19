@@ -315,7 +315,16 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         if (send_info->svc_send.sending_file == CCAPI_TRUE)
         {
-            ASSERT_MSG(ccapi_close_file(ccapi_data, send_info->svc_send.file_handler) == CCIMP_STATUS_OK);
+            ccimp_status_t const ccimp_status = ccapi_close_file(ccapi_data, send_info->svc_send.file_handler);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_BUSY:
+                case CCIMP_STATUS_ERROR:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            }
+
         }
 #else
         UNUSED_ARGUMENT(ccapi_data);
