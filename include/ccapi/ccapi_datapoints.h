@@ -24,7 +24,17 @@ typedef enum {
     CCAPI_DP_ERROR_INVALID_UNITS,
     CCAPI_DP_ERROR_INVALID_FORWARD_TO,
     CCAPI_DP_ERROR_INSUFFICIENT_MEMORY,
-    CCAPI_DP_ERROR_SYNCR_FAILED
+    CCAPI_DP_ERROR_SYNCR_FAILED,
+    CCAPI_DP_ERROR_CCAPI_NOT_RUNNING,
+    CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED,
+    CCAPI_DP_ERROR_INITIATE_ACTION_FAILED,
+    CCAPI_DP_ERROR_RESPONSE_BAD_REQUEST,
+    CCAPI_DP_ERROR_RESPONSE_UNAVAILABLE,
+    CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR,
+    CCAPI_DP_ERROR_STATUS_CANCEL,
+    CCAPI_DP_ERROR_STATUS_TIMEOUT,
+    CCAPI_DP_ERROR_STATUS_INVALID_DATA,
+    CCAPI_DP_ERROR_STATUS_SESSION_ERROR
 } ccapi_dp_error_t;
 
 typedef struct {
@@ -50,6 +60,7 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_handle_t * const
 ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_handle_t const dp_collection);
 ccapi_dp_error_t ccapi_dp_destroy_collection(ccapi_dp_collection_handle_t const dp_collection);
 ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_handle_t const dp_collection);
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport, ccapi_dp_collection_handle_t const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint);
 
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string);
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to);

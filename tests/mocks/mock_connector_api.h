@@ -44,6 +44,10 @@ typedef struct  {
             void * data;
         } out;
     } connector_initiate_send_data_info;
+    struct {
+        connector_data_point_response_t * ccfsm_response;
+        connector_data_point_status_t * ccfsm_status;
+    } connector_initiate_data_point_multiple;
 } mock_connector_api_info_t;
 
 mock_connector_api_info_t * mock_connector_api_info_get(connector_handle_t connector_handle);

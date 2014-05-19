@@ -13,7 +13,6 @@ extern char * assert_file;
 }
 
 extern "C" {
-#include "connector_api.h"
 #include "ccapi/ccxapi.h"
 }
 

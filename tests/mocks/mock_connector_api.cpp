@@ -223,6 +223,7 @@ void Mock_connector_initiate_action_create(void)
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
     mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
     mock().installComparator("connector_request_data_service_send_t", connector_request_data_service_send_t_comparator);
+    mock().installComparator("connector_request_data_point_multiple_t", connector_request_data_point_multiple_t_comparator);
     return;
 }
 
@@ -266,8 +267,14 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
 #endif
 #ifdef CONNECTOR_DATA_POINTS
         case connector_initiate_data_point_single:
-        case connector_initiate_data_point_multiple:
         case connector_initiate_data_point_binary:
+            break;
+        case connector_initiate_data_point_multiple:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_request_data_point_multiple_t", "request_data", request_data)
+                     .andReturnValue(retval);
             break;
 #endif
         case connector_initiate_terminate:
@@ -491,8 +498,23 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
             break;
 #endif
 #ifdef CONNECTOR_DATA_POINTS
-        case connector_initiate_data_point_single:
         case connector_initiate_data_point_multiple:
+        {
+            connector_request_id_t request_id;
+
+            mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_request_data_point_multiple_t", "request_data", (connector_request_data_point_multiple_t *)request_data);
+            {
+                request_id.data_point_request = connector_request_id_data_point_multiple_response;
+                ccapi_connector_callback(connector_class_id_data_point, request_id, mock_info->connector_initiate_data_point_multiple.ccfsm_response, (void *)ccapi_data);
+                request_id.data_point_request = connector_request_id_data_point_multiple_status;
+                ccapi_connector_callback(connector_class_id_data_point, request_id, mock_info->connector_initiate_data_point_multiple.ccfsm_status, (void *)ccapi_data);
+            }
+            break;
+        }
+        case connector_initiate_data_point_single:
         case connector_initiate_data_point_binary:
             break;
 #endif

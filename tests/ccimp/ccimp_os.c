@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <stdarg.h>
 
 #if (defined UNIT_TEST)
 #define ccimp_os_malloc             ccimp_os_malloc_real
@@ -21,6 +22,7 @@
 #define ccimp_os_yield              ccimp_os_yield_real
 #define ccimp_os_syncr_create       ccimp_os_syncr_create_real
 #define ccimp_os_syncr_acquire      ccimp_os_syncr_acquire_real
+#define ccimp_os_syncr_release      ccimp_os_syncr_release_real
 #endif
 
 #define ccapi_logging_line_info(message) /* TODO */

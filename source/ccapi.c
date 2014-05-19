@@ -9,6 +9,51 @@
 
 #include "ccapi_definitions.h"
 
+#if (defined CCIMP_DATA_POINTS_ENABLED) || (defined CCIMP_RCI_SERVICE_ENABLED)
+int connector_snprintf(char * const str, size_t const size, char const * const format, ...)
+{
+    va_list args;
+    int result;
+
+    va_start(args, format);
+
+#if __STDC_VERSION__ >= 199901L
+    result = vsnprintf(str, size, format, args);
+#else
+    /**************************************************************************************
+    * NOTE: This is an example snprintf() implementation for environments                 *
+    * that do not provide one.                                                            *
+    * The following buffer should hold the longest possible string that can be generated. *
+    * Consider the common case to be only one format specifier at once.                   *
+    * WARNING: If an application is using double Data Point types, this value can be as   *
+    * big as:                                                                             *
+    *                 max_digits = 3 + DBL_MANT_DIG - DBL_MIN_EXP                         *
+    * The above expression evaluates to 1077 in a 64-bit Linux machine for GCC 4.8.1.     *
+    **************************************************************************************/
+    #define SAFE_BUFFER_BYTES 64
+
+    if (size >= SAFE_BUFFER_BYTES)
+    {
+        result = vsprintf(str, format, args);
+    }
+    else
+    {
+        char local_buffer[SAFE_BUFFER_BYTES];
+        ssize_t const bytes_needed = vsprintf(local_buffer, format, args);
+
+        if (bytes_needed < (ssize_t)size)
+        {
+            memcpy(str, local_buffer, bytes_needed + 1); /* Don't forget the \0 */
+        }
+        result = bytes_needed;
+    }
+    #undef SAFE_BUFFER_BYTES
+#endif
+    va_end(args);
+
+    return result;
+}
+#endif
 ccapi_data_t * ccapi_data_single_instance = NULL;
 
 void * ccapi_malloc(size_t size)
@@ -119,6 +164,30 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object)
     destroy_data.syncr_object = syncr_object;
 
     return ccimp_os_syncr_destroy(&destroy_data);
+}
+
+connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport)
+{
+    connector_transport_t connector_transport = connector_transport_all;
+
+    switch(ccapi_transport)
+    {
+        case CCAPI_TRANSPORT_TCP:
+            connector_transport = connector_transport_tcp;
+            break;
+        case CCAPI_TRANSPORT_UDP:
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+            connector_transport = connector_transport_udp;
+#endif
+            break;
+        case CCAPI_TRANSPORT_SMS:
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+            connector_transport = connector_transport_sms;
+#endif
+            break;
+    }
+
+    return connector_transport;
 }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -330,13 +399,32 @@ done:
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
 {
     connector_status_t status;
+    ccimp_status_t ccimp_status;
 
-    ASSERT_MSG(ccapi_syncr_acquire(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->initiate_action_syncr);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            goto done;
+    }
 
     status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
-    ASSERT_MSG(ccapi_syncr_release(ccapi_data->initiate_action_syncr) == CCIMP_STATUS_OK);
+    ccimp_status = ccapi_syncr_release(ccapi_data->initiate_action_syncr);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            goto done;
+    }
 
+done:
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
     return status;
 }
 
@@ -1211,6 +1299,104 @@ done:
 }
 #endif
 
+#if (defined CCIMP_DATA_POINTS_ENABLED)
+connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_point_t const data_point_request, void * const data, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_continue;
+
+    UNUSED_ARGUMENT(ccapi_data);
+
+    switch (data_point_request)
+    {
+        case connector_request_id_data_point_multiple_response:
+        {
+            connector_data_point_response_t * data_point_response = data;
+            ccapi_dp_transaction_info_t * const transaction_info = data_point_response->user_context;
+
+            switch (data_point_response->response)
+            {
+                case connector_data_point_response_success:
+                    transaction_info->response_error = CCAPI_DP_ERROR_NONE;
+                    break;
+                case connector_data_point_response_bad_request:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_BAD_REQUEST;
+                    break;
+                case connector_data_point_response_unavailable:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_UNAVAILABLE;
+                    break;
+                case connector_data_point_response_cloud_error:
+                    transaction_info->response_error = CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR;
+                    break;
+            }
+
+            if (data_point_response->hint)
+            {
+                ccapi_logging_line("data point request response hint: '%s'", data_point_response->hint);
+                if (transaction_info->hint != NULL)
+                {
+                    size_t const max_hint_length = transaction_info->hint->length - 1;
+
+                    transaction_info->hint->length = strlen(data_point_response->hint);
+                    strncpy(transaction_info->hint->string, data_point_response->hint, max_hint_length);
+                    transaction_info->hint->string[max_hint_length] = '\0';
+                }
+            }
+            break;
+        }
+        case connector_request_id_data_point_multiple_status:
+        {
+            connector_data_point_status_t * data_point_status = data;
+            ccapi_dp_transaction_info_t * const transaction_info = data_point_status->user_context;
+
+            switch (data_point_status->status)
+            {
+                case connector_data_point_status_complete:
+                    transaction_info->status = CCAPI_DP_ERROR_NONE;
+                    break;
+                case connector_data_point_status_cancel:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_CANCEL;
+                    break;
+                case connector_data_point_status_timeout:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_TIMEOUT;
+                    break;
+                case connector_data_point_status_invalid_data:
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_INVALID_DATA;
+                    break;
+                case connector_data_point_status_session_error:
+                    ccapi_logging_line("Data Points status: session_error = %d\n", data_point_status->session_error);
+                    transaction_info->status = CCAPI_DP_ERROR_STATUS_SESSION_ERROR;
+                    break;
+            }
+
+            switch(ccapi_syncr_release(transaction_info->syncr))
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_BUSY:
+                    connector_status = connector_callback_busy;
+                    goto done;
+                case CCIMP_STATUS_ERROR:
+                    connector_status = connector_callback_error;
+                    goto done;
+            }
+            break;
+        }
+        case connector_request_id_data_point_binary_response:
+        case connector_request_id_data_point_binary_status:
+        case connector_request_id_data_point_single_response:
+        case connector_request_id_data_point_single_status:
+        {
+            connector_status = connector_callback_unrecognized;
+            goto done;
+        }
+    }
+
+done:
+    return connector_status;
+
+}
+#endif
+
 connector_callback_status_t ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
 {
     connector_callback_status_t status = connector_callback_error;
@@ -1245,11 +1431,17 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
             break;
 #endif
+#if (defined CCIMP_DATA_POINTS_ENABLED)
+        case connector_class_id_data_point:
+            status = ccapi_data_points_handler(request_id.data_point_request, data, ccapi_data);
+            break;
+#endif
         default:
             status = connector_callback_unrecognized;
-            ASSERT_MSG_GOTO(0, done);
             break;
     }
+
+    ASSERT_MSG_GOTO(status != connector_callback_unrecognized, done);
 
 done:
     return status;

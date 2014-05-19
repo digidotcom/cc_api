@@ -151,7 +151,7 @@ typedef struct ccapi_dp_data_stream {
     connector_data_stream_t * ccfsm_data_stream;
     struct {
         ccapi_dp_argument_t * list;
-        size_t count;
+        unsigned int count;
     } arguments;
     struct ccapi_dp_data_stream * next;
 } ccapi_dp_data_stream_t;
@@ -165,6 +165,13 @@ typedef struct ccapi_dp_collection {
     ccapi_dp_data_stream_t * ccapi_data_stream_list;
     void * syncr;
 } ccapi_dp_collection_t;
+
+typedef struct {
+    void * syncr;
+    ccapi_string_info_t * hint;
+    ccapi_dp_error_t response_error;
+    ccapi_dp_error_t status;
+} ccapi_dp_transaction_info_t;
 
 #endif
 
@@ -199,6 +206,7 @@ ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler);
 ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);
 ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler);
+connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi_transport);
 ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char const * const local_path, ccimp_fs_stat_t * const fs_status);
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data);
 
