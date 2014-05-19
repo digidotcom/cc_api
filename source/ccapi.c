@@ -1161,8 +1161,10 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
     /* If there is any ccapi internal error, ccfsm will not have called data callback but we still want to let our 
      * user the oportunity to report a response based on the error
      */
-    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->service.receive.user_callbacks.data_cb != NULL)
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->config.receive_supported)
     {
+        ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
+
         /* Get response from user */ 
         ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
                                                            NULL, 
