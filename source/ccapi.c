@@ -1129,6 +1129,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
+            if (svc_receive->response_required)
             {
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
@@ -1141,7 +1142,7 @@ done:
     return connector_status;
 }
 
-static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr)
+static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
@@ -1155,6 +1156,20 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
     if (!svc_receive->response_required)
     {
         goto done;
+    }
+
+    /* If there is any ccapi internal error, ccfsm will not have called data callback but we still want to let our 
+     * user the oportunity to report a response based on the error
+     */
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->service.receive.user_callbacks.data_cb != NULL)
+    {
+        /* Get response from user */ 
+        ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
+                                                           NULL, 
+                                                           &svc_receive->response_buffer_info, 
+                                                           svc_receive->receive_error);
+
+        memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
     }
 
     {
@@ -1282,7 +1297,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         {
             connector_data_service_receive_reply_data_t * const reply_ptr = data;
 
-            connector_status = ccapi_process_device_request_response(reply_ptr);
+            connector_status = ccapi_process_device_request_response(reply_ptr, ccapi_data);
 
             break;
         }
