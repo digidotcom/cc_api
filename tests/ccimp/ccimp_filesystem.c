@@ -339,36 +339,20 @@ ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const dir_close_data)
 ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const hash_status_data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
-    struct stat statbuf;
-    int result = stat(hash_status_data->path, &statbuf);
 
-    if (result == 0)
+    switch (hash_status_data->hash_alg.requested)
     {
-        switch (hash_status_data->hash_alg.requested)
-        {
-            case CCIMP_FS_HASH_NONE:
-            case CCIMP_FS_HASH_MD5:
-            case CCIMP_FS_HASH_BEST:
-                    hash_status_data->hash_alg.actual = CCIMP_FS_HASH_MD5;
-                break;
+        case CCIMP_FS_HASH_NONE:
+        case CCIMP_FS_HASH_MD5:
+        case CCIMP_FS_HASH_BEST:
+                hash_status_data->hash_alg.actual = CCIMP_FS_HASH_MD5;
+            break;
 
-            case CCIMP_FS_HASH_CRC32:
-                hash_status_data->hash_alg.actual = CCIMP_FS_HASH_NONE;
-                break;
-        }
+        case CCIMP_FS_HASH_CRC32:
+            hash_status_data->hash_alg.actual = CCIMP_FS_HASH_NONE;
+            break;
     }
-    else
-    {
-       if (errno == EAGAIN)
-       {
-             status = CCIMP_STATUS_BUSY;
-       }
-       else
-       {
-             hash_status_data->errnum.value = errno;
-             status = CCIMP_STATUS_ERROR;
-       }
-    }
+
     return status;
 }
 
