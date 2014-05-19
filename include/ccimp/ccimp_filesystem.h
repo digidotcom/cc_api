@@ -155,12 +155,11 @@ typedef struct {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
     char const * CONST path;
-    ccimp_fs_stat_t status;
     struct {
         ccimp_fs_hash_alg_t CONST requested;
         ccimp_fs_hash_alg_t actual;
     } hash_alg;
-} ccimp_fs_hash_status_t;
+} ccimp_fs_get_hash_alg_t;
 
 typedef struct
 {
@@ -218,7 +217,6 @@ typedef struct
     ccimp_session_error_status_t CONST session_error;
 } ccimp_fs_session_error_t;
 
-
 ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const file_open_data);
 ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const file_read_data);
 ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const file_write_data) ;
@@ -230,7 +228,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data);
 ccimp_status_t ccimp_fs_dir_read_entry(ccimp_fs_dir_read_entry_t * const dir_read_data);
 ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir_entry_status_data);
 ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const dir_close_data);
-ccimp_status_t ccimp_fs_hash_status(ccimp_fs_hash_status_t * const hash_status_data);
+ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const hash_status_data);
 ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const file_hash_data);
 ccimp_status_t ccimp_fs_error_desc(ccimp_fs_error_desc_t * const error_desc_data);
 ccimp_status_t ccimp_fs_session_error(ccimp_fs_session_error_t * const session_error_data);
