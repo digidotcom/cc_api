@@ -785,7 +785,8 @@ TEST(test_ccfsm_filesystem, testDirCloseFails)
 TEST(test_ccfsm_filesystem, testHashStatus)
 {
     connector_request_id_t request;
-    ccimp_fs_hash_status_t ccimp_fs_hash_status_data;
+    ccimp_fs_get_hash_alg_t ccimp_fs_hash_status_data;
+    ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
     connector_file_system_stat_t ccfsm_file_stat_data;
     connector_callback_status_t status;
 
@@ -797,9 +798,13 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     ccimp_fs_hash_status_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
     ccimp_fs_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_CRC32;
-    ccimp_fs_hash_status_data.status.file_size = 0;
-    ccimp_fs_hash_status_data.status.last_modified = 0;
-    ccimp_fs_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+
+    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.imp_context = &my_fs_context;
+    ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
+    ccimp_dir_entry_status_data.status.file_size = 0;
+    ccimp_dir_entry_status_data.status.last_modified = 0;
+    ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
     ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum.pointer;
     ccfsm_file_stat_data.user_context = NULL;
@@ -810,7 +815,8 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     ccfsm_file_stat_data.statbuf.last_modified = 0;
     ccfsm_file_stat_data.statbuf.flags = connector_file_system_file_type_none;
 
-    Mock_ccimp_fs_hash_status_expectAndReturn(&ccimp_fs_hash_status_data, CCIMP_STATUS_OK);
+    Mock_ccimp_fs_dir_entry_status_expectAndReturn(&ccimp_dir_entry_status_data, CCIMP_STATUS_OK);
+    Mock_ccimp_fs_hash_alg_expectAndReturn(&ccimp_fs_hash_status_data, CCIMP_STATUS_OK);
 
     request.file_system_request = connector_request_id_file_system_stat;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_file_stat_data, ccapi_data_single_instance);
@@ -826,8 +832,9 @@ TEST(test_ccfsm_filesystem, testHashStatus)
 TEST(test_ccfsm_filesystem, testHashStatusFails)
 {
     connector_request_id_t request;
-    ccimp_fs_hash_status_t ccimp_fs_hash_status_data;
+    ccimp_fs_get_hash_alg_t ccimp_fs_hash_status_data;
     connector_file_system_stat_t ccfsm_file_stat_data;
+    ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
     connector_callback_status_t status;
 
     /* Simulate that imp_context was previously set by other call (file_open) */
@@ -838,9 +845,13 @@ TEST(test_ccfsm_filesystem, testHashStatusFails)
     ccimp_fs_hash_status_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
     ccimp_fs_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_CRC32;
-    ccimp_fs_hash_status_data.status.file_size = 0;
-    ccimp_fs_hash_status_data.status.last_modified = 0;
-    ccimp_fs_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+
+    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.imp_context = &my_fs_context;
+    ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
+    ccimp_dir_entry_status_data.status.file_size = 0;
+    ccimp_dir_entry_status_data.status.last_modified = 0;
+    ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
     ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum.pointer;
     ccfsm_file_stat_data.user_context = NULL;
@@ -851,7 +862,8 @@ TEST(test_ccfsm_filesystem, testHashStatusFails)
     ccfsm_file_stat_data.statbuf.last_modified = 0;
     ccfsm_file_stat_data.statbuf.flags = connector_file_system_file_type_none;
 
-    Mock_ccimp_fs_hash_status_expectAndReturn(&ccimp_fs_hash_status_data, CCIMP_STATUS_ERROR);
+    Mock_ccimp_fs_dir_entry_status_expectAndReturn(&ccimp_dir_entry_status_data, CCIMP_STATUS_OK);
+    Mock_ccimp_fs_hash_alg_expectAndReturn(&ccimp_fs_hash_status_data, CCIMP_STATUS_ERROR);
 
     request.file_system_request = connector_request_id_file_system_stat;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_file_stat_data, ccapi_data_single_instance);
