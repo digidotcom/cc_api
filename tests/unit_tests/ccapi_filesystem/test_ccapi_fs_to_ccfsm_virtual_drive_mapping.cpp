@@ -347,33 +347,35 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirInvalid)
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDir)
 {
     connector_request_id_t request;
-    ccimp_fs_hash_status_t ccimp_hash_status_data;
+    ccimp_fs_get_hash_alg_t ccimp_hash_status_data;
+    ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
     connector_file_system_stat_t ccfsm_hash_status_data;
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH VIRTUAL_PATH_1 "/file1.txt";
-    void * malloc_for_local_path = malloc(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME);
 
     ccimp_hash_status_data.errnum.pointer = NULL;
     ccimp_hash_status_data.imp_context = &my_fs_context;
     ccimp_hash_status_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
-    ccimp_hash_status_data.status.file_size = 0;
-    ccimp_hash_status_data.status.last_modified = 0;
-    ccimp_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
     ccimp_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_BEST;
     ccimp_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
+
+    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.imp_context = &my_fs_context;
+    ccimp_dir_entry_status_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
+    ccimp_dir_entry_status_data.status.file_size = 0;
+    ccimp_dir_entry_status_data.status.last_modified = 0;
+    ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
     ccfsm_hash_status_data.errnum = ccimp_hash_status_data.errnum.pointer;
     ccfsm_hash_status_data.user_context = NULL;
     ccfsm_hash_status_data.path = ccfsm_path;
-    ccfsm_hash_status_data.statbuf.file_size = ccimp_hash_status_data.status.file_size;
-    ccfsm_hash_status_data.statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
     ccfsm_hash_status_data.statbuf.flags = connector_file_system_file_type_none;
     ccfsm_hash_status_data.hash_algorithm.requested = connector_file_system_hash_best;
     ccfsm_hash_status_data.hash_algorithm.actual = connector_file_system_hash_none;
 
-    Mock_ccimp_fs_hash_status_expectAndReturn(&ccimp_hash_status_data, CCIMP_STATUS_OK);
-    Mock_ccimp_os_malloc_expectAndReturn(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME, malloc_for_local_path);
-    Mock_ccimp_os_free_expectAndReturn(malloc_for_local_path, CCIMP_STATUS_OK);
+    Mock_ccimp_fs_dir_entry_status_expectAndReturn(&ccimp_dir_entry_status_data, CCIMP_STATUS_OK);
+    Mock_ccimp_fs_hash_alg_expectAndReturn(&ccimp_hash_status_data, CCIMP_STATUS_OK);
+    th_expect_malloc(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME, TH_MALLOC_RETURN_NORMAL, true);
 
     request.file_system_request = connector_request_id_file_system_stat;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_hash_status_data, ccapi_data_single_instance);

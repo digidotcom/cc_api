@@ -821,6 +821,7 @@ static ccimp_status_t ccapi_fs_dir_close(ccapi_data_t * const ccapi_data, connec
 static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, connector_file_system_stat_t * const ccfsm_hash_status_data)
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+
     if (ccapi_data->service.file_system.virtual_dir_list != NULL && strcmp(ccfsm_hash_status_data->path, CCAPI_FS_ROOT_PATH) == 0)
     {
         ccapi_fs_virtual_rootdir_listing_handle_t * root_dir_listing_handle = malloc(sizeof *root_dir_listing_handle);
@@ -836,7 +837,8 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
     }
     else
     {
-        ccimp_fs_hash_status_t ccimp_hash_status_data;
+        ccimp_fs_get_hash_alg_t ccimp_hash_algorithm_data;
+        ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
         ccapi_bool_t must_free_local_path;
         char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_status_data->path, &must_free_local_path);
 
@@ -846,16 +848,30 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
             goto done;
         }
 
-        ccimp_hash_status_data.path = local_path;
-        ccimp_hash_status_data.errnum.pointer = NULL;
-        ccimp_hash_status_data.imp_context = ccapi_data->service.file_system.imp_context;
-        ccimp_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
-        ccimp_hash_status_data.hash_alg.requested = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_status_data->hash_algorithm.requested);
-        ccimp_hash_status_data.status.file_size = 0;
-        ccimp_hash_status_data.status.last_modified = 0;
-        ccimp_hash_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+        ccimp_dir_entry_status_data.path = local_path;
+        ccimp_dir_entry_status_data.errnum.pointer = NULL;
+        ccimp_dir_entry_status_data.imp_context = ccapi_data->service.file_system.imp_context;
+        ccimp_dir_entry_status_data.status.file_size = 0;
+        ccimp_dir_entry_status_data.status.last_modified = 0;
+        ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-        ccimp_status = ccimp_fs_hash_status(&ccimp_hash_status_data);
+        ccimp_status = ccimp_fs_dir_entry_status(&ccimp_dir_entry_status_data);
+        switch(ccimp_status)
+        {
+            case CCIMP_STATUS_OK:
+            case CCIMP_STATUS_BUSY:
+                break;
+            case CCIMP_STATUS_ERROR:
+                ccapi_fs_set_ccimp_error(ccimp_dir_entry_status_data.errnum.pointer, &ccfsm_hash_status_data->errnum);
+        }
+
+        ccimp_hash_algorithm_data.path = local_path;
+        ccimp_hash_algorithm_data.errnum.pointer = NULL;
+        ccimp_hash_algorithm_data.imp_context = ccapi_data->service.file_system.imp_context;
+        ccimp_hash_algorithm_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
+        ccimp_hash_algorithm_data.hash_alg.requested = ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(ccfsm_hash_status_data->hash_algorithm.requested);
+
+        ccimp_status = ccimp_fs_hash_alg(&ccimp_hash_algorithm_data);
         switch(ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -863,16 +879,16 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
                 break;
             case CCIMP_STATUS_ERROR:
             {
-                ccapi_fs_set_ccimp_error(ccimp_hash_status_data.errnum.pointer, &ccfsm_hash_status_data->errnum);
+                ccapi_fs_set_ccimp_error(ccimp_hash_algorithm_data.errnum.pointer, &ccfsm_hash_status_data->errnum);
                 break;
             }
         }
 
-        ccapi_data->service.file_system.imp_context = ccimp_hash_status_data.imp_context;
-        ccfsm_hash_status_data->statbuf.file_size = ccimp_hash_status_data.status.file_size;
-        ccfsm_hash_status_data->statbuf.last_modified = ccimp_hash_status_data.status.last_modified;
-        ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_hash_status_data.status.type);
-        ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_status_data.hash_alg.actual);
+        ccapi_data->service.file_system.imp_context = ccimp_hash_algorithm_data.imp_context;
+        ccfsm_hash_status_data->statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
+        ccfsm_hash_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
+        ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
+        ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_algorithm_data.hash_alg.actual);
 
 done:
         if (must_free_local_path)

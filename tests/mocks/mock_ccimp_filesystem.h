@@ -65,9 +65,9 @@ void Mock_ccimp_fs_dir_close_create(void);
 void Mock_ccimp_fs_dir_close_destroy(void);
 void Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_fs_dir_close_t * expect, ccimp_status_t retval);
 
-void Mock_ccimp_fs_hash_status_create(void);
-void Mock_ccimp_fs_hash_status_destroy(void);
-void Mock_ccimp_fs_hash_status_expectAndReturn(ccimp_fs_hash_status_t * expect, ccimp_status_t retval);
+void Mock_ccimp_fs_hash_alg_create(void);
+void Mock_ccimp_fs_hash_alg_destroy(void);
+void Mock_ccimp_fs_hash_alg_expectAndReturn(ccimp_fs_get_hash_alg_t * expect, ccimp_status_t retval);
 
 void Mock_ccimp_fs_hash_file_create(void);
 void Mock_ccimp_fs_hash_file_destroy(void);
@@ -93,7 +93,7 @@ ccimp_status_t ccimp_fs_dir_open_real(ccimp_fs_dir_open_t * const dir_open_data)
 ccimp_status_t ccimp_fs_dir_read_entry_real(ccimp_fs_dir_read_entry_t * const dir_read_data);
 ccimp_status_t ccimp_fs_dir_entry_status_real(ccimp_fs_dir_entry_status_t * const dir_entry_status_data);
 ccimp_status_t ccimp_fs_dir_close_real(ccimp_fs_dir_close_t * const dir_close_data);
-ccimp_status_t ccimp_fs_hash_status_real(ccimp_fs_hash_status_t * const hash_status_data);
+ccimp_status_t ccimp_fs_hash_status_real(ccimp_fs_get_hash_alg_t * const hash_status_data);
 ccimp_status_t ccimp_fs_hash_file_real(ccimp_fs_hash_file_t * const file_hash_data);
 ccimp_status_t ccimp_fs_error_desc_real(ccimp_fs_error_desc_t * const error_desc_data);
 ccimp_status_t ccimp_fs_session_error_real(ccimp_fs_session_error_t * const session_error_data);

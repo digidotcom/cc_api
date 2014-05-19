@@ -23,7 +23,7 @@ ValueToStringFunction(ccimp_fs_dir_open_t)
 ValueToStringFunction(ccimp_fs_dir_read_entry_t)
 ValueToStringFunction(ccimp_fs_dir_entry_status_t)
 ValueToStringFunction(ccimp_fs_dir_close_t)
-ValueToStringFunction(ccimp_fs_hash_status_t)
+ValueToStringFunction(ccimp_fs_get_hash_alg_t)
 ValueToStringFunction(ccimp_fs_hash_file_t)
 ValueToStringFunction(ccimp_fs_error_desc_t)
 ValueToStringFunction(ccimp_fs_session_error_t)
@@ -378,10 +378,10 @@ static bool ccimp_fs_dir_close_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_hash_status_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_get_hash_alg_t_IsEqual(void * object1, void * object2)
 {
-    ccimp_fs_hash_status_t * ccimp_fs_hash_status_1 = (ccimp_fs_hash_status_t *)object1;
-    ccimp_fs_hash_status_t * ccimp_fs_hash_status_2 = (ccimp_fs_hash_status_t *)object2;
+    ccimp_fs_get_hash_alg_t * ccimp_fs_hash_status_1 = (ccimp_fs_get_hash_alg_t *)object1;
+    ccimp_fs_get_hash_alg_t * ccimp_fs_hash_status_2 = (ccimp_fs_get_hash_alg_t *)object2;
 
     compare_pointers(object1, object2);
     if (ccimp_fs_hash_status_1->errnum.pointer != ccimp_fs_hash_status_2->errnum.pointer)
@@ -393,12 +393,6 @@ static bool ccimp_fs_hash_status_t_IsEqual(void * object1, void * object2)
     if (ccimp_fs_hash_status_1->hash_alg.actual != ccimp_fs_hash_status_2->hash_alg.actual)
         return false;
     if (ccimp_fs_hash_status_1->hash_alg.requested != ccimp_fs_hash_status_2->hash_alg.requested)
-        return false;
-    if (ccimp_fs_hash_status_1->status.file_size != ccimp_fs_hash_status_2->status.file_size)
-        return false;
-    if (ccimp_fs_hash_status_1->status.last_modified != ccimp_fs_hash_status_2->status.last_modified)
-        return false;
-    if (ccimp_fs_hash_status_1->status.type != ccimp_fs_hash_status_2->status.type)
         return false;
     return true;
 }
@@ -499,7 +493,7 @@ MockFunctionComparator ccimp_fs_dir_open_t_comparator(ccimp_fs_dir_open_t_IsEqua
 MockFunctionComparator ccimp_fs_dir_read_entry_t_comparator(ccimp_fs_dir_read_entry_t_IsEqual, ccimp_fs_dir_read_entry_t_ValueToString);
 MockFunctionComparator ccimp_fs_dir_entry_status_t_comparator(ccimp_fs_dir_entry_status_t_IsEqual, ccimp_fs_dir_entry_status_t_ValueToString);
 MockFunctionComparator ccimp_fs_dir_close_t_comparator(ccimp_fs_dir_close_t_IsEqual, ccimp_fs_dir_close_t_ValueToString);
-MockFunctionComparator ccimp_fs_hash_status_t_comparator(ccimp_fs_hash_status_t_IsEqual, ccimp_fs_hash_status_t_ValueToString);
+MockFunctionComparator ccimp_fs_get_hash_alg_t_comparator(ccimp_fs_get_hash_alg_t_IsEqual, ccimp_fs_get_hash_alg_t_ValueToString);
 MockFunctionComparator ccimp_fs_hash_file_t_comparator(ccimp_fs_hash_file_t_IsEqual, ccimp_fs_hash_file_t_ValueToString);
 MockFunctionComparator ccimp_fs_error_desc_t_comparator(ccimp_fs_error_desc_t_IsEqual, ccimp_fs_error_desc_t_ValueToString);
 MockFunctionComparator ccimp_fs_session_error_t_comparator(ccimp_fs_session_error_t_IsEqual, ccimp_fs_session_error_t_ValueToString);
