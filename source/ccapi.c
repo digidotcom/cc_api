@@ -1009,20 +1009,14 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
     /* TODO: Check if it's a registered target */
 
-    if (target_ptr->user_context != NULL)
-    {
-        /* TODO: any reason to get here a previous user_context if we never return busy?
-                 cast to ccapi_svc_receive_t and set error?
-         */
-        ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
-    }
+    ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
 
     {
         const size_t target_size = strlen(target_ptr->target) + 1;
 
         if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
         {
-            /* TODO: SIMULATE! what will happen later? is status callback called without user_context? */
+            /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
             goto done;
         }
 
@@ -1033,6 +1027,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->request_buffer_info.length = 0;
         svc_receive->response_buffer_info.buffer = NULL;
         svc_receive->response_buffer_info.length = 0;
+        svc_receive->response_processing.buffer = NULL;
+        svc_receive->response_processing.length = 0;
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
         svc_receive->response_required = target_ptr->response_required == connector_true ? CCAPI_TRUE : CCAPI_FALSE;
@@ -1086,14 +1082,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
 
-    if (data_ptr->user_context == NULL)
-    {
-        ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
-    }
-    else
-    {
-        svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
-    }
+    ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
+
+    svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
 
     ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"", svc_receive->target);
 
@@ -1155,14 +1146,9 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
 
-    if (reply_ptr->user_context == NULL)
-    {
-        ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
-    }
-    else
-    {
-        svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
-    }
+    ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
+
+    svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
 
     ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"", svc_receive->target);
 
@@ -1194,16 +1180,9 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
 
-    (void)ccapi_data;
+    ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
 
-    if (status_ptr->user_context == NULL)
-    {
-        ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
-    }
-    else
-    {
-        svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
-    }
+    svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
 
     ccapi_logging_line("ccapi_process_device_request_status for target = \"%s\"", svc_receive->target);
     ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
@@ -1233,7 +1212,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */
-    if (ccapi_data->service.receive.user_callbacks.status_cb != NULL)
+    if (ccapi_data->config.receive_supported && ccapi_data->service.receive.user_callbacks.status_cb != NULL)
     {
        ccapi_data->service.receive.user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
                            svc_receive->response_required == CCAPI_TRUE && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
