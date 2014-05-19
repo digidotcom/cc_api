@@ -207,20 +207,20 @@ void Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_fs_dir_close_t * data, ccimp_
 }
 
 /* * * ccimp_fs_hash_status * * */
-void Mock_ccimp_fs_hash_status_create(void)
+void Mock_ccimp_fs_hash_alg_create(void)
 {
-    mock().installComparator("ccimp_fs_hash_status_t", ccimp_fs_hash_status_t_comparator);
+    mock().installComparator("ccimp_fs_get_hash_alg_t", ccimp_fs_get_hash_alg_t_comparator);
 }
 
-void Mock_ccimp_fs_hash_status_destroy(void)
+void Mock_ccimp_fs_hash_alg_destroy(void)
 {
-    mock("ccimp_fs_hash_status").checkExpectations();
+    mock("ccimp_fs_hash_alg").checkExpectations();
 }
 
-void Mock_ccimp_fs_hash_status_expectAndReturn(ccimp_fs_hash_status_t * data, ccimp_status_t retval)
+void Mock_ccimp_fs_hash_alg_expectAndReturn(ccimp_fs_get_hash_alg_t * data, ccimp_status_t retval)
 {
-    mock("ccimp_fs_hash_status").expectOneCall("ccimp_fs_hash_status")
-            .withParameterOfType("ccimp_fs_hash_status_t", "data", data)
+    mock("ccimp_fs_hash_alg").expectOneCall("ccimp_fs_hash_alg")
+            .withParameterOfType("ccimp_fs_get_hash_alg_t", "data", data)
             .andReturnValue(retval);
 }
 
@@ -445,18 +445,15 @@ ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const data)
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_close")->returnValue().value.intValue;
 }
 
-ccimp_status_t ccimp_fs_hash_status(ccimp_fs_hash_status_t * const data)
+ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const data)
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
 
-    mock_scope_c("ccimp_fs_hash_status")->actualCall("ccimp_fs_hash_status")->withParameterOfType("ccimp_fs_hash_status_t", "data", (void *)data);
-    data->status.file_size = 1024;
-    data->status.last_modified = 1397488930;
-    data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
+    mock_scope_c("ccimp_fs_hash_alg")->actualCall("ccimp_fs_hash_alg")->withParameterOfType("ccimp_fs_get_hash_alg_t", "data", (void *)data);
     data->hash_alg.actual = data->hash_alg.requested;
     *fs_context = 10;
     data->errnum.value = ENAMETOOLONG;
-    return (ccimp_status_t)mock_scope_c("ccimp_fs_hash_status")->returnValue().value.intValue;
+    return (ccimp_status_t)mock_scope_c("ccimp_fs_hash_alg")->returnValue().value.intValue;
 }
 
 ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const data)

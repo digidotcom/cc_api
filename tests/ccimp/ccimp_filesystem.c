@@ -24,7 +24,7 @@
 #define ccimp_fs_dir_read_entry             ccimp_fs_dir_read_entry_real
 #define ccimp_fs_dir_entry_status           ccimp_fs_dir_entry_status_real
 #define ccimp_fs_dir_close                  ccimp_fs_dir_close_real
-#define ccimp_fs_hash_status                ccimp_fs_hash_status_real
+#define ccimp_fs_hash_alg                   ccimp_fs_hash_alg_real
 #define ccimp_fs_hash_file                  ccimp_fs_hash_file_real
 #endif
 
@@ -336,7 +336,7 @@ ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const dir_close_data)
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_fs_hash_status(ccimp_fs_hash_status_t * const hash_status_data)
+ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const hash_status_data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
     struct stat statbuf;
@@ -344,31 +344,12 @@ ccimp_status_t ccimp_fs_hash_status(ccimp_fs_hash_status_t * const hash_status_d
 
     if (result == 0)
     {
-        hash_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
-        hash_status_data->status.last_modified = (uint32_t) statbuf.st_mtim.tv_sec;
-        if (S_ISDIR(statbuf.st_mode))
-        {
-           hash_status_data->status.type = CCIMP_FS_DIR_ENTRY_DIR;
-        }
-        else if (S_ISREG(statbuf.st_mode))
-        {
-           hash_status_data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
-           hash_status_data->status.file_size = (ccimp_file_offset_t) statbuf.st_size;
-        }
-
         switch (hash_status_data->hash_alg.requested)
         {
             case CCIMP_FS_HASH_NONE:
             case CCIMP_FS_HASH_MD5:
             case CCIMP_FS_HASH_BEST:
-                if (hash_status_data->status.type != CCIMP_FS_DIR_ENTRY_UNKNOWN)
-                {
                     hash_status_data->hash_alg.actual = CCIMP_FS_HASH_MD5;
-                }
-                else
-                {
-                    hash_status_data->hash_alg.actual = CCIMP_FS_HASH_NONE;
-                }
                 break;
 
             case CCIMP_FS_HASH_CRC32:
