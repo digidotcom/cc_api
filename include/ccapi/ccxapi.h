@@ -33,6 +33,8 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_handle_t const ccapi_hand
 ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_handle_t const ccapi_handle, ccapi_udp_info_t const * const udp_start);
 ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_handle_t const ccapi_handle, ccapi_udp_stop_t const * const udp_stop);
 
+ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_handle_t const ccapi_handle, ccapi_sms_info_t const * const sms_start);
+ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_handle_t const ccapi_handle, ccapi_sms_stop_t const * const sms_stop);
 
 ccapi_send_error_t ccxapi_send_data(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior);
 ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);

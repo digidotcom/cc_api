@@ -44,6 +44,8 @@ extern ccapi_bool_t ccapi_tcp_close_cb_called;
 extern ccapi_tcp_close_cause_t ccapi_tcp_close_cb_argument;
 extern ccapi_bool_t ccapi_udp_close_cb_called;
 extern ccapi_udp_close_cause_t ccapi_udp_close_cb_argument;
+extern ccapi_bool_t ccapi_sms_close_cb_called;
+extern ccapi_sms_close_cause_t ccapi_sms_close_cb_argument;
 
 
 void th_fill_start_structure_with_good_parameters(ccapi_start_t * start);
@@ -52,6 +54,7 @@ void th_fill_tcp_wan_ipv4_callbacks_info(ccapi_tcp_info_t * tcp_start);
 void th_fill_tcp_lan_ipv4(ccapi_tcp_info_t * tcp_start);
 
 void th_start_udp(void);
+void th_start_sms(void);
 
 void th_start_tcp_wan_ipv4_with_callbacks(void);
 void th_start_tcp_lan_ipv4(void);

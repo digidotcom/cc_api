@@ -559,19 +559,43 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_sm_udp_max_sessions:
             {
                 connector_config_sm_max_sessions_t * max_session = data;
-                max_session->max_sessions=ccapi_data->transport_udp.info->limit.max_sessions;
+                max_session->max_sessions = ccapi_data->transport_udp.info->limit.max_sessions;
                 break;
             }
         case connector_request_id_config_sm_udp_rx_timeout:
             {
                 connector_config_sm_rx_timeout_t * rx_timeout = data;
-                rx_timeout->rx_timeout=ccapi_data->transport_udp.info->limit.rx_timeout;
+                rx_timeout->rx_timeout = ccapi_data->transport_udp.info->limit.rx_timeout;
                 break;
             }
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
         case connector_request_id_config_sm_sms_max_sessions:
+            {
+                connector_config_sm_max_sessions_t * max_session = data;
+                max_session->max_sessions = ccapi_data->transport_sms.info->limit.max_sessions;
+                break;
+            }
         case connector_request_id_config_sm_sms_rx_timeout:
+            {
+                connector_config_sm_rx_timeout_t * rx_timeout = data;
+                rx_timeout->rx_timeout = ccapi_data->transport_sms.info->limit.rx_timeout;
+                break;
+            }
+        case connector_request_id_config_get_device_cloud_phone:
+            {
+                connector_config_pointer_string_t * device_cloud_phone = data;
+                device_cloud_phone->string = ccapi_data->transport_sms.info->phone_number;
+                device_cloud_phone->length = strlen(ccapi_data->transport_sms.info->phone_number);
+                break;
+            }
+        case connector_request_id_config_device_cloud_service_id:
+        {
+            connector_config_pointer_string_t * service_id = data;
+            service_id->string = ccapi_data->transport_sms.info->service_id;
+            service_id->length = strlen(ccapi_data->transport_sms.info->service_id);
+            break;
+        }
 #endif
         default:
             status = connector_callback_unrecognized;
@@ -706,6 +730,39 @@ static ccapi_bool_t ask_user_if_reconnect_udp(connector_close_status_t const clo
 
             case connector_close_status_device_error:
                 ccapi_close_cause = CCAPI_UDP_CLOSE_DATA_ERROR;
+                break;
+            case connector_close_status_no_keepalive:
+            case connector_close_status_cloud_redirected:
+            case connector_close_status_device_stopped:
+            case connector_close_status_device_terminated:
+            case connector_close_status_abort:
+                ASSERT_MSG_GOTO(0, done);
+                break;
+        }
+        reconnect = close_cb(ccapi_close_cause);
+    }
+done:
+    return reconnect;
+}
+#endif
+
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+static ccapi_bool_t ask_user_if_reconnect_sms(connector_close_status_t const close_status, ccapi_data_t const * const ccapi_data)
+{
+    ccapi_sms_close_cb_t const close_cb = ccapi_data->transport_sms.info->callback.close;
+    ccapi_sms_close_cause_t ccapi_close_cause;
+    ccapi_bool_t reconnect = CCAPI_FALSE;
+
+    if (close_cb != NULL)
+    {
+        switch (close_status)
+        {
+            case connector_close_status_cloud_disconnected:
+                ccapi_close_cause = CCAPI_SMS_CLOSE_DISCONNECTED;
+                break;
+
+            case connector_close_status_device_error:
+                ccapi_close_cause = CCAPI_SMS_CLOSE_DATA_ERROR;
                 break;
             case connector_close_status_no_keepalive:
             case connector_close_status_cloud_redirected:
@@ -1004,7 +1061,6 @@ connector_callback_status_t ccapi_network_sms_handler(connector_request_id_netwo
             ccimp_network_close_t close_data;
             connector_close_status_t const close_status = connector_close_data->status;
 
-            UNUSED_ARGUMENT(close_status);
             close_data.handle = connector_close_data->handle;
             ccimp_status = ccimp_network_sms_close(&close_data);
 
@@ -1018,9 +1074,29 @@ connector_callback_status_t ccapi_network_sms_handler(connector_request_id_netwo
                     goto done;
                     break;
             }
-            ccimp_status=CCIMP_STATUS_OK;
+
+            switch (close_status)
+            {
+                /* if either Device Cloud or our application cuts the connection, don't reconnect */
+                case connector_close_status_device_stopped:
+                case connector_close_status_device_terminated:
+                case connector_close_status_abort:
+                {
+                    connector_close_data->reconnect = connector_false;
+                    break;
+                }
+                case connector_close_status_cloud_disconnected:
+                case connector_close_status_device_error:
+                {
+                    connector_close_data->reconnect = CCAPI_BOOL_TO_CONNECTOR_BOOL(ask_user_if_reconnect_sms(close_status, ccapi_data));
+                    break;
+                }
+                case connector_close_status_cloud_redirected:
+                case connector_close_status_no_keepalive:
+                break;
+
+            }
             break;
-            /*TODO*/
         }
     }
 done:
@@ -1092,8 +1168,10 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
 #endif
 #if (defined CONNECTOR_TRANSPORT_SMS)
                 case connector_transport_sms:
-                    /* TODO */
+                {
+                    ccapi_data->transport_sms.started = CCAPI_FALSE;
                     break;
+                }
 #endif
                 case connector_transport_all:
                 {
@@ -1102,6 +1180,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
                     ccapi_data->transport_udp.started = CCAPI_FALSE;
 #endif
 #if (defined CONNECTOR_TRANSPORT_SMS)
+                    ccapi_data->transport_sms.started = CCAPI_FALSE;
 #endif
                     break;
                 }
