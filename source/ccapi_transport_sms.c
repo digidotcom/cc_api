@@ -17,16 +17,32 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_sms_start_error_t * const err
 
 static ccapi_bool_t valid_phone(ccapi_sms_info_t const * const sms_start, ccapi_sms_start_error_t * const error)
 {
+    ccapi_bool_t success = CCAPI_TRUE;
+    const char *valid_char = " 0123456789-+#";
+    int i =0;
+
     if (sms_start->phone_number == NULL || sms_start->phone_number[0] == '\0')
     {
         ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number");
         *error = CCAPI_SMS_START_ERROR_INVALID_PHONE;
-        return CCAPI_FALSE;
+        success = CCAPI_FALSE;
+        goto done;
     }
-    else
+
+    while (sms_start->phone_number[i] != '\0')
     {
-        return CCAPI_TRUE;
+        if(strchr(valid_char,sms_start->phone_number[i])==NULL)
+        {
+            ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number character '%c'",sms_start->phone_number[i]);
+            *error = CCAPI_SMS_START_ERROR_INVALID_PHONE;
+            success = CCAPI_FALSE;
+            goto done;
+        }
+        i++;
     }
+
+done:
+    return success;
 }
 
 static ccapi_bool_t valid_service_id(ccapi_sms_info_t const * const sms_start, ccapi_sms_start_error_t * const error)
@@ -55,28 +71,25 @@ static ccapi_bool_t copy_ccapi_sms_info_t_structure(ccapi_sms_info_t * const des
 
     if (source->phone_number != NULL)
     {
-        dest->phone_number = ccapi_malloc(strlen(source->phone_number) + 1);
+        dest->phone_number = ccapi_strdup(source->phone_number);
         if (!valid_malloc(dest->phone_number, error))
         {
             success = CCAPI_FALSE;
             goto done;
         }
-        strcpy(dest->phone_number, source->phone_number);
     }
     if (source->service_id != NULL)
     {
-        dest->service_id = ccapi_malloc(strlen(source->service_id) + 1);
+        dest->service_id = ccapi_strdup(source->service_id);
         if (!valid_malloc(dest->service_id, error))
         {
             success = CCAPI_FALSE;
             goto done;
         }
-        strcpy(dest->service_id, source->service_id);
     }
 done:
     return success;
 }
-
 
 ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_data, ccapi_sms_info_t const * const sms_start)
 {
@@ -104,13 +117,6 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
         error = CCAPI_SMS_START_ERROR_MAX_SESSIONS;
         goto done;
     }
-
-    ccapi_data->transport_sms.info = ccapi_malloc(sizeof *ccapi_data->transport_sms.info);
-    if (!valid_malloc(ccapi_data->transport_sms.info, &error))
-    {
-        goto done;
-    }
-
     if (!valid_phone(sms_start, &error))
     {
         goto done;
@@ -120,7 +126,14 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    if(copy_ccapi_sms_info_t_structure(ccapi_data->transport_sms.info, sms_start,&error)!= CCAPI_TRUE)
+    ccapi_data->transport_sms.info = ccapi_malloc(sizeof *ccapi_data->transport_sms.info);
+
+    if (!valid_malloc(ccapi_data->transport_sms.info, &error))
+    {
+        goto done;
+    }
+
+    if(!copy_ccapi_sms_info_t_structure(ccapi_data->transport_sms.info, sms_start,&error))
     {
         goto done;
     }

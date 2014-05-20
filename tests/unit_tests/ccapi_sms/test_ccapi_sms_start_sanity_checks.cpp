@@ -79,8 +79,12 @@ TEST(test_ccapi_sms_start_sanity_checks, testSmsInfoNoMemory)
 {
     ccapi_sms_start_error_t error;
     ccapi_sms_info_t sms_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+    char id[] = "";
     void * malloc_for_ccapi_sms = NULL;
 
+    sms_start.service_id = id;
+    sms_start.phone_number = phone_number;
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_sms_info_t), malloc_for_ccapi_sms);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INSUFFICIENT_MEMORY, error);
@@ -131,9 +135,10 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhoneNULL)
 {
     ccapi_sms_start_error_t error;
     ccapi_sms_info_t sms_start = {{0}};
+    char id[] = "";
 
     sms_start.phone_number = NULL;
-
+    sms_start.service_id = id;
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
 }
@@ -143,8 +148,24 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhoneEmpty)
     ccapi_sms_start_error_t error;
     ccapi_sms_info_t sms_start = {{0}};
     char phone_number[] = "";
+    char id[] = "";
 
     sms_start.phone_number = phone_number;
+    sms_start.service_id = id;
+
+    error = ccapi_start_transport_sms(&sms_start);
+    CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
+}
+
+TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhone)
+{
+    ccapi_sms_start_error_t error;
+    ccapi_sms_info_t sms_start = {{0}};
+    char phone_number[] = "#54 5+e";
+    char id[] = "";
+
+    sms_start.phone_number = phone_number;
+    sms_start.service_id = id;
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
