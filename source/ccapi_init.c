@@ -306,6 +306,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         }
     }
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     if (ccapi_data->transport_udp.started)
     {
         ccapi_udp_stop_t udp_stop;
@@ -324,7 +325,9 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
                 ASSERT_MSG(udp_stop_error != CCAPI_UDP_STOP_ERROR_NONE);
         }
     }
+#endif
 
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     if (ccapi_data->transport_sms.started)
     {
         ccapi_sms_stop_t sms_stop;
@@ -343,6 +346,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
                 ASSERT_MSG(sms_stop_error != CCAPI_SMS_STOP_ERROR_NONE);
         }
     }
+#endif
 
     {
         connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
