@@ -198,6 +198,66 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
     return connector_transport;
 }
 
+static connector_stop_condition_t ccapi_to_connector_stop(ccapi_stop_t ccapi_stop)
+{
+    connector_stop_condition_t stop_condition;
+
+    switch(ccapi_stop)
+    {
+        case CCAPI_STOP_GRACEFULLY:
+            stop_condition = connector_wait_sessions_complete;
+            break;
+        case CCAPI_STOP_IMMEDIATELY:
+            stop_condition = connector_stop_immediately;
+            break;
+    }
+
+    return stop_condition;
+}
+
+connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_stop_t behavior)
+{
+    connector_status_t connector_status;
+    connector_initiate_stop_request_t stop_data;
+
+    stop_data.transport = ccapi_to_connector_transport(transport);;
+    stop_data.user_context = NULL;
+    stop_data.condition = ccapi_to_connector_stop(behavior);
+
+    connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+
+    switch(connector_status)
+    {
+        case connector_success:
+            break;
+        case connector_init_error:
+        case connector_invalid_data:
+        case connector_service_busy:
+        case connector_invalid_data_size:
+        case connector_invalid_data_range:
+        case connector_keepalive_error:
+        case connector_bad_version:
+        case connector_device_terminated:
+        case connector_invalid_response:
+        case connector_no_resource:
+        case connector_unavailable:
+        case connector_idle:
+        case connector_working:
+        case connector_pending:
+        case connector_active:
+        case connector_abort:
+        case connector_device_error:
+        case connector_exceed_timeout:
+        case connector_invalid_payload_packet:
+        case connector_open_error:
+            ASSERT_MSG_GOTO(connector_status != connector_success, done);
+            break;
+    }
+
+done:
+    return connector_status;
+}
+
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler)

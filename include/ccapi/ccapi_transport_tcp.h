@@ -35,7 +35,6 @@ typedef enum {
 typedef enum {
     CCAPI_TCP_STOP_ERROR_NONE,
     CCAPI_TCP_STOP_ERROR_NOT_STARTED,
-    CCAPI_TCP_STOP_ERROR_TIMEOUT,
     CCAPI_TCP_STOP_ERROR_CCFSM
 } ccapi_tcp_stop_error_t;
 
@@ -98,7 +97,7 @@ typedef struct {
 } ccapi_tcp_info_t;
 
 typedef struct {
-    uint8_t timeout;
+    ccapi_stop_t behavior;
 } ccapi_tcp_stop_t;
 
 ccapi_tcp_start_error_t ccapi_start_transport_tcp(ccapi_tcp_info_t const * const tcp_start);

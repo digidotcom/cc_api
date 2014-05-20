@@ -276,13 +276,76 @@ done:
     return error;
 }
 
+ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_stop_t const * const tcp_stop);
+ccapi_tcp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data, ccapi_udp_stop_t const * const udp_stop);
+ccapi_tcp_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data, ccapi_sms_stop_t const * const sms_stop);
+
 ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
 
-    UNUSED_ARGUMENT(behavior);
-    if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+    if (!CCAPI_RUNNING(ccapi_data))
+    {
         goto done;
+    }
+
+    if (ccapi_data->transport_tcp.connected)
+    {
+        ccapi_tcp_stop_t tcp_stop;
+        ccapi_tcp_stop_error_t tcp_stop_error;
+
+        tcp_stop.behavior = behavior;
+        tcp_stop_error = ccxapi_stop_transport_tcp(ccapi_data, &tcp_stop);
+        switch(tcp_stop_error)
+        {
+            case CCAPI_TCP_STOP_ERROR_NONE:
+                break;
+            case CCAPI_TCP_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop TCP transport!");
+                break;
+            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+        }
+    }
+
+    if (ccapi_data->transport_udp.started)
+    {
+        ccapi_udp_stop_t udp_stop;
+        ccapi_tcp_stop_error_t tcp_stop_error;
+
+        udp_stop.behavior = behavior;
+        tcp_stop_error = ccxapi_stop_transport_udp(ccapi_data, &udp_stop);
+        switch(tcp_stop_error)
+        {
+            case CCAPI_TCP_STOP_ERROR_NONE:
+                break;
+            case CCAPI_TCP_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop UDP transport!");
+                break;
+            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+        }
+    }
+
+    if (ccapi_data->transport_sms.started)
+    {
+        ccapi_sms_stop_t sms_stop;
+        ccapi_tcp_stop_error_t tcp_stop_error;
+
+        sms_stop.behavior = behavior;
+        tcp_stop_error = ccxapi_stop_transport_sms(ccapi_data, &sms_stop);
+        switch(tcp_stop_error)
+        {
+            case CCAPI_TCP_STOP_ERROR_NONE:
+                break;
+            case CCAPI_TCP_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop SMS transport!");
+                break;
+            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+        }
+    }
+
     {
         connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
         switch(connector_status)
@@ -291,44 +354,26 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
             error = CCAPI_STOP_ERROR_NONE;
             break;
         case connector_init_error:
-            break;
         case connector_invalid_data_size:
-            break;
         case connector_invalid_data_range:
-            break;
         case connector_invalid_data:
-            break;
         case connector_keepalive_error:
-            break;
         case connector_bad_version:
-            break;
         case connector_device_terminated:
-            break;
         case connector_service_busy:
-            break;
         case connector_invalid_response:
-            break;
         case connector_no_resource:
-            break;
         case connector_unavailable:
-            break;
         case connector_idle:
-            break;
         case connector_working:
-            break;
         case connector_pending:
-            break;
         case connector_active:
-            break;
         case connector_abort:
-            break;
         case connector_device_error:
-            break;
         case connector_exceed_timeout:
-            break;
         case connector_invalid_payload_packet:
-            break;
         case connector_open_error:
+            ASSERT_MSG(connector_status != connector_success);
             break;
         }
     }

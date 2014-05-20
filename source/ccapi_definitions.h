@@ -203,6 +203,7 @@ void * ccapi_syncr_create_and_release(void);
 ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
 ccimp_status_t ccapi_syncr_release(void * syncr_object);
 ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
+connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_stop_t behavior);
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * file_handler);
 ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);
 ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler);
