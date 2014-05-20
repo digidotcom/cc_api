@@ -19,7 +19,6 @@ typedef enum {
 typedef enum {
     CCAPI_SMS_STOP_ERROR_NONE,
     CCAPI_SMS_STOP_ERROR_NOT_STARTED,
-    CCAPI_SMS_STOP_ERROR_TIMEOUT,
     CCAPI_SMS_STOP_ERROR_CCFSM
 } ccapi_sms_stop_error_t;
 
@@ -45,7 +44,7 @@ typedef struct {
 
 
 typedef struct {
-    uint8_t timeout;
+    ccapi_stop_t behavior;
 } ccapi_sms_stop_t;
 
 

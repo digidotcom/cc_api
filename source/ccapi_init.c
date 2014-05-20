@@ -1,6 +1,7 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
+#include "ccapi/ccxapi.h"
 
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
@@ -107,7 +108,7 @@ static ccapi_start_error_t check_malloc(void const * const p)
 }
 
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
-ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_start_t const * const start)
+ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data = NULL;
@@ -125,7 +126,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     }
 
     ccapi_data = ccapi_malloc(sizeof *ccapi_data);
-    *ccapi_handle = ccapi_data;
+    *ccapi_handle = (ccapi_handle_t)ccapi_data;
 
     error = check_malloc(ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
@@ -276,13 +277,73 @@ done:
     return error;
 }
 
-ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t const behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
+    ccapi_data_t * const ccapi_data = (ccapi_data_t *)ccapi_handle;
 
-    UNUSED_ARGUMENT(behavior);
-    if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
+    if (!CCAPI_RUNNING(ccapi_data))
+    {
         goto done;
+    }
+
+    if (ccapi_data->transport_tcp.connected)
+    {
+        ccapi_tcp_stop_t tcp_stop;
+        ccapi_tcp_stop_error_t tcp_stop_error;
+
+        tcp_stop.behavior = behavior;
+        tcp_stop_error = ccxapi_stop_transport_tcp(ccapi_handle, &tcp_stop);
+        switch(tcp_stop_error)
+        {
+            case CCAPI_TCP_STOP_ERROR_NONE:
+                break;
+            case CCAPI_TCP_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop TCP transport!");
+                break;
+            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+        }
+    }
+
+    if (ccapi_data->transport_udp.started)
+    {
+        ccapi_udp_stop_t udp_stop;
+        ccapi_udp_stop_error_t udp_stop_error;
+
+        udp_stop.behavior = behavior;
+        udp_stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
+        switch(udp_stop_error)
+        {
+            case CCAPI_UDP_STOP_ERROR_NONE:
+                break;
+            case CCAPI_UDP_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop UDP transport!");
+                break;
+            case CCAPI_UDP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(udp_stop_error != CCAPI_UDP_STOP_ERROR_NONE);
+        }
+    }
+
+    if (ccapi_data->transport_sms.started)
+    {
+        ccapi_sms_stop_t sms_stop;
+        ccapi_sms_stop_error_t sms_stop_error;
+
+        sms_stop.behavior = behavior;
+        sms_stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
+        switch(sms_stop_error)
+        {
+            case CCAPI_SMS_STOP_ERROR_NONE:
+                break;
+            case CCAPI_SMS_STOP_ERROR_CCFSM:
+                ccapi_logging_line("ccapi_stop: failed to stop SMS transport!");
+                break;
+            case CCAPI_SMS_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(sms_stop_error != CCAPI_SMS_STOP_ERROR_NONE);
+        }
+    }
+
     {
         connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
         switch(connector_status)
@@ -291,44 +352,26 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
             error = CCAPI_STOP_ERROR_NONE;
             break;
         case connector_init_error:
-            break;
         case connector_invalid_data_size:
-            break;
         case connector_invalid_data_range:
-            break;
         case connector_invalid_data:
-            break;
         case connector_keepalive_error:
-            break;
         case connector_bad_version:
-            break;
         case connector_device_terminated:
-            break;
         case connector_service_busy:
-            break;
         case connector_invalid_response:
-            break;
         case connector_no_resource:
-            break;
         case connector_unavailable:
-            break;
         case connector_idle:
-            break;
         case connector_working:
-            break;
         case connector_pending:
-            break;
         case connector_active:
-            break;
         case connector_abort:
-            break;
         case connector_device_error:
-            break;
         case connector_exceed_timeout:
-            break;
         case connector_invalid_payload_packet:
-            break;
         case connector_open_error:
+            ASSERT_MSG(connector_status != connector_success);
             break;
         }
     }
@@ -355,7 +398,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-    error = ccxapi_start(&ccapi_data_single_instance, start);
+    error = ccxapi_start((ccapi_handle_t *)&ccapi_data_single_instance, start);
 
     switch (error)
     {
@@ -381,7 +424,7 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error;
 
-    error = ccxapi_stop(ccapi_data_single_instance, behavior);
+    error = ccxapi_stop((ccapi_handle_t)ccapi_data_single_instance, behavior);
     switch (error)
     {
         case CCAPI_STOP_ERROR_NONE:

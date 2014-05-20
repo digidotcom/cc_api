@@ -82,3 +82,35 @@ TEST(test_ccapi_stop, testCcapiStopImmediately)
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
 }
+
+TEST(test_ccapi_stop, testCcapiStopTCPOk)
+{
+    ccapi_stop_error_t stop_error;
+
+    th_start_ccapi();
+    th_start_tcp_lan_ipv4();
+
+    connector_initiate_stop_request_t stop_data = {connector_transport_tcp, connector_stop_immediately, NULL};
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_stop, &stop_data, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+    stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+    CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+    CHECK(ccapi_data_single_instance == NULL);
+}
+
+TEST(test_ccapi_stop, testCcapiStopTCPFail)
+{
+    ccapi_stop_error_t stop_error;
+
+    th_start_ccapi();
+    th_start_tcp_lan_ipv4();
+
+    connector_initiate_stop_request_t stop_data = {connector_transport_tcp, connector_stop_immediately, NULL};
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_stop, &stop_data, connector_device_error);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+    stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+    CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+    CHECK(ccapi_data_single_instance == NULL);
+}
