@@ -1,6 +1,7 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
+#include "ccapi/ccxapi.h"
 
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
@@ -107,7 +108,7 @@ static ccapi_start_error_t check_malloc(void const * const p)
 }
 
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
-ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_start_t const * const start)
+ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data = NULL;
@@ -125,7 +126,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     }
 
     ccapi_data = ccapi_malloc(sizeof *ccapi_data);
-    *ccapi_handle = ccapi_data;
+    *ccapi_handle = (ccapi_handle_t)ccapi_data;
 
     error = check_malloc(ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
@@ -276,13 +277,10 @@ done:
     return error;
 }
 
-ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_stop_t const * const tcp_stop);
-ccapi_tcp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data, ccapi_udp_stop_t const * const udp_stop);
-ccapi_tcp_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data, ccapi_sms_stop_t const * const sms_stop);
-
-ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t const behavior)
+ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
+    ccapi_data_t * const ccapi_data = (ccapi_data_t *)ccapi_handle;
 
     if (!CCAPI_RUNNING(ccapi_data))
     {
@@ -295,7 +293,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
         ccapi_tcp_stop_error_t tcp_stop_error;
 
         tcp_stop.behavior = behavior;
-        tcp_stop_error = ccxapi_stop_transport_tcp(ccapi_data, &tcp_stop);
+        tcp_stop_error = ccxapi_stop_transport_tcp(ccapi_handle, &tcp_stop);
         switch(tcp_stop_error)
         {
             case CCAPI_TCP_STOP_ERROR_NONE:
@@ -314,7 +312,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
         ccapi_tcp_stop_error_t tcp_stop_error;
 
         udp_stop.behavior = behavior;
-        tcp_stop_error = ccxapi_stop_transport_udp(ccapi_data, &udp_stop);
+        tcp_stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
         switch(tcp_stop_error)
         {
             case CCAPI_TCP_STOP_ERROR_NONE:
@@ -333,7 +331,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_data_t * const ccapi_data, ccapi_stop_t con
         ccapi_tcp_stop_error_t tcp_stop_error;
 
         sms_stop.behavior = behavior;
-        tcp_stop_error = ccxapi_stop_transport_sms(ccapi_data, &sms_stop);
+        tcp_stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
         switch(tcp_stop_error)
         {
             case CCAPI_TCP_STOP_ERROR_NONE:
@@ -400,7 +398,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
 	ccapi_start_error_t error;
 
-    error = ccxapi_start(&ccapi_data_single_instance, start);
+    error = ccxapi_start((ccapi_handle_t *)&ccapi_data_single_instance, start);
 
     switch (error)
     {
@@ -426,7 +424,7 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error;
 
-    error = ccxapi_stop(ccapi_data_single_instance, behavior);
+    error = ccxapi_stop((ccapi_handle_t)ccapi_data_single_instance, behavior);
     switch (error)
     {
         case CCAPI_STOP_ERROR_NONE:
