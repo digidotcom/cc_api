@@ -1086,7 +1086,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
     svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
 
-    ccapi_logging_line("ccapi_process_device_request_data for target = \"%s\"", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_data for target = '%s'", svc_receive->target);
 
     if (!ccapi_data->config.receive_supported)
     {
@@ -1151,7 +1151,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
 
     svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
 
-    ccapi_logging_line("ccapi_process_device_request_response for target = \"%s\"", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_response for target = '%s'", svc_receive->target);
 
     if (!svc_receive->response_required)
     {
@@ -1201,7 +1201,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
 
     svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
 
-    ccapi_logging_line("ccapi_process_device_request_status for target = \"%s\"", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_status for target = '%s'", svc_receive->target);
     ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
 
     /* Prior reported errors by ccapi have priority over the ones reported by the cloud */
@@ -1223,7 +1223,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
                 ccapi_logging_line("ccapi_process_device_request_status: session_error=%d", status_ptr->session_error);
                 break;
             case connector_data_service_status_COUNT:
-                ASSERT_MSG_GOTO(0, done);
+                ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
                 break;
         }
     }
