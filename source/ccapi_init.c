@@ -53,7 +53,13 @@ static void free_filesystem_dir_entry_list(ccapi_data_t * const ccapi_data)
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 static void free_receive_target_list(ccapi_data_t * const ccapi_data)
 {
-    ccapi_receive_target_t * target_entry = ccapi_data->service.receive.target_list;
+    ccimp_status_t ccimp_status;
+    ccapi_receive_target_t * target_entry;
+
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+
+    target_entry = ccapi_data->service.receive.target_list;
 
     while (target_entry != NULL)
     {
@@ -62,6 +68,9 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
         ccapi_free(target_entry);
         target_entry = next_target_entry;
     }
+
+    ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 }
 #endif
 
