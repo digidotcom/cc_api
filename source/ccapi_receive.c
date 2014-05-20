@@ -42,7 +42,7 @@ done:
     return error;
 }
 
-static ccapi_receive_target_t * create_target_entry(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb)
+static ccapi_receive_target_t * create_target_entry(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
 {
     ccapi_receive_target_t * new_target_entry = ccapi_malloc(sizeof *new_target_entry);
 
@@ -60,12 +60,13 @@ static ccapi_receive_target_t * create_target_entry(char const * const target, c
 
     new_target_entry->user_callbacks.data_cb = data_cb;
     new_target_entry->user_callbacks.status_cb = status_cb;
+    new_target_entry->max_request_size = max_request_size;
     new_target_entry->next = NULL;
 done:
     return new_target_entry;
 }
 
-ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data, char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb /* TODO: size_t maximum_request_size */)
+ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data, char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
 {
     ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
     ccapi_receive_target_t * new_target_entry;
@@ -102,7 +103,7 @@ ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data,
         goto done;
     }
 
-    new_target_entry = create_target_entry(target, data_cb, status_cb);
+    new_target_entry = create_target_entry(target, data_cb, status_cb, max_request_size);
     if (new_target_entry == NULL)
     {
         error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
@@ -211,9 +212,9 @@ done:
     return error;
 }
 
-ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb)
+ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
 {
-    return ccxapi_receive_add_target(ccapi_data_single_instance, target, data_cb, status_cb);
+    return ccxapi_receive_add_target(ccapi_data_single_instance, target, data_cb, status_cb, max_request_size);
 }
 
 ccapi_receive_error_t ccapi_receive_remove_target(char const * const target)

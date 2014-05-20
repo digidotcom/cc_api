@@ -90,6 +90,7 @@ typedef struct ccapi_receive_target
         ccapi_receive_data_cb_t data_cb;
         ccapi_receive_status_cb_t status_cb;
     } user_callbacks;
+    size_t max_request_size;
     struct ccapi_receive_target * next;
 } ccapi_receive_target_t;
 #endif
@@ -155,6 +156,7 @@ typedef struct
         ccapi_receive_data_cb_t data_cb;
         ccapi_receive_status_cb_t status_cb;
     } user_callbacks;
+    size_t max_request_size;
     ccapi_buffer_info_t request_buffer_info;
     ccapi_buffer_info_t response_buffer_info;
     ccapi_buffer_info_t response_processing;

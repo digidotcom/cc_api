@@ -202,7 +202,11 @@ int main (void)
     {
         ccapi_receive_error_t receive_error;
         
-        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb);
+        #define DESIRED_MAX_REQUEST_SIZE 5
+        /* A request up to DESIRED_MAX_REQUEST_SIZE will success but app_get_time_cb() will complain that this command doesn't have arguments.
+         * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
+         */
+        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
@@ -210,7 +214,6 @@ int main (void)
         else
         {
             printf("ccapi_receive_add_target failed with error %d\n", receive_error);
-            goto done;
         }
     }
 
