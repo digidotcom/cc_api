@@ -309,38 +309,38 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     if (ccapi_data->transport_udp.started)
     {
         ccapi_udp_stop_t udp_stop;
-        ccapi_tcp_stop_error_t tcp_stop_error;
+        ccapi_udp_stop_error_t udp_stop_error;
 
         udp_stop.behavior = behavior;
-        tcp_stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
-        switch(tcp_stop_error)
+        udp_stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
+        switch(udp_stop_error)
         {
-            case CCAPI_TCP_STOP_ERROR_NONE:
+            case CCAPI_UDP_STOP_ERROR_NONE:
                 break;
-            case CCAPI_TCP_STOP_ERROR_CCFSM:
+            case CCAPI_UDP_STOP_ERROR_CCFSM:
                 ccapi_logging_line("ccapi_stop: failed to stop UDP transport!");
                 break;
-            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
-                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+            case CCAPI_UDP_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(udp_stop_error != CCAPI_UDP_STOP_ERROR_NONE);
         }
     }
 
     if (ccapi_data->transport_sms.started)
     {
         ccapi_sms_stop_t sms_stop;
-        ccapi_tcp_stop_error_t tcp_stop_error;
+        ccapi_sms_stop_error_t sms_stop_error;
 
         sms_stop.behavior = behavior;
-        tcp_stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
-        switch(tcp_stop_error)
+        sms_stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
+        switch(sms_stop_error)
         {
-            case CCAPI_TCP_STOP_ERROR_NONE:
+            case CCAPI_SMS_STOP_ERROR_NONE:
                 break;
-            case CCAPI_TCP_STOP_ERROR_CCFSM:
+            case CCAPI_SMS_STOP_ERROR_CCFSM:
                 ccapi_logging_line("ccapi_stop: failed to stop SMS transport!");
                 break;
-            case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
-                ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+            case CCAPI_SMS_STOP_ERROR_NOT_STARTED:
+                ASSERT_MSG(sms_stop_error != CCAPI_SMS_STOP_ERROR_NONE);
         }
     }
 
