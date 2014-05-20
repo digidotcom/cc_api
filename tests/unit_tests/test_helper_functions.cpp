@@ -124,6 +124,25 @@ void th_stop_ccapi(ccapi_data_t * const ccapi_data)
 {
     ccapi_stop_error_t stop_error;
 
+    if (ccapi_data->transport_tcp.connected)
+    {
+        connector_initiate_stop_request_t stop_data = {connector_transport_tcp, connector_stop_immediately, NULL};
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_stop, &stop_data, connector_success);
+    }
+
+    if (ccapi_data->transport_udp.started)
+    {
+        connector_initiate_stop_request_t stop_data = {connector_transport_udp, connector_stop_immediately, NULL};
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_stop, &stop_data, connector_success);
+    }
+
+    if (ccapi_data->transport_sms.started)
+    {
+        connector_initiate_stop_request_t stop_data = {connector_transport_sms, connector_stop_immediately, NULL};
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_stop, &stop_data, connector_success);
+    }
+
     Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
     stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
     CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
