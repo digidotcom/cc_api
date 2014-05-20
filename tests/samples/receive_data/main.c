@@ -10,10 +10,13 @@
  * =======================================================================
  */
 #include <stdio.h>
+#include <time.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
 #define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+
+#define DESIRED_MAX_RESPONSE_SIZE 400
 
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
@@ -58,16 +61,24 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     return reconnect;
 }
 
-static ccapi_bool_t app_receive_accept_cb(char const * const target, ccapi_transport_t const transport)
+static ccapi_bool_t app_receive_default_accept_cb(char const * const target, ccapi_transport_t const transport)
 {
-    printf("app_receive_accept_cb: target = \"%s\". transport = %d\n", target, transport);
+    ccapi_bool_t accept_target = CCAPI_TRUE;
 
-    return CCAPI_TRUE;
+    printf("app_receive_default_accept_cb: target = '%s'. transport = %d\n", target, transport);
+
+    if (transport == CCAPI_TRANSPORT_SMS)
+    {
+        /* Don't accept requests comming throught SMS for not registered targets */
+        accept_target = CCAPI_FALSE;
+    }
+
+    return accept_target;
 }
 
-static void app_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void app_receive_default_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
-    printf("app_receive_data_cb: target = \"%s\". transport = %d. Error = %d\n", target, transport, receive_error);
+    printf("app_receive_default_data_cb: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
 
     /* Print data */
     if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
@@ -78,14 +89,14 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
         {
             printf("%c", ((char*)request_buffer_info->buffer)[i]);
         }
-        printf("\nTotal=%d bytes\n", request_buffer_info->length);
+        printf("\napp_receive_default_data_cb received total %d bytes\n", request_buffer_info->length);
     }
 
     /* Provide response */
     if (response_buffer_info != NULL)
     {
-        response_buffer_info->buffer = malloc(200);
-        printf("app_receive_data_cb: Providing response in buffer at %p\n", response_buffer_info->buffer);
+        response_buffer_info->buffer = malloc(DESIRED_MAX_RESPONSE_SIZE);
+        printf("app_receive_default_data_cb: Providing response in buffer at %p\n", response_buffer_info->buffer);
 
         if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
         {
@@ -100,9 +111,41 @@ static void app_receive_data_cb(char const * const target, ccapi_transport_t con
     return;
 }
 
-static void app_receive_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void app_get_time_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
-    printf("app_receive_status_cb: target = \"%s\". transport = %d. Error = %d\n", target, transport, receive_error);
+    size_t max_length;
+
+    printf("app_get_time_cb: transport = %d. Error = %d\n", transport, receive_error);
+
+    if (transport == CCAPI_TRANSPORT_SMS)
+        max_length = 80;
+    else
+        max_length = DESIRED_MAX_RESPONSE_SIZE;
+
+    response_buffer_info->buffer = malloc(max_length);
+
+    assert(response_buffer_info != NULL);
+
+    if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
+    {
+        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
+    } 
+    else if (request_buffer_info->length != 0)
+    {
+        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Invalid argument, this call does not take arguments");
+    }
+    else
+    {
+        time_t t = time(NULL);
+        response_buffer_info->length = snprintf(response_buffer_info->buffer, max_length, "time: %s", ctime(&t));
+    }
+
+    return;
+}
+
+static void app_receive_default_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+{
+    printf("app_receive_default_status_cb: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
 
     if (response_buffer_info != NULL)
     {
@@ -121,7 +164,7 @@ int main (void)
     ccapi_tcp_info_t tcp_info = {{0}};
     uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
     uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
-    ccapi_receive_service_t receive_service = {app_receive_accept_cb, app_receive_data_cb, app_receive_status_cb};
+    ccapi_receive_service_t receive_service = {app_receive_default_accept_cb, app_receive_default_data_cb, app_receive_default_status_cb};
 
     fill_start_structure_with_good_parameters(&start);
     start.service.receive = &receive_service;
@@ -154,6 +197,21 @@ int main (void)
     {
         printf("ccapi_start_transport_tcp failed with error %d\n", tcp_start_error);
         goto done;
+    }
+
+    {
+        ccapi_receive_error_t receive_error;
+        
+        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb);
+        if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
+        {
+            printf("ccapi_receive_add_target success\n");
+        }
+        else
+        {
+            printf("ccapi_receive_add_target failed with error %d\n", receive_error);
+            goto done;
+        }
     }
 
     printf("loop forever\n");

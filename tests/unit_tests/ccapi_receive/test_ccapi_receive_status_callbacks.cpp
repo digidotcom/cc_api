@@ -84,6 +84,8 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_NoResponse)
     char * target = (char *)malloc(sizeof(TEST_TARGET));
     memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
     svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
@@ -123,6 +125,8 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_WithResponse)
     char * target = (char *)malloc(sizeof(TEST_TARGET));
     memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
     svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = (void *)exp_response;
     svc_receive->response_buffer_info.length = sizeof exp_response;
@@ -166,6 +170,8 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_CANCEL)
     char * target = (char *)malloc(sizeof(TEST_TARGET));
     memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
     svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
@@ -199,6 +205,8 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_TIMEOUT)
     char * target = (char *)malloc(sizeof(TEST_TARGET));
     memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
     svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
@@ -232,6 +240,8 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_SESSION_ERROR)
     char * target = (char *)malloc(sizeof(TEST_TARGET));
     memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
     svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;

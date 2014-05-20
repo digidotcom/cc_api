@@ -3,9 +3,13 @@
 
 typedef enum {
     CCAPI_RECEIVE_ERROR_NONE,
-    CCAPI_RECEIVE_ERROR_CCAPI_STOPPED,
+    CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING,
     CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT,
     CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY,
+    CCAPI_RECEIVE_ERROR_INVALID_TARGET,
+    CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED,
+    CCAPI_RECEIVE_ERROR_TARGET_ALREADY_ADDED,
+    CCAPI_RECEIVE_ERROR_SYNCR_FAILED,
     CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET,
     CCAPI_RECEIVE_ERROR_STATUS_CANCEL,
     CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT,
@@ -21,5 +25,8 @@ typedef struct {
     ccapi_receive_data_cb_t data_cb;
     ccapi_receive_status_cb_t status_cb;
 } ccapi_receive_service_t;
+
+ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb);
+ccapi_receive_error_t ccapi_receive_remove_target(char const * const target);
 
 #endif

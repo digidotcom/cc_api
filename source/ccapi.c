@@ -1005,15 +1005,11 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
     ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
 
-    ccapi_logging_line("ccapi_process_device_request_target for target = \"%s\"", target_ptr->target);
-
-    /* TODO: Check if it's a registered target */
+    ccapi_logging_line("ccapi_process_device_request_target for target = '%s'", target_ptr->target);
 
     ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
 
     {
-        const size_t target_size = strlen(target_ptr->target) + 1;
-
         if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
         {
             /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
@@ -1023,6 +1019,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         target_ptr->user_context = svc_receive;
 
         svc_receive->target = NULL;
+        svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
+        svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
         svc_receive->request_buffer_info.buffer = NULL;
         svc_receive->request_buffer_info.length = 0;
         svc_receive->response_buffer_info.buffer = NULL;
@@ -1043,11 +1041,36 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             goto done;
         }
 
-        if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+        /* Check if it's a registered target */
         {
-            goto done;
+            ccapi_receive_target_t * added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
+            if (added_target != NULL)
+            {
+                const size_t target_size = strlen(added_target->target) + 1;
+
+                if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+                {
+                    goto done;
+                }
+                memcpy(svc_receive->target, added_target->target, target_size);
+
+                svc_receive->user_callbacks.data_cb = added_target->user_callbacks.data_cb;
+                svc_receive->user_callbacks.status_cb = added_target->user_callbacks.status_cb;
+
+                connector_status = connector_callback_continue;
+                goto done;
+            }
         }
-        memcpy(svc_receive->target, target_ptr->target, target_size);
+
+        {
+            const size_t target_size = strlen(target_ptr->target) + 1;
+
+            if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+            {
+                goto done;
+            }
+            memcpy(svc_receive->target, target_ptr->target, target_size);
+        }
 
         /* Ask user if accepts target */
         {
@@ -1118,11 +1141,11 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
     if (data_ptr->more_data == connector_false)
     {
-        ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
+        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
 
         /* Pass data to the user and get possible response from user */ 
         {
-            ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
+            svc_receive->user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
                                                                &svc_receive->request_buffer_info, 
                                                                svc_receive->response_required ? &svc_receive->response_buffer_info : NULL, 
                                                                svc_receive->receive_error);
@@ -1163,10 +1186,10 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
      */
     if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->config.receive_supported)
     {
-        ASSERT_MSG_GOTO(ccapi_data->service.receive.user_callbacks.data_cb != NULL, done);
+        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
 
         /* Get response from user */ 
-        ccapi_data->service.receive.user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
+        svc_receive->user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
                                                            NULL, 
                                                            &svc_receive->response_buffer_info, 
                                                            svc_receive->receive_error);
@@ -1229,9 +1252,9 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */
-    if (ccapi_data->config.receive_supported && ccapi_data->service.receive.user_callbacks.status_cb != NULL)
+    if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
     {
-       ccapi_data->service.receive.user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
+       svc_receive->user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
                            svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
     }

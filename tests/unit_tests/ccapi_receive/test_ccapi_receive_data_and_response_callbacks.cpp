@@ -202,6 +202,8 @@ TEST(test_ccapi_receive_data_callback, testOK_BufferNULL)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -249,6 +251,8 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallOneResponseCall)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -315,6 +319,8 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoDataCalls)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -368,6 +374,8 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_FALSE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -416,6 +424,8 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -498,6 +508,8 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall_NoRoom)
     ccapi_svc_receive_t svc_receive = {0};
     const char target[] = TEST_TARGET;
     svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;
