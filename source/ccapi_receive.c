@@ -190,8 +190,8 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
     }
 
     {
-        ccapi_receive_target_t * next_target_entry = (*p_target)->next;
         ccapi_receive_target_t * target_entry = *p_target;
+        ccapi_receive_target_t * next_target_entry = target_entry->next;
 
         ccapi_free(target_entry->target);
         ccapi_free(target_entry);

@@ -103,7 +103,8 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
         if (ccapi_data->service.receive.receive_syncr != NULL)
         {
-            ASSERT_MSG(ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr) == CCIMP_STATUS_OK);
+            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr); 
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
     }
 #endif
