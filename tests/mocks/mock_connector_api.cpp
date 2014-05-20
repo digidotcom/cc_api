@@ -321,6 +321,14 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
 #endif
 #if (defined CONNECTOR_TRANSPORT_SMS)
                 case connector_transport_sms:
+                    if ((ccapi_data->transport_sms.started) && mock_info->connector_initiate_transport_stop_info.stop_transport)
+                    {
+                        connector_request_id_t request_id;
+                        connector_initiate_stop_request_t stop_status = {connector_transport_sms, connector_wait_sessions_complete, NULL};
+
+                        request_id.status_request = connector_request_id_status_stop_completed;
+                        ccapi_connector_callback(connector_class_id_status, request_id, &stop_status, (void *)ccapi_data);
+                    }
                     break;
 #endif
                 case connector_transport_all:
