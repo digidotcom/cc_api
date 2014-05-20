@@ -832,7 +832,7 @@ static ccapi_bool_t ask_user_if_reconnect_udp(connector_close_status_t const clo
             case connector_close_status_device_stopped:
             case connector_close_status_device_terminated:
             case connector_close_status_abort:
-                ASSERT_MSG_GOTO(close_status != connector_close_status_cloud_disconnected, done);
+                ASSERT_MSG_GOTO(close_status == connector_close_status_cloud_disconnected || close_status == connector_close_status_device_error, done);
                 break;
         }
         reconnect = close_cb(ccapi_close_cause);
@@ -865,11 +865,12 @@ static ccapi_bool_t ask_user_if_reconnect_sms(connector_close_status_t const clo
             case connector_close_status_device_stopped:
             case connector_close_status_device_terminated:
             case connector_close_status_abort:
-                ASSERT_MSG_GOTO(close_status != connector_close_status_cloud_disconnected, done);
+                ASSERT_MSG_GOTO(close_status == connector_close_status_cloud_disconnected || close_status == connector_close_status_device_error, done);
                 break;
         }
         reconnect = close_cb(ccapi_close_cause);
     }
+
 done:
     return reconnect;
 }
