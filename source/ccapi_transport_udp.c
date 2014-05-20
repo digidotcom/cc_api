@@ -22,7 +22,7 @@ static void copy_ccapi_udp_info_t_structure(ccapi_udp_info_t * const dest, ccapi
 
     if (dest->limit.max_sessions == 0)
     {
-        dest->limit.max_sessions = CCAPI_SM_MAX_SESSIONS_DEFAULT;
+        dest->limit.max_sessions = CCAPI_SM_UDP_MAX_SESSIONS_DEFAULT;
     }
 }
 
@@ -45,7 +45,7 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    if (udp_start->limit.max_sessions > CCAPI_SM_MAX_SESSIONS_LIMIT)
+    if (udp_start->limit.max_sessions > CCAPI_SM_UDP_MAX_SESSIONS_LIMIT)
     {
         ccapi_logging_line("ccxapi_start_transport_udp: invalid argument MAX SESSIONS");
         error = CCAPI_UDP_START_ERROR_MAX_SESSIONS;

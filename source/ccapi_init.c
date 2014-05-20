@@ -207,6 +207,9 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     ccapi_data->transport_udp.started = CCAPI_FALSE;
 #endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+    ccapi_data->transport_sms.started = CCAPI_FALSE;
+#endif
     {
         ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
         error = check_malloc(ccapi_data->thread.connector_run);

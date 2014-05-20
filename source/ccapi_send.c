@@ -70,7 +70,7 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
             break;
         case CCAPI_TRANSPORT_SMS:
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
-            p_transport_started = &ccapi_data->transport_udp.started;
+            p_transport_started = &ccapi_data->transport_sms.started;
 #endif
             break;
     }
