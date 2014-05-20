@@ -143,6 +143,22 @@ TEST(test_ccapi_receive_add_target, testTargetNull)
     CHECK_EQUAL(CCAPI_RECEIVE_ERROR_INVALID_TARGET, error);
 }
 
+TEST(test_ccapi_receive_add_target, testDataCallbackNull)
+{
+    ccapi_receive_error_t error;
+
+    error = ccapi_receive_add_target(TEST_TARGET, NULL, specific_receive_status_cb);
+    CHECK_EQUAL(CCAPI_RECEIVE_ERROR_INVALID_DATA_CB, error);
+}
+
+TEST(test_ccapi_receive_add_target, testStatusCallbackNull)
+{
+    ccapi_receive_error_t error;
+
+    error = ccapi_receive_add_target(TEST_TARGET, specific_receive_data_cb, NULL);
+    CHECK_EQUAL(CCAPI_RECEIVE_ERROR_NONE, error);
+}
+
 TEST(test_ccapi_receive_add_target, testTargetEmpty)
 {
     ccapi_receive_error_t error;

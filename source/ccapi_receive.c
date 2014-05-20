@@ -75,6 +75,13 @@ ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data,
         error = CCAPI_RECEIVE_ERROR_INVALID_TARGET;
         goto done;
     }
+
+    if (data_cb == NULL)
+    {
+        error = CCAPI_RECEIVE_ERROR_INVALID_DATA_CB;
+        goto done;
+    }
+
     if (!CCAPI_RUNNING(ccapi_data))
     {
         ccapi_logging_line("ccxapi_receive_add_target: CCAPI not running");
