@@ -97,10 +97,10 @@ ccimp_status_t ccimp_network_udp_open(ccimp_network_open_t * const data)
             return CCIMP_STATUS_ERROR;
         }
         status= udp_connect(fd, ip_addr);
-        if ( status < 0)
+        if ( status != CCIMP_STATUS_OK)
         {
             data->handle = NULL;
-            return CCIMP_STATUS_ERROR;
+            return status;
         }
     }
     return CCIMP_STATUS_OK;
