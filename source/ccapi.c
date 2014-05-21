@@ -1384,7 +1384,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 
         send_ptr->bytes_used = bytes_expected_to_read;
         svc_send->bytes_remaining -= send_ptr->bytes_used;
-        send_ptr->more_data = (svc_send->bytes_remaining > 0) ? connector_true : connector_false;
+        send_ptr->more_data = svc_send->bytes_remaining > 0 ? connector_true : connector_false;
 
         status = connector_callback_continue;
     }
@@ -1404,7 +1404,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
-    ccapi_logging_line("Received %s response from Device Cloud", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
+    ccapi_logging_line("Received %s response from Device Cloud", resp_ptr->response == connector_data_service_send_response_success ? "success" : "error");
 
     switch (resp_ptr->response)
     {
@@ -1491,7 +1491,7 @@ static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receiv
  
     *ptr = ccapi_malloc(size);
 
-    success = (*ptr == NULL) ? CCAPI_FALSE : CCAPI_TRUE;
+    success = *ptr == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     
     if (!success)
     {
