@@ -50,6 +50,30 @@ static void free_filesystem_dir_entry_list(ccapi_data_t * const ccapi_data)
 }
 #endif
 
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+static void free_receive_target_list(ccapi_data_t * const ccapi_data)
+{
+    ccimp_status_t ccimp_status;
+    ccapi_receive_target_t * target_entry;
+
+    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+
+    target_entry = ccapi_data->service.receive.target_list;
+
+    while (target_entry != NULL)
+    {
+        ccapi_receive_target_t * const next_target_entry = target_entry->next;
+        ccapi_free(target_entry->target);
+        ccapi_free(target_entry);
+        target_entry = next_target_entry;
+    }
+
+    ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+}
+#endif
+
 static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 {
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
@@ -65,6 +89,22 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         if (ccapi_data->service.file_system.virtual_dir_list != NULL)
         {
             free_filesystem_dir_entry_list(ccapi_data);
+        }
+    }
+#endif
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        if (ccapi_data->service.receive.target_list != NULL)
+        {
+            free_receive_target_list(ccapi_data);
+        }
+
+        if (ccapi_data->service.receive.receive_syncr != NULL)
+        {
+            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr); 
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
     }
 #endif
@@ -118,6 +158,7 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     ccapi_data->initiate_action_syncr = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
     ccapi_data->file_system_syncr = NULL;
+
     /* Initialize one single time for all connector instances the logging syncr object */
     if (logging_syncr == NULL)
     {
@@ -136,6 +177,8 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->initiate_action_syncr = NULL;
+
+    ccapi_data->config.receive_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -191,16 +234,20 @@ ccapi_start_error_t ccxapi_start(ccapi_data_t * * const ccapi_handle, ccapi_star
             goto done;
         }
 
+        ccapi_data->service.receive.receive_syncr = ccapi_syncr_create_and_release();
+        if (ccapi_data->service.receive.receive_syncr == NULL)
+        {
+            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            goto done;
+        }
+
         ccapi_data->config.receive_supported = CCAPI_TRUE;
         ccapi_data->service.receive.user_callbacks.accept_cb = start->service.receive->accept_cb;
         ccapi_data->service.receive.user_callbacks.data_cb = start->service.receive->data_cb;
         ccapi_data->service.receive.user_callbacks.status_cb = start->service.receive->status_cb;
+        ccapi_data->service.receive.target_list = NULL;
     }
-    else
 #endif
-    {
-        ccapi_data->config.receive_supported = CCAPI_FALSE;
-    }
 
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
     error = check_malloc(ccapi_data->connector_handle);
