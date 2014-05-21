@@ -51,7 +51,7 @@ CFLAGS += -g -O0 -DDEBUG
 # Target output to generate.
 APP_SRCS = main.c
 CC_PRIVATE_SRCS = $(CCFSM_PRIVATE_DIR)/connector_api.c
-CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_tcp.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem.c $(CCAPI_PRIVATE_DIR)/ccapi_send.c $(CCAPI_PRIVATE_DIR)/ccapi_receive.c  $(CCAPI_PRIVATE_DIR)/ccapi_datapoints_binary.c
+CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_data_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_tcp.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem.c $(CCAPI_PRIVATE_DIR)/ccapi_send.c $(CCAPI_PRIVATE_DIR)/ccapi_receive.c  $(CCAPI_PRIVATE_DIR)/ccapi_datapoints_binary.c
 PLATFORM_SRCS = $(PLATFORM_DIR)/ccimp_os.c $(PLATFORM_DIR)/ccimp_logging.c $(PLATFORM_DIR)/ccimp_hal.c $(PLATFORM_DIR)/ccimp_network_tcp.c $(PLATFORM_DIR)/dns_helper.c $(PLATFORM_DIR)/ccimp_filesystem.c
 SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
 

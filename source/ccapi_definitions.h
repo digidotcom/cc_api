@@ -256,6 +256,9 @@ ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data);
+#endif
 
 void ccapi_logging_line(char const * const format, ...);
 void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
