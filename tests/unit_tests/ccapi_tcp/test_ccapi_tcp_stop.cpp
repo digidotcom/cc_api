@@ -16,7 +16,7 @@ TEST_GROUP(test_ccapi_tcp_stop)
 TEST(test_ccapi_tcp_stop, testCCAPINotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
-    ccapi_tcp_stop_t tcp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_tcp_stop_t tcp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     tcp_stop_error = ccapi_stop_transport_tcp(&tcp_stop);
     CHECK_EQUAL(CCAPI_TCP_STOP_ERROR_NOT_STARTED, tcp_stop_error);
@@ -25,7 +25,7 @@ TEST(test_ccapi_tcp_stop, testCCAPINotStarted)
 TEST(test_ccapi_tcp_stop, testTCPNotStarted)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
-    ccapi_tcp_stop_t tcp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_tcp_stop_t tcp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
 
@@ -36,7 +36,7 @@ TEST(test_ccapi_tcp_stop, testTCPNotStarted)
 TEST(test_ccapi_tcp_stop, testTCPStopGracefullyOK)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
-    ccapi_tcp_stop_t tcp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_tcp_stop_t tcp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
     th_start_tcp_wan_ipv4_with_callbacks();
@@ -52,7 +52,7 @@ TEST(test_ccapi_tcp_stop, testTCPStopGracefullyOK)
 TEST(test_ccapi_tcp_stop, testTCPStopImmediatelyOK)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
-    ccapi_tcp_stop_t tcp_stop = {CCAPI_STOP_IMMEDIATELY};
+    ccapi_tcp_stop_t tcp_stop = {CCAPI_TRANSPORT_STOP_IMMEDIATELY};
 
     th_start_ccapi();
     th_start_tcp_wan_ipv4_with_callbacks();
@@ -68,7 +68,7 @@ TEST(test_ccapi_tcp_stop, testTCPStopImmediatelyOK)
 TEST(test_ccapi_tcp_stop, testTCPStopCcfsmError)
 {
     ccapi_tcp_stop_error_t tcp_stop_error;
-    ccapi_tcp_stop_t tcp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_tcp_stop_t tcp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
     th_start_tcp_wan_ipv4_with_callbacks();

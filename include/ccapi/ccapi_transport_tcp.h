@@ -97,7 +97,7 @@ typedef struct {
 } ccapi_tcp_info_t;
 
 typedef struct {
-    ccapi_stop_t behavior;
+    ccapi_transport_stop_t behavior;
 } ccapi_tcp_stop_t;
 
 ccapi_tcp_start_error_t ccapi_start_transport_tcp(ccapi_tcp_info_t const * const tcp_start);

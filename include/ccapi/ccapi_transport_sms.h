@@ -44,7 +44,7 @@ typedef struct {
 
 
 typedef struct {
-    ccapi_stop_t behavior;
+    ccapi_transport_stop_t behavior;
 } ccapi_sms_stop_t;
 
 

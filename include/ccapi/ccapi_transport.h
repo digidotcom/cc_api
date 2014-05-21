@@ -8,9 +8,9 @@ typedef enum {
 } ccapi_transport_t;
 
 typedef enum {
-    CCAPI_STOP_GRACEFULLY,
-    CCAPI_STOP_IMMEDIATELY
-} ccapi_stop_t;
+    CCAPI_TRANSPORT_STOP_GRACEFULLY,
+    CCAPI_TRANSPORT_STOP_IMMEDIATELY
+} ccapi_transport_stop_t;
 
 #include "ccapi/ccapi_transport_tcp.h"
 #include "ccapi/ccapi_transport_udp.h"

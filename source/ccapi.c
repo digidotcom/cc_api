@@ -198,16 +198,16 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
     return connector_transport;
 }
 
-static connector_stop_condition_t ccapi_to_connector_stop(ccapi_stop_t ccapi_stop)
+static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t ccapi_stop)
 {
     connector_stop_condition_t stop_condition;
 
     switch(ccapi_stop)
     {
-        case CCAPI_STOP_GRACEFULLY:
+        case CCAPI_TRANSPORT_STOP_GRACEFULLY:
             stop_condition = connector_wait_sessions_complete;
             break;
-        case CCAPI_STOP_IMMEDIATELY:
+        case CCAPI_TRANSPORT_STOP_IMMEDIATELY:
             stop_condition = connector_stop_immediately;
             break;
     }
@@ -215,7 +215,7 @@ static connector_stop_condition_t ccapi_to_connector_stop(ccapi_stop_t ccapi_sto
     return stop_condition;
 }
 
-connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_stop_t behavior)
+connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_transport_stop_t behavior)
 {
     connector_status_t connector_status;
     connector_initiate_stop_request_t stop_data;

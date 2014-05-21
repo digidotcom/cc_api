@@ -16,7 +16,7 @@ TEST_GROUP(test_ccapi_sms_stop)
 TEST(test_ccapi_sms_stop, testCCAPINotStarted)
 {
     ccapi_sms_stop_error_t sms_stop_error;
-    ccapi_sms_stop_t sms_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_sms_stop_t sms_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     sms_stop_error = ccapi_stop_transport_sms(&sms_stop);
     CHECK_EQUAL(CCAPI_SMS_STOP_ERROR_NOT_STARTED, sms_stop_error);
@@ -25,7 +25,7 @@ TEST(test_ccapi_sms_stop, testCCAPINotStarted)
 TEST(test_ccapi_sms_stop, testSMSNotStarted)
 {
     ccapi_sms_stop_error_t sms_stop_error;
-    ccapi_sms_stop_t sms_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_sms_stop_t sms_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
 
@@ -36,7 +36,7 @@ TEST(test_ccapi_sms_stop, testSMSNotStarted)
 TEST(test_ccapi_sms_stop, testSmsStopOK)
 {
     ccapi_sms_stop_error_t sms_stop_error;
-    ccapi_sms_stop_t sms_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_sms_stop_t sms_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
     th_start_sms();
@@ -52,7 +52,7 @@ TEST(test_ccapi_sms_stop, testSmsStopOK)
 TEST(test_ccapi_sms_stop, testSMSStopCcfsmError)
 {
     ccapi_sms_stop_error_t sms_stop_error;
-    ccapi_sms_stop_t sms_stop = {CCAPI_STOP_IMMEDIATELY};
+    ccapi_sms_stop_t sms_stop = {CCAPI_TRANSPORT_STOP_IMMEDIATELY};
 
     th_start_ccapi();
     th_start_sms();
