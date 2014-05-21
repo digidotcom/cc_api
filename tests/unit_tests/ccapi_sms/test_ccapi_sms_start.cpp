@@ -30,8 +30,8 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionOK)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
     sms_start.callback.close = ccapi_sms_close_cb;
 
     connector_transport_t connector_transport = connector_transport_sms;
@@ -49,8 +49,8 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
@@ -76,8 +76,8 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionUnknownError)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
 
 
@@ -95,8 +95,8 @@ TEST(test_ccapi_sms_start, testSMSConnectionTimeout)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
 
     sms_start.start_timeout = 10;

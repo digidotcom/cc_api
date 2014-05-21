@@ -36,9 +36,11 @@ typedef struct {
     struct {
         ccapi_sms_close_cb_t close;
     } callback;
-    char * phone_number;
     uint8_t start_timeout;
-    char * service_id;
+    struct {
+       char * phone_number;
+       char * service_id;
+    } cloud_config;
     struct {
         size_t max_sessions;
         size_t rx_timeout;

@@ -741,15 +741,15 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         case connector_request_id_config_get_device_cloud_phone:
             {
                 connector_config_pointer_string_t * device_cloud_phone = data;
-                device_cloud_phone->string = ccapi_data->transport_sms.info->phone_number;
-                device_cloud_phone->length = strlen(ccapi_data->transport_sms.info->phone_number);
+                device_cloud_phone->string = ccapi_data->transport_sms.info->cloud_config.phone_number;
+                device_cloud_phone->length = strlen(ccapi_data->transport_sms.info->cloud_config.phone_number);
                 break;
             }
         case connector_request_id_config_device_cloud_service_id:
         {
             connector_config_pointer_string_t * service_id = data;
-            service_id->string = ccapi_data->transport_sms.info->service_id;
-            service_id->length = strlen(ccapi_data->transport_sms.info->service_id);
+            service_id->string = ccapi_data->transport_sms.info->cloud_config.service_id;
+            service_id->length = strlen(ccapi_data->transport_sms.info->cloud_config.service_id);
             break;
         }
 #endif

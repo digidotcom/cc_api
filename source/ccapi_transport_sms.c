@@ -21,7 +21,7 @@ static ccapi_bool_t valid_phone(ccapi_sms_info_t const * const sms_start, ccapi_
     const char *valid_char = " 0123456789-+#";
     int i =0;
 
-    if (sms_start->phone_number == NULL || sms_start->phone_number[0] == '\0')
+    if (sms_start->cloud_config.phone_number == NULL || sms_start->cloud_config.phone_number[0] == '\0')
     {
         ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number");
         *error = CCAPI_SMS_START_ERROR_INVALID_PHONE;
@@ -29,11 +29,11 @@ static ccapi_bool_t valid_phone(ccapi_sms_info_t const * const sms_start, ccapi_
         goto done;
     }
 
-    while (sms_start->phone_number[i] != '\0')
+    while (sms_start->cloud_config.phone_number[i] != '\0')
     {
-        if(strchr(valid_char,sms_start->phone_number[i])==NULL)
+        if(strchr(valid_char,sms_start->cloud_config.phone_number[i])==NULL)
         {
-            ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number character '%c'",sms_start->phone_number[i]);
+            ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number character '%c'",sms_start->cloud_config.phone_number[i]);
             *error = CCAPI_SMS_START_ERROR_INVALID_PHONE;
             success = CCAPI_FALSE;
             goto done;
@@ -47,7 +47,7 @@ done:
 
 static ccapi_bool_t valid_service_id(ccapi_sms_info_t const * const sms_start, ccapi_sms_start_error_t * const error)
 {
-    if (sms_start->service_id == NULL)
+    if (sms_start->cloud_config.service_id == NULL)
     {
         ccapi_logging_line("ccxapi_start_transport_sms: invalid Service Id");
         *error = CCAPI_SMS_START_ERROR_INVALID_SERVICE_ID;
@@ -69,19 +69,19 @@ static ccapi_bool_t copy_ccapi_sms_info_t_structure(ccapi_sms_info_t * const des
         dest->limit.max_sessions = CCAPI_SM_SMS_MAX_SESSIONS_DEFAULT;
     }
 
-    if (source->phone_number != NULL)
+    if (source->cloud_config.phone_number != NULL)
     {
-        dest->phone_number = ccapi_strdup(source->phone_number);
-        if (!valid_malloc(dest->phone_number, error))
+        dest->cloud_config.phone_number = ccapi_strdup(source->cloud_config.phone_number);
+        if (!valid_malloc(dest->cloud_config.phone_number, error))
         {
             success = CCAPI_FALSE;
             goto done;
         }
     }
-    if (source->service_id != NULL)
+    if (source->cloud_config.service_id != NULL)
     {
-        dest->service_id = ccapi_strdup(source->service_id);
-        if (!valid_malloc(dest->service_id, error))
+        dest->cloud_config.service_id = ccapi_strdup(source->cloud_config.service_id);
+        if (!valid_malloc(dest->cloud_config.service_id, error))
         {
             success = CCAPI_FALSE;
             goto done;
