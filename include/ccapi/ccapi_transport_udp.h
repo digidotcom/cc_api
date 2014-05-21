@@ -4,7 +4,8 @@
 #define CCAPI_SM_UDP_MAX_SESSIONS_LIMIT 256
 #define CCAPI_SM_UDP_MAX_SESSIONS_DEFAULT 20
 
-
+#define CCAPI_UDP_START_WAIT_FOREVER ((uint8_t) 0)
+#define CCAPI_UDP_RX_TIMEOUT_INFINITE ((size_t) 0)
 
 typedef enum {
     CCAPI_UDP_START_ERROR_NONE,
@@ -33,7 +34,7 @@ typedef struct {
     struct {
         ccapi_udp_close_cb_t close;
     } callback;
-    uint8_t timeout;
+    uint8_t start_timeout;
     struct {
         size_t max_sessions;
         size_t rx_timeout;
@@ -44,7 +45,6 @@ typedef struct {
 typedef struct {
     ccapi_stop_t behavior;
 } ccapi_udp_stop_t;
-
 
 ccapi_udp_start_error_t ccapi_start_transport_udp(ccapi_udp_info_t const * const udp_start);
 ccapi_udp_stop_error_t ccapi_stop_transport_udp(ccapi_udp_stop_t const * const udp_stop);

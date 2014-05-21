@@ -1,7 +1,7 @@
 #ifndef _CCAPI_RECEIVE_H_
 #define _CCAPI_RECEIVE_H_
 
-#define RECEIVE_NO_LIMIT ((size_t) -1)
+#define CCAPI_RECEIVE_NO_LIMIT ((size_t) -1)
 
 typedef enum {
     CCAPI_RECEIVE_ERROR_NONE,

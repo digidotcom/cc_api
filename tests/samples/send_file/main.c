@@ -116,7 +116,7 @@ int main (void)
     hint_string_info.string = hint_string;
     hint_string_info.length = sizeof(hint_string);
 
-    send_error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, "./local_send_file_with_reply.txt", "test/ccapi_send_file_with_reply.txt", "text/plain", CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
+    send_error = ccapi_send_file_with_reply(CCAPI_TRANSPORT_TCP, "./local_send_file_with_reply.txt", "test/ccapi_send_file_with_reply.txt", "text/plain", CCAPI_SEND_BEHAVIOR_OVERWRITE, CCAPI_SEND_WAIT_FOREVER, &hint_string_info);
     if (send_error == CCAPI_SEND_ERROR_NONE)
     {
         printf("ccapi_send_file_with_reply success\n");

@@ -253,7 +253,7 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallOneResponseCall)
     svc_receive.target = (char*)target;
     svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
     svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
-    svc_receive.max_request_size = RECEIVE_NO_LIMIT;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -322,7 +322,7 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoDataCalls)
     svc_receive.target = (char*)target;
     svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
     svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
-    svc_receive.max_request_size = RECEIVE_NO_LIMIT;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
     svc_receive.response_required = CCAPI_TRUE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -378,7 +378,7 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
     svc_receive.target = (char*)target;
     svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
     svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
-    svc_receive.max_request_size = RECEIVE_NO_LIMIT;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
     svc_receive.response_required = CCAPI_FALSE;
     
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -429,7 +429,7 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall)
     svc_receive.target = (char*)target;
     svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
     svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
-    svc_receive.max_request_size = RECEIVE_NO_LIMIT;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;
@@ -514,7 +514,7 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall_NoRoom)
     svc_receive.target = (char*)target;
     svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
     svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
-    svc_receive.max_request_size = RECEIVE_NO_LIMIT;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
     svc_receive.response_required = CCAPI_TRUE;  
 
     ccapi_receive_data_expected_target = TEST_TARGET;

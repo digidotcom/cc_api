@@ -46,7 +46,7 @@ void start_send_data_action(void)
 
 
 
-    send_error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data_with_reply.txt", "text/plain", data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, SEND_WAIT_FOREVER, &hint_string_info);
+    send_error = ccapi_send_data_with_reply(CCAPI_TRANSPORT_TCP, "test/ccapi_send_data_with_reply.txt", "text/plain", data, strlen(data), CCAPI_SEND_BEHAVIOR_OVERWRITE, CCAPI_SEND_WAIT_FOREVER, &hint_string_info);
     if (send_error == CCAPI_SEND_ERROR_NONE)
     {
         printf("ccapi_send_data_with_reply success\n");
