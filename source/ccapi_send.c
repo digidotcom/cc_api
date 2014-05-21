@@ -103,13 +103,13 @@ done:
     return error;
 }
 
-static ccapi_send_error_t checkargs_send_data_common(void const * const data, size_t bytes)
+static ccapi_send_error_t checkargs_send_data(void const * const data, size_t bytes)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
     if (data == NULL || bytes == 0)
     {
-        ccapi_logging_line("checkargs_send_data_common: Invalid data");
+        ccapi_logging_line("checkargs_send_data: Invalid data");
 
         error = CCAPI_SEND_ERROR_INVALID_DATA;
         goto done;
@@ -119,13 +119,13 @@ done:
     return error;
 }
 
-static ccapi_send_error_t checkargs_send_file_common(char const * const local_path)
+static ccapi_send_error_t checkargs_send_file(char const * const local_path)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
     if (local_path == NULL || *local_path == '\0')
     {
-        ccapi_logging_line("checkargs_send_file_common: Invalid local_path");
+        ccapi_logging_line("checkargs_send_file: Invalid local_path");
 
         error = CCAPI_SEND_ERROR_INVALID_LOCAL_PATH;
         goto done;
@@ -135,7 +135,7 @@ done:
     return error;
 }
 
-static ccapi_send_error_t checkargs_send_with_reply_common(unsigned long const timeout, ccapi_string_info_t * const hint)
+static ccapi_send_error_t checkargs_send_with_reply(unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
@@ -144,7 +144,7 @@ static ccapi_send_error_t checkargs_send_with_reply_common(unsigned long const t
 
     if (hint != NULL && (hint->string == NULL || hint->length == 0))
     {
-        ccapi_logging_line("checkargs_send_with_reply_common: Invalid hint pointer");
+        ccapi_logging_line("checkargs_send_with_reply: Invalid hint pointer");
 
         error = CCAPI_SEND_ERROR_INVALID_HINT_POINTER;
         goto done;
@@ -195,7 +195,7 @@ done:
 }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
-static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info, char const * const local_path)
+static ccapi_send_error_t setup_send_file(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info, char const * const local_path)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
@@ -249,28 +249,14 @@ done:
 }
 #endif
 
-static void setup_send_data_common(ccapi_send_t * send_info, void const * const data, size_t bytes)
+static void setup_send_data(ccapi_send_t * send_info, void const * const data, size_t bytes)
 {
     send_info->svc_send.next_data = (void *)data;
     send_info->svc_send.bytes_remaining = bytes;
     send_info->svc_send.sending_file = CCAPI_FALSE;
 }
 
-static void setup_send_no_reply_common(ccapi_send_t * send_info)
-{
-    send_info->svc_send.hint = NULL;
-    send_info->header.response_required = connector_false;
-    send_info->header.timeout_in_seconds = SEND_WAIT_FOREVER;
-}
-
-static void setup_send_with_reply_common(ccapi_send_t * send_info, ccapi_string_info_t * const hint, unsigned long const timeout)
-{
-    send_info->svc_send.hint = hint;
-    send_info->header.response_required = connector_true;
-    send_info->header.timeout_in_seconds = timeout;
-}
-
-static ccapi_send_error_t perform_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
+static ccapi_send_error_t perform_send(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
 {
     connector_status_t status;
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
@@ -289,27 +275,28 @@ static ccapi_send_error_t perform_send_common(ccapi_data_t * const ccapi_data, c
         ccimp_status_t result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE);
         if (result != CCIMP_STATUS_OK)
         {
-            ccapi_logging_line("perform_send_common: lock_acquire failed");
+            ccapi_logging_line("perform_send: lock_acquire failed");
             error = CCAPI_SEND_ERROR_SYNCR_FAILED;
         }
     }
     else
     {
-        ccapi_logging_line("perform_send_common: ccfsm error %d", status);
+        ccapi_logging_line("perform_send: ccfsm error %d", status);
         error = CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED;
     }
 
     return error;
 }
 
-static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
+static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * send_info)
 {
     /* Free resources */
     if (send_info != NULL)
     {
         if (send_info->svc_send.send_syncr != NULL)
         {
-            ASSERT_MSG(ccapi_syncr_destroy(send_info->svc_send.send_syncr) == CCIMP_STATUS_OK);
+            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(send_info->svc_send.send_syncr); 
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -334,7 +321,7 @@ static void finish_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * s
     }
 }
 
-ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
+ccapi_send_error_t ccxapi_send_data_common(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_send_error_t error;
     ccapi_send_t * send_info = NULL;
@@ -345,7 +332,13 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    error = checkargs_send_data_common(data, bytes);
+    error = checkargs_send_data(data, bytes);
+    if (error != CCAPI_SEND_ERROR_NONE)
+    {
+        goto done;
+    }
+
+    error = checkargs_send_with_reply(timeout, hint);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -362,71 +355,13 @@ ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_trans
         goto done;
     }
 
-    setup_send_data_common(send_info, data, bytes);
+    setup_send_data(send_info, data, bytes);
 
-    setup_send_no_reply_common(send_info);
+    send_info->svc_send.hint = hint;
+    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.timeout_in_seconds = timeout;
 
-    error = perform_send_common(ccapi_data, send_info);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    /* tcp transport will update response_error even if not requested but we ignore it here */
-    if (send_info->svc_send.request_error != CCAPI_SEND_ERROR_NONE)
-    {
-        error = send_info->svc_send.request_error;
-    }
-    else
-    {
-        error = send_info->svc_send.status_error;
-    }
-
-done:
-    finish_send_common(ccapi_data, send_info);
-
-    return error;
-}
-
-ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
-{
-    ccapi_send_error_t error;
-    ccapi_send_t * send_info = NULL;
-
-    error = checkargs_send_common(ccapi_data, transport, cloud_path, content_type);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    error = checkargs_send_data_common(data, bytes);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    error = checkargs_send_with_reply_common(timeout, hint);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
-    {
-        goto done;
-    }
-
-    error = setup_send_common(ccapi_data, send_info, transport, cloud_path, content_type, behavior);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    setup_send_data_common(send_info, data, bytes);
-
-    setup_send_with_reply_common(send_info, hint, timeout);
-
-    error = perform_send_common(ccapi_data, send_info);
+    error = perform_send(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -436,8 +371,9 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
     {
         error = send_info->svc_send.request_error;
     }
-    else if (send_info->svc_send.response_error != CCAPI_SEND_ERROR_NONE)
+    else if (with_reply && send_info->svc_send.response_error != CCAPI_SEND_ERROR_NONE)
     {
+        /* tcp transport will update response_error even if not requested but we ignore it if with_reply is false */
         error = send_info->svc_send.response_error;
     }
     else
@@ -446,81 +382,12 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, 
     }
 
 done:
-    finish_send_common(ccapi_data, send_info);
+    finish_send(ccapi_data, send_info);
 
     return error;
 }
 
-ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior)
-{
-    ccapi_send_error_t error;
-    ccapi_send_t * send_info = NULL;
-
-#if !(defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
-    UNUSED_ARGUMENT(transport);
-    UNUSED_ARGUMENT(local_path);
-    UNUSED_ARGUMENT(cloud_path);
-    UNUSED_ARGUMENT(content_type);
-    UNUSED_ARGUMENT(behavior);
-
-    error = CCAPI_SEND_ERROR_FILESYSTEM_NOT_SUPPORTED;
-    goto done;
-#else
-    error = checkargs_send_common(ccapi_data, transport, cloud_path, content_type);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    error = checkargs_send_file_common(local_path);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    if (!valid_malloc((void**)&send_info, sizeof *send_info, &error))
-    {
-        goto done;
-    }
-
-    error = setup_send_common(ccapi_data, send_info, transport, cloud_path, content_type, behavior);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    error = setup_send_file_common(ccapi_data, send_info, local_path);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    setup_send_no_reply_common(send_info);
-
-    error = perform_send_common(ccapi_data, send_info);
-    if (error != CCAPI_SEND_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    /* tcp transport will update response_error even if not requested but we ignore it here */
-    if (send_info->svc_send.request_error != CCAPI_SEND_ERROR_NONE)
-    {
-        error = send_info->svc_send.request_error;
-    }
-    else
-    {
-        error = send_info->svc_send.status_error;
-    }
-#endif
-
-done:
-    finish_send_common(ccapi_data, send_info);
-
-    return error;
-}
-
-ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_send_error_t ccxapi_send_file_common(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_send_error_t error;
     ccapi_send_t * send_info = NULL;
@@ -543,13 +410,13 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    error = checkargs_send_file_common(local_path);
+    error = checkargs_send_file(local_path);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
     }
 
-    error = checkargs_send_with_reply_common(timeout, hint);
+    error = checkargs_send_with_reply(timeout, hint);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -566,15 +433,17 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
         goto done;
     }
 
-    error = setup_send_file_common(ccapi_data, send_info, local_path);
+    error = setup_send_file(ccapi_data, send_info, local_path);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
     }
 
-    setup_send_with_reply_common(send_info, hint, timeout);
+    send_info->svc_send.hint = hint;
+    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.timeout_in_seconds = timeout;
 
-    error = perform_send_common(ccapi_data, send_info);
+    error = perform_send(ccapi_data, send_info);
     if (error != CCAPI_SEND_ERROR_NONE)
     {
         goto done;
@@ -584,8 +453,9 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
     {
         error = send_info->svc_send.request_error;
     }
-    else if (send_info->svc_send.response_error != CCAPI_SEND_ERROR_NONE)
+    else if (with_reply && send_info->svc_send.response_error != CCAPI_SEND_ERROR_NONE)
     {
+        /* tcp transport will update response_error even if not requested but we ignore it if with_reply is false */
         error = send_info->svc_send.response_error;
     }
     else
@@ -595,28 +465,49 @@ ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, 
 #endif
 
 done:
-    finish_send_common(ccapi_data, send_info);
+    finish_send(ccapi_data, send_info);
 
     return error;
 }
 
+
+ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
+{
+    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, SEND_WAIT_FOREVER, NULL);
+}
+
 ccapi_send_error_t ccapi_send_data(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior)
 {
-    return ccxapi_send_data(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior);
+    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, SEND_WAIT_FOREVER, NULL);
+}
+
+ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint);
 }
 
 ccapi_send_error_t ccapi_send_data_with_reply(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_send_data_with_reply(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, timeout, hint);
+    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint);
+}
+
+ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior)
+{
+    return ccxapi_send_file_common(ccapi_data, transport, local_path, cloud_path, content_type, behavior, CCAPI_FALSE, SEND_WAIT_FOREVER, NULL);
 }
 
 ccapi_send_error_t ccapi_send_file(ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior)
 {
-    return ccxapi_send_file(ccapi_data_single_instance, transport, local_path, cloud_path, content_type, behavior);
+    return ccxapi_send_file_common(ccapi_data_single_instance, transport, local_path, cloud_path, content_type, behavior, CCAPI_FALSE, SEND_WAIT_FOREVER, NULL);
+}
+
+ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
+{
+    return ccxapi_send_file_common(ccapi_data, transport, local_path, cloud_path, content_type, behavior, CCAPI_TRUE, timeout, hint);
 }
 
 ccapi_send_error_t ccapi_send_file_with_reply(ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_send_file_with_reply(ccapi_data_single_instance, transport, local_path, cloud_path, content_type, behavior, timeout, hint);
+    return ccxapi_send_file_common(ccapi_data_single_instance, transport, local_path, cloud_path, content_type, behavior, CCAPI_TRUE, timeout, hint);
 }
 #endif
