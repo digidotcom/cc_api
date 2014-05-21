@@ -80,7 +80,7 @@ TEST(test_ccapi_udp_start, testUDPConnectionTimeout)
     ccapi_udp_info_t udp_start = {{0}};
     connector_transport_t connector_transport = connector_transport_udp;
 
-    udp_start.timeout = 10;
+    udp_start.start_timeout = 10;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -96,5 +96,5 @@ TEST(test_ccapi_udp_start, testUDPConnectionTimeout)
 
     error = ccapi_start_transport_udp(&udp_start);
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(udp_start.timeout, ccapi_data_single_instance->transport_udp.info->timeout);
+    CHECK_EQUAL(udp_start.start_timeout, ccapi_data_single_instance->transport_udp.info->start_timeout);
 }

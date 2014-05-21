@@ -99,7 +99,7 @@ TEST(test_ccapi_sms_start, testSMSConnectionTimeout)
     sms_start.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
 
-    sms_start.timeout = 10;
+    sms_start.start_timeout = 10;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -115,5 +115,5 @@ TEST(test_ccapi_sms_start, testSMSConnectionTimeout)
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(sms_start.timeout, ccapi_data_single_instance->transport_sms.info->timeout);
+    CHECK_EQUAL(sms_start.start_timeout, ccapi_data_single_instance->transport_sms.info->start_timeout);
 }

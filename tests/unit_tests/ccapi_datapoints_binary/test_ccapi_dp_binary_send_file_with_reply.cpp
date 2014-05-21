@@ -61,7 +61,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testHint)
     connector_request_data_service_send_t header;
     char const data[] = DATA;
     char const hint_check[] = "hello man";
-    unsigned long timeout = SEND_WAIT_FOREVER;
+    unsigned long timeout = CCAPI_SEND_WAIT_FOREVER;
 
     ccapi_string_info_t hint;
 
@@ -340,7 +340,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
         header.path  = CLOUD_PATH;
         header.content_type = NULL;
         header.response_required = connector_true;
-        header.timeout_in_seconds = SEND_WAIT_FOREVER;
+        header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
 
         Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 

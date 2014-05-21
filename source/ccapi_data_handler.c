@@ -178,7 +178,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->target = NULL;
         svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
         svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
-        svc_receive->max_request_size = RECEIVE_NO_LIMIT;
+        svc_receive->max_request_size = CCAPI_RECEIVE_NO_LIMIT;
         svc_receive->request_buffer_info.buffer = NULL;
         svc_receive->request_buffer_info.length = 0;
         svc_receive->response_buffer_info.buffer = NULL;
@@ -281,7 +281,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
         ccimp_realloc_data.new_size = svc_receive->request_buffer_info.length + data_ptr->bytes_used;
 
-        if (svc_receive->max_request_size != RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_receive->max_request_size)
+        if (svc_receive->max_request_size != CCAPI_RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_receive->max_request_size)
         {
             ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
 

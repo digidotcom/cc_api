@@ -291,7 +291,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
     }
 
     {
-        ccapi_bool_t const wait_forever = CCAPI_BOOL(tcp_start->connection.timeout == 0);
+        ccapi_bool_t const wait_forever = CCAPI_BOOL(tcp_start->connection.start_timeout == CCAPI_TCP_START_WAIT_FOREVER);
 
         if (wait_forever)
         {
@@ -306,7 +306,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             unsigned long const jitter = 1;
 
             ccimp_os_get_system_time(&time_start);
-            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.timeout + jitter;
+            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.start_timeout + jitter;
             do {
                 ccimp_os_system_up_time_t system_uptime;
 

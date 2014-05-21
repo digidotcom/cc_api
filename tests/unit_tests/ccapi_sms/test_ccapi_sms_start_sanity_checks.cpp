@@ -193,7 +193,7 @@ TEST(test_ccapi_sms_start_sanity_checks, testCallbacksIsCopied)
 
     sms_start.service_id = service_id;
     sms_start.limit.max_sessions=140;
-    sms_start.limit.rx_timeout=0;
+    sms_start.limit.rx_timeout=CCAPI_UDP_RX_TIMEOUT_INFINITE;
     sms_start.callback.close=ccapi_sms_close_cb;
     sms_start.phone_number = phone_number;
 
