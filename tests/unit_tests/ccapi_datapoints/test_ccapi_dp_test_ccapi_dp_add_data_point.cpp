@@ -106,13 +106,13 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddInt64LocEpochMS)
     CHECK(connector_data_point_t::time::connector_time_local_epoch_whole == ccfsm_data_point->time.source);
     CHECK(NULL == ccfsm_data_point->description);
 
-    CHECK_EQUAL(integer, ccfsm_data_point->data.element.native.long_value);
+    CHECK(integer == ccfsm_data_point->data.element.native.long_value);
 
     CHECK_EQUAL(location.latitude, ccfsm_data_point->location.value.native.latitude);
     CHECK_EQUAL(location.longitude, ccfsm_data_point->location.value.native.longitude);
     CHECK_EQUAL(location.elevation, ccfsm_data_point->location.value.native.elevation);
 
-    CHECK_EQUAL(timestamp.epoch_msec, ccfsm_data_point->time.value.since_epoch_whole.milliseconds);
+    CHECK(timestamp.epoch_msec == ccfsm_data_point->time.value.since_epoch_whole.milliseconds);
 }
 
 TEST(test_ccapi_dp_add_data_point, testDataPointAddFloat)

@@ -34,6 +34,7 @@ CFLAGS += -Wformat-y2k -Wcast-align -Wformat-nonliteral
 CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
 CFLAGS += -Wall -Werror -Wextra -pedantic
 CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
+CFLAGS += -Wno-error=long-long
 
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
