@@ -68,11 +68,47 @@ static void * thread_wrapper(void * argument)
 ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info)
 {
     pthread_t pthread;
-    int ccode = pthread_create(&pthread, NULL, thread_wrapper, create_thread_info);
+    int ccode;
 
+    pthread_attr_t attr;
+    int stack_size;
+    void *sp;
+    int s;
+
+    switch(create_thread_info->type)
+    {
+        case CCIMP_THREAD_CONNECTOR_RUN:
+            stack_size = 100 * 1024;
+            break;
+    }
+
+    ccode = pthread_attr_init(&attr);
     if (ccode != 0)
     {
-        printf("ccimp_create_thread() error %d\n", ccode);
+        printf("pthread_attr_init() error %d\n", ccode);
+        return (CCIMP_STATUS_ERROR);
+    }
+
+    s = posix_memalign(&sp, sysconf(_SC_PAGESIZE), stack_size);
+    if (s != 0)
+    {
+        printf("error in posix_memalign\n");
+        return (CCIMP_STATUS_ERROR);
+    }
+
+    /*printf("posix_memalign() allocated at %p\n", sp);*/
+
+    s = pthread_attr_setstack(&attr, sp, stack_size);
+    if (s != 0)
+    {
+        printf("error in pthread_attr_setstack\n");
+        return (CCIMP_STATUS_ERROR);
+    }
+
+    ccode = pthread_create(&pthread, &attr, thread_wrapper, create_thread_info);
+    if (ccode != 0)
+    {
+        printf("pthread_create() error %d\n", ccode);
         return (CCIMP_STATUS_ERROR);
     }
 
