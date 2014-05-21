@@ -25,11 +25,6 @@ typedef enum {
     CCAPI_STOP_ERROR_NOT_STARTED
 } ccapi_stop_error_t;
 
-typedef enum {
-    CCAPI_STOP_GRACEFULLY,
-    CCAPI_STOP_IMMEDIATELY
-} ccapi_stop_t;
-
 typedef struct {
         uint32_t vendor_id;
         uint8_t device_id[16];
