@@ -23,6 +23,5 @@ test
 *.patch
 
 # Samples binaries
-#ccapi
-#ccxapi
+ccapi_app
 

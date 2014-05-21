@@ -59,7 +59,7 @@ SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
 LIBS = -lc -lz -lpthread -lrt 
 
 # Generated Sample Executable Name.
-SAMPLE = ccapi
+SAMPLE = ccapi_app
 
 # since each of the samples shares private and platform files, do a clean each time we make
 .PHONY:all
