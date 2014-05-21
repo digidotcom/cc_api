@@ -398,6 +398,7 @@ ccapi_send_error_t ccxapi_send_file_common(ccapi_data_t * const ccapi_data, ccap
     UNUSED_ARGUMENT(cloud_path);
     UNUSED_ARGUMENT(content_type);
     UNUSED_ARGUMENT(behavior);
+    UNUSED_ARGUMENT(with_reply);
     UNUSED_ARGUMENT(timeout);
     UNUSED_ARGUMENT(hint);
 
