@@ -1355,7 +1355,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 	
     if (send_ptr != NULL)
     {
-        ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)send_ptr->user_context;
+        ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)send_ptr->user_context;
         size_t bytes_expected_to_read;
 
         ASSERT_MSG_GOTO(svc_send != NULL, done);
@@ -1400,7 +1400,7 @@ done:
 static connector_callback_status_t ccapi_process_send_data_response(connector_data_service_send_response_t const * const resp_ptr)
 {
 
-    ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)resp_ptr->user_context;
+    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)resp_ptr->user_context;
 
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
@@ -1443,7 +1443,7 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
 {
-    ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
+    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ccapi_logging_line("ccapi_process_send_data_status: %d", status_ptr->status);

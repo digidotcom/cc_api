@@ -7,7 +7,7 @@
 typedef struct
 {
     connector_request_data_service_send_t header;
-    ccapi_svc_send_data_t svc_send;
+    ccapi_svc_send_t svc_send;
 } ccapi_send_t;
 
 static ccapi_bool_t valid_malloc(void * * ptr, size_t size, ccapi_send_error_t * const error)
