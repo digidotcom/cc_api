@@ -16,7 +16,7 @@ TEST_GROUP(test_ccapi_udp_stop)
 TEST(test_ccapi_udp_stop, testCCAPINotStarted)
 {
     ccapi_udp_stop_error_t udp_stop_error;
-    ccapi_udp_stop_t udp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_udp_stop_t udp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     udp_stop_error = ccapi_stop_transport_udp(&udp_stop);
     CHECK_EQUAL(CCAPI_UDP_STOP_ERROR_NOT_STARTED, udp_stop_error);
@@ -25,7 +25,7 @@ TEST(test_ccapi_udp_stop, testCCAPINotStarted)
 TEST(test_ccapi_udp_stop, testUDPNotStarted)
 {
     ccapi_udp_stop_error_t udp_stop_error;
-    ccapi_udp_stop_t udp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_udp_stop_t udp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
 
@@ -36,7 +36,7 @@ TEST(test_ccapi_udp_stop, testUDPNotStarted)
 TEST(test_ccapi_udp_stop, testUDPStopOK)
 {
     ccapi_udp_stop_error_t udp_stop_error;
-    ccapi_udp_stop_t udp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_udp_stop_t udp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
     th_start_udp();
@@ -52,7 +52,7 @@ TEST(test_ccapi_udp_stop, testUDPStopOK)
 TEST(test_ccapi_udp_stop, testUDPStopCcfsmError)
 {
     ccapi_udp_stop_error_t udp_stop_error;
-    ccapi_udp_stop_t udp_stop = {CCAPI_STOP_GRACEFULLY};
+    ccapi_udp_stop_t udp_stop = {CCAPI_TRANSPORT_STOP_GRACEFULLY};
 
     th_start_ccapi();
     th_start_udp();

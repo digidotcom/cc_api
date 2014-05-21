@@ -42,7 +42,7 @@ typedef struct {
 
 
 typedef struct {
-    ccapi_stop_t behavior;
+    ccapi_transport_stop_t behavior;
 } ccapi_udp_stop_t;
 
 

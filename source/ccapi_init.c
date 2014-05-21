@@ -345,6 +345,23 @@ done:
     return error;
 }
 
+static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t const stop_behavior)
+{
+    ccapi_transport_stop_t transport_stop_behavior;
+
+    switch(stop_behavior)
+    {
+        case CCAPI_STOP_GRACEFULLY:
+            transport_stop_behavior = CCAPI_TRANSPORT_STOP_GRACEFULLY;
+            break;
+        case CCAPI_STOP_IMMEDIATELY:
+            transport_stop_behavior = CCAPI_TRANSPORT_STOP_IMMEDIATELY;
+            break;  
+    }
+
+    return transport_stop_behavior;
+}
+
 ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
 {
     ccapi_stop_error_t error = CCAPI_STOP_ERROR_NOT_STARTED;
@@ -360,7 +377,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         ccapi_tcp_stop_t tcp_stop;
         ccapi_tcp_stop_error_t tcp_stop_error;
 
-        tcp_stop.behavior = behavior;
+        tcp_stop.behavior = ccapi_stop_to_ccapi_transport_stop(behavior);
         tcp_stop_error = ccxapi_stop_transport_tcp(ccapi_handle, &tcp_stop);
         switch(tcp_stop_error)
         {
@@ -380,7 +397,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         ccapi_udp_stop_t udp_stop;
         ccapi_udp_stop_error_t udp_stop_error;
 
-        udp_stop.behavior = behavior;
+        udp_stop.behavior = ccapi_stop_to_ccapi_transport_stop(behavior);
         udp_stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
         switch(udp_stop_error)
         {
@@ -401,7 +418,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         ccapi_sms_stop_t sms_stop;
         ccapi_sms_stop_error_t sms_stop_error;
 
-        sms_stop.behavior = behavior;
+        sms_stop.behavior = ccapi_stop_to_ccapi_transport_stop(behavior);
         sms_stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
         switch(sms_stop_error)
         {
