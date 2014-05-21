@@ -10,6 +10,9 @@
 #include "ccapi_definitions.h"
 
 #if (defined CCIMP_DATA_POINTS_ENABLED) || (defined CCIMP_RCI_SERVICE_ENABLED)
+
+#include <stdio.h>
+
 int connector_snprintf(char * const str, size_t const size, char const * const format, ...)
 {
     va_list args;

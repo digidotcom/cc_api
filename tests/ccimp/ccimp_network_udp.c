@@ -9,6 +9,7 @@
 #define ccimp_network_udp_close      ccimp_network_udp_close_real
 #endif
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>

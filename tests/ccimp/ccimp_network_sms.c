@@ -9,6 +9,7 @@
 #define ccimp_network_sms_close      ccimp_network_sms_close_real
 #endif
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
