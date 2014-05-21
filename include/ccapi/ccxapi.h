@@ -41,6 +41,9 @@ ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_handle_t const ccapi_handle
 ccapi_send_error_t ccxapi_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior);
 ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
 
+ccapi_receive_error_t ccxapi_receive_add_target(ccapi_handle_t const ccapi_handle, char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t maximum_request_size);
+ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_handle_t const ccapi_handle, char const * const target);
+
 ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_handle_t const ccapi_handle, char const * const virtual_dir, char const * const actual_dir);
 ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_handle_t const ccapi_data, char const * const virtual_dir);
 

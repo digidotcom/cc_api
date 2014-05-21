@@ -238,7 +238,7 @@ static ccapi_send_error_t setup_send_file_common(ccapi_data_t * const ccapi_data
         send_info->svc_send.file_handler = file_handler;
     }
 
-    ccapi_logging_line("file_size=%d, file_handler=%p\n", send_info->svc_send.bytes_remaining, send_info->svc_send.file_handler.pointer);
+    ccapi_logging_line("file_size=%d, file_handler=%p", send_info->svc_send.bytes_remaining, send_info->svc_send.file_handler.pointer);
 
 
     send_info->svc_send.sending_file = CCAPI_TRUE;

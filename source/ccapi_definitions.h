@@ -82,6 +82,19 @@ typedef struct ccapi_fs_virtual_dir {
     struct ccapi_fs_virtual_dir * next;
 } ccapi_fs_virtual_dir_t;
 
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+typedef struct ccapi_receive_target
+{
+    char * target;
+    struct {
+        ccapi_receive_data_cb_t data_cb;
+        ccapi_receive_status_cb_t status_cb;
+    } user_callbacks;
+    size_t max_request_size;
+    struct ccapi_receive_target * next;
+} ccapi_receive_target_t;
+#endif
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
@@ -96,6 +109,13 @@ typedef struct {
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+        struct {
+            ccapi_receive_service_t user_callbacks;
+            void * receive_syncr;
+            ccapi_receive_target_t * target_list;
+        } receive;
+#endif
     } service;
     struct {
         ccapi_tcp_info_t * info;
@@ -129,6 +149,23 @@ typedef struct
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
 } ccapi_svc_send_data_t;
+
+typedef struct
+{
+    char * target;
+    ccapi_bool_t response_required;
+    struct {
+        ccapi_receive_data_cb_t data_cb;
+        ccapi_receive_status_cb_t status_cb;
+    } user_callbacks;
+    size_t max_request_size;
+    ccapi_buffer_info_t request_buffer_info;
+    ccapi_buffer_info_t response_buffer_info;
+    ccapi_buffer_info_t response_processing;
+    ccapi_receive_error_t receive_error;
+} ccapi_svc_receive_t;
+
+ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)

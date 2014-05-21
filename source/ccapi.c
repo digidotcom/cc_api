@@ -1390,7 +1390,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
     }
     else
     {
-        ccapi_logging_line("process_send_data_request: no app data set to send\n");
+        ccapi_logging_line("process_send_data_request: no app data set to send");
     }
 
 done:
@@ -1404,7 +1404,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
-    ccapi_logging_line("Received %s response from Device Cloud\n", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
+    ccapi_logging_line("Received %s response from Device Cloud", (resp_ptr->response == connector_data_service_send_response_success) ? "success" : "error");
 
     switch (resp_ptr->response)
     {
@@ -1427,7 +1427,7 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
 
     if (resp_ptr->hint != NULL)
     {
-        ccapi_logging_line("Device Cloud response hint %s\n", resp_ptr->hint);
+        ccapi_logging_line("Device Cloud response hint %s", resp_ptr->hint);
         if (svc_send->hint != NULL)
         {
             size_t const max_hint_length = svc_send->hint->length - 1;
@@ -1446,7 +1446,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     ccapi_svc_send_data_t * const svc_send = (ccapi_svc_send_data_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ccapi_logging_line("Data service status: %d\n", status_ptr->status);
+    ccapi_logging_line("ccapi_process_send_data_status: %d", status_ptr->status);
    
     switch (status_ptr->status)
     {
@@ -1461,6 +1461,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
             break;
         case connector_data_service_status_session_error:
             svc_send->status_error = CCAPI_SEND_ERROR_STATUS_SESSION_ERROR;
+            ccapi_logging_line("ccapi_process_send_data_status: session_error=%d", status_ptr->session_error);
             break;
         case connector_data_service_status_COUNT:
             ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
@@ -1484,11 +1485,310 @@ done:
     return connector_status;
 }
 
+static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receive_error_t * const error)
+{
+    ccapi_bool_t success;
+ 
+    *ptr = ccapi_malloc(size);
+
+    success = (*ptr == NULL) ? CCAPI_FALSE : CCAPI_TRUE;
+    
+    if (!success)
+    {
+        *error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    return success;
+}
+
+static connector_callback_status_t ccapi_process_device_request_target(connector_data_service_receive_target_t * const target_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
+
+    ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
+
+    ccapi_logging_line("ccapi_process_device_request_target for target = '%s'", target_ptr->target);
+
+    ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
+
+    {
+        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
+        {
+            /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
+            goto done;
+        }
+
+        target_ptr->user_context = svc_receive;
+
+        svc_receive->target = NULL;
+        svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
+        svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
+        svc_receive->max_request_size = RECEIVE_NO_LIMIT;
+        svc_receive->request_buffer_info.buffer = NULL;
+        svc_receive->request_buffer_info.length = 0;
+        svc_receive->response_buffer_info.buffer = NULL;
+        svc_receive->response_buffer_info.length = 0;
+        svc_receive->response_processing.buffer = NULL;
+        svc_receive->response_processing.length = 0;
+        svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
+
+        svc_receive->response_required = target_ptr->response_required == connector_true ? CCAPI_TRUE : CCAPI_FALSE;
+
+        /* CCAPI_RECEIVE_ERROR_CCAPI_STOPPED is not handled here. We assume that if we get a request
+           means that ccapi is running. That error will be used in add_receive_target()
+         */
+
+        if (!ccapi_data->config.receive_supported)
+        {
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+            goto done;
+        }
+
+        /* Check if it's a registered target */
+        {
+            ccapi_receive_target_t * added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
+            if (added_target != NULL)
+            {
+                const size_t target_size = strlen(added_target->target) + 1;
+
+                if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+                {
+                    goto done;
+                }
+                memcpy(svc_receive->target, added_target->target, target_size);
+
+                svc_receive->max_request_size = added_target->max_request_size;
+                svc_receive->user_callbacks.data_cb = added_target->user_callbacks.data_cb;
+                svc_receive->user_callbacks.status_cb = added_target->user_callbacks.status_cb;
+
+                connector_status = connector_callback_continue;
+                goto done;
+            }
+        }
+
+        {
+            const size_t target_size = strlen(target_ptr->target) + 1;
+
+            if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+            {
+                goto done;
+            }
+            memcpy(svc_receive->target, target_ptr->target, target_size);
+        }
+
+        /* Ask user if accepts target */
+        {
+            ccapi_bool_t user_accepts;
+            if (ccapi_data->service.receive.user_callbacks.accept_cb != NULL)
+            {
+                user_accepts = ccapi_data->service.receive.user_callbacks.accept_cb(svc_receive->target, target_ptr->transport);
+            }
+            else
+            {
+                /* User didn't provide an accept callback. We accept it always */
+                user_accepts = CCAPI_TRUE;
+            }
+
+            if (user_accepts == CCAPI_TRUE)
+            {
+                connector_status = connector_callback_continue;
+            }
+            else
+            {
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET;
+            }
+        }
+    }
+
+done:
+    return connector_status;
+}
+
+static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
+
+    ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
+
+    svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+
+    ccapi_logging_line("ccapi_process_device_request_data for target = '%s'", svc_receive->target);
+
+    if (!ccapi_data->config.receive_supported)
+    {
+        svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+        goto done;
+    }
+
+    {
+        ccimp_os_realloc_t ccimp_realloc_data;
+
+        ccimp_realloc_data.new_size = svc_receive->request_buffer_info.length + data_ptr->bytes_used;
+
+        if (svc_receive->max_request_size != RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_receive->max_request_size)
+        {
+            ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
+
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG;
+            goto done;
+        }
+
+        ccimp_realloc_data.old_size = svc_receive->request_buffer_info.length;
+        ccimp_realloc_data.ptr = svc_receive->request_buffer_info.buffer;
+        if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
+        {
+            ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+            goto done;
+        }
+        svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
+ 
+        {
+            uint8_t * const dest_addr = (uint8_t *)svc_receive->request_buffer_info.buffer + svc_receive->request_buffer_info.length;
+            memcpy(dest_addr, data_ptr->buffer, data_ptr->bytes_used);
+        }
+        svc_receive->request_buffer_info.length += data_ptr->bytes_used;
+    }
+
+    if (data_ptr->more_data == connector_false)
+    {
+        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
+
+        /* Pass data to the user and get possible response from user */ 
+        {
+            svc_receive->user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
+                                                               &svc_receive->request_buffer_info, 
+                                                               svc_receive->response_required ? &svc_receive->response_buffer_info : NULL, 
+                                                               svc_receive->receive_error);
+
+            ccapi_free(svc_receive->request_buffer_info.buffer);
+
+            if (svc_receive->response_required)
+            {
+                memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
+            }
+        }
+    }
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
+static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
+
+    ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
+
+    svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+
+    ccapi_logging_line("ccapi_process_device_request_response for target = '%s'", svc_receive->target);
+
+    if (!svc_receive->response_required)
+    {
+        goto done;
+    }
+
+    /* If there is any ccapi internal error, ccfsm will not have called data callback but we still want to let our 
+     * user the oportunity to report a response based on the error
+     */
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->config.receive_supported)
+    {
+        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
+
+        /* Get response from user */ 
+        svc_receive->user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
+                                                           NULL, 
+                                                           &svc_receive->response_buffer_info, 
+                                                           svc_receive->receive_error);
+
+        memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
+    }
+
+    {
+        size_t bytes_to_send = svc_receive->response_processing.length > reply_ptr->bytes_available ? 
+                                                 reply_ptr->bytes_available : svc_receive->response_processing.length;
+
+        memcpy(reply_ptr->buffer, svc_receive->response_processing.buffer, bytes_to_send);
+        svc_receive->response_processing.buffer = ((char *)svc_receive->response_processing.buffer) + bytes_to_send;
+ 
+        reply_ptr->bytes_used = bytes_to_send;
+        svc_receive->response_processing.length -= reply_ptr->bytes_used;
+        reply_ptr->more_data = svc_receive->response_processing.length > 0 ? connector_true : connector_false;
+    }
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
+static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_svc_receive_t * svc_receive = NULL;
+
+    ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
+
+    svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+
+    ccapi_logging_line("ccapi_process_device_request_status for target = '%s'", svc_receive->target);
+    ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
+
+    /* Prior reported errors by ccapi have priority over the ones reported by the cloud */
+    if (svc_receive->receive_error == CCAPI_RECEIVE_ERROR_NONE)
+    {
+        switch (status_ptr->status)
+        {
+            case connector_data_service_status_complete:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
+                break;
+            case connector_data_service_status_cancel:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_CANCEL;
+                break;
+            case connector_data_service_status_timeout:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT;
+                break;
+            case connector_data_service_status_session_error:
+                svc_receive->receive_error = CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR;
+                ccapi_logging_line("ccapi_process_device_request_status: session_error=%d", status_ptr->session_error);
+                break;
+            case connector_data_service_status_COUNT:
+                ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
+                break;
+        }
+    }
+
+    /* Call the user so he can free allocated response memory and handle errors  */
+    if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
+    {
+       svc_receive->user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
+                           svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
+                           svc_receive->receive_error);
+    }
+
+    /* Free resources */
+    if (svc_receive->target != NULL)
+    {
+        ccapi_free(svc_receive->target);
+    }
+    ccapi_free(svc_receive);
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
-
-    UNUSED_ARGUMENT(ccapi_data);
 
     switch (data_service_request)
     {
@@ -1516,15 +1816,43 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
 
             break;
         }
-        case connector_request_id_data_service_send_length:
+        case connector_request_id_data_service_receive_target:
         {
-            connector_data_service_length_t * const len_ptr = data;
-            /*Todo*/
-            /*client_data_t * const app_ptr = len_ptr->user_context;*/
-            len_ptr->total_bytes =25; /*app_ptr->bytes;*/
-            connector_status= connector_callback_continue;
+            connector_data_service_receive_target_t * const target_ptr = data;
+
+            connector_status = ccapi_process_device_request_target(target_ptr, ccapi_data);
+
+            break;
+        }           
+        case connector_request_id_data_service_receive_data:
+        {
+            connector_data_service_receive_data_t * const data_ptr = data;
+
+            connector_status = ccapi_process_device_request_data(data_ptr, ccapi_data);
+
             break;
         }
+        case connector_request_id_data_service_receive_reply_data:
+        {
+            connector_data_service_receive_reply_data_t * const reply_ptr = data;
+
+            connector_status = ccapi_process_device_request_response(reply_ptr, ccapi_data);
+
+            break;
+        }
+        case connector_request_id_data_service_receive_status:
+        {
+            connector_data_service_status_t const * const status_ptr = data;
+
+            connector_status = ccapi_process_device_request_status(status_ptr, ccapi_data);
+
+            break;
+        }
+        case connector_request_id_data_service_receive_reply_length:
+        {
+            break;
+        }
+
         default:
             connector_status = connector_callback_unrecognized;
             break;

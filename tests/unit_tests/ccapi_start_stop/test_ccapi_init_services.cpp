@@ -1,5 +1,14 @@
 #include "test_helper_functions.h"
 
+static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+{
+    (void)target;
+    (void)transport;
+    (void)request_buffer_info;
+    (void)response_buffer_info;
+    (void)receive_error;
+}
+
 TEST_GROUP(test_ccapi_init_services)
 {
     void setup()
@@ -28,11 +37,12 @@ TEST(test_ccapi_init_services, testServicesSupported)
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
+    ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
     void * pointer = pointer; /* Not-NULL */
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.cli = &pointer;
-    start.service.receive = &pointer;
+    start.service.receive = &receive_service;
     start.service.firmware = &pointer;
     start.service.rci = &pointer;
     start.service.file_system = &fs_service;
@@ -42,6 +52,9 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK(error == CCAPI_START_ERROR_NONE);
     CHECK(ccapi_data_single_instance->config.cli_supported == CCAPI_TRUE);
     CHECK(ccapi_data_single_instance->config.receive_supported == CCAPI_TRUE);
+    CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
+    CHECK_EQUAL(receive_service.data_cb, ccapi_data_single_instance->service.receive.user_callbacks.data_cb);
+    CHECK_EQUAL(receive_service.status_cb, ccapi_data_single_instance->service.receive.user_callbacks.status_cb);
     CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_TRUE);
     CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_TRUE);
     CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_TRUE);
