@@ -14,6 +14,8 @@
 #define CCAPI_KEEPALIVES_WCNT_MAX       64
 #define CCAPI_KEEPALIVES_WCNT_DEFAULT   5
 
+#define CCAPI_TCP_START_WAIT_FOREVER ((uint8_t) 0)
+
 typedef enum {
     CCAPI_CONNECTION_LAN,
     CCAPI_CONNECTION_WAN
@@ -77,7 +79,7 @@ typedef struct {
         ccapi_ip_address_t ip;
         uint8_t max_transactions;
         char * password;
-        uint8_t timeout;
+        uint8_t start_timeout;
         ccapi_connection_type_t type;
         union {
             struct {

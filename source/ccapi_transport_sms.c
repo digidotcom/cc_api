@@ -175,7 +175,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
         }
     }
     {
-        ccapi_bool_t const wait_forever = CCAPI_BOOL(sms_start->timeout == 0);
+        ccapi_bool_t const wait_forever = CCAPI_BOOL(sms_start->start_timeout == CCAPI_SMS_START_WAIT_FOREVER);
 
         if (wait_forever)
         {
@@ -190,7 +190,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
             unsigned long const jitter = 1;
 
             ccimp_os_get_system_time(&time_start);
-            end_time.sys_uptime = time_start.sys_uptime + sms_start->timeout + jitter;
+            end_time.sys_uptime = time_start.sys_uptime + sms_start->start_timeout + jitter;
             do {
                 ccimp_os_system_up_time_t system_uptime;
 

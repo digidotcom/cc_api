@@ -4,6 +4,9 @@
 #define CCAPI_SM_SMS_MAX_SESSIONS_LIMIT 256
 #define CCAPI_SM_SMS_MAX_SESSIONS_DEFAULT 20
 
+#define CCAPI_SMS_START_WAIT_FOREVER ((uint8_t) 0)
+#define CCAPI_SMS_RX_TIMEOUT_INFINITE ((size_t) 0)
+
 typedef enum {
     CCAPI_SMS_START_ERROR_NONE,
     CCAPI_SMS_START_ERROR_CCAPI_STOPPED,
@@ -33,8 +36,8 @@ typedef struct {
     struct {
         ccapi_sms_close_cb_t close;
     } callback;
-    uint8_t timeout;
     char * phone_number;
+    uint8_t start_timeout;
     char * service_id;
     struct {
         size_t max_sessions;

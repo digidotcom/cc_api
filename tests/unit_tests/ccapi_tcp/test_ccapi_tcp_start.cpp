@@ -95,7 +95,7 @@ TEST(test_ccapi_tcp_start, testTCPConnectionTimeout)
     connector_transport_t connector_transport = connector_transport_tcp;
 
     th_fill_tcp_wan_ipv4_callbacks_info(&tcp_start);
-    tcp_start.connection.timeout = 10;
+    tcp_start.connection.start_timeout = 10;
 
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
@@ -111,5 +111,5 @@ TEST(test_ccapi_tcp_start, testTCPConnectionTimeout)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(tcp_start.connection.timeout, ccapi_data_single_instance->transport_tcp.info->connection.timeout);
+    CHECK_EQUAL(tcp_start.connection.start_timeout, ccapi_data_single_instance->transport_tcp.info->connection.start_timeout);
 }

@@ -82,7 +82,7 @@ TEST(test_ccapi_udp_start_sanity_checks, testInfoIsCopied)
     ccapi_udp_start_error_t error;
     ccapi_udp_info_t udp_start = {{0}};
     udp_start.limit.max_sessions=140;
-    udp_start.limit.rx_timeout=0;
+    udp_start.limit.rx_timeout=CCAPI_UDP_RX_TIMEOUT_INFINITE;
     udp_start.callback.close=ccapi_udp_close_cb;
 
     connector_transport_t connector_transport = connector_transport_udp;
