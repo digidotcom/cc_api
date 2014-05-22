@@ -453,6 +453,22 @@ done:
     return connector_status;
 }
 
+
+static connector_callback_status_t ccapi_process_device_request_length(connector_data_service_length_t * const length_ptr)
+{
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)length_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
+
+    length_ptr->total_bytes = svc_receive->response_processing.length;
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -525,6 +541,10 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
         case connector_request_id_data_service_receive_reply_length:
         {
+            connector_data_service_length_t * const length_ptr = data;
+            
+            connector_status = ccapi_process_device_request_length(length_ptr);
+
             break;
         }
     }

@@ -11,6 +11,7 @@
  */
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
@@ -107,6 +108,10 @@ static void app_receive_default_data_cb(char const * const target, ccapi_transpo
             response_buffer_info->length = sprintf(response_buffer_info->buffer, "Thanks for the info");
         }
     }
+    else
+    {
+        printf("app_receive_default_data_cb: Response not requested by cloud\n");
+    }
 
     return;
 }
@@ -160,10 +165,6 @@ int main (void)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t start_error = CCAPI_START_ERROR_NONE;
-    ccapi_tcp_start_error_t tcp_start_error;
-    ccapi_tcp_info_t tcp_info = {{0}};
-    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
-    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
     ccapi_receive_service_t receive_service = {app_receive_default_accept_cb, app_receive_default_data_cb, app_receive_default_status_cb};
 
     fill_start_structure_with_good_parameters(&start);
@@ -181,22 +182,53 @@ int main (void)
         goto done;
     }
 
-    tcp_info.connection.type = CCAPI_CONNECTION_LAN;
-    memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);
-    memcpy(tcp_info.connection.info.lan.mac_address, mac, sizeof tcp_info.connection.info.lan.mac_address);
-
-    tcp_info.callback.close = ccapi_tcp_close_cb;
-    tcp_info.callback.keepalive = NULL;
-
-    tcp_start_error = ccapi_start_transport_tcp(&tcp_info);
-    if (tcp_start_error == CCAPI_TCP_START_ERROR_NONE)
+    /* Start TCP transport */
     {
-        printf("ccapi_start_transport_tcp success\n");
+        ccapi_tcp_start_error_t tcp_start_error;
+        ccapi_tcp_info_t tcp_info = {{0}};
+        uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
+
+        tcp_info.connection.type = CCAPI_CONNECTION_LAN;
+        memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);
+        memcpy(tcp_info.connection.info.lan.mac_address, mac, sizeof tcp_info.connection.info.lan.mac_address);
+
+        tcp_info.callback.close = ccapi_tcp_close_cb;
+        tcp_info.callback.keepalive = NULL;
+
+        tcp_start_error = ccapi_start_transport_tcp(&tcp_info);
+        if (tcp_start_error == CCAPI_TCP_START_ERROR_NONE)
+        {
+            printf("ccapi_start_transport_tcp success\n");
+        }
+        else
+        {
+            printf("ccapi_start_transport_tcp failed with error %d\n", tcp_start_error);
+            goto done;
+        }
     }
-    else
+
+    /* Start UDP trasnport */
     {
-        printf("ccapi_start_transport_tcp failed with error %d\n", tcp_start_error);
-        goto done;
+        ccapi_udp_start_error_t udp_start_error;
+        ccapi_udp_info_t udp_info = {{0}};
+
+        udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
+        udp_info.limit.max_sessions = 1;
+        udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
+
+        udp_info.callback.close = NULL;
+
+        udp_start_error = ccapi_start_transport_udp(&udp_info);
+        if (udp_start_error == CCAPI_UDP_START_ERROR_NONE)
+        {
+            printf("ccapi_start_transport_udp success\n");
+        }
+        else
+        {
+            printf("ccapi_start_transport_udp failed with error %d\n", udp_start_error);
+            goto done;
+        }
     }
 
     {
@@ -217,9 +249,24 @@ int main (void)
         }
     }
 
-    printf("loop forever\n");
-    
-	for(;;);
+    printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
+	for(;;)
+    {   
+        /* TODO: send ping instead of data*/
+        ccapi_send_error_t send_error;
+        #define SEND_DATA_UDP         "ping"
+        send_error = ccapi_send_data(CCAPI_TRANSPORT_UDP, "ping.txt", "text/plain", SEND_DATA_UDP, strlen(SEND_DATA_UDP), CCAPI_SEND_BEHAVIOR_OVERWRITE);
+        if (send_error == CCAPI_SEND_ERROR_NONE)
+        {
+            printf("ccapi_send_data for udp success\n");
+        }
+        else
+        {
+            printf("ccapi_send_data for udp failed with error %d\n", send_error);
+        }
+        
+        sleep(5);
+    }
 
 done:
     return 0;
