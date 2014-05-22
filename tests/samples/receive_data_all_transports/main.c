@@ -231,6 +231,34 @@ int main (void)
         }
     }
 
+#if 0
+    /* Start SMS trasnport */
+    {
+        ccapi_sms_start_error_t sms_start_error;
+        ccapi_sms_info_t sms_info = {{0}};
+
+        sms_info.start_timeout = CCAPI_TCP_START_WAIT_FOREVER;
+        sms_info.limit.max_sessions = 1;
+        sms_info.limit.rx_timeout = CCAPI_SMS_RX_TIMEOUT_INFINITE;
+
+        sms_info.callback.close = NULL;
+
+        sms_info.cloud_config.phone_number = "32075";
+        sms_info.cloud_config.service_id = "idgp";
+
+        sms_start_error = ccapi_start_transport_sms(&sms_info);
+        if (sms_start_error == CCAPI_SMS_START_ERROR_NONE)
+        {
+            printf("ccapi_start_transport_sms success\n");
+        }
+        else
+        {
+            printf("ccapi_start_transport_sms failed with error %d\n", sms_start_error);
+            goto done;
+        }
+    }
+#endif
+
     {
         ccapi_receive_error_t receive_error;
         
