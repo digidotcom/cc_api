@@ -18,6 +18,7 @@ test
 
 # Local scripts
 *.sh
+!build_release.sh
 
 # Local patches
 *.patch

@@ -17,6 +17,7 @@
 #if (defined CONNECTOR_DEBUG)
 
 #include <assert.h>
+#include <stdarg.h>
 
 typedef enum {
     debug_beg,
