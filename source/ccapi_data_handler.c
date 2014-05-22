@@ -251,6 +251,12 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             memcpy(svc_receive->target, target_ptr->target, target_size);
         }
 
+        if (svc_receive->user_callbacks.data_cb == NULL)
+        {
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INVALID_DATA_CB;
+            goto done;
+        }
+
         /* Ask user if accepts target */
         {
             ccapi_bool_t user_accepts;

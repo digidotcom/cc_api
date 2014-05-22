@@ -134,7 +134,7 @@ TEST_GROUP(test_ccapi_receive_data_callback_MissingDataCallback)
         clean_ccapi_receive_data();
 
         error = ccapi_start(&start);
-        CHECK(error == CCAPI_START_ERROR_INVALID_RECEIVE_DATA_CB);
+        CHECK(error == CCAPI_START_ERROR_NONE);
     }
 
     void teardown()
@@ -143,7 +143,7 @@ TEST_GROUP(test_ccapi_receive_data_callback_MissingDataCallback)
     }
 };
 
-TEST(test_ccapi_receive_data_callback_MissingDataCallback, testWeNotAllowNullDataCallback)
+TEST(test_ccapi_receive_data_callback_MissingDataCallback, testWeAllowNullDataCallback)
 {
 }
 
