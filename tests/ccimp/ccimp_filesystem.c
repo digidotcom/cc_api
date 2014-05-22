@@ -66,7 +66,7 @@ ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const file_open_data)
 
     if (fd < 0)
     {
-        file_open_data->errnum.value = errno;
+        file_open_data->errnum = errno;
         status = CCIMP_STATUS_ERROR;
         goto done;
     }
@@ -92,7 +92,7 @@ ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const file_read_data)
        }
        else
        {
-             file_read_data->errnum.value = errno;
+             file_read_data->errnum = errno;
              status = CCIMP_STATUS_ERROR;
        }
    }
@@ -115,7 +115,7 @@ ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const file_write_data
        }
        else
        {
-             file_write_data->errnum.value = errno;
+             file_write_data->errnum = errno;
              status = CCIMP_STATUS_ERROR;
        }
    }
@@ -130,7 +130,7 @@ ccimp_status_t ccimp_fs_file_close(ccimp_fs_file_close_t * const file_close_data
 
     if (result < 0)
     {
-        file_close_data->errnum.value = errno;
+        file_close_data->errnum = errno;
         status = CCIMP_STATUS_ERROR;
     }
 
@@ -164,7 +164,7 @@ ccimp_status_t ccimp_fs_file_seek(ccimp_fs_file_seek_t * const file_seek_data)
        }
        else
        {
-           file_seek_data->errnum.value = errno;
+           file_seek_data->errnum = errno;
            status = CCIMP_STATUS_ERROR;
        }
    }
@@ -184,7 +184,7 @@ ccimp_status_t ccimp_fs_file_truncate(ccimp_fs_file_truncate_t * const file_trun
         }
         else
         {
-            file_truncate_data->errnum.value = errno;
+            file_truncate_data->errnum = errno;
             status = CCIMP_STATUS_ERROR;
         }
     }
@@ -203,7 +203,7 @@ ccimp_status_t ccimp_fs_file_remove(ccimp_fs_file_remove_t * const file_remove_d
         }
         else
         {
-            file_remove_data->errnum.value = errno;
+            file_remove_data->errnum = errno;
             status = CCIMP_STATUS_ERROR;
         }
     }
@@ -227,7 +227,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data)
         else
         {
             closedir(dirp);
-            dir_open_data->errnum.value = ENOMEM;
+            dir_open_data->errnum = ENOMEM;
             status = CCIMP_STATUS_ERROR;
         }
     }
@@ -239,7 +239,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data)
        }
        else
        {
-             dir_open_data->errnum.value = errno;
+             dir_open_data->errnum = errno;
              status = CCIMP_STATUS_ERROR;
        }
     }
@@ -262,7 +262,7 @@ ccimp_status_t ccimp_fs_dir_read_entry(ccimp_fs_dir_read_entry_t * const dir_rea
        }
        else
        {
-             dir_read_data->errnum.value = error;
+             dir_read_data->errnum = error;
              status = CCIMP_STATUS_ERROR;
        }
     }
@@ -281,7 +281,7 @@ ccimp_status_t ccimp_fs_dir_read_entry(ccimp_fs_dir_read_entry_t * const dir_rea
         }
         else
         {
-            dir_read_data->errnum.value = ENAMETOOLONG;
+            dir_read_data->errnum = ENAMETOOLONG;
             status = CCIMP_STATUS_ERROR;
         }
     }
@@ -376,7 +376,7 @@ ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const file_hash_data)
 
 ccimp_status_t ccimp_fs_error_desc(ccimp_fs_error_desc_t * const error_desc_data)
 {
-    int errnum = error_desc_data->errnum.value;
+    ccimp_fs_errnum_t errnum = error_desc_data->errnum;
 
     error_desc_data->bytes_used = 0;
 

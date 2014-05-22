@@ -221,7 +221,7 @@ typedef enum {
 typedef struct {
     ccapi_bool_t error_is_internal;
     union {
-        void * ccimp_error;
+        uintptr_t ccimp_error;
         ccapi_fs_internal_error_t ccapi_error;
     } error;
 } ccapi_fs_error_handle_t;
