@@ -62,8 +62,6 @@ int main (void)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t start_error = CCAPI_START_ERROR_NONE;
-    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
-    uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
     ccapi_send_error_t send_error;
     char hint_string[100] = "";
@@ -86,6 +84,8 @@ int main (void)
     {
         ccapi_tcp_start_error_t tcp_start_error;
         ccapi_tcp_info_t tcp_info = {{0}};
+        uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+        uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
         tcp_info.connection.type = CCAPI_CONNECTION_LAN;
         memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);

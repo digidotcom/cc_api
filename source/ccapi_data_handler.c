@@ -177,8 +177,8 @@ static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receiv
 
 static connector_callback_status_t ccapi_process_device_request_target(connector_data_service_receive_target_t * const target_ptr, ccapi_data_t * const ccapi_data)
 {
-    connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
+    connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
 
@@ -281,12 +281,10 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
 
-    ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_data for target = '%s'", svc_receive->target);
 
@@ -355,12 +353,10 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
 
-    ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_response for target = '%s'", svc_receive->target);
 
@@ -405,12 +401,9 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
-
-    ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_status for target = '%s'", svc_receive->target);
     ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
