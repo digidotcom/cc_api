@@ -6,11 +6,15 @@
 #include "device_id_utils.h"
 #include "simulated_tank.h"
 
+#if !(defined UNUSED_ARGUMENT)
+#define UNUSED_ARGUMENT(a)  (void)(a)
+#endif
+
 #define DEVICE_TYPE             "Simulated Tank (CCAPI)"
 #define DEVICE_CLOUD_URL        "login.etherios.com"
 #define IPV4_ADDRESS_STRING     "192.168.1.2"
 
-//#error "Define your Deice MAC Address and your account's Vendor ID and comment this error line"
+//#error "Define your Device MAC Address and your account's Vendor ID and comment this error line"
 #define MAC_ADDRESS_STRING      "00049D:ABCDFF"
 #define VENDOR_ID               0x030000BD
 
@@ -24,13 +28,16 @@ static void tank_valves_cb(char const * const target, ccapi_transport_t const tr
 {
     char const * valveIN_token = NULL;
     char const * valveOUT_token = NULL;
+    size_t const buffer_size = 64;
+    response_buffer_info->buffer = malloc(buffer_size);
 
     assert(transport == CCAPI_TRANSPORT_TCP);
 
     printf("\t *** Received request from Device Cloud\n");
+    printf("\tAllocated response buffer at %p\n", response_buffer_info->buffer);
     if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
     {
-        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
+        response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "Error %d while handling target %s", receive_error, target);
         return;
     }
 
@@ -41,21 +48,19 @@ static void tank_valves_cb(char const * const target, ccapi_transport_t const tr
     {
         char const * const value = valveIN_token + strlen("valveIN=");
 
-        printf("\tValveIN: ");
-
         if (*value == '0')
         {
-            printf("Opened\n");
             set_valveIN_status(VALVE_OPENED);
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "ValveIN: Opened");
         }
         else if (*value == '1')
         {
-            printf("Closed\n");
             set_valveIN_status(VALVE_CLOSED);
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "ValveIN: Closed");
         }
         else
         {
-            printf("Invalid value, status not changed!!!\n");
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "valveIN: Invalid value, status not changed!!!");
         }
     }
 
@@ -63,25 +68,40 @@ static void tank_valves_cb(char const * const target, ccapi_transport_t const tr
     {
         char const * const value = valveOUT_token + strlen("valveOUT=");
 
-        printf("\tValveOUT: ");
-
         if (*value == '0')
         {
-            printf("Opened\n");
             set_valveOUT_status(VALVE_OPENED);
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "ValveOUT: Opened");
         }
         else if (*value == '1')
         {
-            printf("Closed\n");
-            set_valveIN_status(VALVE_CLOSED);
+            set_valveOUT_status(VALVE_CLOSED);
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "ValveOUT: Closed");
         }
         else
         {
-            printf("Invalid value, status not changed!!!\n");
+            response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "valveOUT: Invalid value, status not changed!!!");
         }
     }
 
+    printf("\tSending response: %s\n", (char *)response_buffer_info->buffer);
+
     return;
+}
+
+static void tank_valves_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+{
+    UNUSED_ARGUMENT(target);
+    UNUSED_ARGUMENT(transport);
+    UNUSED_ARGUMENT(receive_error);
+
+    printf("\t *** Received receive service status callback\n");
+
+    if (response_buffer_info != NULL)
+    {
+        printf("\tFreeing response buffer at %p\n", response_buffer_info->buffer);
+        free(response_buffer_info->buffer);
+    }
 }
 
 static void tank_demo_loop(void)
@@ -185,7 +205,7 @@ int main (void)
     }
 
     printf("\tRegistering Receive Service target\n");
-    receive_error = ccapi_receive_add_target("tank", tank_valves_cb, NULL, 100);
+    receive_error = ccapi_receive_add_target("tank", tank_valves_cb, tank_valves_status_cb, 100);
     if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
     {
         printf("\tccapi_receive_add_target success\n");

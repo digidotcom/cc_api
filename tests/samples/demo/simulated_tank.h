@@ -12,11 +12,11 @@
 #define INIT_VOLUME     (MAX_VOLUME / 2)
 #define INIT_VALVEIN    VALVE_CLOSED
 #define INIT_VALVEOUT   VALVE_OPENED
-#define INIT_TEMP       25
+#define INIT_TEMP       35
 #define VALVEOUT_FLOW   15
 #define VALVEIN_FLOW    10
-#define MIN_TEMP        20
-#define MAX_TEMP        30
+#define MIN_TEMP        25
+#define MAX_TEMP        45
 
 typedef enum {
   VALVE_OPENED = 0,

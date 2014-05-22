@@ -12,7 +12,7 @@ double get_tank_temperature(void)
 
 int32_t get_tank_fill_percentage(void)
 {
-    return volume / MAX_VOLUME;
+    return volume * 100 / MAX_VOLUME;
 }
 
 valve_status_t get_valveIN_status(void)
@@ -86,7 +86,7 @@ void update_simulated_tank_status(void)
 
 void print_tank_status(void)
 {
-    printf("\n\tVolume = %d (%d%%)\n", volume, volume / MAX_VOLUME);
+    printf("\n\tVolume = %d (%d%%)\n", volume, get_tank_fill_percentage());
     printf("\tTemperature = %f\n", temperature);
     printf("\tValveIN = %s\n", valveIN == VALVE_OPENED ? "Opened" : "Closed");
     printf("\tValveOUT = %s\n\n", valveOUT == VALVE_OPENED ? "Opened" : "Closed");
