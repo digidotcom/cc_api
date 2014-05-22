@@ -295,7 +295,7 @@ ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const data)
     if (mock_scope_c("ccimp_fs_file_open")->getData("behavior").value.intValue == MOCK_FS_FILE_OPEN_ENABLED)
 	{
         mock_scope_c("ccimp_fs_file_open")->actualCall("ccimp_fs_file_open")->withParameterOfType("ccimp_fs_file_open_t", "data", (void *)data);
-        data->errnum.value = EAGAIN;
+        data->errnum = EAGAIN;
         data->handle.value = 5;
         data->imp_context = &my_fs_context;
 
@@ -316,7 +316,7 @@ ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const data)
         mock_scope_c("ccimp_fs_file_read")->actualCall("ccimp_fs_file_read")->withParameterOfType("ccimp_fs_file_read_t", "data", (void *)data);
         strcpy((char *)data->buffer, "testFileRead");
         data->bytes_used = sizeof "testFileRead";
-        data->errnum.value = ETIMEDOUT;
+        data->errnum = ETIMEDOUT;
         *fs_context = 1;
         return (ccimp_status_t)mock_scope_c("ccimp_fs_file_read")->returnValue().value.intValue;
     }
@@ -331,7 +331,7 @@ ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const data)
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
 
     mock_scope_c("ccimp_fs_file_write")->actualCall("ccimp_fs_file_write")->withParameterOfType("ccimp_fs_file_write_t", "data", (void *)data);
-    data->errnum.value = ENODATA;
+    data->errnum = ENODATA;
     *fs_context = 2;
     data->bytes_used = data->bytes_available;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_file_write")->returnValue().value.intValue;
@@ -343,7 +343,7 @@ ccimp_status_t ccimp_fs_file_seek(ccimp_fs_file_seek_t * const data)
 
     mock_scope_c("ccimp_fs_file_seek")->actualCall("ccimp_fs_file_seek")->withParameterOfType("ccimp_fs_file_seek_t", "data", (void *)data);
     *fs_context = 3;
-    data->errnum.value = EINVAL;
+    data->errnum = EINVAL;
     data->resulting_offset = data->requested_offset;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_file_seek")->returnValue().value.intValue;
 }
@@ -356,7 +356,7 @@ ccimp_status_t ccimp_fs_file_close(ccimp_fs_file_close_t * const data)
 	{
         mock_scope_c("ccimp_fs_file_close")->actualCall("ccimp_fs_file_close")->withParameterOfType("ccimp_fs_file_close_t", "data", (void *)data);
         *fs_context = 4;
-        data->errnum.value = EROFS;
+        data->errnum = EROFS;
         return (ccimp_status_t)mock_scope_c("ccimp_fs_file_close")->returnValue().value.intValue;
     }
     else
@@ -371,7 +371,7 @@ ccimp_status_t ccimp_fs_file_truncate(ccimp_fs_file_truncate_t * const data)
 
     mock_scope_c("ccimp_fs_file_truncate")->actualCall("ccimp_fs_file_truncate")->withParameterOfType("ccimp_fs_file_truncate_t", "data", (void *)data);
     *fs_context = 12;
-    data->errnum.value = EIO;
+    data->errnum = EIO;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_file_truncate")->returnValue().value.intValue;
 }
 
@@ -381,7 +381,7 @@ ccimp_status_t ccimp_fs_file_remove(ccimp_fs_file_remove_t * const data)
 
     mock_scope_c("ccimp_fs_file_remove")->actualCall("ccimp_fs_file_remove")->withParameterOfType("ccimp_fs_file_remove_t", "data", (void *)data);
     *fs_context = 5;
-    data->errnum.value = EACCES;
+    data->errnum = EACCES;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_file_remove")->returnValue().value.intValue;
 }
 
@@ -391,7 +391,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const data)
     mock_scope_c("ccimp_fs_dir_open")->actualCall("ccimp_fs_dir_open")->withParameterOfType("ccimp_fs_dir_open_t", "data", (void *)data);
     data->handle.pointer = &dir_handle;
     *fs_context = 6;
-    data->errnum.value = ENOTDIR;
+    data->errnum = ENOTDIR;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_open")->returnValue().value.intValue;
 }
 
@@ -402,7 +402,7 @@ ccimp_status_t ccimp_fs_dir_read_entry(ccimp_fs_dir_read_entry_t * const data)
     mock_scope_c("ccimp_fs_dir_read_entry")->actualCall("ccimp_fs_dir_read_entry")->withParameterOfType("ccimp_fs_dir_read_entry_t", "data", (void *)data);
     strcpy(data->entry_name, "/tmp/hello.txt");
     *fs_context = 7;
-    data->errnum.value = ENOSYS;
+    data->errnum = ENOSYS;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_read_entry")->returnValue().value.intValue;
 }
 
@@ -426,7 +426,7 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dat
         }
 
         *fs_context = 8;
-        data->errnum.value = ENOMEM;
+        data->errnum = ENOMEM;
         return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_entry_status")->returnValue().value.intValue;
     }
     else
@@ -441,7 +441,7 @@ ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const data)
 
     mock_scope_c("ccimp_fs_dir_close")->actualCall("ccimp_fs_dir_close")->withParameterOfType("ccimp_fs_dir_close_t", "data", (void *)data);
     *fs_context = 9;
-    data->errnum.value = EINVAL;
+    data->errnum = EINVAL;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_close")->returnValue().value.intValue;
 }
 
@@ -452,7 +452,7 @@ ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const data)
     mock_scope_c("ccimp_fs_hash_alg")->actualCall("ccimp_fs_hash_alg")->withParameterOfType("ccimp_fs_get_hash_alg_t", "data", (void *)data);
     data->hash_alg.actual = data->hash_alg.requested;
     *fs_context = 10;
-    data->errnum.value = ENAMETOOLONG;
+    data->errnum = ENAMETOOLONG;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_hash_alg")->returnValue().value.intValue;
 }
 
@@ -464,7 +464,7 @@ ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const data)
     mock_scope_c("ccimp_fs_hash_file")->actualCall("ccimp_fs_hash_file")->withParameterOfType("ccimp_fs_hash_file_t", "data", (void *)data);
     *crc32 = 0x34EC;
     *fs_context = 11;
-    data->errnum.value = ENOSPC;
+    data->errnum = ENOSPC;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_hash_file")->returnValue().value.intValue;
 }
 
@@ -474,7 +474,7 @@ ccimp_status_t ccimp_fs_error_desc(ccimp_fs_error_desc_t * const data)
 
     mock_scope_c("ccimp_fs_error_desc")->actualCall("ccimp_fs_error_desc")->withParameterOfType("ccimp_fs_error_desc_t", "data", (void *)data);
     data->error_status = CCIMP_FS_ERROR_INVALID_PARAMETER;
-    strcpy(data->error_string, strerror(data->errnum.value));
+    strcpy(data->error_string, strerror(data->errnum));
     data->bytes_used = strlen(data->error_string) + 1;
     *fs_context = 12;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_error_desc")->returnValue().value.intValue;
