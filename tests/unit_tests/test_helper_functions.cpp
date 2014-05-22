@@ -313,13 +313,13 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
     ccimp_fs_file_open_t ccimp_open_data;
     connector_callback_status_t status;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = flags;
     ccimp_open_data.path = path;
 
-    ccfsm_open_data->errnum = NULL;
+    ccfsm_open_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data->handle = NULL;
     ccfsm_open_data->oflag = flags;
     ccfsm_open_data->path = ccimp_open_data.path;
@@ -336,7 +336,7 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
 
 void th_filesystem_prepare_ccimp_dir_entry_status_call(ccimp_fs_dir_entry_status_t * const ccimp_fs_dir_entry_status_data, char const * const path)
 {
-    ccimp_fs_dir_entry_status_data->errnum.pointer = NULL;
+    ccimp_fs_dir_entry_status_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_fs_dir_entry_status_data->imp_context = &my_fs_context;
     ccimp_fs_dir_entry_status_data->path = path;
     ccimp_fs_dir_entry_status_data->status.file_size = 0;
@@ -347,7 +347,7 @@ void th_filesystem_prepare_ccimp_dir_entry_status_call(ccimp_fs_dir_entry_status
 
 void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const ccimp_dir_open_data, char const * const path)
 {
-    ccimp_dir_open_data->errnum.pointer = NULL;
+    ccimp_dir_open_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data->imp_context = &my_fs_context;
     ccimp_dir_open_data->handle.pointer = NULL;
     ccimp_dir_open_data->path = path;
@@ -357,7 +357,7 @@ void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const 
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data)
 {
     ccimp_dir_close_data->handle.pointer = &dir_handle;
-    ccimp_dir_close_data->errnum.pointer = NULL;
+    ccimp_dir_close_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data->imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_dir_close_data, CCIMP_STATUS_OK);
 }
@@ -382,26 +382,26 @@ void destroy_test_file(char const * const path)
     CHECK (result >= 0);
 }
 
-void th_call_ccimp_fs_error_desc_and_check_error(void * ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error)
+void th_call_ccimp_fs_error_desc_and_check_error(uintptr_t ccfsm_errnum, connector_file_system_error_t ccfsm_fs_error)
 {
     connector_request_id_t request;
     connector_callback_status_t status;
     connector_file_system_get_error_t ccfsm_error_desc_data;
     char buffer[10];
 
-    ccfsm_error_desc_data.errnum = ccfsm_errnum;
+    ccfsm_error_desc_data.errnum = (ccimp_fs_errnum_t)ccfsm_errnum;
     ccfsm_error_desc_data.user_context = NULL;
     ccfsm_error_desc_data.buffer = buffer;
     ccfsm_error_desc_data.bytes_available = sizeof buffer;
     ccfsm_error_desc_data.bytes_used = 1;
 
-    Mock_ccimp_os_free_expectAndReturn(ccfsm_errnum, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn((void *)ccfsm_errnum, CCIMP_STATUS_OK);
 
     request.file_system_request = connector_request_id_file_system_get_error;
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_error_desc_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK(NULL != ccfsm_errnum);
+    CHECK((uintptr_t)NULL != ccfsm_errnum);
     CHECK_EQUAL(ccfsm_fs_error, ccfsm_error_desc_data.error_status);
     CHECK_EQUAL(0, ccfsm_error_desc_data.bytes_used);
 }

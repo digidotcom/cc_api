@@ -52,13 +52,13 @@ TEST(test_ccapi_fs_access, testAccessRead)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READ;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDONLY | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDONLY | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
@@ -86,13 +86,13 @@ TEST(test_ccapi_fs_access, testAccessWrite)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_WRITE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_WRONLY | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
@@ -128,13 +128,13 @@ TEST(test_ccapi_fs_access, testAccessReadWrite)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READWRITE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
@@ -174,11 +174,11 @@ TEST(test_ccapi_fs_access, testAccessRemove)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
-    ccimp_remove_data.errnum.pointer = NULL;
+    ccimp_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_remove_data.imp_context = &fs_context;
     ccimp_remove_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
+    ccfsm_remove_data.errnum = ccimp_remove_data.errnum;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
@@ -206,12 +206,12 @@ TEST(test_ccapi_fs_access, testAccessList)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_LIST;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_ALLOW;
 
-    ccimp_dir_open_data.errnum.pointer = NULL;
+    ccimp_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
+    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
@@ -236,7 +236,7 @@ TEST(test_ccapi_fs_access, testAccessOpenDenied)
     ccapi_fs_access_expected_path = "/tmp/hello.txt";
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_READ;
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDONLY | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccapi_fs_access_expected_path;
@@ -274,7 +274,7 @@ TEST(test_ccapi_fs_access, testAccessListDenied)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_LIST;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
 
-    ccfsm_dir_open_data.errnum = NULL;
+    ccfsm_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = NULL;
     ccfsm_dir_open_data.path = ccapi_fs_access_expected_path;
@@ -311,7 +311,7 @@ TEST(test_ccapi_fs_access, testAccessRemoveDenied)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
 
-    ccfsm_remove_data.errnum = NULL;
+    ccfsm_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccapi_fs_access_expected_path;
 

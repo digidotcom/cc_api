@@ -30,19 +30,19 @@ TEST_GROUP(test_ccfsm_filesystem)
         start.service.file_system = &fs_service;
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        expected_errnum[FS_OPEN_ERRNUM_INDEX].value = EAGAIN;
-        expected_errnum[FS_READ_ERRNUM_INDEX].value = ETIMEDOUT;
-        expected_errnum[FS_WRITE_ERRNUM_INDEX].value = ENODATA;
-        expected_errnum[FS_SEEK_ERRNUM_INDEX].value = EINVAL;
-        expected_errnum[FS_CLOSE_ERRNUM_INDEX].value = EROFS;
-        expected_errnum[FS_REMOVE_ERRNUM_INDEX].value = EACCES;
-        expected_errnum[FS_DIROPEN_ERRNUM_INDEX].value = ENOTDIR;
-        expected_errnum[FS_DIRREAD_ERRNUM_INDEX].value = ENOSYS;
-        expected_errnum[FS_DIRSTAT_ERRNUM_INDEX].value = ENOMEM;
-        expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX].value = EINVAL;
-        expected_errnum[FS_HASHSTAT_ERRNUM_INDEX].value = ENAMETOOLONG;
-        expected_errnum[FS_HASHFILE_ERRNUM_INDEX].value = ENOSPC;
-        expected_errnum[FS_TRUNCATE_ERRNUM_INDEX].value = EIO;
+        expected_errnum[FS_OPEN_ERRNUM_INDEX] = EAGAIN;
+        expected_errnum[FS_READ_ERRNUM_INDEX] = ETIMEDOUT;
+        expected_errnum[FS_WRITE_ERRNUM_INDEX] = ENODATA;
+        expected_errnum[FS_SEEK_ERRNUM_INDEX] = EINVAL;
+        expected_errnum[FS_CLOSE_ERRNUM_INDEX] = EROFS;
+        expected_errnum[FS_REMOVE_ERRNUM_INDEX] = EACCES;
+        expected_errnum[FS_DIROPEN_ERRNUM_INDEX] = ENOTDIR;
+        expected_errnum[FS_DIRREAD_ERRNUM_INDEX] = ENOSYS;
+        expected_errnum[FS_DIRSTAT_ERRNUM_INDEX] = ENOMEM;
+        expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX] = EINVAL;
+        expected_errnum[FS_HASHSTAT_ERRNUM_INDEX] = ENAMETOOLONG;
+        expected_errnum[FS_HASHFILE_ERRNUM_INDEX] = ENOSPC;
+        expected_errnum[FS_TRUNCATE_ERRNUM_INDEX] = EIO;
     }
 
     void teardown()
@@ -58,13 +58,13 @@ TEST(test_ccfsm_filesystem, testFileOpen)
     connector_file_system_open_t ccfsm_open_data;
     connector_callback_status_t status;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = "/tmp/hello.txt";
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
@@ -78,7 +78,7 @@ TEST(test_ccfsm_filesystem, testFileOpen)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(&my_fs_context, ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(ccfsm_open_data.handle != NULL);
-    CHECK(ccfsm_open_data.errnum == NULL);
+    CHECK(ccfsm_open_data.errnum == (ccimp_fs_errnum_t)NULL);
 }
 
 TEST(test_ccfsm_filesystem, testFileOpenFails)
@@ -88,13 +88,13 @@ TEST(test_ccfsm_filesystem, testFileOpenFails)
     connector_file_system_open_t ccfsm_open_data;
     connector_callback_status_t status;
 
-    ccimp_open_data.errnum.pointer = NULL;
+    ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
     ccimp_open_data.handle.pointer = NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = "/tmp/hello.txt";
 
-    ccfsm_open_data.errnum = NULL;
+    ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_open_data.handle = NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
@@ -111,7 +111,7 @@ TEST(test_ccfsm_filesystem, testFileOpenFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_open_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_OPEN_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_OPEN_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -125,14 +125,14 @@ TEST(test_ccfsm_filesystem, testFileRead)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_CREAT);
 
-    ccimp_read_data.errnum.pointer = NULL;
+    ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_read_data.imp_context = &my_fs_context;
     ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_read_data.buffer = buffer;
     ccimp_read_data.bytes_available = 128;
     ccimp_read_data.bytes_used = 0;
 
-    ccfsm_read_data.errnum = ccimp_read_data.errnum.pointer;
+    ccfsm_read_data.errnum = ccimp_read_data.errnum;
     ccfsm_read_data.user_context = NULL;
     ccfsm_read_data.handle = ccfsm_open_data.handle;
     ccfsm_read_data.buffer = ccimp_read_data.buffer;
@@ -145,7 +145,7 @@ TEST(test_ccfsm_filesystem, testFileRead)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_read_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK_EQUAL(sizeof "testFileRead", ccfsm_read_data.bytes_used);
+    CHECK(sizeof "testFileRead" == ccfsm_read_data.bytes_used);
     STRCMP_EQUAL("testFileRead", (char *)ccfsm_read_data.buffer);
     CHECK_EQUAL(1, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
 }
@@ -160,14 +160,14 @@ TEST(test_ccfsm_filesystem, testFileReadFails)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_CREAT);
 
-    ccimp_read_data.errnum.pointer = NULL;
+    ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_read_data.imp_context = &my_fs_context;
     ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_read_data.buffer = buffer;
     ccimp_read_data.bytes_available = 128;
     ccimp_read_data.bytes_used = 0;
 
-    ccfsm_read_data.errnum = ccimp_read_data.errnum.pointer;
+    ccfsm_read_data.errnum = ccimp_read_data.errnum;
     ccfsm_read_data.user_context = NULL;
     ccfsm_read_data.handle = ccfsm_open_data.handle;
     ccfsm_read_data.buffer = ccimp_read_data.buffer;
@@ -184,7 +184,7 @@ TEST(test_ccfsm_filesystem, testFileReadFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_read_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_READ_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_READ_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -198,14 +198,14 @@ TEST(test_ccfsm_filesystem, testFileWrite)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
-    ccimp_write_data.errnum.pointer = NULL;
+    ccimp_write_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_write_data.imp_context = &my_fs_context;
     ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_write_data.buffer = buffer;
     ccimp_write_data.bytes_available = sizeof buffer;
     ccimp_write_data.bytes_used = 0;
 
-    ccfsm_write_data.errnum = ccimp_write_data.errnum.pointer;
+    ccfsm_write_data.errnum = ccimp_write_data.errnum;
     ccfsm_write_data.user_context = NULL;
     ccfsm_write_data.handle = ccfsm_open_data.handle;
     ccfsm_write_data.buffer = ccimp_write_data.buffer;
@@ -232,14 +232,14 @@ TEST(test_ccfsm_filesystem, testFileWriteFails)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
-    ccimp_write_data.errnum.pointer = NULL;
+    ccimp_write_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_write_data.imp_context = &my_fs_context;
     ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_write_data.buffer = buffer;
     ccimp_write_data.bytes_available = sizeof buffer;
     ccimp_write_data.bytes_used = 0;
 
-    ccfsm_write_data.errnum = ccimp_write_data.errnum.pointer;
+    ccfsm_write_data.errnum = ccimp_write_data.errnum;
     ccfsm_write_data.user_context = NULL;
     ccfsm_write_data.handle = ccfsm_open_data.handle;
     ccfsm_write_data.buffer = ccimp_write_data.buffer;
@@ -257,7 +257,7 @@ TEST(test_ccfsm_filesystem, testFileWriteFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_write_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_WRITE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_WRITE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -270,14 +270,14 @@ TEST(test_ccfsm_filesystem, testFileSeek)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
-    ccimp_seek_data.errnum.pointer = NULL;
+    ccimp_seek_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_seek_data.imp_context = &my_fs_context;
     ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_seek_data.origin = CCIMP_SEEK_END;
     ccimp_seek_data.requested_offset = -128;
     ccimp_seek_data.resulting_offset = 0;
 
-    ccfsm_seek_data.errnum = ccimp_seek_data.errnum.pointer;
+    ccfsm_seek_data.errnum = ccimp_seek_data.errnum;
     ccfsm_seek_data.user_context = NULL;
     ccfsm_seek_data.handle = ccfsm_open_data.handle;
     ccfsm_seek_data.origin = connector_file_system_seek_end;
@@ -303,14 +303,14 @@ TEST(test_ccfsm_filesystem, testFileSeekFails)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND);
 
-    ccimp_seek_data.errnum.pointer = NULL;
+    ccimp_seek_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_seek_data.imp_context = &my_fs_context;
     ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_seek_data.origin = CCIMP_SEEK_END;
     ccimp_seek_data.requested_offset = -128;
     ccimp_seek_data.resulting_offset = 0;
 
-    ccfsm_seek_data.errnum = ccimp_seek_data.errnum.pointer;
+    ccfsm_seek_data.errnum = ccimp_seek_data.errnum;
     ccfsm_seek_data.user_context = NULL;
     ccfsm_seek_data.handle = ccfsm_open_data.handle;
     ccfsm_seek_data.origin = connector_file_system_seek_end;
@@ -328,7 +328,7 @@ TEST(test_ccfsm_filesystem, testFileSeekFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_seek_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_SEEK_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_SEEK_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -341,11 +341,11 @@ TEST(test_ccfsm_filesystem, testFileClose)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
 
-    ccimp_close_data.errnum.pointer = NULL;
+    ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
     ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
-    ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
+    ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = NULL;
     ccfsm_close_data.handle = ccfsm_open_data.handle;
 
@@ -367,11 +367,11 @@ TEST(test_ccfsm_filesystem, testFileCloseFails)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
 
-    ccimp_close_data.errnum.pointer = NULL;
+    ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
     ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
 
-    ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
+    ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = NULL;
     ccfsm_close_data.handle = ccfsm_open_data.handle;
 
@@ -385,7 +385,7 @@ TEST(test_ccfsm_filesystem, testFileCloseFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_close_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_CLOSE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_CLOSE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -398,12 +398,12 @@ TEST(test_ccfsm_filesystem, testFileTruncate)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
 
-    ccimp_truncate_data.errnum.pointer = NULL;
+    ccimp_truncate_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_truncate_data.imp_context = &my_fs_context;
     ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_truncate_data.length_in_bytes = 1024;
 
-    ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum.pointer;
+    ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum;
     ccfsm_truncate_data.user_context = NULL;
     ccfsm_truncate_data.handle = ccfsm_open_data.handle;
     ccfsm_truncate_data.length_in_bytes = ccimp_truncate_data.length_in_bytes;
@@ -426,12 +426,12 @@ TEST(test_ccfsm_filesystem, testFileTruncateFails)
     connector_file_system_open_t ccfsm_open_data;
     ccapi_fs_file_handle_t * ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_WRONLY | CCIMP_FILE_O_CREAT);
 
-    ccimp_truncate_data.errnum.pointer = NULL;
+    ccimp_truncate_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_truncate_data.imp_context = &my_fs_context;
     ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
     ccimp_truncate_data.length_in_bytes = 1024;
 
-    ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum.pointer;
+    ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum;
     ccfsm_truncate_data.user_context = NULL;
     ccfsm_truncate_data.handle = ccfsm_open_data.handle;
     ccfsm_truncate_data.length_in_bytes = ccimp_truncate_data.length_in_bytes;
@@ -446,7 +446,7 @@ TEST(test_ccfsm_filesystem, testFileTruncateFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_truncate_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_TRUNCATE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_TRUNCATE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -460,11 +460,11 @@ TEST(test_ccfsm_filesystem, testFileRemove)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_remove_data.errnum.pointer = NULL;
+    ccimp_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_remove_data.imp_context = &my_fs_context;
     ccimp_remove_data.path = "/tmp/hello.txt";
 
-    ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
+    ccfsm_remove_data.errnum = ccimp_remove_data.errnum;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
@@ -487,11 +487,11 @@ TEST(test_ccfsm_filesystem, testFileRemoveFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_remove_data.errnum.pointer = NULL;
+    ccimp_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_remove_data.imp_context = &my_fs_context;
     ccimp_remove_data.path = "/tmp/hello.txt";
 
-    ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
+    ccfsm_remove_data.errnum = ccimp_remove_data.errnum;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
@@ -504,7 +504,7 @@ TEST(test_ccfsm_filesystem, testFileRemoveFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_remove_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_REMOVE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_REMOVE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -518,12 +518,12 @@ TEST(test_ccfsm_filesystem, testDirOpen)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_open_data.errnum.pointer = NULL;
+    ccimp_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data.imp_context = &my_fs_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = "/tmp/";
 
-    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
+    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
@@ -548,12 +548,12 @@ TEST(test_ccfsm_filesystem, testDirOpenFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_open_data.errnum.pointer = NULL;
+    ccimp_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data.imp_context = &my_fs_context;
     ccimp_dir_open_data.handle.pointer = NULL;
     ccimp_dir_open_data.path = "/tmp/";
 
-    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
+    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
     ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
@@ -568,7 +568,7 @@ TEST(test_ccfsm_filesystem, testDirOpenFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_open_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_DIROPEN_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_DIROPEN_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -584,13 +584,13 @@ TEST(test_ccfsm_filesystem, testDirRead)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_read_entry_data.errnum.pointer = NULL;
+    ccimp_dir_read_entry_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_read_entry_data.imp_context = &my_fs_context;
     ccimp_dir_read_entry_data.handle.pointer = handle;
     ccimp_dir_read_entry_data.entry_name = entry_name;
     ccimp_dir_read_entry_data.bytes_available = sizeof entry_name;
 
-    ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum.pointer;
+    ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum;
     ccfsm_dir_read_entry_data.user_context = NULL;
     ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle.pointer;
     ccfsm_dir_read_entry_data.entry_name = ccimp_dir_read_entry_data.entry_name;
@@ -618,13 +618,13 @@ TEST(test_ccfsm_filesystem, testDirReadFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_read_entry_data.errnum.pointer = NULL;
+    ccimp_dir_read_entry_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_read_entry_data.imp_context = &my_fs_context;
     ccimp_dir_read_entry_data.handle.pointer = handle;
     ccimp_dir_read_entry_data.entry_name = entry_name;
     ccimp_dir_read_entry_data.bytes_available = sizeof entry_name;
 
-    ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum.pointer;
+    ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum;
     ccfsm_dir_read_entry_data.user_context = NULL;
     ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle.pointer;
     ccfsm_dir_read_entry_data.entry_name = ccimp_dir_read_entry_data.entry_name;
@@ -640,7 +640,7 @@ TEST(test_ccfsm_filesystem, testDirReadFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_read_entry_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_DIRREAD_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_DIRREAD_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -654,14 +654,14 @@ TEST(test_ccfsm_filesystem, testDirEntryStat)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum.pointer;
+    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum;
     ccfsm_dir_entry_status_data.user_context = NULL;
     ccfsm_dir_entry_status_data.path = ccimp_dir_entry_status_data.path;
     ccfsm_dir_entry_status_data.statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
@@ -690,14 +690,14 @@ TEST(test_ccfsm_filesystem, testDirEntryStatFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum.pointer;
+    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum;
     ccfsm_dir_entry_status_data.user_context = NULL;
     ccfsm_dir_entry_status_data.path = ccimp_dir_entry_status_data.path;
     ccfsm_dir_entry_status_data.statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
@@ -717,7 +717,7 @@ TEST(test_ccfsm_filesystem, testDirEntryStatFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_entry_status_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_DIRSTAT_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_DIRSTAT_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -732,11 +732,11 @@ TEST(test_ccfsm_filesystem, testDirClose)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_close_data.errnum.pointer = NULL;
+    ccimp_dir_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data.imp_context = &my_fs_context;
     ccimp_dir_close_data.handle.pointer = handle;
 
-    ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum.pointer;
+    ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum;
     ccfsm_dir_close_data.user_context = NULL;
     ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle.pointer;
 
@@ -760,11 +760,11 @@ TEST(test_ccfsm_filesystem, testDirCloseFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_dir_close_data.errnum.pointer = NULL;
+    ccimp_dir_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data.imp_context = &my_fs_context;
     ccimp_dir_close_data.handle.pointer = handle;
 
-    ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum.pointer;
+    ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum;
     ccfsm_dir_close_data.user_context = NULL;
     ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle.pointer;
 
@@ -778,7 +778,7 @@ TEST(test_ccfsm_filesystem, testDirCloseFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_close_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_DIRCLOSE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -793,20 +793,20 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_fs_hash_status_data.errnum.pointer = NULL;
+    ccimp_fs_hash_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_fs_hash_status_data.imp_context = &my_fs_context;
     ccimp_fs_hash_status_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
     ccimp_fs_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_CRC32;
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum.pointer;
+    ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum;
     ccfsm_file_stat_data.user_context = NULL;
     ccfsm_file_stat_data.path = ccimp_fs_hash_status_data.path;
     ccfsm_file_stat_data.hash_algorithm.actual = connector_file_system_hash_none;
@@ -840,20 +840,20 @@ TEST(test_ccfsm_filesystem, testHashStatusFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_fs_hash_status_data.errnum.pointer = NULL;
+    ccimp_fs_hash_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_fs_hash_status_data.imp_context = &my_fs_context;
     ccimp_fs_hash_status_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
     ccimp_fs_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_CRC32;
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum.pointer;
+    ccfsm_file_stat_data.errnum = ccimp_fs_hash_status_data.errnum;
     ccfsm_file_stat_data.user_context = NULL;
     ccfsm_file_stat_data.path = ccimp_fs_hash_status_data.path;
     ccfsm_file_stat_data.hash_algorithm.actual = connector_file_system_hash_none;
@@ -877,7 +877,7 @@ TEST(test_ccfsm_filesystem, testHashStatusFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_file_stat_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_HASHSTAT_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_HASHSTAT_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -892,14 +892,14 @@ TEST(test_ccfsm_filesystem, testHashFile)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_fs_hash_file_data.errnum.pointer = NULL;
+    ccimp_fs_hash_file_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_fs_hash_file_data.imp_context = &my_fs_context;
     ccimp_fs_hash_file_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_file_data.hash_algorithm = CCIMP_FS_HASH_CRC32;
     ccimp_fs_hash_file_data.hash_value = &hash_value;
     ccimp_fs_hash_file_data.bytes_requested = sizeof hash_value;
 
-    ccfsm_hash_file_data.errnum = ccimp_fs_hash_file_data.errnum.pointer;
+    ccfsm_hash_file_data.errnum = ccimp_fs_hash_file_data.errnum;
     ccfsm_hash_file_data.user_context = NULL;
     ccfsm_hash_file_data.path = ccimp_fs_hash_file_data.path;
     ccfsm_hash_file_data.hash_algorithm = connector_file_system_hash_crc32;
@@ -927,14 +927,14 @@ TEST(test_ccfsm_filesystem, testHashFileFails)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_fs_hash_file_data.errnum.pointer = NULL;
+    ccimp_fs_hash_file_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_fs_hash_file_data.imp_context = &my_fs_context;
     ccimp_fs_hash_file_data.path = "/tmp/hello.txt";
     ccimp_fs_hash_file_data.hash_algorithm = CCIMP_FS_HASH_CRC32;
     ccimp_fs_hash_file_data.hash_value = &hash_value;
     ccimp_fs_hash_file_data.bytes_requested = sizeof hash_value;
 
-    ccfsm_hash_file_data.errnum = ccimp_fs_hash_file_data.errnum.pointer;
+    ccfsm_hash_file_data.errnum = ccimp_fs_hash_file_data.errnum;
     ccfsm_hash_file_data.user_context = NULL;
     ccfsm_hash_file_data.path = ccimp_fs_hash_file_data.path;
     ccfsm_hash_file_data.hash_algorithm = connector_file_system_hash_crc32;
@@ -952,7 +952,7 @@ TEST(test_ccfsm_filesystem, testHashFileFails)
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_hash_file_data.errnum;
         CHECK(error_handle != NULL);
-        CHECK_EQUAL(expected_errnum[FS_HASHFILE_ERRNUM_INDEX].pointer, error_handle->error.ccimp_error);
+        CHECK_EQUAL(expected_errnum[FS_HASHFILE_ERRNUM_INDEX], error_handle->error.ccimp_error);
     }
 }
 
@@ -968,7 +968,7 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
-    ccimp_error_desc_data.errnum.value = ETIMEDOUT;
+    ccimp_error_desc_data.errnum = ETIMEDOUT;
     ccimp_error_desc_data.imp_context = &my_fs_context;
     ccimp_error_desc_data.error_string = (char *)buffer;
     ccimp_error_desc_data.bytes_available = sizeof buffer;
@@ -976,9 +976,9 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
     ccimp_error_desc_data.error_status = CCIMP_FS_ERROR_UNKNOWN;
 
     error_handle->error_is_internal = CCAPI_FALSE;
-    error_handle->error.ccimp_error = ccimp_error_desc_data.errnum.pointer;
+    error_handle->error.ccimp_error = ccimp_error_desc_data.errnum;
 
-    ccfsm_error_desc_data.errnum = error_handle;
+    ccfsm_error_desc_data.errnum = (ccimp_fs_errnum_t)error_handle;
     ccfsm_error_desc_data.user_context = NULL;
     ccfsm_error_desc_data.buffer = ccimp_error_desc_data.error_string;
     ccfsm_error_desc_data.bytes_available = ccimp_error_desc_data.bytes_available;
@@ -993,8 +993,8 @@ TEST(test_ccfsm_filesystem, testErrorDesc)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(12, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
-    CHECK_EQUAL(strlen(strerror(ccimp_error_desc_data.errnum.value)) + 1, ccfsm_error_desc_data.bytes_used);
-    STRCMP_EQUAL(strerror(ccimp_error_desc_data.errnum.value), (char*)ccfsm_error_desc_data.buffer);
+    CHECK_EQUAL(strlen(strerror(ccimp_error_desc_data.errnum)) + 1, ccfsm_error_desc_data.bytes_used);
+    STRCMP_EQUAL(strerror(ccimp_error_desc_data.errnum), (char*)ccfsm_error_desc_data.buffer);
     CHECK_EQUAL(connector_file_system_invalid_parameter, ccfsm_error_desc_data.error_status);
 }
 
