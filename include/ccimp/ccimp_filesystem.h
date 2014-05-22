@@ -24,11 +24,7 @@ typedef int32_t ccimp_file_offset_t;
 
 typedef uintptr_t ccimp_fs_errnum_t;
 
-typedef union
-{
-    void * pointer;
-    int value;
-} ccimp_fs_handle_t;
+typedef uintptr_t ccimp_fs_handle_t;
 
 typedef enum
 {

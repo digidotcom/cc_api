@@ -71,7 +71,7 @@ ccimp_status_t ccimp_fs_file_open(ccimp_fs_file_open_t * const file_open_data)
         goto done;
     }
 
-    file_open_data->handle.value = fd;
+    file_open_data->handle = fd;
 done:
     return status;
 }
@@ -79,7 +79,7 @@ done:
 ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const file_read_data)
 {
    ccimp_status_t status = CCIMP_STATUS_OK;
-   int result = read(file_read_data->handle.value, file_read_data->buffer, file_read_data->bytes_available);
+   int result = read(file_read_data->handle, file_read_data->buffer, file_read_data->bytes_available);
    if (result >= 0)
    {
        file_read_data->bytes_used = result;
@@ -102,7 +102,7 @@ ccimp_status_t ccimp_fs_file_read(ccimp_fs_file_read_t * const file_read_data)
 ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const file_write_data)
 {
    ccimp_status_t status = CCIMP_STATUS_OK;
-   int result = write(file_write_data->handle.value, file_write_data->buffer, file_write_data->bytes_available);
+   int result = write(file_write_data->handle, file_write_data->buffer, file_write_data->bytes_available);
    if (result >= 0)
    {
        file_write_data->bytes_used = result;
@@ -126,7 +126,7 @@ ccimp_status_t ccimp_fs_file_write(ccimp_fs_file_write_t * const file_write_data
 ccimp_status_t ccimp_fs_file_close(ccimp_fs_file_close_t * const file_close_data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
-    int result = close(file_close_data->handle.value);
+    int result = close(file_close_data->handle);
 
     if (result < 0)
     {
@@ -154,7 +154,7 @@ ccimp_status_t ccimp_fs_file_seek(ccimp_fs_file_seek_t * const file_seek_data)
           origin = SEEK_CUR;
           break;
    }
-   offset = lseek(file_seek_data->handle.value, file_seek_data->requested_offset, origin);
+   offset = lseek(file_seek_data->handle, file_seek_data->requested_offset, origin);
    file_seek_data->resulting_offset = (ccimp_file_offset_t) offset;
    if (offset < 0)
    {
@@ -175,7 +175,7 @@ ccimp_status_t ccimp_fs_file_seek(ccimp_fs_file_seek_t * const file_seek_data)
 ccimp_status_t ccimp_fs_file_truncate(ccimp_fs_file_truncate_t * const file_truncate_data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
-    int result = ftruncate(file_truncate_data->handle.value, file_truncate_data->length_in_bytes);
+    int result = ftruncate(file_truncate_data->handle, file_truncate_data->length_in_bytes);
     if (result < 0)
     {
         if (errno == EAGAIN)
@@ -221,7 +221,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data)
         dir_data_t * dir_data = malloc(sizeof *dir_data);
         if (dir_data != NULL)
         {
-            dir_open_data->handle.pointer = dir_data;
+            dir_open_data->handle = (ccimp_fs_handle_t)dir_data;
             dir_data->dirp = dirp;
         }
         else
@@ -249,7 +249,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data)
 ccimp_status_t ccimp_fs_dir_read_entry(ccimp_fs_dir_read_entry_t * const dir_read_data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
-    dir_data_t * dir_data = dir_read_data->handle.pointer;
+    dir_data_t * dir_data = (dir_data_t *)dir_read_data->handle;
     struct dirent * p_dirent = NULL;
     int error;
     /* This sample does not skip "." and ".." */
@@ -329,7 +329,7 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir
 
 ccimp_status_t ccimp_fs_dir_close(ccimp_fs_dir_close_t * const dir_close_data)
 {
-    dir_data_t const * const dir_data = dir_close_data->handle.pointer;
+    dir_data_t const * const dir_data = (dir_data_t const * const)dir_close_data->handle;
     closedir(dir_data->dirp);
     free((void *)dir_data);
 
