@@ -64,6 +64,11 @@ sed -i '/#define MAC_ADDRESS_STRING/c\#define MAC_ADDRESS_STRING      "112233:44
 sed -i '/#define VENDOR_ID/c\#define VENDOR_ID               0x00000000' $OUTPUT_DEMO_DIR/main.c
 sed -i -e 's/\/\/#error/#error/' $OUTPUT_DEMO_DIR/main.c
 
+for FILE in $(find ./${OUTPUT_DIR} -name \*.[ch] -not -path "./${OUTPUT_DIR}/ccapi/source/ccfsm/*")
+do
+    cat copyright_header.txt | cat - $FILE > /tmp/file && mv /tmp/file $FILE
+done
+
 echo "Creating the Tarball ${OUTPUT_DIR}/${TARBALL_NAME}.tgz."
 mv $OUTPUT_DIR ccapi
 tar -czvf "${TARBALL_NAME}.tgz" "ccapi"
