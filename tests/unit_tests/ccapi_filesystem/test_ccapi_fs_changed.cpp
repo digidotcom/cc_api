@@ -139,7 +139,7 @@ TEST(test_ccapi_fs_changed, testChangedModified)
 
     ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = ccimp_close_data.imp_context;
@@ -171,7 +171,7 @@ TEST(test_ccapi_fs_changed, testOpenForReadNotChanged)
 
     ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = ccimp_close_data.imp_context;

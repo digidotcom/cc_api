@@ -60,12 +60,12 @@ TEST(test_ccfsm_filesystem, testFileOpen)
 
     ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
-    ccimp_open_data.handle.pointer = NULL;
+    ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = "/tmp/hello.txt";
 
     ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
-    ccfsm_open_data.handle = NULL;
+    ccfsm_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
     ccfsm_open_data.user_context = NULL;
@@ -77,7 +77,7 @@ TEST(test_ccfsm_filesystem, testFileOpen)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(&my_fs_context, ccapi_data_single_instance->service.file_system.imp_context);
-    CHECK(ccfsm_open_data.handle != NULL);
+    CHECK(ccfsm_open_data.handle != (ccimp_fs_handle_t)NULL);
     CHECK(ccfsm_open_data.errnum == (ccimp_fs_errnum_t)NULL);
 }
 
@@ -90,12 +90,12 @@ TEST(test_ccfsm_filesystem, testFileOpenFails)
 
     ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
-    ccimp_open_data.handle.pointer = NULL;
+    ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
     ccimp_open_data.path = "/tmp/hello.txt";
 
     ccfsm_open_data.errnum = (ccimp_fs_errnum_t)NULL;
-    ccfsm_open_data.handle = NULL;
+    ccfsm_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccfsm_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
     ccfsm_open_data.path = ccimp_open_data.path;
     ccfsm_open_data.user_context = NULL;
@@ -107,7 +107,7 @@ TEST(test_ccfsm_filesystem, testFileOpenFails)
 
     CHECK_EQUAL(connector_callback_error, status);
     CHECK_EQUAL(&my_fs_context, ccapi_data_single_instance->service.file_system.imp_context);
-    CHECK(ccfsm_open_data.handle == NULL);
+    CHECK(ccfsm_open_data.handle == (ccimp_fs_handle_t)NULL);
     {
         ccapi_fs_error_handle_t * const error_handle = (ccapi_fs_error_handle_t *)ccfsm_open_data.errnum;
         CHECK(error_handle != NULL);
@@ -127,7 +127,7 @@ TEST(test_ccfsm_filesystem, testFileRead)
 
     ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_read_data.imp_context = &my_fs_context;
-    ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_read_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_read_data.buffer = buffer;
     ccimp_read_data.bytes_available = 128;
     ccimp_read_data.bytes_used = 0;
@@ -162,7 +162,7 @@ TEST(test_ccfsm_filesystem, testFileReadFails)
 
     ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_read_data.imp_context = &my_fs_context;
-    ccimp_read_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_read_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_read_data.buffer = buffer;
     ccimp_read_data.bytes_available = 128;
     ccimp_read_data.bytes_used = 0;
@@ -200,7 +200,7 @@ TEST(test_ccfsm_filesystem, testFileWrite)
 
     ccimp_write_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_write_data.imp_context = &my_fs_context;
-    ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_write_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_write_data.buffer = buffer;
     ccimp_write_data.bytes_available = sizeof buffer;
     ccimp_write_data.bytes_used = 0;
@@ -234,7 +234,7 @@ TEST(test_ccfsm_filesystem, testFileWriteFails)
 
     ccimp_write_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_write_data.imp_context = &my_fs_context;
-    ccimp_write_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_write_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_write_data.buffer = buffer;
     ccimp_write_data.bytes_available = sizeof buffer;
     ccimp_write_data.bytes_used = 0;
@@ -272,7 +272,7 @@ TEST(test_ccfsm_filesystem, testFileSeek)
 
     ccimp_seek_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_seek_data.imp_context = &my_fs_context;
-    ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_seek_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_seek_data.origin = CCIMP_SEEK_END;
     ccimp_seek_data.requested_offset = -128;
     ccimp_seek_data.resulting_offset = 0;
@@ -305,7 +305,7 @@ TEST(test_ccfsm_filesystem, testFileSeekFails)
 
     ccimp_seek_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_seek_data.imp_context = &my_fs_context;
-    ccimp_seek_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_seek_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_seek_data.origin = CCIMP_SEEK_END;
     ccimp_seek_data.requested_offset = -128;
     ccimp_seek_data.resulting_offset = 0;
@@ -343,7 +343,7 @@ TEST(test_ccfsm_filesystem, testFileClose)
 
     ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = NULL;
@@ -369,7 +369,7 @@ TEST(test_ccfsm_filesystem, testFileCloseFails)
 
     ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
     ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = NULL;
@@ -400,7 +400,7 @@ TEST(test_ccfsm_filesystem, testFileTruncate)
 
     ccimp_truncate_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_truncate_data.imp_context = &my_fs_context;
-    ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_truncate_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_truncate_data.length_in_bytes = 1024;
 
     ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum;
@@ -428,7 +428,7 @@ TEST(test_ccfsm_filesystem, testFileTruncateFails)
 
     ccimp_truncate_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_truncate_data.imp_context = &my_fs_context;
-    ccimp_truncate_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_truncate_data.handle = ccapi_fs_handle->ccimp_handle;
     ccimp_truncate_data.length_in_bytes = 1024;
 
     ccfsm_truncate_data.errnum = ccimp_truncate_data.errnum;
@@ -520,12 +520,12 @@ TEST(test_ccfsm_filesystem, testDirOpen)
 
     ccimp_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data.imp_context = &my_fs_context;
-    ccimp_dir_open_data.handle.pointer = NULL;
+    ccimp_dir_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_dir_open_data.path = "/tmp/";
 
     ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
-    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
+    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
 
     Mock_ccimp_fs_dir_open_expectAndReturn(&ccimp_dir_open_data, CCIMP_STATUS_OK);
@@ -535,7 +535,7 @@ TEST(test_ccfsm_filesystem, testDirOpen)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(6, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
-    CHECK(NULL != ccfsm_dir_open_data.handle);
+    CHECK((ccimp_fs_handle_t)NULL != ccfsm_dir_open_data.handle);
 }
 
 TEST(test_ccfsm_filesystem, testDirOpenFails)
@@ -550,12 +550,12 @@ TEST(test_ccfsm_filesystem, testDirOpenFails)
 
     ccimp_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data.imp_context = &my_fs_context;
-    ccimp_dir_open_data.handle.pointer = NULL;
+    ccimp_dir_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_dir_open_data.path = "/tmp/";
 
     ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
-    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
+    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle;
     ccfsm_dir_open_data.path = ccimp_dir_open_data.path;
 
     Mock_ccimp_fs_dir_open_expectAndReturn(&ccimp_dir_open_data, CCIMP_STATUS_ERROR);
@@ -578,7 +578,7 @@ TEST(test_ccfsm_filesystem, testDirRead)
     ccimp_fs_dir_read_entry_t ccimp_dir_read_entry_data;
     connector_file_system_readdir_t ccfsm_dir_read_entry_data;
     connector_callback_status_t status;
-    void * handle = &handle; /* Not NULL */
+    ccimp_fs_handle_t handle = (ccimp_fs_handle_t)&handle; /* Not NULL */
     char entry_name[256] = {0};
 
     /* Simulate that imp_context was previously set by other call (file_open) */
@@ -586,13 +586,13 @@ TEST(test_ccfsm_filesystem, testDirRead)
 
     ccimp_dir_read_entry_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_read_entry_data.imp_context = &my_fs_context;
-    ccimp_dir_read_entry_data.handle.pointer = handle;
+    ccimp_dir_read_entry_data.handle = handle;
     ccimp_dir_read_entry_data.entry_name = entry_name;
     ccimp_dir_read_entry_data.bytes_available = sizeof entry_name;
 
     ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum;
     ccfsm_dir_read_entry_data.user_context = NULL;
-    ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle.pointer;
+    ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle;
     ccfsm_dir_read_entry_data.entry_name = ccimp_dir_read_entry_data.entry_name;
     ccfsm_dir_read_entry_data.bytes_available = ccimp_dir_read_entry_data.bytes_available;
 
@@ -612,7 +612,7 @@ TEST(test_ccfsm_filesystem, testDirReadFails)
     ccimp_fs_dir_read_entry_t ccimp_dir_read_entry_data;
     connector_file_system_readdir_t ccfsm_dir_read_entry_data;
     connector_callback_status_t status;
-    void * handle = &handle; /* Not NULL */
+    ccimp_fs_handle_t handle = (ccimp_fs_handle_t)&handle; /* Not NULL */
     char entry_name[256] = {0};
 
     /* Simulate that imp_context was previously set by other call (file_open) */
@@ -620,13 +620,13 @@ TEST(test_ccfsm_filesystem, testDirReadFails)
 
     ccimp_dir_read_entry_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_read_entry_data.imp_context = &my_fs_context;
-    ccimp_dir_read_entry_data.handle.pointer = handle;
+    ccimp_dir_read_entry_data.handle = handle;
     ccimp_dir_read_entry_data.entry_name = entry_name;
     ccimp_dir_read_entry_data.bytes_available = sizeof entry_name;
 
     ccfsm_dir_read_entry_data.errnum = ccimp_dir_read_entry_data.errnum;
     ccfsm_dir_read_entry_data.user_context = NULL;
-    ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle.pointer;
+    ccfsm_dir_read_entry_data.handle = ccimp_dir_read_entry_data.handle;
     ccfsm_dir_read_entry_data.entry_name = ccimp_dir_read_entry_data.entry_name;
     ccfsm_dir_read_entry_data.bytes_available = ccimp_dir_read_entry_data.bytes_available;
 
@@ -727,18 +727,18 @@ TEST(test_ccfsm_filesystem, testDirClose)
     ccimp_fs_dir_close_t ccimp_dir_close_data;
     connector_file_system_close_t ccfsm_dir_close_data;
     connector_callback_status_t status;
-    void * handle = &handle; /* Not NULL */
+    ccimp_fs_handle_t handle = (ccimp_fs_handle_t)&handle; /* Not NULL */
 
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
     ccimp_dir_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data.imp_context = &my_fs_context;
-    ccimp_dir_close_data.handle.pointer = handle;
+    ccimp_dir_close_data.handle = handle;
 
     ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum;
     ccfsm_dir_close_data.user_context = NULL;
-    ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle.pointer;
+    ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle;
 
     Mock_ccimp_fs_dir_close_expectAndReturn(&ccimp_dir_close_data, CCIMP_STATUS_OK);
 
@@ -755,18 +755,18 @@ TEST(test_ccfsm_filesystem, testDirCloseFails)
     ccimp_fs_dir_close_t ccimp_dir_close_data;
     connector_file_system_close_t ccfsm_dir_close_data;
     connector_callback_status_t status;
-    void * handle = &handle; /* Not NULL */
+    ccimp_fs_handle_t handle = (ccimp_fs_handle_t)&handle; /* Not NULL */
 
     /* Simulate that imp_context was previously set by other call (file_open) */
     ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
 
     ccimp_dir_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data.imp_context = &my_fs_context;
-    ccimp_dir_close_data.handle.pointer = handle;
+    ccimp_dir_close_data.handle = handle;
 
     ccfsm_dir_close_data.errnum = ccimp_dir_close_data.errnum;
     ccfsm_dir_close_data.user_context = NULL;
-    ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle.pointer;
+    ccfsm_dir_close_data.handle = ccimp_dir_close_data.handle;
 
     Mock_ccimp_fs_dir_close_expectAndReturn(&ccimp_dir_close_data, CCIMP_STATUS_ERROR);
 

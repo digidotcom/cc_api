@@ -308,7 +308,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testOpenSEND_ERROR_ACCESSING_F
 
         ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
         ccimp_open_data.imp_context = NULL;
-        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
         ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
         ccimp_open_data.path = LOCAL_PATH;
 
@@ -352,7 +352,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
 
         ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
         ccimp_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
-        ccimp_open_data.handle.pointer = NULL;
+        ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
         ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
         ccimp_open_data.path = LOCAL_PATH;
 
@@ -362,7 +362,7 @@ TEST(test_ccapi_datapoint_binary_file_with_reply, testReadSEND_ERROR_ACCESSING_F
 
         ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
         ccimp_read_data.imp_context = &my_fs_context;
-        ccimp_read_data.handle.value = 5;
+        ccimp_read_data.handle = 5;
         ccimp_read_data.bytes_available = sizeof data;
         ccimp_read_data.bytes_used = 0;
 

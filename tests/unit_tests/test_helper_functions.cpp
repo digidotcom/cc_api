@@ -315,12 +315,12 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
 
     ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_open_data.imp_context = NULL;
-    ccimp_open_data.handle.pointer = NULL;
+    ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_open_data.flags = flags;
     ccimp_open_data.path = path;
 
-    ccfsm_open_data->errnum = (ccimp_fs_errnum_t)NULL;
-    ccfsm_open_data->handle = NULL;
+    ccfsm_open_data->errnum = (uintptr_t)NULL;
+    ccfsm_open_data->handle = (uintptr_t)NULL;
     ccfsm_open_data->oflag = flags;
     ccfsm_open_data->path = ccimp_open_data.path;
     ccfsm_open_data->user_context = NULL;
@@ -330,7 +330,7 @@ ccapi_fs_file_handle_t * th_filesystem_openfile(char const * const path, connect
     request.file_system_request = connector_request_id_file_system_open;
     status = ccapi_connector_callback(connector_class_id_file_system, request, ccfsm_open_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK(ccfsm_open_data->handle != NULL);
+    CHECK(ccfsm_open_data->handle != (ccimp_fs_handle_t)NULL);
     return (ccapi_fs_file_handle_t *)ccfsm_open_data->handle;
 }
 
@@ -349,14 +349,14 @@ void th_filesystem_prepare_ccimp_dir_open_data_call(ccimp_fs_dir_open_t * const 
 {
     ccimp_dir_open_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_open_data->imp_context = &my_fs_context;
-    ccimp_dir_open_data->handle.pointer = NULL;
+    ccimp_dir_open_data->handle = (ccimp_fs_handle_t)NULL;
     ccimp_dir_open_data->path = path;
     Mock_ccimp_fs_dir_open_expectAndReturn(ccimp_dir_open_data, CCIMP_STATUS_OK);
 }
 
 void th_filesystem_prepare_ccimp_dir_close_call(ccimp_fs_dir_close_t * const ccimp_dir_close_data)
 {
-    ccimp_dir_close_data->handle.pointer = &dir_handle;
+    ccimp_dir_close_data->handle = (ccimp_fs_handle_t)&dir_handle;
     ccimp_dir_close_data->errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_close_data->imp_context = ccapi_data_single_instance->service.file_system.imp_context;
     Mock_ccimp_fs_dir_close_expectAndReturn(ccimp_dir_close_data, CCIMP_STATUS_OK);
