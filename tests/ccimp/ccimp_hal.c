@@ -1,9 +1,3 @@
-/*
- * ccimp_hal.c
- *
- *  Created on: Mar 27, 2014
- *      Author: hbujanda
- */
 #include "ccimp/ccimp_hal.h"
 
 #include <stdio.h>

@@ -1,10 +1,3 @@
-/*
- * ccxapi.h
- *
- *  Created on: Mar 31, 2014
- *      Author: hbujanda
- */
-
 #ifndef _CCXAPI_H_
 #define _CCXAPI_H_
 

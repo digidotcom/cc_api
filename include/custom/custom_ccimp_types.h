@@ -1,10 +1,3 @@
-/*
- * custom_ccimp_types.h
- *
- *  Created on: Mar 6, 2014
- *      Author: hbujanda
- */
-
 #ifndef _CUSTOM_CCIMP_TYPES_CONFIG_H_
 #define _CUSTOM_CCIMP_TYPES_CONFIG_H_
 

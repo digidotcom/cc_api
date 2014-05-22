@@ -1,10 +1,3 @@
-/*
- * ccapi.c
- *
- *  Created on: Feb 12, 2014
- *      Author: spastor
- */
-
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"

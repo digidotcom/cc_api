@@ -1,10 +1,3 @@
-/*
- * ccimp_hal.h
- *
- *  Created on: Mar 24, 2014
- *      Author: hbujanda
- */
-
 #ifndef CCIMP_HAL_H_
 #define CCIMP_HAL_H_
 

@@ -1,10 +1,3 @@
-/*
- * ccapi_definitions.h
- *
- *  Created on: Feb 12, 2014
- *      Author: spastor
- */
-
 #if !(defined _CCAPI_DEFINITIONS_H_)
 #define _CCAPI_DEFINITIONS_H_
 

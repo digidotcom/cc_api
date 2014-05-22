@@ -1,9 +1,3 @@
-/*
- * ccimp_os.c
- *
- *  Created on: Mar 5, 2014
- *      Author: hbujanda
- */
 #include "ccimp/ccimp_os.h"
 
 #include <malloc.h>
