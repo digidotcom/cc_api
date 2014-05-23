@@ -244,13 +244,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
     {
-        /* Only data_cb is compulsory */
-        if (start->service.receive->data_cb == NULL)
-        {
-            error = CCAPI_START_ERROR_INVALID_RECEIVE_DATA_CB;
-            goto done;
-        }
-
         ccapi_data->service.receive.receive_syncr = ccapi_syncr_create_and_release();
         if (ccapi_data->service.receive.receive_syncr == NULL)
         {
@@ -327,7 +320,6 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
-        case CCAPI_START_ERROR_INVALID_RECEIVE_DATA_CB:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
@@ -498,7 +490,6 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
-        case CCAPI_START_ERROR_INVALID_RECEIVE_DATA_CB:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:

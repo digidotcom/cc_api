@@ -161,6 +161,7 @@ typedef struct
     size_t max_request_size;
     ccapi_buffer_info_t request_buffer_info;
     ccapi_buffer_info_t response_buffer_info;
+    ccapi_bool_t response_handled_internally;
     ccapi_buffer_info_t response_processing;
     ccapi_receive_error_t receive_error;
 } ccapi_svc_receive_t;

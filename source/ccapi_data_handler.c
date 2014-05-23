@@ -203,6 +203,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->request_buffer_info.length = 0;
         svc_receive->response_buffer_info.buffer = NULL;
         svc_receive->response_buffer_info.length = 0;
+        svc_receive->response_handled_internally = CCAPI_FALSE;
         svc_receive->response_processing.buffer = NULL;
         svc_receive->response_processing.length = 0;
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
@@ -249,6 +250,12 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
                 goto done;
             }
             memcpy(svc_receive->target, target_ptr->target, target_size);
+        }
+
+        if (svc_receive->user_callbacks.data_cb == NULL)
+        {
+            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INVALID_DATA_CB;
+            goto done;
         }
 
         /* Ask user if accepts target */
@@ -333,8 +340,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         {
             svc_receive->user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
                                                                &svc_receive->request_buffer_info, 
-                                                               svc_receive->response_required ? &svc_receive->response_buffer_info : NULL, 
-                                                               svc_receive->receive_error);
+                                                               svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
 
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
@@ -351,7 +357,87 @@ done:
     return connector_status;
 }
 
-static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr, ccapi_data_t * const ccapi_data)
+static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
+{
+#define ERROR_MESSAGE "CCAPI Error %d (%s) while handling target '%s'"
+
+        char * receive_error_str = NULL;
+        size_t receive_error_str_len = 0;
+
+        switch (svc_receive->receive_error)
+        {
+            case CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_INVALID_DATA_CB:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_INVALID_DATA_CB";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG:
+            {
+                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+            case CCAPI_RECEIVE_ERROR_NONE:
+            case CCAPI_RECEIVE_ERROR_INVALID_TARGET:
+            case CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED:
+            case CCAPI_RECEIVE_ERROR_TARGET_ALREADY_ADDED:
+            case CCAPI_RECEIVE_ERROR_SYNCR_FAILED:
+            case CCAPI_RECEIVE_ERROR_STATUS_CANCEL:
+            case CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT:
+            case CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR:
+            {
+                static char const this_receive_error_str[] = "Unexpected error";
+                receive_error_str = (char *)this_receive_error_str;
+                receive_error_str_len = sizeof this_receive_error_str - 1;
+                break;
+            }
+        }
+
+        receive_error_str_len += sizeof ERROR_MESSAGE + strlen(svc_receive->target);
+
+        if (!valid_receive_malloc(&svc_receive->response_buffer_info.buffer, receive_error_str_len, &svc_receive->receive_error))
+        {
+              return;
+        }
+        svc_receive->response_buffer_info.length = sprintf(svc_receive->response_buffer_info.buffer, ERROR_MESSAGE, 
+                                                                        svc_receive->receive_error, receive_error_str, svc_receive->target);
+
+        ccapi_logging_line("fill_internal_error: Providing response in buffer at %p: %s", 
+                                    svc_receive->response_buffer_info.buffer, (char*)svc_receive->response_buffer_info.buffer);
+}
+
+static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr)
 {
     ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
@@ -365,19 +451,12 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
         goto done;
     }
 
-    /* If there is any ccapi internal error, ccfsm will not have called data callback but we still want to let our 
-     * user the oportunity to report a response based on the error
-     */
-    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && ccapi_data->config.receive_supported)
+    /* We initialize the response buffer for internal errors just once */
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && svc_receive->response_handled_internally == CCAPI_FALSE)
     {
-        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
+        svc_receive->response_handled_internally = CCAPI_TRUE;
 
-        /* Get response from user */ 
-        svc_receive->user_callbacks.data_cb(svc_receive->target, reply_ptr->transport, 
-                                                           NULL, 
-                                                           &svc_receive->response_buffer_info, 
-                                                           svc_receive->receive_error);
-
+        fill_internal_error(svc_receive);
         memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
     }
 
@@ -435,8 +514,9 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     /* Call the user so he can free allocated response memory and handle errors  */
     if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
     {
+       const ccapi_bool_t should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
        svc_receive->user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
-                           svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL ? &svc_receive->response_buffer_info : NULL, 
+                           should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
     }
 
@@ -444,6 +524,11 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     if (svc_receive->target != NULL)
     {
         ccapi_free(svc_receive->target);
+    }
+    if (svc_receive->response_handled_internally == CCAPI_TRUE)
+    {
+        ccapi_logging_line("ccapi_process_device_request_status: Freeing response buffer at %p", svc_receive->response_buffer_info.buffer);
+        ccapi_free(svc_receive->response_buffer_info.buffer);
     }
     ccapi_free(svc_receive);
 
@@ -527,7 +612,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         {
             connector_data_service_receive_reply_data_t * const reply_ptr = data;
 
-            connector_status = ccapi_process_device_request_response(reply_ptr, ccapi_data);
+            connector_status = ccapi_process_device_request_response(reply_ptr);
 
             break;
         }
