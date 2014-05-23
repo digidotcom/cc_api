@@ -380,6 +380,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
                 break;
             case CCAPI_TCP_STOP_ERROR_NOT_STARTED:
                 ASSERT_MSG(tcp_stop_error != CCAPI_TCP_STOP_ERROR_NOT_STARTED);
+                break;
         }
     }
 
