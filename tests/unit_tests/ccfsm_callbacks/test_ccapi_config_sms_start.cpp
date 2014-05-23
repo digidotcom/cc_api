@@ -53,9 +53,9 @@ TEST(test_ccapi_config_sms_start,testPhoneNumber)
     request.config_request = connector_request_id_config_get_device_cloud_phone;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &phone, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(strlen(ccapi_data_single_instance->transport_sms.info->phone_number), phone.length);
-    CHECK_EQUAL(ccapi_data_single_instance->transport_sms.info->phone_number, phone.string);
-    STRCMP_EQUAL(ccapi_data_single_instance->transport_sms.info->phone_number, phone.string);
+    CHECK_EQUAL(strlen(ccapi_data_single_instance->transport_sms.info->cloud_config.phone_number), phone.length);
+    CHECK_EQUAL(ccapi_data_single_instance->transport_sms.info->cloud_config.phone_number, phone.string);
+    STRCMP_EQUAL(ccapi_data_single_instance->transport_sms.info->cloud_config.phone_number, phone.string);
 
 }
 
@@ -68,8 +68,8 @@ TEST(test_ccapi_config_sms_start,testServiceID)
     request.config_request = connector_request_id_config_device_cloud_service_id;
     callback_status = ccapi_connector_callback(connector_class_id_config, request, &id, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, callback_status);
-    CHECK_EQUAL(strlen(ccapi_data_single_instance->transport_sms.info->service_id), id.length);
-    CHECK_EQUAL(ccapi_data_single_instance->transport_sms.info->service_id, id.string);
-    STRCMP_EQUAL(ccapi_data_single_instance->transport_sms.info->service_id, id.string);
+    CHECK_EQUAL(strlen(ccapi_data_single_instance->transport_sms.info->cloud_config.service_id), id.length);
+    CHECK_EQUAL(ccapi_data_single_instance->transport_sms.info->cloud_config.service_id, id.string);
+    STRCMP_EQUAL(ccapi_data_single_instance->transport_sms.info->cloud_config.service_id, id.string);
 
 }

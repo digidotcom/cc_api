@@ -3,7 +3,7 @@
 #include "ccapi_definitions.h"
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
-static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t *send_ptr)
+static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t * const send_ptr)
 {
     connector_callback_status_t status = connector_callback_error;
 	
@@ -44,7 +44,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
     }
     else
     {
-        ccapi_logging_line("process_send_data_request: no app data set to send");
+        ccapi_logging_line("ccapi_process_send_data_request: no app data set to send");
     }
 
 done:
@@ -53,8 +53,9 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_response(connector_data_service_send_response_t const * const resp_ptr)
 {
-
     ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)resp_ptr->user_context;
+
+    ASSERT_MSG_GOTO(svc_send != NULL, done);
 
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
@@ -100,6 +101,8 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
+    ASSERT_MSG_GOTO(svc_send != NULL, done);
+
     ccapi_logging_line("ccapi_process_send_data_status: %d", status_ptr->status);
    
     switch (status_ptr->status)
@@ -139,6 +142,23 @@ done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_send_data_length(connector_data_service_length_t * const length_ptr)
+{
+    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)length_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_send != NULL, done);
+
+    length_ptr->total_bytes = svc_send->bytes_remaining;
+
+    ccapi_logging_line("ccapi_process_send_data_length: %d", length_ptr->total_bytes);
+   
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
 static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receive_error_t * const error)
 {
     ccapi_bool_t success;
@@ -157,8 +177,8 @@ static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receiv
 
 static connector_callback_status_t ccapi_process_device_request_target(connector_data_service_receive_target_t * const target_ptr, ccapi_data_t * const ccapi_data)
 {
-    connector_callback_status_t connector_status = connector_callback_error;
     ccapi_svc_receive_t * svc_receive = NULL;
+    connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(target_ptr->target != NULL, done);
 
@@ -261,12 +281,10 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
 
-    ASSERT_MSG_GOTO(data_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_data for target = '%s'", svc_receive->target);
 
@@ -335,12 +353,10 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
 
-    ASSERT_MSG_GOTO(reply_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_response for target = '%s'", svc_receive->target);
 
@@ -385,12 +401,9 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_svc_receive_t * svc_receive = NULL;
-
-    ASSERT_MSG_GOTO(status_ptr->user_context != NULL, done);
-
-    svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_status for target = '%s'", svc_receive->target);
     ccapi_logging_line("ccapi_process_device_request_status: ccapi_receive_error= %d,  status: %d", svc_receive->receive_error, status_ptr->status);
@@ -440,6 +453,22 @@ done:
     return connector_status;
 }
 
+
+static connector_callback_status_t ccapi_process_device_request_length(connector_data_service_length_t * const length_ptr)
+{
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)length_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_receive != NULL, done);
+
+    length_ptr->total_bytes = svc_receive->response_processing.length;
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -467,6 +496,14 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
             connector_data_service_status_t * const status_ptr = data;
             
             connector_status = ccapi_process_send_data_status(status_ptr);
+
+            break;
+        }
+        case connector_request_id_data_service_send_length:
+        {
+            connector_data_service_length_t * const length_ptr = data;
+            
+            connector_status = ccapi_process_send_data_length(length_ptr);
 
             break;
         }
@@ -504,12 +541,12 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
         case connector_request_id_data_service_receive_reply_length:
         {
+            connector_data_service_length_t * const length_ptr = data;
+            
+            connector_status = ccapi_process_device_request_length(length_ptr);
+
             break;
         }
-
-        default:
-            connector_status = connector_callback_unrecognized;
-            break;
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);

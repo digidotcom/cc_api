@@ -49,8 +49,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testDefaults)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
 
     connector_transport_t connector_transport = connector_transport_sms;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
@@ -66,8 +66,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testMaxSessions)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
     sms_start.limit.max_sessions=300;
 
     error = ccapi_start_transport_sms(&sms_start);
@@ -83,8 +83,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testSmsInfoNoMemory)
     char id[] = "";
     void * malloc_for_ccapi_sms = NULL;
 
-    sms_start.service_id = id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = id;
+    sms_start.cloud_config.phone_number = phone_number;
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_sms_info_t), malloc_for_ccapi_sms);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INSUFFICIENT_MEMORY, error);
@@ -100,8 +100,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testSmsPhoneNoMemory)
     void * malloc_for_ccapi_sms = malloc(sizeof (ccapi_sms_info_t));
     void * malloc_for_phone = NULL;
 
-    sms_start.service_id = id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = id;
+    sms_start.cloud_config.phone_number = phone_number;
 
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_sms_info_t), malloc_for_ccapi_sms);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof phone_number, malloc_for_phone);
@@ -121,8 +121,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testSmsServiceIdNoMemory)
     void * malloc_for_phone = malloc(sizeof (phone_number));
     void * malloc_for_service_id = NULL;
 
-    sms_start.service_id = id;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.service_id = id;
+    sms_start.cloud_config.phone_number = phone_number;
 
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_sms_info_t), malloc_for_ccapi_sms);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof phone_number, malloc_for_phone);
@@ -137,8 +137,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhoneNULL)
     ccapi_sms_info_t sms_start = {{0}};
     char id[] = "";
 
-    sms_start.phone_number = NULL;
-    sms_start.service_id = id;
+    sms_start.cloud_config.phone_number = NULL;
+    sms_start.cloud_config.service_id = id;
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
 }
@@ -150,8 +150,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhoneEmpty)
     char phone_number[] = "";
     char id[] = "";
 
-    sms_start.phone_number = phone_number;
-    sms_start.service_id = id;
+    sms_start.cloud_config.phone_number = phone_number;
+    sms_start.cloud_config.service_id = id;
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
@@ -164,8 +164,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidPhone)
     char phone_number[] = "#54 5+e";
     char id[] = "";
 
-    sms_start.phone_number = phone_number;
-    sms_start.service_id = id;
+    sms_start.cloud_config.phone_number = phone_number;
+    sms_start.cloud_config.service_id = id;
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_PHONE, error);
@@ -177,8 +177,8 @@ TEST(test_ccapi_sms_start_sanity_checks, testInvalidServiceId)
     ccapi_sms_info_t sms_start = {{0}};
     char phone_number[] = "+54-3644-421921";
 
-    sms_start.phone_number = phone_number;
-    sms_start.service_id = NULL;
+    sms_start.cloud_config.phone_number = phone_number;
+    sms_start.cloud_config.service_id = NULL;
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INVALID_SERVICE_ID, error);
@@ -191,11 +191,11 @@ TEST(test_ccapi_sms_start_sanity_checks, testCallbacksIsCopied)
     char phone_number[] = "+54-3644-421921";
     char service_id[] = "";
 
-    sms_start.service_id = service_id;
+    sms_start.cloud_config.service_id = service_id;
     sms_start.limit.max_sessions=140;
     sms_start.limit.rx_timeout=CCAPI_UDP_RX_TIMEOUT_INFINITE;
     sms_start.callback.close=ccapi_sms_close_cb;
-    sms_start.phone_number = phone_number;
+    sms_start.cloud_config.phone_number = phone_number;
 
     connector_transport_t connector_transport = connector_transport_sms;
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
