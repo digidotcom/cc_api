@@ -19,6 +19,9 @@
 
 #define DESIRED_MAX_RESPONSE_SIZE 400
 
+#define TEST_UDP 1
+#define TEST_SMS 0
+
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
@@ -77,36 +80,23 @@ static ccapi_bool_t app_receive_default_accept_cb(char const * const target, cca
     return accept_target;
 }
 
-static void app_receive_default_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void app_receive_default_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
-    printf("app_receive_default_data_cb: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
+    printf("app_receive_default_data_cb: target = '%s'. transport = %d\n", target, transport);
 
-    /* Print data */
-    if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
+    /* Print request data */
+    for (size_t i=0 ; i < request_buffer_info->length ; i++)
     {
-        size_t i;
-
-        for (i=0 ; i < request_buffer_info->length ; i++)
-        {
             printf("%c", ((char*)request_buffer_info->buffer)[i]);
-        }
-        printf("\napp_receive_default_data_cb received total %d bytes\n", request_buffer_info->length);
     }
 
-    /* Provide response */
+    /* Provide response to the cloud */
     if (response_buffer_info != NULL)
     {
         response_buffer_info->buffer = malloc(DESIRED_MAX_RESPONSE_SIZE);
         printf("app_receive_default_data_cb: Providing response in buffer at %p\n", response_buffer_info->buffer);
 
-        if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
-        {
-            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
-        } 
-        else
-        {
-            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Thanks for the info");
-        }
+        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Thanks for the info");
     }
     else
     {
@@ -116,11 +106,11 @@ static void app_receive_default_data_cb(char const * const target, ccapi_transpo
     return;
 }
 
-static void app_get_time_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void app_get_time_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     size_t max_length;
 
-    printf("app_get_time_cb: transport = %d. Error = %d\n", transport, receive_error);
+    printf("app_get_time_cb: transport = %d\n", transport);
 
     if (transport == CCAPI_TRANSPORT_SMS)
         max_length = 80;
@@ -131,13 +121,9 @@ static void app_get_time_cb(char const * const target, ccapi_transport_t const t
 
     assert(response_buffer_info != NULL);
 
-    if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
+    if (request_buffer_info->length != 0)
     {
-        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
-    } 
-    else if (request_buffer_info->length != 0)
-    {
-        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Invalid argument, this call does not take arguments");
+        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Invalid argument, this %s does not take arguments", target);
     }
     else
     {
@@ -154,21 +140,23 @@ static void app_receive_default_status_cb(char const * const target, ccapi_trans
 
     if (response_buffer_info != NULL)
     {
-        printf("Freeing response buffer at %p\n", response_buffer_info->buffer);
+        printf("app_receive_default_status_cb: Freeing response buffer at %p\n", response_buffer_info->buffer);
         free(response_buffer_info->buffer);
     }
-
-    (void)response_buffer_info;
 }
 
 int main (void)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t start_error = CCAPI_START_ERROR_NONE;
-    ccapi_receive_service_t receive_service = {app_receive_default_accept_cb, app_receive_default_data_cb, app_receive_default_status_cb};
+    ccapi_receive_service_t receive_service;
 
     fill_start_structure_with_good_parameters(&start);
+
     start.service.receive = &receive_service;
+    receive_service.accept_cb = app_receive_default_accept_cb;
+    receive_service.data_cb = app_receive_default_data_cb;
+    receive_service.status_cb = app_receive_default_status_cb;
 
     start_error = ccapi_start(&start);
 
@@ -208,6 +196,7 @@ int main (void)
         }
     }
 
+#if (TEST_UDP == 1)
     /* Start UDP trasnport */
     {
         ccapi_udp_start_error_t udp_start_error;
@@ -230,8 +219,9 @@ int main (void)
             goto done;
         }
     }
+#endif
 
-#if 0
+#if (TEST_SMS == 1)
     /* Start SMS trasnport */
     {
         ccapi_sms_start_error_t sms_start_error;
@@ -266,7 +256,7 @@ int main (void)
         /* A request up to DESIRED_MAX_REQUEST_SIZE will success but app_get_time_cb() will complain that this command doesn't have arguments.
          * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
          */
-        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
+        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, NULL, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
@@ -277,6 +267,7 @@ int main (void)
         }
     }
 
+#if (TEST_UDP == 1)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
 	for(;;)
     {   
@@ -295,6 +286,10 @@ int main (void)
         
         sleep(5);
     }
+#else
+    printf("Endless loop\n");
+    for(;;);
+#endif
 
 done:
     return 0;

@@ -19,13 +19,12 @@ void clean_ccapi_receive_status_data(void)
     ccapi_receive_status_expected_receive_error = CCAPI_RECEIVE_ERROR_NONE;
 }
 
-static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     (void)target;
     (void)transport;
     (void)request_buffer_info;
     (void)response_buffer_info;
-    (void)receive_error;
 
     return;
 }
@@ -89,6 +88,7 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_NoResponse)
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
+    svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
@@ -130,6 +130,7 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_WithResponse)
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = (void *)exp_response;
     svc_receive->response_buffer_info.length = sizeof exp_response;
+    svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
     expected_response.buffer = (void *)exp_response;
@@ -175,6 +176,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_CANCEL)
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
+    svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
@@ -210,6 +212,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_TIMEOUT)
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
+    svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
@@ -245,6 +248,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_SESSION_ERROR)
     svc_receive->response_required = CCAPI_TRUE;  
     svc_receive->response_buffer_info.buffer = NULL;
     svc_receive->response_buffer_info.length = 0;
+    svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;

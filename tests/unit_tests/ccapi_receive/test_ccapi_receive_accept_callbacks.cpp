@@ -15,13 +15,12 @@ static ccapi_bool_t test_receive_accept_cb(char const * const target, ccapi_tran
     return ccapi_receive_accept_retval;
 }
 
-static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     (void)target;
     (void)transport;
     (void)request_buffer_info;
     (void)response_buffer_info;
-    (void)receive_error;
 }
 
 TEST_GROUP(test_ccapi_receive_accept_callback_NoReceiveSupport)

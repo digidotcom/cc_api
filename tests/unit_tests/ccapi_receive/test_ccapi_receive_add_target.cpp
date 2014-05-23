@@ -12,13 +12,12 @@ static ccapi_bool_t generic_receive_accept_cb(char const * const target, ccapi_t
     return CCAPI_TRUE;
 }
 
-static void generic_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void generic_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     (void)target;
     (void)transport;
     (void)request_buffer_info;
     (void)response_buffer_info;
-    (void)receive_error;
 
     return;
 }
@@ -34,13 +33,12 @@ static void generic_receive_status_cb(char const * const target, ccapi_transport
     return;
 }
 
-static void specific_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void specific_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     (void)target;
     (void)transport;
     (void)request_buffer_info;
     (void)response_buffer_info;
-    (void)receive_error;
 
     return;
 }
