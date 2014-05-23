@@ -11,6 +11,10 @@
 
 typedef void * ccimp_network_handle_t;
 
+#define CCIMP_TCP_PORT      3197
+#define CCIMP_SSL_PORT      3199
+#define CCIMP_UDP_PORT      3297
+
 typedef struct  {
     union
     {

@@ -19,8 +19,6 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#include "connector_api.h"
-
 
 #define GW_PORT		9999		    /* Port number is hardcoded in sms_proxy.py running in ConnectPort X4 Gateway */
 #define GW_ADDR_IN  "10.80.1.213"   /* Gateway running sms_proxy.py in India office */

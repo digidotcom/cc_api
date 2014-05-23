@@ -18,7 +18,6 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#include "connector_api.h"
 #include "dns_helper.h"
 
 ccimp_status_t ccimp_network_tcp_close(ccimp_network_close_t * const data)
@@ -147,7 +146,7 @@ static ccimp_status_t app_tcp_connect(int const fd, in_addr_t const ip_addr)
     ccimp_status_t status = CCIMP_STATUS_OK;
 
     memcpy(&sin.sin_addr, &ip_addr, sizeof sin.sin_addr);
-    sin.sin_port   = htons(CONNECTOR_PORT);
+    sin.sin_port   = htons(CCIMP_TCP_PORT);
     sin.sin_family = AF_INET;
 
     printf("app_tcp_connect: fd %d\n", fd);
