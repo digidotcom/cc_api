@@ -23,22 +23,18 @@
 #define DATA_POINTS_PER_UPLOAD  10
 #define SECONDS_BETWEEN_DPS     1
 
-static void tank_valves_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+static void tank_valves_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
     char const * valveIN_token = NULL;
     char const * valveOUT_token = NULL;
     size_t const buffer_size = 64;
+
     response_buffer_info->buffer = malloc(buffer_size);
 
     assert(transport == CCAPI_TRANSPORT_TCP);
 
-    printf("\t *** Received request from Device Cloud\n");
+    printf("\t *** Received '%s' target from Device Cloud\n", target);
     printf("\tAllocated response buffer at %p\n", response_buffer_info->buffer);
-    if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
-    {
-        response_buffer_info->length = snprintf(response_buffer_info->buffer, buffer_size, "Error %d while handling target %s", receive_error, target);
-        return;
-    }
 
     valveIN_token = strstr(request_buffer_info->buffer, "valveIN=");
     valveOUT_token = strstr(request_buffer_info->buffer, "valveOUT=");
@@ -160,7 +156,7 @@ int main (void)
     filesystem_service.changed_cb = NULL;
 
     receive_service.accept_cb = NULL;
-    receive_service.data_cb = tank_valves_cb;
+    receive_service.data_cb = NULL;
     receive_service.status_cb = NULL;
 
     start.device_cloud_url = DEVICE_CLOUD_URL;
