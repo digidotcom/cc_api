@@ -93,7 +93,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRootDirList)
 
     /* Open root path */
     ccfsm_dir_open_data.path = ROOT_PATH;
-    ccfsm_dir_open_data.handle = NULL;
+    ccfsm_dir_open_data.handle = (uintptr_t)NULL;
     ccfsm_dir_open_data.user_context = ccfsm_filesystem_stat_data.user_context;
 
     request.file_system_request = connector_request_id_file_system_opendir;
@@ -102,7 +102,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRootDirList)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(ccapi_data_single_instance->service.file_system.virtual_dir_list, root_dir_listing_handle->dir_entry);
-    CHECK(NULL != ccfsm_dir_open_data.handle);
+    CHECK((uintptr_t)NULL != ccfsm_dir_open_data.handle);
 
     /* Read first entry and check that it's the second mapped path */
     ccfsm_dir_read_entry_data.handle = ccfsm_dir_open_data.handle;
@@ -186,8 +186,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirInvalid)
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_dir_open_data.user_context = NULL;
-    ccfsm_dir_open_data.errnum = NULL;
-    ccfsm_dir_open_data.handle = NULL;
+    ccfsm_dir_open_data.errnum = (ccimp_fs_errnum_t)NULL;
+    ccfsm_dir_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccfsm_dir_open_data.path = ccfsm_path;
 
     request.file_system_request = connector_request_id_file_system_opendir;
@@ -195,7 +195,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirInvalid)
     error_handle = (ccapi_fs_error_handle_t *)ccfsm_dir_open_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
-    CHECK(ccfsm_dir_open_data.handle == NULL);
+    CHECK(ccfsm_dir_open_data.handle == (uintptr_t)NULL);
     CHECK(NULL != error_handle);
     CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
     CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
@@ -214,8 +214,8 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDir)
     th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, LOCAL_PATH_1);
 
     ccfsm_dir_open_data.user_context = NULL;
-    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
-    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
+    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
+    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle;
     ccfsm_dir_open_data.path = ccfsm_path;
 
     Mock_ccimp_os_malloc_expectAndReturn(sizeof LOCAL_PATH_1, malloc_for_local_path);
@@ -225,7 +225,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDir)
     status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_dir_open_data, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
-    CHECK(NULL != ccfsm_dir_open_data.handle);
+    CHECK((uintptr_t)NULL != ccfsm_dir_open_data.handle);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirSubdir)
@@ -239,9 +239,9 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirSubdir)
 
     th_filesystem_prepare_ccimp_dir_open_data_call(&ccimp_dir_open_data, LOCAL_PATH_1 DIR_SEPARATOR SUBDIR);
 
-    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum.pointer;
+    ccfsm_dir_open_data.errnum = ccimp_dir_open_data.errnum;
     ccfsm_dir_open_data.user_context = NULL;
-    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle.pointer;
+    ccfsm_dir_open_data.handle = ccimp_dir_open_data.handle;
     ccfsm_dir_open_data.path = ccfsm_path;
 
     Mock_ccimp_os_malloc_expectAndReturn(sizeof LOCAL_PATH_1 DIR_SEPARATOR SUBDIR, malloc_for_local_path);
@@ -252,7 +252,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenVirtualDirSubdir)
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(6, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
-    CHECK(NULL != ccfsm_dir_open_data.handle);
+    CHECK((uintptr_t)NULL != ccfsm_dir_open_data.handle);
 }
 
 TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntryInvalid)
@@ -264,7 +264,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntryInvalid)
     ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
-    ccfsm_dir_entry_status_data.errnum = NULL;
+    ccfsm_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_dir_entry_status_data.user_context = NULL;
     ccfsm_dir_entry_status_data.path = ccfsm_path;
     ccfsm_dir_entry_status_data.statbuf.file_size = 0;
@@ -291,14 +291,14 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirEntry)
     char const * const ccfsm_path = ROOT_PATH VIRTUAL_PATH_1;
     void * malloc_for_local_path = malloc(sizeof LOCAL_PATH_1);
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = LOCAL_PATH_1;
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum.pointer;
+    ccfsm_dir_entry_status_data.errnum = ccimp_dir_entry_status_data.errnum;
     ccfsm_dir_entry_status_data.user_context = NULL;
     ccfsm_dir_entry_status_data.path = ccfsm_path;
     ccfsm_dir_entry_status_data.statbuf.file_size = ccimp_dir_entry_status_data.status.file_size;
@@ -324,7 +324,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDirInvalid)
     ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
-    ccfsm_hash_status_data.errnum = NULL;
+    ccfsm_hash_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_hash_status_data.user_context = NULL;
     ccfsm_hash_status_data.path = ccfsm_path;
     ccfsm_hash_status_data.statbuf.file_size = 0;
@@ -353,20 +353,20 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testStatVirtualDir)
     connector_callback_status_t status;
     char const * const ccfsm_path = ROOT_PATH VIRTUAL_PATH_1 "/file1.txt";
 
-    ccimp_hash_status_data.errnum.pointer = NULL;
+    ccimp_hash_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_hash_status_data.imp_context = &my_fs_context;
     ccimp_hash_status_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
     ccimp_hash_status_data.hash_alg.requested = CCIMP_FS_HASH_BEST;
     ccimp_hash_status_data.hash_alg.actual = CCIMP_FS_HASH_NONE;
 
-    ccimp_dir_entry_status_data.errnum.pointer = NULL;
+    ccimp_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_dir_entry_status_data.imp_context = &my_fs_context;
     ccimp_dir_entry_status_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
     ccimp_dir_entry_status_data.status.file_size = 0;
     ccimp_dir_entry_status_data.status.last_modified = 0;
     ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
 
-    ccfsm_hash_status_data.errnum = ccimp_hash_status_data.errnum.pointer;
+    ccfsm_hash_status_data.errnum = ccimp_hash_status_data.errnum;
     ccfsm_hash_status_data.user_context = NULL;
     ccfsm_hash_status_data.path = ccfsm_path;
     ccfsm_hash_status_data.statbuf.flags = connector_file_system_file_type_none;
@@ -392,7 +392,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRemoveFileFromVirtualDirInval
     ccapi_fs_error_handle_t * error_handle = (ccapi_fs_error_handle_t *) malloc(sizeof *error_handle);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
-    ccfsm_file_remove_data.errnum = NULL;
+    ccfsm_file_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_file_remove_data.user_context = NULL;
     ccfsm_file_remove_data.path = ccfsm_path;
 
@@ -416,11 +416,11 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testRemoveFileFromVirtualDir)
     char const * const ccfsm_path = ROOT_PATH VIRTUAL_PATH_1 DIR_SEPARATOR FILENAME;
     void * malloc_for_local_path = malloc(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME);
 
-    ccimp_file_remove_data.errnum.pointer = NULL;
+    ccimp_file_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_file_remove_data.imp_context = &my_fs_context;
     ccimp_file_remove_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
 
-    ccfsm_file_remove_data.errnum = ccimp_file_remove_data.errnum.pointer;
+    ccfsm_file_remove_data.errnum = ccimp_file_remove_data.errnum;
     ccfsm_file_remove_data.user_context = NULL;
     ccfsm_file_remove_data.path = ccfsm_path;
 
@@ -444,9 +444,9 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDirInvalid
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccfsm_file_open_data.path = ccfsm_path;
-    ccfsm_file_open_data.errnum = NULL;
+    ccfsm_file_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccfsm_file_open_data.user_context = NULL;
-    ccfsm_file_open_data.handle = NULL;
+    ccfsm_file_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccfsm_file_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
 
     request.file_system_request = connector_request_id_file_system_open;
@@ -456,7 +456,7 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDirInvalid
     error_handle = (ccapi_fs_error_handle_t *)ccfsm_file_open_data.errnum;
 
     CHECK_EQUAL(connector_callback_error, status);
-    CHECK(ccfsm_file_open_data.handle == NULL);
+    CHECK(ccfsm_file_open_data.handle == (uintptr_t)NULL);
     CHECK_EQUAL(CCAPI_TRUE, error_handle->error_is_internal);
     CHECK_EQUAL(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, error_handle->error.ccapi_error);
 
@@ -476,15 +476,15 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testOpenFileFromVirtualDir)
     void * malloc_for_path = malloc(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME);
 
     ccimp_file_open_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
-    ccimp_file_open_data.errnum.pointer = NULL;
+    ccimp_file_open_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_file_open_data.imp_context = &my_fs_context;
-    ccimp_file_open_data.handle.pointer = NULL;
+    ccimp_file_open_data.handle = (ccimp_fs_handle_t)NULL;
     ccimp_file_open_data.flags = CCIMP_FILE_O_RDWR | CCIMP_FILE_O_APPEND;
 
     ccfsm_file_open_data.path = ccfsm_path;
-    ccfsm_file_open_data.errnum = ccimp_file_open_data.errnum.pointer;
+    ccfsm_file_open_data.errnum = ccimp_file_open_data.errnum;
     ccfsm_file_open_data.user_context = NULL;
-    ccfsm_file_open_data.handle = ccimp_file_open_data.handle.pointer;
+    ccfsm_file_open_data.handle = ccimp_file_open_data.handle;
     ccfsm_file_open_data.oflag = CONNECTOR_FILE_O_RDWR | CONNECTOR_FILE_O_APPEND;
 
     Mock_ccimp_fs_file_open_expectAndReturn(&ccimp_file_open_data, CCIMP_STATUS_OK);
@@ -511,14 +511,14 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testHashFileFromVirtualDirInvalid
     Mock_ccimp_os_malloc_expectAndReturn(sizeof *error_handle, error_handle);
 
     ccimp_hash_file_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
-    ccimp_hash_file_data.errnum.pointer = NULL;
+    ccimp_hash_file_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_hash_file_data.imp_context = &my_fs_context;
     ccimp_hash_file_data.hash_algorithm = CCIMP_FS_HASH_CRC32;
     ccimp_hash_file_data.hash_value = &hash_value;
     ccimp_hash_file_data.bytes_requested = sizeof hash_value;
 
     ccfsm_hash_file_data.path = ccfsm_path;
-    ccfsm_hash_file_data.errnum = ccimp_hash_file_data.errnum.pointer;
+    ccfsm_hash_file_data.errnum = ccimp_hash_file_data.errnum;
     ccfsm_hash_file_data.user_context = NULL;
     ccfsm_hash_file_data.hash_algorithm = connector_file_system_hash_crc32;
     ccfsm_hash_file_data.hash_value = ccimp_hash_file_data.hash_value;
@@ -546,14 +546,14 @@ TEST(test_ccapi_fs_virtual_drive_map_to_ccfsm, testHashFileFromVirtualDir)
     void * malloc_for_local_path = malloc(sizeof LOCAL_PATH_1 DIR_SEPARATOR FILENAME);
 
     ccimp_hash_file_data.path = LOCAL_PATH_1 DIR_SEPARATOR FILENAME;
-    ccimp_hash_file_data.errnum.pointer = NULL;
+    ccimp_hash_file_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_hash_file_data.imp_context = &my_fs_context;
     ccimp_hash_file_data.hash_algorithm = CCIMP_FS_HASH_CRC32;
     ccimp_hash_file_data.hash_value = &hash_value;
     ccimp_hash_file_data.bytes_requested = sizeof hash_value;
 
     ccfsm_hash_file_data.path = ccfsm_path;
-    ccfsm_hash_file_data.errnum = ccimp_hash_file_data.errnum.pointer;
+    ccfsm_hash_file_data.errnum = ccimp_hash_file_data.errnum;
     ccfsm_hash_file_data.user_context = NULL;
     ccfsm_hash_file_data.hash_algorithm = connector_file_system_hash_crc32;
     ccfsm_hash_file_data.hash_value = ccimp_hash_file_data.hash_value;

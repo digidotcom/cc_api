@@ -178,13 +178,13 @@ static bool ccimp_fs_file_open_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_open_t * ccimp_fs_file_open_2 = (ccimp_fs_file_open_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_open_1->errnum.pointer != ccimp_fs_file_open_2->errnum.pointer)
+    if (ccimp_fs_file_open_1->errnum != ccimp_fs_file_open_2->errnum)
         return false;
     if (ccimp_fs_file_open_1->imp_context != ccimp_fs_file_open_2->imp_context)
         return false;
     if (ccimp_fs_file_open_1->flags != ccimp_fs_file_open_2->flags)
         return false;
-    if (ccimp_fs_file_open_1->handle.pointer != ccimp_fs_file_open_2->handle.pointer)
+    if (ccimp_fs_file_open_1->handle != ccimp_fs_file_open_2->handle)
         return false;
     if (strcmp(ccimp_fs_file_open_1->path, ccimp_fs_file_open_2->path) != 0)
         return false;
@@ -197,11 +197,11 @@ static bool ccimp_fs_file_read_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_read_t * ccimp_fs_file_read_2 = (ccimp_fs_file_read_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_read_1->errnum.pointer != ccimp_fs_file_read_2->errnum.pointer)
+    if (ccimp_fs_file_read_1->errnum != ccimp_fs_file_read_2->errnum)
         return false;
     if (ccimp_fs_file_read_1->imp_context != ccimp_fs_file_read_2->imp_context)
         return false;
-    if (ccimp_fs_file_read_1->handle.pointer != ccimp_fs_file_read_2->handle.pointer)
+    if (ccimp_fs_file_read_1->handle != ccimp_fs_file_read_2->handle)
         return false;
     if (ccimp_fs_file_read_1->bytes_available != ccimp_fs_file_read_2->bytes_available)
         return false;
@@ -217,11 +217,11 @@ static bool ccimp_fs_file_write_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_write_t * ccimp_fs_file_write_2 = (ccimp_fs_file_write_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_write_1->errnum.pointer != ccimp_fs_file_write_2->errnum.pointer)
+    if (ccimp_fs_file_write_1->errnum != ccimp_fs_file_write_2->errnum)
         return false;
     if (ccimp_fs_file_write_1->imp_context != ccimp_fs_file_write_2->imp_context)
         return false;
-    if (ccimp_fs_file_write_1->handle.pointer != ccimp_fs_file_write_2->handle.pointer)
+    if (ccimp_fs_file_write_1->handle != ccimp_fs_file_write_2->handle)
         return false;
     if (ccimp_fs_file_write_1->buffer != ccimp_fs_file_write_2->buffer)
         return false;
@@ -239,11 +239,11 @@ static bool ccimp_fs_file_seek_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_seek_t * ccimp_fs_file_seek_2 = (ccimp_fs_file_seek_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_seek_1->errnum.pointer != ccimp_fs_file_seek_2->errnum.pointer)
+    if (ccimp_fs_file_seek_1->errnum != ccimp_fs_file_seek_2->errnum)
         return false;
     if (ccimp_fs_file_seek_1->imp_context != ccimp_fs_file_seek_2->imp_context)
         return false;
-    if (ccimp_fs_file_seek_1->handle.pointer != ccimp_fs_file_seek_2->handle.pointer)
+    if (ccimp_fs_file_seek_1->handle != ccimp_fs_file_seek_2->handle)
         return false;
     if (ccimp_fs_file_seek_1->requested_offset != ccimp_fs_file_seek_2->requested_offset)
         return false;
@@ -261,11 +261,11 @@ static bool ccimp_fs_file_close_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_close_t * ccimp_fs_file_close_2 = (ccimp_fs_file_close_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_close_1->errnum.pointer != ccimp_fs_file_close_2->errnum.pointer)
+    if (ccimp_fs_file_close_1->errnum != ccimp_fs_file_close_2->errnum)
         return false;
     if (ccimp_fs_file_close_1->imp_context != ccimp_fs_file_close_2->imp_context)
         return false;
-    if (ccimp_fs_file_close_1->handle.pointer != ccimp_fs_file_close_2->handle.pointer)
+    if (ccimp_fs_file_close_1->handle != ccimp_fs_file_close_2->handle)
         return false;
 
     return true;
@@ -277,11 +277,11 @@ static bool ccimp_fs_file_truncate_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_truncate_t * ccimp_fs_file_truncate_2 = (ccimp_fs_file_truncate_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_truncate_1->errnum.pointer != ccimp_fs_file_truncate_2->errnum.pointer)
+    if (ccimp_fs_file_truncate_1->errnum != ccimp_fs_file_truncate_2->errnum)
         return false;
     if (ccimp_fs_file_truncate_1->imp_context != ccimp_fs_file_truncate_2->imp_context)
         return false;
-    if (ccimp_fs_file_truncate_1->handle.pointer != ccimp_fs_file_truncate_2->handle.pointer)
+    if (ccimp_fs_file_truncate_1->handle != ccimp_fs_file_truncate_2->handle)
         return false;
     if (ccimp_fs_file_truncate_1->length_in_bytes != ccimp_fs_file_truncate_2->length_in_bytes)
         return false;
@@ -295,7 +295,7 @@ static bool ccimp_fs_file_remove_t_IsEqual(void * object1, void * object2)
     ccimp_fs_file_remove_t * ccimp_fs_file_remove_2 = (ccimp_fs_file_remove_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_file_remove_1->errnum.pointer != ccimp_fs_file_remove_2->errnum.pointer)
+    if (ccimp_fs_file_remove_1->errnum != ccimp_fs_file_remove_2->errnum)
         return false;
     if (ccimp_fs_file_remove_1->imp_context != ccimp_fs_file_remove_2->imp_context)
         return false;
@@ -311,13 +311,13 @@ static bool ccimp_fs_dir_open_t_IsEqual(void * object1, void * object2)
     ccimp_fs_dir_open_t * ccimp_fs_dir_open_2 = (ccimp_fs_dir_open_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_dir_open_1->errnum.pointer != ccimp_fs_dir_open_2->errnum.pointer)
+    if (ccimp_fs_dir_open_1->errnum != ccimp_fs_dir_open_2->errnum)
         return false;
     if (ccimp_fs_dir_open_1->imp_context != ccimp_fs_dir_open_2->imp_context)
         return false;
     if (strcmp(ccimp_fs_dir_open_1->path, ccimp_fs_dir_open_2->path) != 0)
         return false;
-    if (ccimp_fs_dir_open_1->handle.pointer != ccimp_fs_dir_open_2->handle.pointer)
+    if (ccimp_fs_dir_open_1->handle != ccimp_fs_dir_open_2->handle)
         return false;
 
     return true;
@@ -329,11 +329,11 @@ static bool ccimp_fs_dir_read_entry_t_IsEqual(void * object1, void * object2)
     ccimp_fs_dir_read_entry_t * ccimp_fs_dir_read_entry_2 = (ccimp_fs_dir_read_entry_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_dir_read_entry_1->errnum.pointer != ccimp_fs_dir_read_entry_2->errnum.pointer)
+    if (ccimp_fs_dir_read_entry_1->errnum != ccimp_fs_dir_read_entry_2->errnum)
         return false;
     if (ccimp_fs_dir_read_entry_1->imp_context != ccimp_fs_dir_read_entry_2->imp_context)
         return false;
-    if (ccimp_fs_dir_read_entry_1->handle.pointer != ccimp_fs_dir_read_entry_2->handle.pointer)
+    if (ccimp_fs_dir_read_entry_1->handle != ccimp_fs_dir_read_entry_2->handle)
         return false;
     if (ccimp_fs_dir_read_entry_1->entry_name != ccimp_fs_dir_read_entry_2->entry_name)
         return false;
@@ -348,7 +348,7 @@ static bool ccimp_fs_dir_entry_status_t_IsEqual(void * object1, void * object2)
     ccimp_fs_dir_entry_status_t * ccimp_fs_dir_entry_status_2 = (ccimp_fs_dir_entry_status_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_dir_entry_status_1->errnum.pointer != ccimp_fs_dir_entry_status_2->errnum.pointer)
+    if (ccimp_fs_dir_entry_status_1->errnum != ccimp_fs_dir_entry_status_2->errnum)
         return false;
     if (ccimp_fs_dir_entry_status_1->imp_context != ccimp_fs_dir_entry_status_2->imp_context)
         return false;
@@ -369,11 +369,11 @@ static bool ccimp_fs_dir_close_t_IsEqual(void * object1, void * object2)
     ccimp_fs_dir_close_t * ccimp_fs_dir_close_2 = (ccimp_fs_dir_close_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_dir_close_1->errnum.pointer != ccimp_fs_dir_close_2->errnum.pointer)
+    if (ccimp_fs_dir_close_1->errnum != ccimp_fs_dir_close_2->errnum)
         return false;
     if (ccimp_fs_dir_close_1->imp_context != ccimp_fs_dir_close_2->imp_context)
         return false;
-    if (ccimp_fs_dir_close_1->handle.pointer != ccimp_fs_dir_close_2->handle.pointer)
+    if (ccimp_fs_dir_close_1->handle != ccimp_fs_dir_close_2->handle)
         return false;
     return true;
 }
@@ -384,7 +384,7 @@ static bool ccimp_fs_get_hash_alg_t_IsEqual(void * object1, void * object2)
     ccimp_fs_get_hash_alg_t * ccimp_fs_hash_status_2 = (ccimp_fs_get_hash_alg_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_hash_status_1->errnum.pointer != ccimp_fs_hash_status_2->errnum.pointer)
+    if (ccimp_fs_hash_status_1->errnum != ccimp_fs_hash_status_2->errnum)
         return false;
     if (ccimp_fs_hash_status_1->imp_context != ccimp_fs_hash_status_2->imp_context)
         return false;
@@ -403,7 +403,7 @@ static bool ccimp_fs_hash_file_t_IsEqual(void * object1, void * object2)
     ccimp_fs_hash_file_t * ccimp_fs_hash_file_2 = (ccimp_fs_hash_file_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_hash_file_1->errnum.pointer != ccimp_fs_hash_file_2->errnum.pointer)
+    if (ccimp_fs_hash_file_1->errnum != ccimp_fs_hash_file_2->errnum)
         return false;
     if (ccimp_fs_hash_file_1->imp_context != ccimp_fs_hash_file_2->imp_context)
         return false;
@@ -424,7 +424,7 @@ static bool ccimp_fs_error_desc_t_IsEqual(void * object1, void * object2)
     ccimp_fs_error_desc_t * ccimp_fs_error_desc_2 = (ccimp_fs_error_desc_t *)object2;
 
     compare_pointers(object1, object2);
-    if (ccimp_fs_error_desc_1->errnum.pointer != ccimp_fs_error_desc_2->errnum.pointer)
+    if (ccimp_fs_error_desc_1->errnum != ccimp_fs_error_desc_2->errnum)
         return false;
     if (ccimp_fs_error_desc_1->imp_context != ccimp_fs_error_desc_2->imp_context)
         return false;

@@ -74,11 +74,11 @@ TEST(test_ccapi_fs_changed, testChangedRemoved)
     ccapi_fs_changed_expected_path = ccapi_fs_access_expected_path;
     ccapi_fs_changed_expected_request = CCAPI_FS_CHANGED_REMOVED;
 
-    ccimp_remove_data.errnum.pointer = NULL;
+    ccimp_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_remove_data.imp_context = &fs_context;
     ccimp_remove_data.path = ccapi_fs_changed_expected_path;
 
-    ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
+    ccfsm_remove_data.errnum = ccimp_remove_data.errnum;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
@@ -104,11 +104,11 @@ TEST(test_ccapi_fs_changed, testChangedRemoveNotAllowed)
     ccapi_fs_access_expected_request = CCAPI_FS_REQUEST_REMOVE;
     ccapi_fs_access_retval = CCAPI_FS_ACCESS_DENY;
 
-    ccimp_remove_data.errnum.pointer = NULL;
+    ccimp_remove_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_remove_data.imp_context = &fs_context;
     ccimp_remove_data.path = ccapi_fs_access_expected_path;
 
-    ccfsm_remove_data.errnum = ccimp_remove_data.errnum.pointer;
+    ccfsm_remove_data.errnum = ccimp_remove_data.errnum;
     ccfsm_remove_data.user_context = NULL;
     ccfsm_remove_data.path = ccimp_remove_data.path;
 
@@ -137,11 +137,11 @@ TEST(test_ccapi_fs_changed, testChangedModified)
     ccapi_fs_changed_expected_path = "/tmp/hello.txt";
     ccapi_fs_changed_expected_request = CCAPI_FS_CHANGED_MODIFIED;
 
-    ccimp_close_data.errnum.pointer = NULL;
+    ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
-    ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
+    ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = ccimp_close_data.imp_context;
     ccfsm_close_data.handle = ccfsm_open_data.handle;
 
@@ -169,11 +169,11 @@ TEST(test_ccapi_fs_changed, testOpenForReadNotChanged)
 
     ccapi_fs_handle = th_filesystem_openfile("/tmp/hello.txt", &ccfsm_open_data, CCIMP_FILE_O_RDONLY);
 
-    ccimp_close_data.errnum.pointer = NULL;
+    ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.imp_context = &my_fs_context;
-    ccimp_close_data.handle.pointer = ccapi_fs_handle->ccimp_handle.pointer;
+    ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
 
-    ccfsm_close_data.errnum = ccimp_close_data.errnum.pointer;
+    ccfsm_close_data.errnum = ccimp_close_data.errnum;
     ccfsm_close_data.user_context = ccimp_close_data.imp_context;
     ccfsm_close_data.handle = ccfsm_open_data.handle;
 
