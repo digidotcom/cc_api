@@ -68,6 +68,7 @@ TEST(test_ccapi_receive_accept_callback_NoReceiveSupport, testNoReceiveSupport)
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT);
+        STRCMP_EQUAL(svc_receive->target, TEST_TARGET); 
     }
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_receive_accept_cb_called);
@@ -175,6 +176,7 @@ TEST(test_ccapi_receive_accept_callback_MissingCallbacks, testERROR_INVALID_DATA
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_INVALID_DATA_CB);
+        STRCMP_EQUAL(svc_receive->target, TEST_TARGET); 
     }
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_receive_accept_cb_called);
@@ -254,6 +256,7 @@ TEST(test_ccapi_receive_accept_callback, testTargetNotAccepted)
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET);
+        STRCMP_EQUAL(svc_receive->target, TEST_TARGET); 
     }
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_accept_cb_called);

@@ -214,6 +214,16 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
            means that ccapi is running. That error will be used in add_receive_target()
          */
 
+        {
+            const size_t target_size = strlen(target_ptr->target) + 1;
+
+            if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
+            {
+                goto done;
+            }
+            memcpy(svc_receive->target, target_ptr->target, target_size);
+        }
+
         if (!ccapi_data->config.receive_supported)
         {
             svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
@@ -225,14 +235,6 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             ccapi_receive_target_t * added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
             if (added_target != NULL)
             {
-                const size_t target_size = strlen(added_target->target) + 1;
-
-                if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
-                {
-                    goto done;
-                }
-                memcpy(svc_receive->target, added_target->target, target_size);
-
                 svc_receive->max_request_size = added_target->max_request_size;
                 svc_receive->user_callbacks.data_cb = added_target->user_callbacks.data_cb;
                 svc_receive->user_callbacks.status_cb = added_target->user_callbacks.status_cb;
@@ -240,16 +242,6 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
                 connector_status = connector_callback_continue;
                 goto done;
             }
-        }
-
-        {
-            const size_t target_size = strlen(target_ptr->target) + 1;
-
-            if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
-            {
-                goto done;
-            }
-            memcpy(svc_receive->target, target_ptr->target, target_size);
         }
 
         if (svc_receive->user_callbacks.data_cb == NULL)
