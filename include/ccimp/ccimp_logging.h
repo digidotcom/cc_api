@@ -1,10 +1,3 @@
-/*
- * ccimp_logging.h
- *
- *  Created on: Mar 6, 2014
- *      Author: hbujanda
- */
-
 #ifndef CCIMP_LOGGING_H_
 #define CCIMP_LOGGING_H_
 

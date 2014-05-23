@@ -1,9 +1,3 @@
-/*
- * ccimp_logging.c
- *
- *  Created on: Mar 7, 2014
- *      Author: hbujanda
- */
 #include "ccimp/ccimp_logging.h"
 
 #if (defined UNIT_TEST)
