@@ -394,13 +394,6 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
                 receive_error_str_len = sizeof this_receive_error_str - 1;
                 break;
             }
-            case CCAPI_RECEIVE_ERROR_SYNCR_FAILED:
-            {
-                static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_SYNCR_FAILED";
-                receive_error_str = (char *)this_receive_error_str;
-                receive_error_str_len = sizeof this_receive_error_str - 1;
-                break;
-            }
             case CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET:
             {
                 static char const this_receive_error_str[] = "CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET";
@@ -419,6 +412,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
             case CCAPI_RECEIVE_ERROR_INVALID_TARGET:
             case CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED:
             case CCAPI_RECEIVE_ERROR_TARGET_ALREADY_ADDED:
+            case CCAPI_RECEIVE_ERROR_SYNCR_FAILED:
             case CCAPI_RECEIVE_ERROR_STATUS_CANCEL:
             case CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT:
             case CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR:
