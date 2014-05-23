@@ -364,7 +364,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
         char * receive_error_str = NULL;
         size_t receive_error_str_len = 0;
 
-        switch(svc_receive->receive_error)
+        switch (svc_receive->receive_error)
         {
             case CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING:
             {
