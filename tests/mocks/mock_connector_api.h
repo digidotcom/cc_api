@@ -1,10 +1,3 @@
-/*
- * Mock_connector_api.h
- *
- *  Created on: Feb 14, 2014
- *      Author: spastor
- */
-
 #ifndef _MOCK_CONNECTOR_API_H_
 #define _MOCK_CONNECTOR_API_H_
 

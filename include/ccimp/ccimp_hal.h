@@ -1,5 +1,5 @@
-#ifndef CCIMP_HAL_H_
-#define CCIMP_HAL_H_
+#ifndef _CCIMP_HAL_H_
+#define _CCIMP_HAL_H_
 
 #include "ccimp/ccimp_types.h"
 

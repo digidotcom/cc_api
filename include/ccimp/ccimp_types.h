@@ -1,5 +1,5 @@
-#ifndef CCIMP_TYPES_H_
-#define CCIMP_TYPES_H_
+#ifndef _CCIMP_TYPES_H_
+#define _CCIMP_TYPES_H_
 
 #include "custom/custom_ccimp_types.h"
 

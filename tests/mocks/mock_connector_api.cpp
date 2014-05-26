@@ -1,10 +1,3 @@
-/*
- * mock_connector_api.cpp
- *
- *  Created on: Feb 14, 2014
- *      Author: spastor
- */
-
 #include <pthread.h>
 #include <unistd.h>
 #include <semaphore.h>

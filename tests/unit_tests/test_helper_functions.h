@@ -1,10 +1,3 @@
-/*
- * test_helper_functions.h
- *
- *  Created on: Mar 18, 2014
- *      Author: spastor
- */
-
 #ifndef _TEST_HELPER_FUNCTIONS_H_
 #define _TEST_HELPER_FUNCTIONS_H_
 

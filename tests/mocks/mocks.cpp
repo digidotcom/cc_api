@@ -1,11 +1,3 @@
-/*
- * mocks.cpp
- *
- *  Created on: Mar 11, 2014
- *      Author: spastor
- */
-
-
 #include "mocks.h"
 
 char * assert_buffer;

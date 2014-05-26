@@ -1,5 +1,5 @@
-#ifndef CCIMP_LOGGING_H_
-#define CCIMP_LOGGING_H_
+#ifndef _CCIMP_LOGGING_H_
+#define _CCIMP_LOGGING_H_
 
 #include "ccimp/ccimp_types.h"
 
@@ -42,4 +42,4 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
 
 #endif
 
-#endif /* CCIMP_LOGGING_H_ */
+#endif

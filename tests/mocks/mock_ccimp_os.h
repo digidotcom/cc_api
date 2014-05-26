@@ -1,10 +1,3 @@
-/*
- * mock_ccimp_os.h
- *
- *  Created on: Feb 14, 2014
- *      Author: spastor
- */
-
 #ifndef _MOCK_CCIMP_OS_H_
 #define _MOCK_CCIMP_OS_H_
 

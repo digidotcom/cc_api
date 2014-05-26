@@ -1,10 +1,3 @@
-/*
- * mock_ccimp_logging.h
- *
- *  Created on: Feb 14, 2014
- *      Author: spastor
- */
-
 #ifndef _MOCK_CCIMP_LOGGING_H_
 #define _MOCK_CCIMP_LOGGING_H_
 
