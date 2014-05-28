@@ -183,6 +183,7 @@ static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, cca
     }
 
     send_info->header.transport = ccapi_to_connector_transport(transport);
+    send_info->header.request_id = NULL;
 
     switch (behavior)
     {

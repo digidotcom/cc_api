@@ -180,6 +180,8 @@ static bool connector_request_data_service_send_t_IsEqual(void * object1, void *
         return false;
     if (connector_request_data_service_send_t_1->timeout_in_seconds != connector_request_data_service_send_t_2->timeout_in_seconds)
         return false;
+    if (connector_request_data_service_send_t_1->request_id != connector_request_data_service_send_t_2->request_id)
+        return false;
 
     return true;
 }
