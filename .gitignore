@@ -26,3 +26,6 @@ test
 # Samples binaries
 ccapi_app
 
+# Release tgz
+ccapi.tgz
+
