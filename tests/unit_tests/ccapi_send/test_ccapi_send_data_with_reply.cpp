@@ -54,6 +54,7 @@ TEST(test_ccapi_send_data_with_reply, testTimeoutOkNoHint)
     header.content_type = CONTENT_TYPE;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
+    header.request_id = NULL;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
 
@@ -82,6 +83,7 @@ TEST(test_ccapi_send_data_with_reply, testHint)
     header.content_type = CONTENT_TYPE;
     header.response_required = connector_true;
     header.timeout_in_seconds = timeout;
+    header.request_id = NULL;
 
     hint.length = 10;
     hint.string = (char*)malloc(hint.length);
