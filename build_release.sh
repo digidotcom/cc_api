@@ -51,6 +51,10 @@ cp include/custom/*.h $OUTPUT_CCAPI_DIR/include/custom
 # Replace custom headers
 cp $LOCAL_CCAPI_DIR/cc_ansic_custom_include/*.h $OUTPUT_CCFSM_DIR/include
 
+# Temporarily remove ccapi binary datapoints until CCAPI-86 jira is solved
+rm $OUTPUT_CCAPI_DIR/include/ccapi/ccapi_datapoints_binary.h
+rm $OUTPUT_CCAPI_DIR/source/ccapi_datapoints_binary.c
+
 mkdir $OUTPUT_DEMO_DIR
 cp $LOCAL_DEMO_DIR/*.[ch] $OUTPUT_DEMO_DIR
 cp $LOCAL_DEMO_DIR/Makefile_for_demo $OUTPUT_DEMO_DIR/Makefile
