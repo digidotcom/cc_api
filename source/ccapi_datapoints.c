@@ -1067,7 +1067,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
             break;
         case CCAPI_TRANSPORT_SMS:
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
-            p_transport_started = &ccapi_data->transport_udp.started;
+            p_transport_started = &ccapi_data->transport_sms.started;
 #endif
             break;
     }
