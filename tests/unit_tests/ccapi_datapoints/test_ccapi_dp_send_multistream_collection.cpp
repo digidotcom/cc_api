@@ -53,7 +53,7 @@ TEST_GROUP(test_ccapi_dp_send_multi_stream_collection)
 TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTCPOk)
 {
     ccapi_dp_error_t dp_error;
-    connector_request_data_point_multiple_t ccfsm_request;
+    connector_request_data_point_t ccfsm_request;
 
     th_start_ccapi();
     th_start_tcp_lan_ipv4();
@@ -72,8 +72,8 @@ TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTC
     ccfsm_status.transport = connector_transport_tcp;
     ccfsm_status.status = connector_data_point_status_t::connector_data_point_status_complete;
     ccfsm_status.user_context = malloc_for_transaction;
-    mock_info->connector_initiate_data_point_multiple.ccfsm_response = &ccfsm_response;
-    mock_info->connector_initiate_data_point_multiple.ccfsm_status = &ccfsm_status;
+    mock_info->connector_initiate_data_point.ccfsm_response = &ccfsm_response;
+    mock_info->connector_initiate_data_point.ccfsm_status = &ccfsm_status;
 
     ccfsm_request.request_id = NULL;
     ccfsm_request.response_required = connector_false;
@@ -81,7 +81,7 @@ TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTC
     ccfsm_request.transport = connector_transport_tcp;
     ccfsm_request.user_context = malloc_for_transaction;
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point_multiple, &ccfsm_request, connector_success);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_data_point, &ccfsm_request, connector_success);
 
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point, CCIMP_STATUS_OK);
     Mock_ccimp_os_free_expectAndReturn(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point->next, CCIMP_STATUS_OK);

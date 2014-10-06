@@ -1365,7 +1365,7 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
 
     switch (data_point_request)
     {
-        case connector_request_id_data_point_multiple_response:
+        case connector_request_id_data_point_response:
         {
             connector_data_point_response_t * data_point_response = data;
             ccapi_dp_transaction_info_t * const transaction_info = data_point_response->user_context;
@@ -1400,7 +1400,7 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
             }
             break;
         }
-        case connector_request_id_data_point_multiple_status:
+        case connector_request_id_data_point_status:
         {
             connector_data_point_status_t * data_point_status = data;
             ccapi_dp_transaction_info_t * const transaction_info = data_point_status->user_context;
@@ -1440,8 +1440,6 @@ connector_callback_status_t ccapi_data_points_handler(connector_request_id_data_
         }
         case connector_request_id_data_point_binary_response:
         case connector_request_id_data_point_binary_status:
-        case connector_request_id_data_point_single_response:
-        case connector_request_id_data_point_single_status:
         {
             connector_status = connector_callback_unrecognized;
             goto done;

@@ -37,6 +37,6 @@ extern MockFunctionComparator ccimp_fs_get_hash_alg_t_comparator;
 extern MockFunctionComparator ccimp_fs_hash_file_t_comparator;
 extern MockFunctionComparator ccimp_fs_error_desc_t_comparator;
 extern MockFunctionComparator ccimp_fs_session_error_t_comparator;
-extern MockFunctionComparator connector_request_data_point_multiple_t_comparator;
+extern MockFunctionComparator connector_request_data_point_t_comparator;
 
 #endif

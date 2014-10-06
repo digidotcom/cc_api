@@ -38,7 +38,7 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMResponseCallbackErrorMapping)
     dp_respose.hint = NULL;
     dp_respose.transport = connector_transport_tcp;
     dp_respose.user_context = &transaction_info;
-    request_id.data_point_request = connector_request_id_data_point_multiple_response;
+    request_id.data_point_request = connector_request_id_data_point_response;
 
     dp_respose.response = connector_data_point_response_t::connector_data_point_response_success;
     connector_status = ccapi_connector_callback(connector_class_id_data_point, request_id, &dp_respose, (void *)ccapi_data_single_instance);
@@ -73,7 +73,7 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMStatusCallbackReleaseFailed)
     dp_status.status = connector_data_point_status_t::connector_data_point_status_complete;
     dp_status.session_error = connector_session_error_none;
     dp_status.user_context = &transaction_info;
-    request_id.data_point_request = connector_request_id_data_point_multiple_status;
+    request_id.data_point_request = connector_request_id_data_point_status;
 
     Mock_ccimp_os_syncr_release_return(CCIMP_STATUS_ERROR);
 
@@ -93,7 +93,7 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMStatusCallbackErrorMapping)
     dp_status.transport = connector_transport_tcp;
     dp_status.session_error = connector_session_error_none;
     dp_status.user_context = &transaction_info;
-    request_id.data_point_request = connector_request_id_data_point_multiple_status;
+    request_id.data_point_request = connector_request_id_data_point_status;
 
     dp_status.status = connector_data_point_status_t::connector_data_point_status_complete;
     connector_status = ccapi_connector_callback(connector_class_id_data_point, request_id, &dp_status, (void *)ccapi_data_single_instance);

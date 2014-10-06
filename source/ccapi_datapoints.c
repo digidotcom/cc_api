@@ -74,6 +74,8 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
             case connector_data_point_type_float:
             case connector_data_point_type_double:
             case connector_data_point_type_binary:
+            case connector_data_point_type_json:
+            case connector_data_point_type_geojson:
                 break;
         }
 
@@ -1080,7 +1082,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
     }
 
     {
-        connector_request_data_point_multiple_t ccfsm_request;
+        connector_request_data_point_t ccfsm_request;
         connector_status_t ccfsm_status;
 
         transaction_info = ccapi_malloc(sizeof *transaction_info);
@@ -1118,7 +1120,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         ccfsm_request.user_context = transaction_info;
         ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
 
-        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point_multiple, &ccfsm_request);
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point, &ccfsm_request);
         if (ccfsm_status != connector_success)
         {
             ccapi_logging_line("ccapi_dp_send_collection: failure when calling connector_initiate_action, error %d", ccfsm_status);
