@@ -364,19 +364,20 @@ done:
 static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
 {
 #define ERROR_MESSAGE "CCAPI Error %d (%s) while handling target '%s'"
-#define enum_to_case_err(name)  case name:  receive_error_str = #name; receive_error_str_len = sizeof #name - 1; break
 
         char const * receive_error_str = NULL;
         size_t receive_error_str_len = 0;
 
         switch (svc_receive->receive_error)
         {
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING);
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT);
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY);
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_INVALID_DATA_CB);
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET);
-            enum_to_case_err(CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG);
+#define ENUM_TO_CASE_ERR(name)  case name:  receive_error_str = #name; receive_error_str_len = sizeof #name - 1; break
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING);
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT);
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY);
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_INVALID_DATA_CB);
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_USER_REFUSED_TARGET);
+            ENUM_TO_CASE_ERR(CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG);
+#undef ENUM_TO_CASE_ERR
 
             case CCAPI_RECEIVE_ERROR_NONE:
             case CCAPI_RECEIVE_ERROR_INVALID_TARGET:
