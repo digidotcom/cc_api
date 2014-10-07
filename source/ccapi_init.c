@@ -256,13 +256,10 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (start->service.firmware != NULL)
     {
-        /* TODO: 
-                - What if something is wrong? do we start with the service disabled or we don't start ? 
-                - Any of the callbacks required? 
-         */
+        /* TODO: Any of the callbacks required? */
+        /* If target info is wrong, we won't let CCAPI start */ 
         if (start->service.firmware->target.list != NULL && start->service.firmware->target.count > 0)
         {
-
             ccapi_data->service.firmware_update.target.list = start->service.firmware->target.list;
             ccapi_data->service.firmware_update.target.count = start->service.firmware->target.count;
 
@@ -271,6 +268,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccapi_data->service.firmware_update.user_callbacks.cancel_cb = start->service.firmware->callback.cancel_cb;
 
             ccapi_data->config.firmware_supported = CCAPI_TRUE;
+        }
+        else
+        {
+            error = CCAPI_START_ERROR_INVALID_FIRMWARE_INFO;
+            goto done;
         }
     }
 #endif
@@ -354,6 +356,7 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
@@ -525,6 +528,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
