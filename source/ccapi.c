@@ -1486,6 +1486,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             status = ccapi_filesystem_handler(request_id.file_system_request, data, ccapi_data);
             break;
 #endif
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+        case connector_class_id_firmware:
+            status = ccapi_firmware_service_handler(request_id.firmware_request, data, ccapi_data);
+            break;
+#endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         case connector_class_id_data_service:
             status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
