@@ -114,6 +114,19 @@ typedef struct {
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+        struct {
+            struct {
+                firmware_target_t * list;
+                uint8_t count;
+            } target;
+            struct {
+                ccapi_firmware_update_request_cb_t request_cb;
+                ccapi_firmware_update_data_cb_t data_cb;
+                ccapi_firmware_update_cancel_cb_t cancel_cb;
+            } user_callbacks;
+        } firmware_update;
+#endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         struct {
             ccapi_receive_service_t user_callbacks;

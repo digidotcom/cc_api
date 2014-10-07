@@ -207,6 +207,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->initiate_action_syncr = NULL;
 
+    ccapi_data->config.firmware_supported = CCAPI_FALSE;
     ccapi_data->config.receive_supported = CCAPI_FALSE;
 
     if (start == NULL)
@@ -235,7 +236,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
     ccapi_data->config.cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_data->config.firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -252,6 +252,28 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     {
         ccapi_data->config.filesystem_supported = CCAPI_FALSE;
     }
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (start->service.firmware != NULL)
+    {
+        /* TODO: 
+                - What if something is wrong? do we start with the service disabled or we don't start ? 
+                - Any of the callbacks required? 
+         */
+        if (start->service.firmware->target.list != NULL && start->service.firmware->target.count > 0)
+        {
+
+            ccapi_data->service.firmware_update.target.list = start->service.firmware->target.list;
+            ccapi_data->service.firmware_update.target.count = start->service.firmware->target.count;
+
+            ccapi_data->service.firmware_update.user_callbacks.request_cb = start->service.firmware->callback.request_cb;
+            ccapi_data->service.firmware_update.user_callbacks.data_cb = start->service.firmware->callback.data_cb;
+            ccapi_data->service.firmware_update.user_callbacks.cancel_cb = start->service.firmware->callback.cancel_cb;
+
+            ccapi_data->config.firmware_supported = CCAPI_TRUE;
+        }
+    }
+#endif
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)

@@ -13,7 +13,6 @@
 #ifndef _CCAPI_INIT_H_
 #define _CCAPI_INIT_H_
 
-typedef void * ccapi_firmware_service_t; /* STUB */
 typedef void * ccapi_remote_config_service_t; /* STUB */
 typedef void * ccapi_cli_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
@@ -49,7 +48,7 @@ typedef struct {
         ccapi_status_callback_t status_callback;
         struct {
                 ccapi_receive_service_t * receive;
-                ccapi_firmware_service_t * firmware; /* EDPoTCP only */
+                ccapi_firmware_update_service_t * firmware; /* EDPoTCP only */
                 ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDPoTCP only */
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
