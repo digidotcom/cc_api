@@ -56,10 +56,10 @@
 #define CCAPI_FS_ROOT_PATH          "/"
 
 typedef struct {
-    uint32_t vendor_id;
-    uint8_t device_id[16];
     char * device_type;
     char * device_cloud_url;
+    uint8_t device_id[16];
+    uint32_t vendor_id;
     ccapi_bool_t cli_supported;
     ccapi_bool_t receive_supported;
     ccapi_bool_t firmware_supported;

@@ -17,8 +17,8 @@
 
 static ccapi_start_error_t check_params(ccapi_start_t const * const start)
 {
+    static uint8_t const invalid_device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
-    uint8_t const invalid_device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     if (start->vendor_id == 0x00)
     {
@@ -77,6 +77,7 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     while (target_entry != NULL)
     {
         ccapi_receive_target_t * const next_target_entry = target_entry->next;
+
         ccapi_free(target_entry->target);
         ccapi_free(target_entry);
         target_entry = next_target_entry;
@@ -95,6 +96,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->file_system_syncr != NULL)
     {
         ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->file_system_syncr);
+
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -124,7 +126,8 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
         if (ccapi_data->service.receive.receive_syncr != NULL)
         {
-            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr); 
+            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr);
+
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
     }
@@ -137,6 +140,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->initiate_action_syncr != NULL)
     {   
         ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->initiate_action_syncr);
+
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:

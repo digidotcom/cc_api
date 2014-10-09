@@ -244,7 +244,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
         /* Check if it's a registered target */
         {
-            ccapi_receive_target_t * added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
+            ccapi_receive_target_t const * const added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
+
             if (added_target != NULL)
             {
                 svc_receive->max_request_size = added_target->max_request_size;
@@ -265,6 +266,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         /* Ask user if accepts target */
         {
             ccapi_bool_t user_accepts;
+
             if (ccapi_data->service.receive.user_callbacks.accept_cb != NULL)
             {
                 user_accepts = ccapi_data->service.receive.user_callbacks.accept_cb(svc_receive->target, target_ptr->transport);
@@ -292,7 +294,7 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -410,7 +412,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
 
 static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr)
 {
-    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -432,7 +434,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
     }
 
     {
-        size_t bytes_to_send = svc_receive->response_processing.length > reply_ptr->bytes_available ? 
+        size_t const bytes_to_send = svc_receive->response_processing.length > reply_ptr->bytes_available ?
                                                  reply_ptr->bytes_available : svc_receive->response_processing.length;
 
         memcpy(reply_ptr->buffer, svc_receive->response_processing.buffer, bytes_to_send);
@@ -451,8 +453,9 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
+
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
     ccapi_logging_line("ccapi_process_device_request_status for target = '%s'", svc_receive->target);
@@ -512,7 +515,7 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_length(connector_data_service_length_t * const length_ptr)
 {
-    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)length_ptr->user_context;
+    ccapi_svc_receive_t const * const svc_receive = (ccapi_svc_receive_t *)length_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -533,7 +536,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
     {
         case connector_request_id_data_service_send_data:
         {
-            connector_data_service_send_data_t * send_ptr = data;
+            connector_data_service_send_data_t * const send_ptr = data;
 
             connector_status = ccapi_process_send_data_request(send_ptr);
 
@@ -541,7 +544,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
         case connector_request_id_data_service_send_response:
         {
-            connector_data_service_send_response_t * const resp_ptr = data;
+            connector_data_service_send_response_t const * const resp_ptr = data;
 
             connector_status = ccapi_process_send_data_response(resp_ptr);
 
@@ -549,7 +552,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
         case connector_request_id_data_service_send_status:
         {
-            connector_data_service_status_t * const status_ptr = data;
+            connector_data_service_status_t const * const status_ptr = data;
             
             connector_status = ccapi_process_send_data_status(status_ptr);
 

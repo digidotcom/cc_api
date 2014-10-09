@@ -20,12 +20,11 @@
 
 static ccapi_dp_b_error_t add_dp_prefix_sufix(char const * const stream_id, char * * dp_path)
 {
-    ccapi_dp_b_error_t dp_b_error = CCAPI_DP_B_ERROR_NONE;
-
     static char const dp_prefix[] = "DataPoint/";
     static char const dp_sufix[] = ".bin";
-    const size_t dp_prefix_length = sizeof dp_prefix - 1; 
-    const size_t dp_sufix_length = sizeof dp_sufix - 1;
+    size_t const dp_prefix_length = sizeof dp_prefix - 1;
+    size_t const dp_sufix_length = sizeof dp_sufix - 1;
+    ccapi_dp_b_error_t dp_b_error = CCAPI_DP_B_ERROR_NONE;
     size_t stream_id_length;
     char * tmp_dp_path;
 
@@ -59,7 +58,7 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
 {
     ccapi_dp_b_error_t dp_b_error;
 
-    switch(send_data_error)
+    switch (send_data_error)
     {
         case CCAPI_SEND_ERROR_NONE:
             dp_b_error = CCAPI_DP_B_ERROR_NONE;
@@ -115,7 +114,7 @@ static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t 
         case CCAPI_SEND_ERROR_RESPONSE_CLOUD_ERROR:
             dp_b_error = CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR;
             break;
-        /* These errors should not happen */
+        /* These errors should never happen */
         case CCAPI_SEND_ERROR_INVALID_CLOUD_PATH:
         case CCAPI_SEND_ERROR_INVALID_CONTENT_TYPE:
             dp_b_error = CCAPI_DP_B_ERROR_RESPONSE_CLOUD_ERROR;

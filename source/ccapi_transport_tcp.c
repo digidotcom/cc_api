@@ -66,11 +66,11 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
 {
     ccapi_bool_t success = CCAPI_TRUE;
 
-    switch(tcp_start->connection.ip.type)
+    switch (tcp_start->connection.ip.type)
     {
         case CCAPI_IPV4:
         {
-            uint8_t const invalid_ipv4[] = {0x00, 0x00, 0x00, 0x00};
+            static uint8_t const invalid_ipv4[] = {0x00, 0x00, 0x00, 0x00};
 
             if (memcmp(tcp_start->connection.ip.address.ipv4, invalid_ipv4, sizeof tcp_start->connection.ip.address.ipv4) == 0)
             {
@@ -83,7 +83,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
         }
         case CCAPI_IPV6:
         {
-            uint8_t const invalid_ipv6[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            static uint8_t const invalid_ipv6[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
             if (memcmp(tcp_start->connection.ip.address.ipv6, invalid_ipv6, sizeof tcp_start->connection.ip.address.ipv6) == 0)
             {
@@ -100,7 +100,7 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
     {
         case CCAPI_CONNECTION_LAN:
         {
-            uint8_t const invalid_mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+            static uint8_t const invalid_mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
             if (memcmp(invalid_mac, tcp_start->connection.info.lan.mac_address, sizeof invalid_mac) == 0)
             {
@@ -144,7 +144,7 @@ static ccapi_bool_t copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_
     ccapi_bool_t success = CCAPI_TRUE;
 
     UNUSED_ARGUMENT(error);
-    switch(source->connection.ip.type)
+    switch (source->connection.ip.type)
     {
         case CCAPI_IPV4:
         {
@@ -268,8 +268,9 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
 
     {
-        connector_transport_t transport = connector_transport_tcp;
+        connector_transport_t const transport = connector_transport_tcp;
         connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+
         switch (connector_status)
         {
             case connector_success:

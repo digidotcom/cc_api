@@ -57,7 +57,7 @@ typedef struct {
 #define OS_SYNCR_ACQUIRE_INFINITE           ((unsigned long)-1)
 
 typedef struct {
-    void * syncr_object;
+    void CONST * syncr_object;
 } ccimp_os_syncr_create_t;
 
 typedef struct {

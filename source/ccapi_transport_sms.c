@@ -14,7 +14,7 @@
 #include "ccapi/ccapi_transport_sms.h"
 
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
-static ccapi_bool_t valid_malloc(void * ptr, ccapi_sms_start_error_t * const error)
+static ccapi_bool_t valid_malloc(void * const ptr, ccapi_sms_start_error_t * const error)
 {
     if (ptr == NULL)
     {
@@ -30,8 +30,8 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_sms_start_error_t * const err
 static ccapi_bool_t valid_phone(ccapi_sms_info_t const * const sms_start, ccapi_sms_start_error_t * const error)
 {
     ccapi_bool_t success = CCAPI_TRUE;
-    const char *valid_char = " 0123456789-+#";
-    int i =0;
+    static char const * const valid_char = " 0123456789-+#";
+    int i = 0;
 
     if (sms_start->cloud_config.phone_number == NULL || sms_start->cloud_config.phone_number[0] == '\0')
     {
@@ -106,6 +106,7 @@ done:
 ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_data, ccapi_sms_info_t const * const sms_start)
 {
     ccapi_sms_start_error_t error = CCAPI_SMS_START_ERROR_NONE;
+
     UNUSED_ARGUMENT(sms_start);
 
     if (!CCAPI_RUNNING(ccapi_data))
@@ -153,7 +154,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
     ccapi_data->transport_sms.started = CCAPI_FALSE;
 
     {
-        connector_transport_t transport = connector_transport_sms;
+        connector_transport_t const transport = connector_transport_sms;
         connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
         switch (connector_status)
         {

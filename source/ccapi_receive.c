@@ -54,7 +54,7 @@ done:
     return error;
 }
 
-static ccapi_receive_target_t * create_target_entry(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
+static ccapi_receive_target_t * create_target_entry(char const * const target, ccapi_receive_data_cb_t const data_cb, ccapi_receive_status_cb_t const status_cb, size_t const max_request_size)
 {
     ccapi_receive_target_t * new_target_entry = ccapi_malloc(sizeof *new_target_entry);
 
@@ -74,11 +74,12 @@ static ccapi_receive_target_t * create_target_entry(char const * const target, c
     new_target_entry->user_callbacks.status_cb = status_cb;
     new_target_entry->max_request_size = max_request_size;
     new_target_entry->next = NULL;
+
 done:
     return new_target_entry;
 }
 
-ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data, char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
+ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data, char const * const target, ccapi_receive_data_cb_t const data_cb, ccapi_receive_status_cb_t const status_cb, size_t const max_request_size)
 {
     ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
     ccapi_receive_target_t * new_target_entry;
@@ -134,7 +135,7 @@ ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccap
     ccapi_bool_t finished = CCAPI_FALSE;
 
     do {
-        ccapi_receive_target_t * current_target = *p_target;
+        ccapi_receive_target_t * const current_target = *p_target;
 
         if (current_target != NULL)
         {
@@ -202,8 +203,8 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
     }
 
     {
-        ccapi_receive_target_t * target_entry = *p_target;
-        ccapi_receive_target_t * next_target_entry = target_entry->next;
+        ccapi_receive_target_t * const target_entry = *p_target;
+        ccapi_receive_target_t * const next_target_entry = target_entry->next;
 
         ccapi_free(target_entry->target);
         ccapi_free(target_entry);
@@ -224,7 +225,7 @@ done:
     return error;
 }
 
-ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t max_request_size)
+ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t const data_cb, ccapi_receive_status_cb_t const status_cb, size_t const max_request_size)
 {
     return ccxapi_receive_add_target(ccapi_data_single_instance, target, data_cb, status_cb, max_request_size);
 }

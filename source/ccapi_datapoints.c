@@ -108,7 +108,7 @@ static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
     }
 }
 
-static void clear_collection(ccapi_dp_collection_t * const dp_collection)
+static void free_collection(ccapi_dp_collection_t * const dp_collection)
 {
     if (dp_collection->ccapi_data_stream_list != NULL)
     {
@@ -150,7 +150,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             goto done;
     }
 
-    clear_collection(dp_collection);
+    free_collection(dp_collection);
 
     ccimp_status = ccapi_syncr_release(dp_collection->syncr);
     switch (ccimp_status)
@@ -389,13 +389,13 @@ done:
 
 static ccapi_dp_error_t get_arg_list_from_format_string(char const * const format_string, ccapi_dp_argument_t * * const arg_list, unsigned int * const arg_list_count)
 {
-    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    static char const * const keyword_separator = " ";
     char const * keyword;
-    char const * const keyword_separator = " ";
     char * format_string_copy;
     char * next_keyword = NULL;
     ccapi_dp_argument_t temp_arg_list[4] = {CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID, CCAPI_DP_ARG_INVALID};
     unsigned int temp_arg_list_count = 0;
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
 
     format_string_copy = ccapi_strdup(format_string);
     if (format_string_copy == NULL)
@@ -485,7 +485,7 @@ done:
     return error;
 }
 
-static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t * list, unsigned int count)
+static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t const * const list, unsigned int const count)
 {
     connector_data_point_type_t type;
     ccapi_bool_t found = CCAPI_FALSE;
@@ -803,10 +803,10 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_t * 
 
 static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_stream_t * const data_stream, va_list arg_list, connector_data_point_t * * const new_data_point)
 {
-    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
-    ccapi_dp_argument_t * arg = data_stream->arguments.list;
+    ccapi_dp_argument_t * const arg = data_stream->arguments.list;
     unsigned int const arg_count =  data_stream->arguments.count;
-    connector_data_point_t * ccfsm_datapoint = ccapi_malloc(sizeof *ccfsm_datapoint);
+    connector_data_point_t * const ccfsm_datapoint = ccapi_malloc(sizeof *ccfsm_datapoint);
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     unsigned int i;
 
     if (ccfsm_datapoint == NULL)
@@ -842,7 +842,8 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
 
             case CCAPI_DP_ARG_DATA_FLOAT:
             {
-                double aux = va_arg(arg_list, double); /* ‘float’ is promoted to ‘double’ when passed through ‘...’ */
+                double const aux = va_arg(arg_list, double); /* ‘float’ is promoted to ‘double’ when passed through ‘...’ */
+
                 ccfsm_datapoint->data.element.native.float_value = (float)aux;
                 break;
             }
@@ -856,6 +857,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
             case CCAPI_DP_ARG_DATA_STRING:
             {
                 char const * const string_dp = va_arg(arg_list, char const * const);
+
                 ccfsm_datapoint->data.element.native.string_value = ccapi_strdup(string_dp);
 
                 if (ccfsm_datapoint->data.element.native.string_value == NULL)
@@ -869,7 +871,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
 
             case CCAPI_DP_ARG_TIME_EPOCH:
             {
-                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+                ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
                 ccfsm_datapoint->time.source = connector_time_local_epoch_fractional;
                 ccfsm_datapoint->time.value.since_epoch_fractional.seconds = timestamp->epoch.seconds;
@@ -879,7 +881,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
 
             case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
             {
-                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+                ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
                 ccfsm_datapoint->time.source = connector_time_local_epoch_whole;
                 ccfsm_datapoint->time.value.since_epoch_whole.milliseconds = timestamp->epoch_msec;
@@ -888,7 +890,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
 
             case CCAPI_DP_ARG_TIME_ISO8601:
             {
-                ccapi_timestamp_t * timestamp = va_arg(arg_list, ccapi_timestamp_t *);
+                ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
                 ccfsm_datapoint->time.source = connector_time_local_iso8601;
                 ccfsm_datapoint->time.value.iso8601_string = ccapi_strdup(timestamp->iso8601);
@@ -903,7 +905,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
             }
             case CCAPI_DP_ARG_LOC:
             {
-                ccapi_location_t * location = va_arg(arg_list, ccapi_location_t *);
+                ccapi_location_t const * const location = va_arg(arg_list, ccapi_location_t *);
 
                 ccfsm_datapoint->location.type = connector_location_type_native;
                 ccfsm_datapoint->location.value.native.latitude = location->latitude;
@@ -1024,7 +1026,7 @@ static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_co
     while (current_data_stream != NULL)
     {
         connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
-        ccapi_dp_data_stream_t * const next_data_stream = current_data_stream->next;
+        ccapi_dp_data_stream_t const * const next_data_stream = current_data_stream->next;
 
         if (next_data_stream != NULL)
         {
@@ -1037,7 +1039,7 @@ static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_co
     }
 }
 
-static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
+static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t const with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
     ccapi_bool_t * p_transport_started = NULL;
@@ -1129,7 +1131,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         {
-            ccimp_status_t ccimp_status = ccapi_syncr_acquire(transaction_info->syncr);
+            ccimp_status_t const ccimp_status = ccapi_syncr_acquire(transaction_info->syncr);
 
             switch (ccimp_status)
             {
@@ -1176,22 +1178,22 @@ done:
     return error;
 }
 
-ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
+ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection)
 {
     return send_collection(ccapi_data, transport, dp_collection, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
 }
 
-ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     return send_collection(ccapi_data, transport, dp_collection, CCAPI_TRUE, timeout, hint);
 }
 
-ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection)
+ccapi_dp_error_t ccapi_dp_send_collection(ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection)
 {
     return ccxapi_dp_send_collection(ccapi_data_single_instance, transport, dp_collection);
 }
 
-ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     return ccxapi_dp_send_collection_with_reply(ccapi_data_single_instance, transport, dp_collection , timeout, hint);
 }

@@ -14,7 +14,8 @@
 #include "ccapi/ccapi_transport_udp.h"
 
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
-static ccapi_bool_t valid_malloc(void * ptr, ccapi_udp_start_error_t * const error)
+
+static ccapi_bool_t valid_malloc(void * const ptr, ccapi_udp_start_error_t * const error)
 {
     if (ptr == NULL)
     {
@@ -29,7 +30,6 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_udp_start_error_t * const err
 
 static void copy_ccapi_udp_info_t_structure(ccapi_udp_info_t * const dest, ccapi_udp_info_t const * const source)
 {
-
     *dest = *source; /* Strings and pointers to buffer need to be copied manually to allocated spaces. */
 
     if (dest->limit.max_sessions == 0)
@@ -75,8 +75,9 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
     ccapi_data->transport_udp.started = CCAPI_FALSE;
 
     {
-        connector_transport_t transport = connector_transport_udp;
+        connector_transport_t const transport = connector_transport_udp;
         connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+
         switch (connector_status)
         {
             case connector_success:

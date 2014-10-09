@@ -162,7 +162,7 @@ done:
     return error;
 }
 
-ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int virtual_dir_length)
+ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data_t * const ccapi_data, char const * const virtual_dir, unsigned int const virtual_dir_length)
 {
     ccapi_fs_virtual_dir_t * * p_dir_entry = &ccapi_data->service.file_system.virtual_dir_list;
     ccapi_bool_t finished = CCAPI_FALSE;
@@ -236,8 +236,8 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
     }
 
     {
-        ccapi_fs_virtual_dir_t * next_dir_entry = (*p_dir_entry)->next;
-        ccapi_fs_virtual_dir_t * dir_entry = *p_dir_entry;
+        ccapi_fs_virtual_dir_t * const next_dir_entry = (*p_dir_entry)->next;
+        ccapi_fs_virtual_dir_t * const dir_entry = *p_dir_entry;
 
         ccapi_free(dir_entry->local_dir);
         ccapi_free(dir_entry->virtual_dir);

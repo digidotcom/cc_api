@@ -26,7 +26,7 @@ typedef struct {
     ccapi_fs_virtual_dir_t * dir_entry;
 } ccapi_fs_virtual_rootdir_listing_handle_t;
 
-static ccimp_fs_seek_origin_t ccimp_seek_origin_from_ccfsm_seek_origin(connector_file_system_seek_origin_t ccfsm_origin)
+static ccimp_fs_seek_origin_t ccimp_seek_origin_from_ccfsm_seek_origin(connector_file_system_seek_origin_t const ccfsm_origin)
 {
     ccimp_fs_seek_origin_t ccimp_fs_seek = CCIMP_SEEK_CUR;
 
@@ -46,7 +46,7 @@ static ccimp_fs_seek_origin_t ccimp_seek_origin_from_ccfsm_seek_origin(connector
     return ccimp_fs_seek;
 }
 
-static connector_file_system_file_type_t ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_fs_dir_entry_type_t ccimp_entry_type)
+static connector_file_system_file_type_t ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_fs_dir_entry_type_t const ccimp_entry_type)
 {
     connector_file_system_file_type_t ccfsm_file_type = connector_file_system_file_type_none;
 
@@ -66,7 +66,7 @@ static connector_file_system_file_type_t ccfsm_file_system_file_type_from_ccimp_
     return ccfsm_file_type;
 }
 
-static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_fs_hash_alg_t ccimp_hash_alg)
+static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_fs_hash_alg_t const ccimp_hash_alg)
 {
     connector_file_system_hash_algorithm_t ccfsm_hash_algorithm = connector_file_system_hash_none;
 
@@ -89,7 +89,7 @@ static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_f
     return ccfsm_hash_algorithm;
 }
 
-static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(connector_file_system_hash_algorithm_t ccimp_hash_alg)
+static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(connector_file_system_hash_algorithm_t const ccimp_hash_alg)
 {
     ccimp_fs_hash_alg_t ccimp_hash_algorithm;
 
@@ -112,7 +112,7 @@ static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorit
     return ccimp_hash_algorithm;
 }
 
-static connector_file_system_error_t ccfsm_file_system_error_status_from_ccimp_fs_error(ccimp_fs_error_t ccimp_fs_error)
+static connector_file_system_error_t ccfsm_file_system_error_status_from_ccimp_fs_error(ccimp_fs_error_t const ccimp_fs_error)
 {
     connector_file_system_error_t ccfsm_fs_error = connector_file_system_unspec_error;
 
@@ -143,7 +143,7 @@ static connector_file_system_error_t ccfsm_file_system_error_status_from_ccimp_f
     return ccfsm_fs_error;
 }
 
-static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error(connector_session_error_t ccfsm_session_error)
+static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error(connector_session_error_t const ccfsm_session_error)
 {
     ccimp_session_error_status_t cccimp_session_error;
 
@@ -212,7 +212,7 @@ static char const * get_path_without_virtual_dir(char const * const full_path)
     return c;
 }
 
-static char const * get_local_path_from_cloud_path(ccapi_data_t * ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
+static char const * get_local_path_from_cloud_path(ccapi_data_t * const ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
 {
     ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
     char const * local_path = NULL;
@@ -255,12 +255,12 @@ done:
     return local_path;
 }
 
-static void free_local_path(char const * local_path)
+static void free_local_path(char const * const local_path)
 {
     ccapi_free((void *)local_path);
 }
 
-static void ccapi_fs_set_internal_error(ccapi_fs_internal_error_t internal_error, ccimp_fs_errnum_t * const p_ccfsm_errnum)
+static void ccapi_fs_set_internal_error(ccapi_fs_internal_error_t const internal_error, ccimp_fs_errnum_t * const p_ccfsm_errnum)
 {
     ccapi_fs_error_handle_t * const error_handle = ccapi_malloc(sizeof *error_handle);
 
@@ -272,7 +272,7 @@ done:
     return;
 }
 
-static void ccapi_fs_set_ccimp_error(ccimp_fs_errnum_t errnum, ccimp_fs_errnum_t * const p_ccfsm_errnum)
+static void ccapi_fs_set_ccimp_error(ccimp_fs_errnum_t const errnum, ccimp_fs_errnum_t * const p_ccfsm_errnum)
 {
     ccapi_fs_error_handle_t * const error_handle = ccapi_malloc(sizeof *error_handle);
 
@@ -357,7 +357,7 @@ static ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, connec
     {
         case CCIMP_STATUS_OK:
         {
-            ccapi_fs_file_handle_t * ccapi_fs_handle = ccapi_malloc(sizeof *ccapi_fs_handle);
+            ccapi_fs_file_handle_t * const ccapi_fs_handle = ccapi_malloc(sizeof *ccapi_fs_handle);
 
             ASSERT_MSG_GOTO(ccapi_fs_handle != NULL, done);
             ccapi_fs_handle->file_path = ccapi_strdup(ccimp_open_data.path);
@@ -388,7 +388,7 @@ static ccimp_status_t ccapi_fs_file_read(ccapi_data_t * const ccapi_data, connec
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_file_read_t ccimp_read_data;
-    ccapi_fs_file_handle_t * ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_read_data->handle;
+    ccapi_fs_file_handle_t const * const ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_read_data->handle;
 
     ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_read_data.bytes_used = 0;
@@ -419,7 +419,7 @@ static ccimp_status_t ccapi_fs_file_write(ccapi_data_t * const ccapi_data, conne
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_file_write_t ccimp_write_data;
-    ccapi_fs_file_handle_t * ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_write_data->handle;
+    ccapi_fs_file_handle_t const * const ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_write_data->handle;
 
     ccimp_write_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_write_data.bytes_used = 0;
@@ -450,7 +450,7 @@ static ccimp_status_t ccapi_fs_file_seek(ccapi_data_t * const ccapi_data, connec
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_file_seek_t ccimp_seek_data;
-    ccapi_fs_file_handle_t * ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_seek_data->handle;
+    ccapi_fs_file_handle_t const * const ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_seek_data->handle;
 
     ccimp_seek_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_seek_data.handle = ccapi_fs_handle->ccimp_handle;
@@ -481,7 +481,7 @@ static ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, conne
 {
     ccimp_status_t ccimp_status;
     ccimp_fs_file_close_t ccimp_close_data;
-    ccapi_fs_file_handle_t * ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_close_data->handle;
+    ccapi_fs_file_handle_t const * const ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_close_data->handle;
 
     ccimp_close_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_close_data.handle = ccapi_fs_handle->ccimp_handle;
@@ -512,7 +512,7 @@ static ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, conne
         {
             ccapi_fs_set_ccimp_error(ccimp_close_data.errnum, &ccfsm_close_data->errnum);
             ccapi_free(ccapi_fs_handle->file_path);
-            ccapi_free(ccapi_fs_handle);
+            ccapi_free((void*)ccapi_fs_handle);
             break;
         }
         case CCIMP_STATUS_BUSY:
@@ -528,7 +528,7 @@ static ccimp_status_t ccapi_fs_file_truncate(ccapi_data_t * const ccapi_data, co
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_file_truncate_t ccimp_truncate_data;
-    ccapi_fs_file_handle_t * ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_truncate_data->handle;
+    ccapi_fs_file_handle_t const * const ccapi_fs_handle = (ccapi_fs_file_handle_t *)ccfsm_truncate_data->handle;
 
     ccimp_truncate_data.errnum = (ccimp_fs_errnum_t)NULL;
     ccimp_truncate_data.handle = ccapi_fs_handle->ccimp_handle;
@@ -552,7 +552,7 @@ static ccimp_status_t ccapi_fs_file_truncate(ccapi_data_t * const ccapi_data, co
     return ccimp_status;
 }
 
-static ccimp_status_t ccapi_fs_file_remove(ccapi_data_t * const ccapi_data, connector_file_system_remove_t * ccfsm_remove_data)
+static ccimp_status_t ccapi_fs_file_remove(ccapi_data_t * const ccapi_data, connector_file_system_remove_t * const ccfsm_remove_data)
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_file_remove_t ccimp_remove_data;
@@ -688,7 +688,7 @@ done:
     return ccimp_status;
 }
 
-static ccimp_status_t ccapi_fs_dir_read_entry(ccapi_data_t * const ccapi_data, connector_file_system_readdir_t * ccfsm_dir_read_entry_data)
+static ccimp_status_t ccapi_fs_dir_read_entry(ccapi_data_t * const ccapi_data, connector_file_system_readdir_t * const ccfsm_dir_read_entry_data)
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
@@ -836,7 +836,7 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
 
     if (ccapi_data->service.file_system.virtual_dir_list != NULL && strcmp(ccfsm_hash_status_data->path, CCAPI_FS_ROOT_PATH) == 0)
     {
-        ccapi_fs_virtual_rootdir_listing_handle_t * root_dir_listing_handle = malloc(sizeof *root_dir_listing_handle);
+        ccapi_fs_virtual_rootdir_listing_handle_t * const root_dir_listing_handle = malloc(sizeof *root_dir_listing_handle);
 
         ASSERT_MSG_GOTO(root_dir_listing_handle != NULL, done);
         root_dir_listing_handle->dir_entry = ccapi_data->service.file_system.virtual_dir_list;
@@ -996,7 +996,7 @@ static ccimp_status_t ccapi_fs_error_desc(ccapi_data_t * const ccapi_data, conne
     return ccimp_status;
 }
 
-static ccimp_status_t ccapi_fs_session_error(ccapi_data_t * const ccapi_data, connector_file_system_session_error_t * const ccfsm_session_error_data)
+static ccimp_status_t ccapi_fs_session_error(ccapi_data_t * const ccapi_data, connector_file_system_session_error_t const * const ccfsm_session_error_data)
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
     ccimp_fs_session_error_t ccimp_session_error_data;
@@ -1011,7 +1011,7 @@ static ccimp_status_t ccapi_fs_session_error(ccapi_data_t * const ccapi_data, co
     return ccimp_status;
 }
 
-connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data)
+connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t const filesystem_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
@@ -1037,6 +1037,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_open:
         {
             connector_file_system_open_t * const ccfsm_open_data = data;
+
             ccimp_status = ccapi_fs_file_open(ccapi_data, ccfsm_open_data);
             break;
         }
@@ -1044,6 +1045,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_read:
         {
             connector_file_system_read_t * const ccfsm_read_data = data;
+
             ccimp_status = ccapi_fs_file_read(ccapi_data, ccfsm_read_data);
             break;
         }
@@ -1051,6 +1053,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_write:
         {
             connector_file_system_write_t * const ccfsm_write_data = data;
+
             ccimp_status = ccapi_fs_file_write(ccapi_data, ccfsm_write_data);
             break;
         }
@@ -1058,6 +1061,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_lseek:
         {
             connector_file_system_lseek_t * const ccfsm_seek_data = data;
+
             ccimp_status = ccapi_fs_file_seek(ccapi_data, ccfsm_seek_data);
             break;
         }
@@ -1065,6 +1069,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_close:
         {
             connector_file_system_close_t * const ccfsm_close_data = data;
+
             ccimp_status = ccapi_fs_file_close(ccapi_data, ccfsm_close_data);
             break;
         }
@@ -1072,6 +1077,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_ftruncate:
         {
             connector_file_system_truncate_t * const ccfsm_truncate_data = data;
+
             ccimp_status = ccapi_fs_file_truncate(ccapi_data, ccfsm_truncate_data);
             break;
         }
@@ -1079,6 +1085,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_remove:
         {
             connector_file_system_remove_t * const ccfsm_remove_data = data;
+
             ccimp_status = ccapi_fs_file_remove(ccapi_data, ccfsm_remove_data);
             break;
         }
@@ -1086,6 +1093,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_opendir:
         {
             connector_file_system_opendir_t * const ccfsm_dir_open_data = data;
+
             ccimp_status = ccapi_fs_dir_open(ccapi_data, ccfsm_dir_open_data);
             break;
         }
@@ -1093,6 +1101,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_readdir:
         {
             connector_file_system_readdir_t * const ccfsm_dir_read_entry_data = data;
+
             ccimp_status = ccapi_fs_dir_read_entry(ccapi_data, ccfsm_dir_read_entry_data);
             break;
         }
@@ -1100,6 +1109,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_stat_dir_entry:
         {
             connector_file_system_stat_dir_entry_t * const ccfsm_dir_entry_status_data = data;
+
             ccimp_status = ccapi_fs_dir_entry_status(ccapi_data, ccfsm_dir_entry_status_data);
             break;
         }
@@ -1107,6 +1117,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_closedir:
         {
             connector_file_system_close_t * const ccfsm_dir_close_data = data;
+
             ccimp_status = ccapi_fs_dir_close(ccapi_data, ccfsm_dir_close_data);
             break;
         }
@@ -1114,6 +1125,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_stat:
         {
             connector_file_system_stat_t * const ccfsm_hash_status_data = data;
+
             ccimp_status = ccapi_fs_hash_status(ccapi_data, ccfsm_hash_status_data);
             break;
         }
@@ -1121,6 +1133,7 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_hash:
         {
             connector_file_system_hash_t * const ccfsm_hash_file_data = data;
+
             ccimp_status = ccapi_fs_hash_file(ccapi_data, ccfsm_hash_file_data);
             break;
         }
@@ -1128,13 +1141,14 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
         case connector_request_id_file_system_get_error:
         {
             connector_file_system_get_error_t * const ccfsm_error_desc_data = data;
+
             ccimp_status = ccapi_fs_error_desc(ccapi_data, ccfsm_error_desc_data);
             break;
         }
 
         case connector_request_id_file_system_session_error:
         {
-            connector_file_system_session_error_t * const ccfsm_session_error_data = data;
+            connector_file_system_session_error_t const * const ccfsm_session_error_data = data;
 
             ccimp_status = ccapi_fs_session_error(ccapi_data, ccfsm_session_error_data);
             break;
