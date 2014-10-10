@@ -28,8 +28,8 @@ typedef struct {
         uint8_t revision;
         uint8_t build;
     } version;
-    char const * description;
-    char const * filespec;
+    char * description;
+    char * filespec;
     size_t maximum_size;
     size_t chunk_size;
 } firmware_target_t;

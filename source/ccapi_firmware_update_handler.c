@@ -36,6 +36,26 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
         }
 
         case connector_request_id_firmware_info:
+        {
+            connector_firmware_info_t * const info_ptr = data;
+
+            ASSERT_MSG_GOTO(ccapi_data->config.firmware_supported == CCAPI_TRUE, done);
+
+            ASSERT_MSG_GOTO(info_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+
+            info_ptr->version.major = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.major;
+            info_ptr->version.minor = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.minor;
+            info_ptr->version.revision = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.revision;
+            info_ptr->version.build = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.build;
+
+            info_ptr->description = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].description;
+            info_ptr->filespec = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].filespec;
+           
+            connector_status = connector_callback_continue;
+
+            break;
+        }
+
         case connector_request_id_firmware_download_start:
         case connector_request_id_firmware_download_data:
         case connector_request_id_firmware_download_complete:
