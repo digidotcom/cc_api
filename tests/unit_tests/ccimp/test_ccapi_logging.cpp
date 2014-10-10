@@ -74,7 +74,7 @@ static void * thread_logging(void * argument)
     int buffer[BUF_SIZE];
     int i;
 
-    for(i= 0; i < BUF_SIZE; i++)
+    for (i=0; i < BUF_SIZE; i++)
         buffer[i]= i;
     
     ccapi_logging_print_buffer((char*)argument, buffer, BUF_SIZE);
@@ -104,7 +104,7 @@ TEST(test_ccapi_logging, testCcapiLoggingSyncr)
     char thread_str_pattern[] = "thread %d:";
     int i;
 
-    for(i= 0; i < NUM_THREADS; i++)
+    for (i=0; i < NUM_THREADS; i++)
     {
         thread_str[i]= (char*)malloc(sizeof(thread_str_pattern));
         sprintf(thread_str[i], thread_str_pattern, i);
@@ -112,7 +112,7 @@ TEST(test_ccapi_logging, testCcapiLoggingSyncr)
         thread_h[i] = create_thread_logging(thread_str[i]);
     }
 
-    for(i= 0; i < NUM_THREADS; i++)
+    for (i=0; i < NUM_THREADS; i++)
     {
         pthread_join(thread_h[i], NULL);
     }

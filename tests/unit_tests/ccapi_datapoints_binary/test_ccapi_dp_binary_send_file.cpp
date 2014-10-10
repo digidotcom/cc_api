@@ -139,7 +139,7 @@ TEST(test_ccapi_datapoint_binary_file_no_reply, testChunkSizeSmallBinary)
     static uint8_t data[TEST_SIZE];
     unsigned int i;
 
-    for( i=0 ; i < TEST_SIZE ; i++)
+    for (i=0 ; i < TEST_SIZE ; i++)
         data[i] = i;
 
     create_test_file(LOCAL_PATH, data, TEST_SIZE);

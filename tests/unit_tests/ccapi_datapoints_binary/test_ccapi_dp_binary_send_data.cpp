@@ -125,7 +125,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeSmallBinary)
     static uint8_t data[TEST_SIZE];
     unsigned int i;
 
-    for( i=0 ; i < TEST_SIZE ; i++)
+    for (i=0 ; i < TEST_SIZE ; i++)
         data[i] = i;
 
     mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
