@@ -118,6 +118,10 @@ typedef struct {
         struct {
             struct {
                 ccapi_bool_t update_started;
+                uint8_t * chuck_data;
+                uint32_t total_size;
+                uint32_t head_offset;
+                uint32_t bottom_offset;
             } service;
             struct {
                 firmware_target_t * list;

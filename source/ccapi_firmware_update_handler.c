@@ -16,6 +16,8 @@
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
 
+/* TODO: create a singe function to convert from CCAPI error to CCFSM error */
+
 static connector_callback_status_t ccapi_process_firmware_update_start(connector_firmware_download_start_t * const start_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
@@ -49,19 +51,97 @@ static connector_callback_status_t ccapi_process_firmware_update_start(connector
             case CCAPI_FIRMWARE_UPDATE_ERROR_NONE:
                 break;    
             case CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD:
+            case CCAPI_FIRMWARE_UPDATE_ERROR_INVALID_DATA: /* should not happen */
                 start_ptr->status = connector_firmware_status_download_denied;
                 break;    
         }
     } 
 
-    /* TODO: alloc chunk_size ? */
+    ccapi_data->service.firmware_update.service.chuck_data = ccapi_malloc(ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size);
+    if (ccapi_data->service.firmware_update.service.chuck_data == NULL)
+    {
+        start_ptr->status = connector_firmware_status_encountered_error;
+        goto done;
+    }
 
+    ccapi_data->service.firmware_update.service.total_size = start_ptr->code_size;
+    ccapi_data->service.firmware_update.service.head_offset = 0;
+    ccapi_data->service.firmware_update.service.bottom_offset = 0;
     ccapi_data->service.firmware_update.service.update_started = CCAPI_TRUE;
+    
 
 done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_firmware_update_data(connector_firmware_download_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_firmware_update_error_t ccapi_firmware_update_error;
+
+    ASSERT_MSG_GOTO(data_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+
+    connector_status = connector_callback_continue;
+    data_ptr->status = connector_firmware_status_success;
+
+    ccapi_logging_line("ccapi_process_firmware_update_data for target_number = '%d'", data_ptr->target_number);
+
+    if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
+    {
+        data_ptr->status = connector_firmware_status_device_error;
+        goto done;
+    }
+
+    {
+        const uint32_t chunk_size = ccapi_data->service.firmware_update.target.list[data_ptr->target_number].chunk_size;
+
+        /* Source */
+        uint8_t * source_data = (uint8_t *)data_ptr->image.data;
+        size_t source_bytes_remaining = data_ptr->image.bytes_used;
+
+        if (data_ptr->image.offset != ccapi_data->service.firmware_update.service.head_offset)
+        {
+            data_ptr->status = connector_firmware_status_invalid_offset;
+            goto done;
+        }
+
+        while (source_bytes_remaining)
+        {
+            const uint32_t room_in_chuck = ccapi_data->service.firmware_update.service.bottom_offset + chunk_size - ccapi_data->service.firmware_update.service.head_offset;
+            const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chuck ? room_in_chuck : source_bytes_remaining;
+            const uint32_t next_offset = ccapi_data->service.firmware_update.service.head_offset + bytes_to_copy;
+            const ccapi_bool_t last_chunk = next_offset == ccapi_data->service.firmware_update.service.total_size ? CCAPI_TRUE : CCAPI_FALSE;
+
+            memcpy(&ccapi_data->service.firmware_update.service.chuck_data[ccapi_data->service.firmware_update.service.head_offset % chunk_size ], source_data, bytes_to_copy);
+
+            source_bytes_remaining -= bytes_to_copy;
+            source_data += bytes_to_copy;
+
+            if ((next_offset - ccapi_data->service.firmware_update.service.bottom_offset) == chunk_size)
+            {
+                ccapi_firmware_update_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(data_ptr->target_number, 
+                                                                                                         ccapi_data->service.firmware_update.service.bottom_offset, 
+                                                                                                         ccapi_data->service.firmware_update.service.chuck_data, 
+                                                                                                         chunk_size, 
+                                                                                                         last_chunk);
+                switch (ccapi_firmware_update_error)
+                {
+                    case CCAPI_FIRMWARE_UPDATE_ERROR_NONE:
+                        break;    
+                    case CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD: /* should not happen */
+                    case CCAPI_FIRMWARE_UPDATE_ERROR_INVALID_DATA:
+                        data_ptr->status = connector_firmware_status_download_denied;
+                        break;    
+                }
+                ccapi_data->service.firmware_update.service.bottom_offset = next_offset;
+            }
+            ccapi_data->service.firmware_update.service.head_offset = next_offset;
+        }
+    } 
+
+done:
+    return connector_status;
+}
 
 connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_firmware_t const firmware_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
@@ -113,6 +193,14 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
         }
 
         case connector_request_id_firmware_download_data:
+        {
+            connector_firmware_download_data_t * const data_ptr = data;
+
+            connector_status = ccapi_process_firmware_update_data(data_ptr, ccapi_data);
+
+            break;
+        }
+
         case connector_request_id_firmware_download_complete:
         case connector_request_id_firmware_download_abort:
         case connector_request_id_firmware_target_reset:
