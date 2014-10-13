@@ -294,6 +294,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccapi_data->service.firmware_update.user_callbacks.data_cb = start->service.firmware->callback.data_cb;
             ccapi_data->service.firmware_update.user_callbacks.cancel_cb = start->service.firmware->callback.cancel_cb;
 
+            ccapi_data->service.firmware_update.service.update_started = CCAPI_FALSE;
             ccapi_data->config.firmware_supported = CCAPI_TRUE;
         }
         else

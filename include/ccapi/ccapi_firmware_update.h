@@ -14,7 +14,8 @@
 #define _CCAPI_FIRMWARE_UPDATE_H_
 
 typedef enum {
-    CCAPI_FIRMWARE_UPDATE_ERROR_NONE
+    CCAPI_FIRMWARE_UPDATE_ERROR_NONE,
+    CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD
 } ccapi_firmware_update_error_t;
 
 typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);

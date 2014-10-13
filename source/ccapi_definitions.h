@@ -117,6 +117,9 @@ typedef struct {
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
         struct {
             struct {
+                ccapi_bool_t update_started;
+            } service;
+            struct {
                 firmware_target_t * list;
                 uint8_t count;
             } target;

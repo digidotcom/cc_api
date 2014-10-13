@@ -82,6 +82,17 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK_EQUAL(fw_service.callback.data_cb, ccapi_data_single_instance->service.firmware_update.user_callbacks.data_cb);
     CHECK_EQUAL(fw_service.callback.cancel_cb, ccapi_data_single_instance->service.firmware_update.user_callbacks.cancel_cb);
 
+    /* TODO: Check 'maximum_size' and 'chunk_size' as it won't be checked in test_ccapi_firmware_update_init_callback */
+    {
+        unsigned char target;
+
+        for (target=0 ; target < firmware_count ; target++)
+        {
+            CHECK(ccapi_data_single_instance->service.firmware_update.target.list[target].maximum_size == firmware_list[target].maximum_size);
+            CHECK(ccapi_data_single_instance->service.firmware_update.target.list[target].chunk_size == firmware_list[target].chunk_size);
+        }
+    }
+
     CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_TRUE);
 
     CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_TRUE);
