@@ -19,6 +19,17 @@ static firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
+static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+{
+    (void)target;
+    (void)offset;
+    (void)data;
+    (void)size;
+    (void)last_chunk;
+
+    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+}
+
 TEST_GROUP(test_ccapi_firmware_update_init)
 {
     void setup()
@@ -32,7 +43,7 @@ TEST_GROUP(test_ccapi_firmware_update_init)
     }
 };
 
-TEST(test_ccapi_firmware_update_init, testBadtargetCount)
+TEST(test_ccapi_firmware_update_init, testBadDataCallback)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
@@ -44,6 +55,30 @@ TEST(test_ccapi_firmware_update_init, testBadtargetCount)
                                                      {
                                                          NULL, 
                                                          NULL, 
+                                                         NULL
+                                                     }
+                                                 };
+
+    th_fill_start_structure_with_good_parameters(&start);
+    start.service.firmware = &fw_service;
+
+    error = ccapi_start(&start);
+
+    CHECK(error == CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK);
+}
+
+TEST(test_ccapi_firmware_update_init, testBadTargetCount)
+{
+    ccapi_start_t start = {0};
+    ccapi_start_error_t error;
+    ccapi_firmware_update_service_t fw_service = {
+                                                     {
+                                                         firmware_list, 
+                                                         0
+                                                     }, 
+                                                     {
+                                                         NULL, 
+                                                         test_firmware_update_data_cb, 
                                                          NULL
                                                      }
                                                  };
@@ -67,7 +102,7 @@ TEST(test_ccapi_firmware_update_init, testBadtargetList)
                                                      }, 
                                                      {
                                                          NULL, 
-                                                         NULL, 
+                                                         test_firmware_update_data_cb, 
                                                          NULL
                                                      }
                                                  };
@@ -91,7 +126,7 @@ TEST(test_ccapi_firmware_update_init, testInitOk)
                                                      }, 
                                                      {
                                                          NULL, 
-                                                         NULL, 
+                                                         test_firmware_update_data_cb, 
                                                          NULL
                                                      }
                                                  };
@@ -117,7 +152,7 @@ TEST_GROUP(test_ccapi_firmware_update_init_callback)
                                                          }, 
                                                          {
                                                              NULL, 
-                                                             NULL, 
+                                                             test_firmware_update_data_cb, 
                                                              NULL
                                                          }
                                                      };

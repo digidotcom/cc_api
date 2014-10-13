@@ -19,6 +19,17 @@ static firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
+static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+{
+    (void)target;
+    (void)offset;
+    (void)data;
+    (void)size;
+    (void)last_chunk;
+
+    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+}
+
 static unsigned int ccapi_firmware_start_expected_target;
 static char const * ccapi_firmware_start_expected_filename;
 static size_t ccapi_firmware_start_expected_total_size;
@@ -47,7 +58,7 @@ TEST_GROUP(test_ccapi_firmware_update_start_no_callback)
                                                          }, 
                                                          {
                                                              NULL, 
-                                                             NULL, 
+                                                             test_firmware_update_data_cb, 
                                                              NULL
                                                          }
                                                      };
@@ -147,7 +158,7 @@ TEST_GROUP(test_ccapi_firmware_update_start_callback)
                                                          }, 
                                                          {
                                                              test_firmware_update_request_cb, 
-                                                             NULL, 
+                                                             test_firmware_update_data_cb, 
                                                              NULL
                                                          }
                                                      };

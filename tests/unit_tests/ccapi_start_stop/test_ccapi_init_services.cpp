@@ -27,6 +27,17 @@ static void test_receive_data_cb(char const * const target, ccapi_transport_t co
     (void)response_buffer_info;
 }
 
+static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+{
+    (void)target;
+    (void)offset;
+    (void)data;
+    (void)size;
+    (void)last_chunk;
+
+    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+}
+
 TEST_GROUP(test_ccapi_init_services)
 {
     void setup()
@@ -56,7 +67,7 @@ TEST(test_ccapi_init_services, testServicesSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
-    ccapi_firmware_update_service_t fw_service = {{firmware_list, firmware_count}, {NULL, NULL, NULL}};
+    ccapi_firmware_update_service_t fw_service = {{firmware_list, firmware_count}, {NULL, test_firmware_update_data_cb, NULL}};
     ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
 
     th_fill_start_structure_with_good_parameters(&start);
