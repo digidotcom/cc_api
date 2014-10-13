@@ -17,9 +17,9 @@ typedef enum {
     CCAPI_FIRMWARE_UPDATE_ERROR_NONE
 } ccapi_firmware_update_error_t;
 
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int target, char const * const filename, size_t const total_size);
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_data_cb_t)(unsigned int target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_cancel_cb_t)(unsigned int target);
+typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
+typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
+typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_cancel_cb_t)(unsigned int const target);
 
 typedef struct {
     struct {
