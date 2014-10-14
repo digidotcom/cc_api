@@ -153,7 +153,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataBadInitialOffset) /* TODO
     }
 
     connector_firmware_download_data.target_number = TEST_TARGET;
-    connector_firmware_download_data.image.offset = firmware_list[TEST_TARGET].chunk_size; /* second chuck_size block */
+    connector_firmware_download_data.image.offset = firmware_list[TEST_TARGET].chunk_size; /* second chunk_size block */
     connector_firmware_download_data.image.data = NULL;
     connector_firmware_download_data.image.bytes_used = firmware_list[TEST_TARGET].chunk_size;
 

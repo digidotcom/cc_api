@@ -57,8 +57,8 @@ static connector_callback_status_t ccapi_process_firmware_update_start(connector
         }
     } 
 
-    ccapi_data->service.firmware_update.service.chuck_data = ccapi_malloc(ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size);
-    if (ccapi_data->service.firmware_update.service.chuck_data == NULL)
+    ccapi_data->service.firmware_update.service.chunk_data = ccapi_malloc(ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size);
+    if (ccapi_data->service.firmware_update.service.chunk_data == NULL)
     {
         start_ptr->status = connector_firmware_status_encountered_error;
         goto done;
@@ -107,12 +107,12 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
         while (source_bytes_remaining)
         {
-            const uint32_t room_in_chuck = ccapi_data->service.firmware_update.service.bottom_offset + chunk_size - ccapi_data->service.firmware_update.service.head_offset;
-            const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chuck ? room_in_chuck : source_bytes_remaining;
+            const uint32_t room_in_chunk = ccapi_data->service.firmware_update.service.bottom_offset + chunk_size - ccapi_data->service.firmware_update.service.head_offset;
+            const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
             const uint32_t next_offset = ccapi_data->service.firmware_update.service.head_offset + bytes_to_copy;
             const ccapi_bool_t last_chunk = next_offset == ccapi_data->service.firmware_update.service.total_size ? CCAPI_TRUE : CCAPI_FALSE;
 
-            memcpy(&ccapi_data->service.firmware_update.service.chuck_data[ccapi_data->service.firmware_update.service.head_offset % chunk_size ], source_data, bytes_to_copy);
+            memcpy(&ccapi_data->service.firmware_update.service.chunk_data[ccapi_data->service.firmware_update.service.head_offset % chunk_size ], source_data, bytes_to_copy);
 
             source_bytes_remaining -= bytes_to_copy;
             source_data += bytes_to_copy;
@@ -121,7 +121,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
             {
                 ccapi_firmware_update_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(data_ptr->target_number, 
                                                                                                          ccapi_data->service.firmware_update.service.bottom_offset, 
-                                                                                                         ccapi_data->service.firmware_update.service.chuck_data, 
+                                                                                                         ccapi_data->service.firmware_update.service.chunk_data, 
                                                                                                          chunk_size, 
                                                                                                          last_chunk);
                 switch (ccapi_firmware_update_error)

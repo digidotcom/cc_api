@@ -118,7 +118,7 @@ typedef struct {
         struct {
             struct {
                 ccapi_bool_t update_started;
-                uint8_t * chuck_data;
+                uint8_t * chunk_data;
                 uint32_t total_size;
                 uint32_t head_offset;
                 uint32_t bottom_offset;
