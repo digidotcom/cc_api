@@ -65,7 +65,7 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     return reconnect;
 }
 
-FILE * fp;
+FILE * fp = NULL;
 
 static ccapi_fw_request_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
 {
@@ -105,10 +105,22 @@ static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const tar
 
     if (last_chunk)
 	{
-        fclose(fp);
+        if (fp != NULL)
+            fclose(fp);
     }
 
     return CCAPI_FW_DATA_ERROR_NONE;
+}
+
+static void test_firmware_update_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
+{
+
+    printf("test_firmware_update_cancel_cb for target='%d'. cancel_reason='%d'", target, cancel_reason);
+
+    if (fp != NULL)
+        fclose(fp);
+
+    return;
 }
 
 static ccapi_start_error_t app_start_ccapi(void)

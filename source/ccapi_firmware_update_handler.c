@@ -237,7 +237,35 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 
     ccapi_logging_line("ccapi_process_firmware_update_abort for target_number='%d'. status='%d'", abort_ptr->target_number, abort_ptr->status);
 
-/* TODO: callback !!!! */
+    if (ccapi_data->service.firmware_update.user_callbacks.cancel_cb != NULL)
+    {
+        ccapi_fw_cancel_error_t cancel_reason;
+
+        switch (abort_ptr->status)
+        {
+            case connector_firmware_status_user_abort:
+                cancel_reason = CCAPI_FW_CANCEL_USER_ABORT;
+                break;
+            case connector_firmware_status_device_error:
+                cancel_reason = CCAPI_FW_CANCEL_DEVICE_ERROR;
+                break;
+            case connector_firmware_status_invalid_offset:
+                cancel_reason = CCAPI_FW_CANCEL_INVALID_OFFSET;
+                break;
+            case connector_firmware_status_invalid_data:
+                cancel_reason = CCAPI_FW_CANCEL_INVALID_DATA;
+                break;
+            case connector_firmware_status_hardware_error:
+                cancel_reason = CCAPI_FW_CANCEL_HARDWARE_ERROR;
+                break;
+            default:
+                ASSERT(0);
+                connector_status = connector_callback_error;
+                goto done;
+        }
+
+        ccapi_data->service.firmware_update.user_callbacks.cancel_cb(abort_ptr->target_number, cancel_reason);
+    }
 
     free_and_stop_service(ccapi_data);
     
