@@ -31,10 +31,10 @@ static uint32_t ccapi_firmware_data_expected_offset[MAX_CALLBACK_CALLS];
 static void const * ccapi_firmware_data_expected_data[MAX_CALLBACK_CALLS];
 static size_t ccapi_firmware_data_expected_size[MAX_CALLBACK_CALLS];
 static ccapi_bool_t ccapi_firmware_data_expected_last_chunk[MAX_CALLBACK_CALLS];
-static ccapi_firmware_update_error_t ccapi_firmware_data_retval[MAX_CALLBACK_CALLS];
+static ccapi_fw_data_error_t ccapi_firmware_data_retval[MAX_CALLBACK_CALLS];
 static uint8_t ccapi_firmware_data_cb_called;
 
-static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     CHECK_EQUAL(ccapi_firmware_data_expected_target[ccapi_firmware_data_cb_called], target);
     CHECK_EQUAL(ccapi_firmware_data_expected_offset[ccapi_firmware_data_cb_called], offset);
@@ -92,7 +92,7 @@ TEST_GROUP(test_ccapi_firmware_update_data_callback)
                 ccapi_firmware_data_expected_size[i] = 0;
                 ccapi_firmware_data_expected_last_chunk[i] = CCAPI_FALSE;
 
-                ccapi_firmware_data_retval[i] = CCAPI_FIRMWARE_UPDATE_ERROR_INVALID_DATA;
+                ccapi_firmware_data_retval[i] = CCAPI_FW_DATA_ERROR_INVALID_DATA;
                 ccapi_firmware_data_cb_called = 0;
             }
         }
@@ -195,7 +195,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataTotalsizeEqualsChunksize)
     ccapi_firmware_data_expected_data[0] = &data[0];
     ccapi_firmware_data_expected_size[0] = connector_firmware_download_data.image.bytes_used;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_TRUE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -236,7 +236,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataTwoBlocksThatMachChuncks)
     ccapi_firmware_data_expected_data[0] = &data[0];
     ccapi_firmware_data_expected_size[0] = connector_firmware_download_data.image.bytes_used;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_FALSE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -258,7 +258,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataTwoBlocksThatMachChuncks)
     ccapi_firmware_data_expected_data[0] = &data[firmware_list[TEST_TARGET].chunk_size];
     ccapi_firmware_data_expected_size[0] = connector_firmware_download_data.image.bytes_used;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_TRUE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -313,7 +313,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataFourBlocksSmallerThanChun
     ccapi_firmware_data_expected_data[0] = &data[0];
     ccapi_firmware_data_expected_size[0] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_FALSE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -349,7 +349,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataFourBlocksSmallerThanChun
     ccapi_firmware_data_expected_data[0] = &data[firmware_list[TEST_TARGET].chunk_size];
     ccapi_firmware_data_expected_size[0] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_TRUE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -405,7 +405,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataThreeBlocksThatDoNotMatch
     ccapi_firmware_data_expected_data[0] = &data[0];
     ccapi_firmware_data_expected_size[0] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_FALSE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -427,7 +427,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataThreeBlocksThatDoNotMatch
     ccapi_firmware_data_expected_data[0] = &data[firmware_list[TEST_TARGET].chunk_size];
     ccapi_firmware_data_expected_size[0] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_TRUE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -468,14 +468,14 @@ TEST(test_ccapi_firmware_update_data_callback, testOneBlockIsTwoChunks)
     ccapi_firmware_data_expected_data[0] = &data[0];
     ccapi_firmware_data_expected_size[0] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[0] = CCAPI_FALSE;
-    ccapi_firmware_data_retval[0] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
 
     ccapi_firmware_data_expected_target[1] = connector_firmware_download_data.target_number;
     ccapi_firmware_data_expected_offset[1] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_data[1] = &data[firmware_list[TEST_TARGET].chunk_size];
     ccapi_firmware_data_expected_size[1] = firmware_list[TEST_TARGET].chunk_size;
     ccapi_firmware_data_expected_last_chunk[1] = CCAPI_TRUE;
-    ccapi_firmware_data_retval[1] = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_data_retval[1] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);

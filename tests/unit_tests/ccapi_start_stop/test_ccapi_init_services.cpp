@@ -27,7 +27,7 @@ static void test_receive_data_cb(char const * const target, ccapi_transport_t co
     (void)response_buffer_info;
 }
 
-static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     (void)target;
     (void)offset;
@@ -35,7 +35,7 @@ static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int c
     (void)size;
     (void)last_chunk;
 
-    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    return CCAPI_FW_DATA_ERROR_NONE;
 }
 
 TEST_GROUP(test_ccapi_init_services)

@@ -67,7 +67,7 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 
 FILE * fp;
 
-static ccapi_firmware_update_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
+static ccapi_fw_request_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
 {
     (void)target;
     (void)total_size;
@@ -76,13 +76,13 @@ static ccapi_firmware_update_error_t test_firmware_update_request_cb(unsigned in
     if (fp == NULL)
     {
         printf("Unable to create %s file\n", filename );
-        return CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD;
+        return CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR;
     }
 
-    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    return CCAPI_FW_REQUEST_ERROR_NONE;
 }
 
-static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     size_t const max_bytes_to_print = 4;
     size_t const bytes_to_print = (size > max_bytes_to_print) ? max_bytes_to_print : size;
@@ -108,7 +108,7 @@ static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int c
         fclose(fp);
     }
 
-    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    return CCAPI_FW_DATA_ERROR_NONE;
 }
 
 static ccapi_start_error_t app_start_ccapi(void)

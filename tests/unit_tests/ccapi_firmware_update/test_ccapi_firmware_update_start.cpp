@@ -19,7 +19,7 @@ static firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
-static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     (void)target;
     (void)offset;
@@ -27,16 +27,16 @@ static ccapi_firmware_update_error_t test_firmware_update_data_cb(unsigned int c
     (void)size;
     (void)last_chunk;
 
-    return CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    return CCAPI_FW_DATA_ERROR_NONE;
 }
 
 static unsigned int ccapi_firmware_start_expected_target;
 static char const * ccapi_firmware_start_expected_filename;
 static size_t ccapi_firmware_start_expected_total_size;
-static ccapi_firmware_update_error_t ccapi_firmware_start_retval;
+static ccapi_fw_request_error_t ccapi_firmware_start_retval;
 static ccapi_bool_t ccapi_firmware_start_cb_called;
 
-static ccapi_firmware_update_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
+static ccapi_fw_request_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
 {
     CHECK_EQUAL(ccapi_firmware_start_expected_target, target);
     STRCMP_EQUAL(ccapi_firmware_start_expected_filename, filename);
@@ -110,7 +110,7 @@ TEST(test_ccapi_firmware_update_start_no_callback, testStartAlreadyStarted)
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 
-    CHECK(connector_firmware_download_start.status == connector_firmware_status_device_error);
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_encountered_error);
 }
 
 TEST(test_ccapi_firmware_update_start_no_callback, testStartBadSize)
@@ -171,7 +171,7 @@ TEST_GROUP(test_ccapi_firmware_update_start_callback)
         ccapi_firmware_start_expected_target = (unsigned int)-1;
         ccapi_firmware_start_expected_filename = "";
         ccapi_firmware_start_expected_total_size = 0;
-        ccapi_firmware_start_retval = CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD;
+        ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED;
         ccapi_firmware_start_cb_called = CCAPI_FALSE;
 
         error = ccapi_start(&start);
@@ -187,7 +187,7 @@ TEST_GROUP(test_ccapi_firmware_update_start_callback)
 
 #define TEST_FILENAME ((char*)"test.bin")
 
-TEST(test_ccapi_firmware_update_start_callback, testStartRefuseDownload)
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_denied)
 {
     connector_request_id_t request;
     connector_firmware_download_start_t connector_firmware_download_start;
@@ -200,7 +200,7 @@ TEST(test_ccapi_firmware_update_start_callback, testStartRefuseDownload)
     ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
     ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
     ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
-    ccapi_firmware_start_retval = CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED;
 
     request.firmware_request = connector_request_id_firmware_download_start;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
@@ -209,6 +209,150 @@ TEST(test_ccapi_firmware_update_start_callback, testStartRefuseDownload)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
 
     CHECK(connector_firmware_download_start.status == connector_firmware_status_download_denied);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_invalid_size)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_SIZE;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_download_invalid_size);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_invalid_version)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_VERSION;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_download_invalid_version);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_unauthenticated)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_UNAUTHENTICATED;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_download_unauthenticated);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_not_allowed)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_NOT_ALLOWED;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_download_not_allowed);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_download_configured_to_reject)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_download_configured_to_reject);
+}
+
+TEST(test_ccapi_firmware_update_start_callback, testStart_encountered_error)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 0;
+    connector_firmware_download_start.filename = TEST_FILENAME;
+    connector_firmware_download_start.code_size = firmware_list[0].maximum_size;
+
+    ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
+    ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
+    ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_start_cb_called);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_encountered_error);
 }
 
 TEST(test_ccapi_firmware_update_start_callback, testStartOk)
@@ -224,7 +368,7 @@ TEST(test_ccapi_firmware_update_start_callback, testStartOk)
     ccapi_firmware_start_expected_target = connector_firmware_download_start.target_number;
     ccapi_firmware_start_expected_filename = connector_firmware_download_start.filename;
     ccapi_firmware_start_expected_total_size = connector_firmware_download_start.code_size;
-    ccapi_firmware_start_retval = CCAPI_FIRMWARE_UPDATE_ERROR_NONE;
+    ccapi_firmware_start_retval = CCAPI_FW_REQUEST_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_start;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);

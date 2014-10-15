@@ -13,15 +13,36 @@
 #ifndef _CCAPI_FIRMWARE_UPDATE_H_
 #define _CCAPI_FIRMWARE_UPDATE_H_
 
-typedef enum {
-    CCAPI_FIRMWARE_UPDATE_ERROR_NONE,
-    CCAPI_FIRMWARE_UPDATE_ERROR_REFUSE_DOWNLOAD,
-    CCAPI_FIRMWARE_UPDATE_ERROR_INVALID_DATA
-} ccapi_firmware_update_error_t;
+/* We enum here values with meaning for the cloud for the request operation */
+typedef enum {                                             /* TODO: Remove comments when moved to documentation */
+    CCAPI_FW_REQUEST_ERROR_NONE,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED,                /**< Callback denied firmware update */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_SIZE,          /**< Callback returns invalid size */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_VERSION,       /**< Callback returns invalid version */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_UNAUTHENTICATED,       /**< Device Cloud has not been authenticated */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_NOT_ALLOWED,           /**< Device Cloud is not allowed to provided updates */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT,  /**< Callback rejects firmware update */
+    CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR               /**< Callback encountered an error that precludes the firmware update */
+} ccapi_fw_request_error_t;
 
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
-typedef ccapi_firmware_update_error_t (*ccapi_firmware_update_cancel_cb_t)(unsigned int const target);
+/* Any error reported to cloud different than 0 have the same result: Failed with status[12]: Aborted By Target */
+typedef enum {
+    CCAPI_FW_DATA_ERROR_NONE,
+    CCAPI_FW_DATA_ERROR_INVALID_DATA
+} ccapi_fw_data_error_t;
+
+/* Values that cc_fsm will forward as a cause */
+typedef enum {                                      /* TODO: Remove comments when moved to documentation */
+    CCAPI_FW_CANCEL_USER_ABORT,                     /**< User aborted firmware update */
+    CCAPI_FW_CANCEL_DEVICE_ERROR,                   /**< Device or Device Cloud encountered an error in the download data */
+    CCAPI_FW_CANCEL_INVALID_OFFSET,                 /**< connector_request_id_firmware_download_data callback found invalid offset. */
+    CCAPI_FW_CANCEL_INVALID_DATA,                   /**< connector_request_id_firmware_download_data callback found invalid data block.*/
+    CCAPI_FW_CANCEL_HARDWARE_ERROR                  /**< Callback found permanent hardware error */
+} ccapi_fw_cancel_error_t;
+
+typedef ccapi_fw_request_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
+typedef ccapi_fw_data_error_t (*ccapi_firmware_update_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
+typedef void (*ccapi_firmware_update_cancel_cb_t)(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason);
 
 typedef struct {
     struct {
