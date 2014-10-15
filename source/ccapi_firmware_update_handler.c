@@ -117,6 +117,8 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
     {
+        ccapi_logging_line("update_data arrived when update was not started!");
+
         data_ptr->status = connector_firmware_status_device_error;
         goto done;
     }
@@ -184,7 +186,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
     {
-        ccapi_logging_line("update_complete arrived before all firmware data arrived!");
+        ccapi_logging_line("update_complete arrived when update was not started!");
 
         complete_ptr->status = connector_firmware_download_not_complete;
         goto done;
@@ -268,7 +270,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
     }
 
     free_and_stop_service(ccapi_data);
-    
+
 done:
     return connector_status;
 }

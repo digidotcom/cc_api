@@ -283,7 +283,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
             memcpy(ccapi_data->service.firmware_update.target.list, start->service.firmware->target.list, list_size);
 
-            for (target_num=0 ; target_num<start->service.firmware->target.count ; target_num++)
+            for (target_num = 0 ; target_num < start->service.firmware->target.count; target_num++)
             {
                 size_t const description_size = strlen(start->service.firmware->target.list[target_num].description) + 1;
                 size_t const filespec_size = strlen(start->service.firmware->target.list[target_num].filespec) + 1;
