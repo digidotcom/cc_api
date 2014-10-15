@@ -18,6 +18,17 @@
 
 /* TODO: create a singe function to convert from CCAPI error to CCFSM error */
 
+static void free_and_stop_service(ccapi_data_t * const ccapi_data)
+{
+    if (ccapi_data->service.firmware_update.service.chunk_data != NULL)
+    {
+        ccapi_free(ccapi_data->service.firmware_update.service.chunk_data);
+        ccapi_data->service.firmware_update.service.chunk_data = NULL;
+    }
+
+    ccapi_data->service.firmware_update.service.update_started = CCAPI_FALSE;
+}
+
 static connector_callback_status_t ccapi_process_firmware_update_start(connector_firmware_download_start_t * const start_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
@@ -195,13 +206,23 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
         }
     }
 
-    if (ccapi_data->service.firmware_update.service.chunk_data != NULL)
-    {
-        ccapi_free(ccapi_data->service.firmware_update.service.chunk_data);
-        ccapi_data->service.firmware_update.service.chunk_data = NULL;
-    }
+    free_and_stop_service(ccapi_data);
+    
+done:
+    return connector_status;
+}
 
-    ccapi_data->service.firmware_update.service.update_started = CCAPI_FALSE;
+static connector_callback_status_t ccapi_process_firmware_update_abort(connector_firmware_download_abort_t * const abort_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(abort_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+
+    connector_status = connector_callback_continue;
+
+    ccapi_logging_line("ccapi_process_firmware_update_abort for target_number = '%d'. status=%d", abort_ptr->target_number, abort_ptr->status);
+
+    free_and_stop_service(ccapi_data);
     
 done:
     return connector_status;
@@ -275,7 +296,11 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
         }
         case connector_request_id_firmware_download_abort:
         {
-            ASSERT(0);
+            connector_firmware_download_abort_t * const abort_ptr = data;
+
+            connector_status = ccapi_process_firmware_update_abort(abort_ptr, ccapi_data);
+
+            break;
         }
         case connector_request_id_firmware_target_reset:
         {
