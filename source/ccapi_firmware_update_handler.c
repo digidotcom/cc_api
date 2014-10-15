@@ -43,6 +43,8 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_TRUE)
     {
+        free_and_stop_service(ccapi_data);
+
         start_ptr->status = connector_firmware_status_encountered_error;
         goto done;
     }
@@ -233,7 +235,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 
     connector_status = connector_callback_continue;
 
-    ccapi_logging_line("ccapi_process_firmware_update_abort for target_number = '%d'. status=%d", abort_ptr->target_number, abort_ptr->status);
+    ccapi_logging_line("ccapi_process_firmware_update_abort for target_number='%d'. status='%d'", abort_ptr->target_number, abort_ptr->status);
 
 /* TODO: callback !!!! */
 
