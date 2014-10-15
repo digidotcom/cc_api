@@ -274,9 +274,23 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
             break;
         }
         case connector_request_id_firmware_download_abort:
-        case connector_request_id_firmware_target_reset:
+        {
             ASSERT(0);
+        }
+        case connector_request_id_firmware_target_reset:
+        {
+            ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+
+            ccapi_logging_line("ccapi_process_firmware_update_reset");
+
+            (void)data;
+
+            ccimp_status = ccimp_hal_reset();
+            connector_status = connector_callback_continue;
+            connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
+
             break;  
+        }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
