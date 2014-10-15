@@ -39,7 +39,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     connector_status = connector_callback_continue;
     start_ptr->status = connector_firmware_status_success;
 
-    ccapi_logging_line("ccapi_process_firmware_update_request for target_number = '%d'. code_size=%d", start_ptr->target_number, start_ptr->code_size);
+    ccapi_logging_line("ccapi_process_firmware_update_request for target_number='%d'. code_size='%d'", start_ptr->target_number, start_ptr->code_size);
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_TRUE)
     {
@@ -96,7 +96,6 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     ccapi_data->service.firmware_update.service.head_offset = 0;
     ccapi_data->service.firmware_update.service.bottom_offset = 0;
     ccapi_data->service.firmware_update.service.update_started = CCAPI_TRUE;
-    
 
 done:
     return connector_status;
@@ -112,7 +111,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_status = connector_callback_continue;
     data_ptr->status = connector_firmware_status_success;
 
-    /*ccapi_logging_line("ccapi_process_firmware_update_data for target_number = '%d'", data_ptr->target_number);*/
+    /*ccapi_logging_line("ccapi_process_firmware_update_data for target_number='%d'", data_ptr->target_number);*/
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
     {
@@ -123,7 +122,6 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     {
         const uint32_t chunk_size = ccapi_data->service.firmware_update.target.list[data_ptr->target_number].chunk_size;
 
-        /* Source */
         uint8_t * source_data = (uint8_t *)data_ptr->image.data;
         size_t source_bytes_remaining = data_ptr->image.bytes_used;
 
@@ -180,7 +178,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
     connector_status = connector_callback_continue;
     complete_ptr->status = connector_firmware_download_success;
 
-    ccapi_logging_line("ccapi_process_firmware_update_complete for target_number = '%d'", complete_ptr->target_number);
+    ccapi_logging_line("ccapi_process_firmware_update_complete for target_number='%d'", complete_ptr->target_number);
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
     {
@@ -263,7 +261,6 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             break;
         }
-
         case connector_request_id_firmware_info:
         {
             connector_firmware_info_t * const info_ptr = data;
@@ -284,7 +281,6 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             break;
         }
-
         case connector_request_id_firmware_download_start:
         {
             connector_firmware_download_start_t * const start_ptr = data;
@@ -293,7 +289,6 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             break;
         }
-
         case connector_request_id_firmware_download_data:
         {
             connector_firmware_download_data_t * const data_ptr = data;
@@ -302,7 +297,6 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             break;
         }
-
         case connector_request_id_firmware_download_complete:
         {
             connector_firmware_download_complete_t * const complete_ptr = data;
