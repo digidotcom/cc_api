@@ -28,7 +28,7 @@ static connector_callback_status_t ccapi_process_firmware_update_start(connector
     connector_status = connector_callback_continue;
     start_ptr->status = connector_firmware_status_success;
 
-    ccapi_logging_line("ccapi_process_firmware_update_start for target_number = '%d'", start_ptr->target_number);
+    ccapi_logging_line("ccapi_process_firmware_update_start for target_number = '%d'. code_size=%d", start_ptr->target_number, start_ptr->code_size);
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_TRUE)
     {
@@ -84,7 +84,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_status = connector_callback_continue;
     data_ptr->status = connector_firmware_status_success;
 
-    ccapi_logging_line("ccapi_process_firmware_update_data for target_number = '%d'", data_ptr->target_number);
+    /*ccapi_logging_line("ccapi_process_firmware_update_data for target_number = '%d'", data_ptr->target_number);*/
 
     if (ccapi_data->service.firmware_update.service.update_started == CCAPI_FALSE)
     {
@@ -107,12 +107,12 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
         while (source_bytes_remaining)
         {
-            const uint32_t room_in_chunk = ccapi_data->service.firmware_update.service.bottom_offset + chunk_size - ccapi_data->service.firmware_update.service.head_offset;
+            const uint32_t room_in_chunk = chunk_size - ccapi_data->service.firmware_update.service.head_offset % chunk_size;
             const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
             const uint32_t next_offset = ccapi_data->service.firmware_update.service.head_offset + bytes_to_copy;
             const ccapi_bool_t last_chunk = next_offset == ccapi_data->service.firmware_update.service.total_size ? CCAPI_TRUE : CCAPI_FALSE;
 
-            memcpy(&ccapi_data->service.firmware_update.service.chunk_data[ccapi_data->service.firmware_update.service.head_offset % chunk_size ], source_data, bytes_to_copy);
+            memcpy(&ccapi_data->service.firmware_update.service.chunk_data[ccapi_data->service.firmware_update.service.head_offset % chunk_size], source_data, bytes_to_copy);
 
             source_bytes_remaining -= bytes_to_copy;
             source_data += bytes_to_copy;
