@@ -111,7 +111,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_status = connector_callback_continue;
     data_ptr->status = connector_firmware_status_success;
 
-    ccapi_logging_line("ccapi_process_fw_data target_number=%d, offset=0x%x, size=%d", data_ptr->target_number, data_ptr->image.offset, data_ptr->image.bytes_used);
+    /* ccapi_logging_line("ccapi_process_fw_data target_number=%d, offset=0x%x, size=%d", data_ptr->target_number, data_ptr->image.offset, data_ptr->image.bytes_used); */
 
     if (ccapi_data->service.firmware_update.processing.update_started == CCAPI_FALSE)
     {

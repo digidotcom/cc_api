@@ -93,12 +93,12 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
 
     printf("app_fw_data_cb: offset = 0x%" PRIx32 "\n", offset);
 
-    if (busy++ < 5)
+    /* Return busy simulating a flash busy while writting */
+    if (busy++ % 3)
     {
         printf("busy\n");
         return CCAPI_FW_DATA_ERROR_BUSY;
     }
-    busy = 0;
 
     printf("data = ");
     for (i=0; i < bytes_to_print; i++)
