@@ -121,7 +121,7 @@ typedef struct {
                 uint8_t * chunk_data;
                 uint32_t total_size;
                 uint32_t head_offset;
-                uint32_t bottom_offset;
+                uint32_t tail_offset;
             } processing;
             struct {
                 firmware_target_t * list;

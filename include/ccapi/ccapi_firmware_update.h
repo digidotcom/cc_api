@@ -28,6 +28,7 @@ typedef enum {                                             /* TODO: Remove comme
 /* Any error reported to cloud different than 0 have the same result: Failed with status[12]: Aborted By Target */
 typedef enum {
     CCAPI_FW_DATA_ERROR_NONE,
+    CCAPI_FW_DATA_ERROR_BUSY,
     CCAPI_FW_DATA_ERROR_INVALID_DATA
 } ccapi_fw_data_error_t;
 

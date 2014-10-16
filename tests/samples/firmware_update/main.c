@@ -87,10 +87,18 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
     size_t const max_bytes_to_print = 4;
     size_t const bytes_to_print = (size > max_bytes_to_print) ? max_bytes_to_print : size;
     size_t i;
+    static unsigned int busy = 0;
 
     (void)target;
 
-    printf("offset = 0x%" PRIx32 "\n", offset);
+    printf("app_fw_data_cb: offset = 0x%" PRIx32 "\n", offset);
+
+    if (busy++ < 5)
+    {
+        printf("busy\n");
+        return CCAPI_FW_DATA_ERROR_BUSY;
+    }
+    busy = 0;
 
     printf("data = ");
     for (i=0; i < bytes_to_print; i++)

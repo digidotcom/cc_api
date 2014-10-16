@@ -93,8 +93,8 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     }
 
     ccapi_data->service.firmware_update.processing.total_size = start_ptr->code_size;
+    ccapi_data->service.firmware_update.processing.tail_offset = 0;
     ccapi_data->service.firmware_update.processing.head_offset = 0;
-    ccapi_data->service.firmware_update.processing.bottom_offset = 0;
     ccapi_data->service.firmware_update.processing.update_started = CCAPI_TRUE;
 
 done:
@@ -111,7 +111,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_status = connector_callback_continue;
     data_ptr->status = connector_firmware_status_success;
 
-    /*ccapi_logging_line("ccapi_process_firmware_update_data for target_number='%d'", data_ptr->target_number);*/
+    ccapi_logging_line("ccapi_process_fw_data target_number=%d, offset=0x%x, size=%d", data_ptr->target_number, data_ptr->image.offset, data_ptr->image.bytes_used);
 
     if (ccapi_data->service.firmware_update.processing.update_started == CCAPI_FALSE)
     {
@@ -121,51 +121,66 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
         goto done;
     }
 
+    if (data_ptr->image.offset != ccapi_data->service.firmware_update.processing.tail_offset)
+    {
+        ccapi_logging_line("Invalid offset: 0x%x != 0x%x !", data_ptr->image.offset, ccapi_data->service.firmware_update.processing.tail_offset);
+
+        data_ptr->status = connector_firmware_status_invalid_offset;
+        goto done;
+    }
+
     {
         const uint32_t chunk_size = ccapi_data->service.firmware_update.target.list[data_ptr->target_number].chunk_size;
+        uint32_t next_tail_offset = ccapi_data->service.firmware_update.processing.tail_offset;
+        uint32_t next_head_offset = 0;
+        ccapi_bool_t last_chunk;
 
         uint8_t * source_data = (uint8_t *)data_ptr->image.data;
         size_t source_bytes_remaining = data_ptr->image.bytes_used;
 
-        if (data_ptr->image.offset != ccapi_data->service.firmware_update.processing.head_offset)
-        {
-            data_ptr->status = connector_firmware_status_invalid_offset;
-            goto done;
-        }
-
-        /* TODO: Busy, double buffer ? */
-
         while (source_bytes_remaining)
         {
-            const uint32_t room_in_chunk = chunk_size - ccapi_data->service.firmware_update.processing.head_offset % chunk_size;
+            const uint32_t room_in_chunk = chunk_size - next_tail_offset % chunk_size;
             const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
-            const uint32_t next_offset = ccapi_data->service.firmware_update.processing.head_offset + bytes_to_copy;
-            const ccapi_bool_t last_chunk = next_offset == ccapi_data->service.firmware_update.processing.total_size ? CCAPI_TRUE : CCAPI_FALSE;
+            next_head_offset = next_tail_offset + bytes_to_copy;
+            last_chunk = next_head_offset == ccapi_data->service.firmware_update.processing.total_size ? CCAPI_TRUE : CCAPI_FALSE;
 
-            memcpy(&ccapi_data->service.firmware_update.processing.chunk_data[ccapi_data->service.firmware_update.processing.head_offset % chunk_size], source_data, bytes_to_copy);
+            ASSERT(bytes_to_copy);
+
+            if (next_tail_offset >= ccapi_data->service.firmware_update.processing.head_offset)
+            {
+                memcpy(&ccapi_data->service.firmware_update.processing.chunk_data[next_tail_offset % chunk_size], source_data, bytes_to_copy);
+
+                if (last_chunk || next_head_offset % chunk_size == 0)
+                {
+                    /*printf("head_offset=0x%x\n",ccapi_data->service.firmware_update.processing.head_offset);*/
+                    ccapi_fw_data_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(data_ptr->target_number, 
+                                                                                                     ccapi_data->service.firmware_update.processing.head_offset, 
+                                                                                                     ccapi_data->service.firmware_update.processing.chunk_data, 
+                                                                                                     next_head_offset - ccapi_data->service.firmware_update.processing.head_offset, 
+                                                                                                     last_chunk);
+                    switch (ccapi_fw_data_error)
+                    {
+                        case CCAPI_FW_DATA_ERROR_NONE:
+                            ccapi_data->service.firmware_update.processing.head_offset = next_head_offset;
+                            break;    
+                        case CCAPI_FW_DATA_ERROR_BUSY:
+                            connector_status = connector_callback_busy;
+                            goto done;
+                            break;    
+                        case CCAPI_FW_DATA_ERROR_INVALID_DATA:
+                            data_ptr->status = connector_firmware_status_invalid_data;
+                            goto done;
+                            break;    
+                    }
+                }
+            }
 
             source_bytes_remaining -= bytes_to_copy;
             source_data += bytes_to_copy;
-
-            if ((next_offset - ccapi_data->service.firmware_update.processing.bottom_offset) == chunk_size)
-            {
-                ccapi_fw_data_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(data_ptr->target_number, 
-                                                                                                 ccapi_data->service.firmware_update.processing.bottom_offset, 
-                                                                                                 ccapi_data->service.firmware_update.processing.chunk_data, 
-                                                                                                 chunk_size, 
-                                                                                                 last_chunk);
-                switch (ccapi_fw_data_error)
-                {
-                    case CCAPI_FW_DATA_ERROR_NONE:
-                        break;    
-                    case CCAPI_FW_DATA_ERROR_INVALID_DATA:
-                        data_ptr->status = connector_firmware_status_invalid_data;
-                        break;    
-                }
-                ccapi_data->service.firmware_update.processing.bottom_offset = next_offset;
-            }
-            ccapi_data->service.firmware_update.processing.head_offset = next_offset;
+            next_tail_offset += bytes_to_copy;
         }
+        ccapi_data->service.firmware_update.processing.tail_offset = next_head_offset;
     } 
 
 done:
@@ -175,7 +190,6 @@ done:
 static connector_callback_status_t ccapi_process_firmware_update_complete(connector_firmware_download_complete_t * const complete_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
-    ccapi_fw_data_error_t ccapi_fw_data_error;
 
     ASSERT_MSG_GOTO(complete_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 
@@ -192,38 +206,13 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
         goto done;
     }
 
-
     if (ccapi_data->service.firmware_update.processing.head_offset != ccapi_data->service.firmware_update.processing.total_size)
     {
         ccapi_logging_line("update_complete arrived before all firmware data arrived!");
 
         complete_ptr->status = connector_firmware_download_not_complete;
-        goto free;
     }
 
-    {
-        const uint32_t chunk_size = ccapi_data->service.firmware_update.target.list[complete_ptr->target_number].chunk_size;
-        const uint32_t remaining_bytes = ccapi_data->service.firmware_update.processing.head_offset % chunk_size;
-
-        if (remaining_bytes)
-        {
-            ccapi_fw_data_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(complete_ptr->target_number, 
-                                                                                             ccapi_data->service.firmware_update.processing.bottom_offset, 
-                                                                                             ccapi_data->service.firmware_update.processing.chunk_data, 
-                                                                                             remaining_bytes,
-                                                                                             CCAPI_TRUE);
-            switch (ccapi_fw_data_error)
-            {
-                case CCAPI_FW_DATA_ERROR_NONE:
-                    break;    
-                case CCAPI_FW_DATA_ERROR_INVALID_DATA:
-                    complete_ptr->status = connector_firmware_status_invalid_data;
-                    break;    
-            }
-        }
-    }
-
-free:
     free_and_stop_service(ccapi_data);
     
 done:
