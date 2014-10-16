@@ -16,8 +16,6 @@
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
 
-/* TODO: create a singe function to convert from CCAPI error to CCFSM error */
-
 static void free_and_stop_service(ccapi_data_t * const ccapi_data)
 {
     if (ccapi_data->service.firmware_update.processing.chunk_data != NULL)

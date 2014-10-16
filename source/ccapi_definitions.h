@@ -128,9 +128,9 @@ typedef struct {
                 uint8_t count;
             } target;
             struct {
-                ccapi_firmware_update_request_cb_t request_cb;
-                ccapi_firmware_update_data_cb_t data_cb;
-                ccapi_firmware_update_cancel_cb_t cancel_cb;
+                ccapi_fw_request_cb_t request_cb;
+                ccapi_fw_data_cb_t data_cb;
+                ccapi_fw_cancel_cb_t cancel_cb;
             } user_callbacks;
         } firmware_update;
 #endif

@@ -19,7 +19,7 @@ static firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
-static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     (void)target;
     (void)offset;
@@ -30,7 +30,7 @@ static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const tar
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 
-TEST_GROUP(test_ccapi_firmware_update_init)
+TEST_GROUP(test_ccapi_fw_init)
 {
     void setup()
     {
@@ -43,21 +43,21 @@ TEST_GROUP(test_ccapi_firmware_update_init)
     }
 };
 
-TEST(test_ccapi_firmware_update_init, testBadDataCallback)
+TEST(test_ccapi_fw_init, testBadDataCallback)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_firmware_update_service_t fw_service = {
-                                                     {
-                                                         firmware_list, 
-                                                         0
-                                                     }, 
-                                                     {
-                                                         NULL, 
-                                                         NULL, 
-                                                         NULL
-                                                     }
-                                                 };
+    ccapi_fw_service_t fw_service = {
+                                        {
+                                            firmware_list, 
+                                            0
+                                        }, 
+                                        {
+                                            NULL, 
+                                            NULL, 
+                                            NULL
+                                        }
+                                   };
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.firmware = &fw_service;
@@ -67,21 +67,21 @@ TEST(test_ccapi_firmware_update_init, testBadDataCallback)
     CHECK(error == CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK);
 }
 
-TEST(test_ccapi_firmware_update_init, testBadTargetCount)
+TEST(test_ccapi_fw_init, testBadTargetCount)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_firmware_update_service_t fw_service = {
-                                                     {
-                                                         firmware_list, 
-                                                         0
-                                                     }, 
-                                                     {
-                                                         NULL, 
-                                                         test_firmware_update_data_cb, 
-                                                         NULL
-                                                     }
-                                                 };
+    ccapi_fw_service_t fw_service = {
+                                        {
+                                            firmware_list, 
+                                            0
+                                        }, 
+                                        {
+                                            NULL, 
+                                            test_fw_data_cb, 
+                                            NULL
+                                        }
+                                    };
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.firmware = &fw_service;
@@ -91,21 +91,21 @@ TEST(test_ccapi_firmware_update_init, testBadTargetCount)
     CHECK(error == CCAPI_START_ERROR_INVALID_FIRMWARE_INFO);
 }
 
-TEST(test_ccapi_firmware_update_init, testBadtargetList)
+TEST(test_ccapi_fw_init, testBadtargetList)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_firmware_update_service_t fw_service = {
-                                                     {
-                                                         NULL, 
-                                                         firmware_count
-                                                     }, 
-                                                     {
-                                                         NULL, 
-                                                         test_firmware_update_data_cb, 
-                                                         NULL
-                                                     }
-                                                 };
+    ccapi_fw_service_t fw_service = {
+                                        {
+                                            NULL, 
+                                            firmware_count
+                                        }, 
+                                        {
+                                            NULL, 
+                                            test_fw_data_cb, 
+                                            NULL
+                                        }
+                                    };
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.firmware = &fw_service;
@@ -115,21 +115,21 @@ TEST(test_ccapi_firmware_update_init, testBadtargetList)
     CHECK(error == CCAPI_START_ERROR_INVALID_FIRMWARE_INFO);
 }
 
-TEST(test_ccapi_firmware_update_init, testInitOk)
+TEST(test_ccapi_fw_init, testInitOk)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_firmware_update_service_t fw_service = {
-                                                     {
-                                                         firmware_list, 
-                                                         firmware_count
-                                                     }, 
-                                                     {
-                                                         NULL, 
-                                                         test_firmware_update_data_cb, 
-                                                         NULL
-                                                     }
-                                                 };
+    ccapi_fw_service_t fw_service = {
+                                        {
+                                            firmware_list, 
+                                            firmware_count
+                                        }, 
+                                        {
+                                            NULL, 
+                                            test_fw_data_cb, 
+                                            NULL
+                                        }
+                                    };
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.firmware = &fw_service;
@@ -139,23 +139,23 @@ TEST(test_ccapi_firmware_update_init, testInitOk)
     CHECK(error == CCAPI_START_ERROR_NONE);
 }
 
-TEST_GROUP(test_ccapi_firmware_update_init_callback)
+TEST_GROUP(test_ccapi_fw_init_callback)
 {
     void setup()
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_firmware_update_service_t fw_service = {
-                                                         {
-                                                             firmware_list, 
-                                                             firmware_count
-                                                         }, 
-                                                         {
-                                                             NULL, 
-                                                             test_firmware_update_data_cb, 
-                                                             NULL
-                                                         }
-                                                     };
+        ccapi_fw_service_t fw_service = {
+                                            {
+                                                firmware_list, 
+                                                firmware_count
+                                            }, 
+                                            {
+                                                NULL, 
+                                                test_fw_data_cb, 
+                                                NULL
+                                            }
+                                        };
 
         Mock_create_all();
 
@@ -173,7 +173,7 @@ TEST_GROUP(test_ccapi_firmware_update_init_callback)
     }
 };
 
-TEST(test_ccapi_firmware_update_init_callback, testInitOkCallbackCount)
+TEST(test_ccapi_fw_init_callback, testInitOkCallbackCount)
 {
     connector_request_id_t request;
     connector_firmware_count_t ccfsm_firmware_count;
@@ -186,7 +186,7 @@ TEST(test_ccapi_firmware_update_init_callback, testInitOkCallbackCount)
     CHECK(ccfsm_firmware_count.count == firmware_count);
 }
 
-TEST(test_ccapi_firmware_update_init_callback, testInitOkCallbackList)
+TEST(test_ccapi_fw_init_callback, testInitOkCallbackList)
 {
     connector_request_id_t request;
     connector_firmware_info_t ccfsm_request_id_firmware_info;

@@ -40,9 +40,9 @@ typedef enum {                                      /* TODO: Remove comments whe
     CCAPI_FW_CANCEL_HARDWARE_ERROR                  /**< Callback found permanent hardware error */
 } ccapi_fw_cancel_error_t;
 
-typedef ccapi_fw_request_error_t (*ccapi_firmware_update_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
-typedef ccapi_fw_data_error_t (*ccapi_firmware_update_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
-typedef void (*ccapi_firmware_update_cancel_cb_t)(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason);
+typedef ccapi_fw_request_error_t (*ccapi_fw_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
+typedef ccapi_fw_data_error_t (*ccapi_fw_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
+typedef void (*ccapi_fw_cancel_cb_t)(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason);
 
 typedef struct {
     struct {
@@ -63,10 +63,10 @@ typedef struct {
         uint8_t count;
     } target;
     struct {
-        ccapi_firmware_update_request_cb_t request_cb;
-        ccapi_firmware_update_data_cb_t data_cb;
-        ccapi_firmware_update_cancel_cb_t cancel_cb;
+        ccapi_fw_request_cb_t request_cb;
+        ccapi_fw_data_cb_t data_cb;
+        ccapi_fw_cancel_cb_t cancel_cb;
     } callback;
-} ccapi_firmware_update_service_t;
+} ccapi_fw_service_t;
 
 #endif

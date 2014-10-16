@@ -34,7 +34,7 @@ static ccapi_bool_t ccapi_firmware_data_expected_last_chunk[MAX_CALLBACK_CALLS];
 static ccapi_fw_data_error_t ccapi_firmware_data_retval[MAX_CALLBACK_CALLS];
 static uint8_t ccapi_firmware_data_cb_called;
 
-static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     CHECK_EQUAL(ccapi_firmware_data_expected_target[ccapi_firmware_data_cb_called], target);
     CHECK_EQUAL(ccapi_firmware_data_expected_offset[ccapi_firmware_data_cb_called], offset);
@@ -59,23 +59,23 @@ static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const tar
     return ccapi_firmware_data_retval[ccapi_firmware_data_cb_called++];
 }
 
-TEST_GROUP(test_ccapi_firmware_update_data_callback)
+TEST_GROUP(test_ccapi_fw_data_callback)
 {
     void setup()
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_firmware_update_service_t fw_service = {
-                                                         {
-                                                             firmware_list, 
-                                                             firmware_count
-                                                         }, 
-                                                         {
-                                                             NULL, 
-                                                             test_firmware_update_data_cb, 
-                                                             NULL
-                                                         }
-                                                     };
+        ccapi_fw_service_t fw_service = {
+                                            {
+                                                firmware_list, 
+                                                firmware_count
+                                            }, 
+                                            {
+                                                NULL, 
+                                                test_fw_data_cb, 
+                                                NULL
+                                            }
+                                        };
 
         Mock_create_all();
 
@@ -108,7 +108,7 @@ TEST_GROUP(test_ccapi_firmware_update_data_callback)
     }
 };
 
-TEST(test_ccapi_firmware_update_data_callback, testDataStartNotCalled)
+TEST(test_ccapi_fw_data_callback, testDataStartNotCalled)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -134,7 +134,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataStartNotCalled)
     CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataBadInitialOffset) /* TODO: Do one with bad intermediate offset */
+TEST(test_ccapi_fw_data_callback, testDataBadInitialOffset) /* TODO: Do one with bad intermediate offset */
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -166,7 +166,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataBadInitialOffset) /* TODO
     CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataTotalsizeEqualsChunksize)
+TEST(test_ccapi_fw_data_callback, testDataTotalsizeEqualsChunksize)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -206,7 +206,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataTotalsizeEqualsChunksize)
     CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataTwoBlocksThatMachChuncks)
+TEST(test_ccapi_fw_data_callback, testDataTwoBlocksThatMachChuncks)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -269,7 +269,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataTwoBlocksThatMachChuncks)
     CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataFourBlocksSmallerThanChuncks)
+TEST(test_ccapi_fw_data_callback, testDataFourBlocksSmallerThanChuncks)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -361,7 +361,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataFourBlocksSmallerThanChun
 
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundaries)
+TEST(test_ccapi_fw_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundaries)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -439,7 +439,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataThreeBlocksThatDoNotMatch
 
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testOneBlockIsTwoChunks)
+TEST(test_ccapi_fw_data_callback, testOneBlockIsTwoChunks)
 {
     connector_request_id_t request;
     connector_firmware_download_data_t connector_firmware_download_data;
@@ -486,7 +486,7 @@ TEST(test_ccapi_firmware_update_data_callback, testOneBlockIsTwoChunks)
     CHECK_EQUAL(2, ccapi_firmware_data_cb_called);
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataCompleteBeforeAllDataArrives)
+TEST(test_ccapi_fw_data_callback, testDataCompleteBeforeAllDataArrives)
 {
     connector_request_id_t request;
 
@@ -564,7 +564,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteBeforeAllDataArri
     }
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataCompleteHasNoDataToFlush)
+TEST(test_ccapi_fw_data_callback, testDataCompleteHasNoDataToFlush)
 {
     connector_request_id_t request;
 
@@ -650,7 +650,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteHasNoDataToFlush)
     }
 }
 
-TEST(test_ccapi_firmware_update_data_callback, testDataCompleteFlushLastData)
+TEST(test_ccapi_fw_data_callback, testDataCompleteFlushLastData)
 {
     connector_request_id_t request;
 

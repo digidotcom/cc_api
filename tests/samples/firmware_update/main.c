@@ -67,7 +67,7 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
 
 FILE * fp = NULL;
 
-static ccapi_fw_request_error_t test_firmware_update_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
+static ccapi_fw_request_error_t app_fw_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
 {
     (void)target;
     (void)total_size;
@@ -82,7 +82,7 @@ static ccapi_fw_request_error_t test_firmware_update_request_cb(unsigned int con
     return CCAPI_FW_REQUEST_ERROR_NONE;
 }
 
-static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     size_t const max_bytes_to_print = 4;
     size_t const bytes_to_print = (size > max_bytes_to_print) ? max_bytes_to_print : size;
@@ -112,10 +112,10 @@ static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const tar
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 
-static void test_firmware_update_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
+static void app_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
 {
 
-    printf("test_firmware_update_cancel_cb for target='%d'. cancel_reason='%d'", target, cancel_reason);
+    printf("app_fw_cancel_cb for target='%d'. cancel_reason='%d'", target, cancel_reason);
 
     if (fp != NULL)
         fclose(fp);
@@ -126,17 +126,17 @@ static void test_firmware_update_cancel_cb(unsigned int const target, ccapi_fw_c
 static ccapi_start_error_t app_start_ccapi(void)
 {
     ccapi_start_t start = {0};
-    ccapi_firmware_update_service_t fw_service = {
-                                                     {
-                                                         firmware_list, 
-                                                         firmware_count
-                                                     }, 
-                                                     {
-                                                         test_firmware_update_request_cb, 
-                                                         test_firmware_update_data_cb, 
-                                                         NULL
-                                                     }
-                                                 };
+    ccapi_fw_service_t fw_service = {
+                                        {
+                                            firmware_list, 
+                                            firmware_count
+                                        }, 
+                                        {
+                                            app_fw_request_cb, 
+                                            app_fw_data_cb, 
+                                            NULL
+                                        }
+                                    };
 
     ccapi_start_error_t start_error;
 

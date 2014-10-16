@@ -19,7 +19,7 @@ static firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
-static ccapi_fw_data_error_t test_firmware_update_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     (void)target;
     (void)offset;
@@ -34,7 +34,7 @@ static unsigned int ccapi_firmware_cancel_expected_target;
 static ccapi_fw_cancel_error_t ccapi_firmware_cancel_expected_cancel_reason;
 static ccapi_bool_t ccapi_firmware_cancel_cb_called;
 
-static void test_firmware_update_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
+static void test_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
 {
     CHECK_EQUAL(ccapi_firmware_cancel_expected_target, target);
     CHECK_EQUAL(ccapi_firmware_cancel_expected_cancel_reason, cancel_reason);
@@ -42,23 +42,23 @@ static void test_firmware_update_cancel_cb(unsigned int const target, ccapi_fw_c
     return;
 }
 
-TEST_GROUP(test_ccapi_firmware_update_abort_no_callback)
+TEST_GROUP(test_ccapi_fw_abort_no_callback)
 {
     void setup()
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_firmware_update_service_t fw_service = {
-                                                         {
-                                                             firmware_list, 
-                                                             firmware_count
-                                                         }, 
-                                                         {
-                                                             NULL, 
-                                                             test_firmware_update_data_cb, 
-                                                             NULL
-                                                         }
-                                                     };
+        ccapi_fw_service_t fw_service = {
+                                            {
+                                                firmware_list, 
+                                                firmware_count
+                                            }, 
+                                            {
+                                                NULL, 
+                                                test_fw_data_cb, 
+                                                NULL
+                                            }
+                                        };
 
         Mock_create_all();
 
@@ -76,7 +76,7 @@ TEST_GROUP(test_ccapi_firmware_update_abort_no_callback)
     }
 };
 
-TEST(test_ccapi_firmware_update_abort_no_callback, testAbortBadTarget)
+TEST(test_ccapi_fw_abort_no_callback, testAbortBadTarget)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -90,7 +90,7 @@ TEST(test_ccapi_firmware_update_abort_no_callback, testAbortBadTarget)
     CHECK_EQUAL(connector_callback_error, status);
 }
 
-TEST(test_ccapi_firmware_update_abort_no_callback, testAbortOk_nocallback)
+TEST(test_ccapi_fw_abort_no_callback, testAbortOk_nocallback)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -104,23 +104,23 @@ TEST(test_ccapi_firmware_update_abort_no_callback, testAbortOk_nocallback)
     CHECK_EQUAL(connector_callback_continue, status);
 }
 
-TEST_GROUP(test_ccapi_firmware_update_abort_callback)
+TEST_GROUP(test_ccapi_fw_abort_callback)
 {
     void setup()
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_firmware_update_service_t fw_service = {
-                                                         {
-                                                             firmware_list, 
-                                                             firmware_count
-                                                         }, 
-                                                         {
-                                                             NULL, 
-                                                             test_firmware_update_data_cb, 
-                                                             test_firmware_update_cancel_cb
-                                                         }
-                                                     };
+        ccapi_fw_service_t fw_service = {
+                                            {
+                                                firmware_list, 
+                                                firmware_count
+                                            }, 
+                                            {
+                                                NULL, 
+                                                test_fw_data_cb, 
+                                                test_fw_cancel_cb
+                                            }
+                                        };
 
         Mock_create_all();
 
@@ -142,7 +142,7 @@ TEST_GROUP(test_ccapi_firmware_update_abort_callback)
     }
 };
 
-TEST(test_ccapi_firmware_update_abort_callback, testAbort_user_abort)
+TEST(test_ccapi_fw_abort_callback, testAbort_user_abort)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -163,7 +163,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_user_abort)
     CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
-TEST(test_ccapi_firmware_update_abort_callback, testAbort_device_error)
+TEST(test_ccapi_fw_abort_callback, testAbort_device_error)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -184,7 +184,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_device_error)
     CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
-TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_offset)
+TEST(test_ccapi_fw_abort_callback, testAbort_invalid_offset)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -205,7 +205,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_offset)
     CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
-TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_data)
+TEST(test_ccapi_fw_abort_callback, testAbort_invalid_data)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
@@ -226,7 +226,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_data)
     CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
-TEST(test_ccapi_firmware_update_abort_callback, testAbort_hardware_error)
+TEST(test_ccapi_fw_abort_callback, testAbort_hardware_error)
 {
     connector_request_id_t request;
     connector_firmware_download_abort_t connector_firmware_download_abort;
