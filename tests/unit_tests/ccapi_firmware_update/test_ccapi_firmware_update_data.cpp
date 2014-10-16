@@ -560,7 +560,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteBeforeAllDataArri
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 
-        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 
@@ -646,7 +646,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteHasNoDataToFlush)
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 
-        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 
@@ -731,7 +731,7 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteFlushLastData)
 
         CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
 
-        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 

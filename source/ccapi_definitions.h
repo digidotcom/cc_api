@@ -122,7 +122,7 @@ typedef struct {
                 uint32_t total_size;
                 uint32_t head_offset;
                 uint32_t bottom_offset;
-            } service;
+            } processing;
             struct {
                 firmware_target_t * list;
                 uint8_t count;

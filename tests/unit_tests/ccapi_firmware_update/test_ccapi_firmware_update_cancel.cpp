@@ -160,7 +160,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_user_abort)
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_cancel_cb_called);
 
-    CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
 TEST(test_ccapi_firmware_update_abort_callback, testAbort_device_error)
@@ -181,7 +181,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_device_error)
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_cancel_cb_called);
 
-    CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
 TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_offset)
@@ -202,7 +202,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_offset)
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_cancel_cb_called);
 
-    CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
 TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_data)
@@ -223,7 +223,7 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_invalid_data)
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_cancel_cb_called);
 
-    CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
 
 TEST(test_ccapi_firmware_update_abort_callback, testAbort_hardware_error)
@@ -244,5 +244,5 @@ TEST(test_ccapi_firmware_update_abort_callback, testAbort_hardware_error)
 
     CHECK_EQUAL(CCAPI_TRUE, ccapi_firmware_cancel_cb_called);
 
-    CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
 }
