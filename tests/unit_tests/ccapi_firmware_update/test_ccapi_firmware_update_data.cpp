@@ -559,6 +559,8 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteBeforeAllDataArri
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_not_complete);
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
+
+        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
     }
 }
 
@@ -643,6 +645,8 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteHasNoDataToFlush)
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_success);
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
+
+        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
     }
 }
 
@@ -726,6 +730,8 @@ TEST(test_ccapi_firmware_update_data_callback, testDataCompleteFlushLastData)
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_success);
 
         CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
+
+        CHECK(ccapi_data_single_instance->service.firmware_update.service.chunk_data == NULL);
     }
 }
 

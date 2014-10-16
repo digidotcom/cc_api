@@ -135,6 +135,8 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
             goto done;
         }
 
+        /* TODO: Busy, double buffer ? */
+
         while (source_bytes_remaining)
         {
             const uint32_t room_in_chunk = chunk_size - ccapi_data->service.firmware_update.service.head_offset % chunk_size;
@@ -198,7 +200,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
         ccapi_logging_line("update_complete arrived before all firmware data arrived!");
 
         complete_ptr->status = connector_firmware_download_not_complete;
-        goto done;
+        goto free;
     }
 
     {
@@ -223,6 +225,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
         }
     }
 
+free:
     free_and_stop_service(ccapi_data);
     
 done:
