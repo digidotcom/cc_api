@@ -47,7 +47,8 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    if (start_ptr->code_size > ccapi_data->service.firmware_update.target.list[start_ptr->target_number].maximum_size)
+    if (ccapi_data->service.firmware_update.target.list[start_ptr->target_number].maximum_size != 0 && 
+        ccapi_data->service.firmware_update.target.list[start_ptr->target_number].maximum_size < start_ptr->code_size)
     {
         start_ptr->status = connector_firmware_status_download_invalid_size;
         goto done;
@@ -85,6 +86,10 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         }
     } 
 
+    if (ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size == 0)
+    {
+        ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size = 1024;
+    }
     ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size);
     if (ccapi_data->service.firmware_update.processing.chunk_data == NULL)
     {

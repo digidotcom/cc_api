@@ -15,7 +15,8 @@
 static firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{1,0,0,0}, (char*)"Bootloader",  (char*)".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
-        {{0,0,1,0}, (char*)"Kernel",      (char*)".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
+        {{0,0,1,0}, (char*)"Kernel",      (char*)".*\\.a",            128 * 1024 * 1024, 128 * 1024 },  /* any *.a files */
+        {{0,0,1,0}, (char*)"TestDefVals", (char*)".*\\.k",            0,                 0 }   /* any *.a files */
     };
 static uint8_t firmware_count = asizeof(firmware_list);
 
@@ -127,6 +128,40 @@ TEST(test_ccapi_fw_start_no_callback, testStartBadSize)
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(connector_firmware_download_start.status == connector_firmware_status_download_invalid_size);
+}
+
+TEST(test_ccapi_fw_start_no_callback, testStartMaxSize0)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 2;
+    connector_firmware_download_start.code_size = firmware_list[2].maximum_size + 1;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
+}
+
+TEST(test_ccapi_fw_start_no_callback, testStartChunkSize0)
+{
+    connector_request_id_t request;
+    connector_firmware_download_start_t connector_firmware_download_start;
+    connector_callback_status_t status;
+
+    connector_firmware_download_start.target_number = 2;
+    connector_firmware_download_start.code_size = firmware_list[2].maximum_size;
+
+    request.firmware_request = connector_request_id_firmware_download_start;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.firmware_update.target.list[2].chunk_size, 1024);
 }
 
 TEST(test_ccapi_fw_start_no_callback, testStartOk_nocallback)
