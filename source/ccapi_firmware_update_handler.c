@@ -150,7 +150,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
             next_head_offset = next_tail_offset + bytes_to_copy;
             last_chunk = next_head_offset == ccapi_data->service.firmware_update.processing.total_size ? CCAPI_TRUE : CCAPI_FALSE;
 
-            ASSERT(bytes_to_copy);
+            ASSERT_MSG(bytes_to_copy != 0);
 
             if (next_tail_offset >= ccapi_data->service.firmware_update.processing.head_offset)
             {
@@ -255,10 +255,16 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
             case connector_firmware_status_hardware_error:
                 cancel_reason = CCAPI_FW_CANCEL_HARDWARE_ERROR;
                 break;
-            default:
-                ASSERT(0);
+            case connector_firmware_status_success:
+            case connector_firmware_status_download_denied:
+            case connector_firmware_status_download_invalid_size:
+            case connector_firmware_status_download_invalid_version:
+            case connector_firmware_status_download_unauthenticated:
+            case connector_firmware_status_download_not_allowed:
+            case connector_firmware_status_download_configured_to_reject:
+            case connector_firmware_status_encountered_error:
                 connector_status = connector_callback_error;
-                goto done;
+                ASSERT_MSG_GOTO(abort_ptr->status >= connector_firmware_status_user_abort, done);
         }
 
         ccapi_data->service.firmware_update.user_callbacks.cancel_cb(abort_ptr->target_number, cancel_reason);
