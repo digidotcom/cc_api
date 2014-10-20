@@ -60,8 +60,8 @@ typedef struct {
 
 typedef struct {
     struct {
-        firmware_target_t * list;
         uint8_t count;
+        firmware_target_t * item;
     } target;
     struct {
         ccapi_fw_request_cb_t request_cb;

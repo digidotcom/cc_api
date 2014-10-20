@@ -47,8 +47,8 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    if (ccapi_data->service.firmware_update.target.list[start_ptr->target_number].maximum_size != 0 && 
-        ccapi_data->service.firmware_update.target.list[start_ptr->target_number].maximum_size < start_ptr->code_size)
+    if (ccapi_data->service.firmware_update.target.item[start_ptr->target_number].maximum_size != 0 && 
+        ccapi_data->service.firmware_update.target.item[start_ptr->target_number].maximum_size < start_ptr->code_size)
     {
         start_ptr->status = connector_firmware_status_download_invalid_size;
         goto done;
@@ -86,11 +86,11 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         }
     } 
 
-    if (ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size == 0)
+    if (ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size == 0)
     {
-        ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size = 1024;
+        ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size = 1024;
     }
-    ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(ccapi_data->service.firmware_update.target.list[start_ptr->target_number].chunk_size);
+    ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size);
     if (ccapi_data->service.firmware_update.processing.chunk_data == NULL)
     {
         start_ptr->status = connector_firmware_status_encountered_error;
@@ -135,7 +135,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     }
 
     {
-        const uint32_t chunk_size = ccapi_data->service.firmware_update.target.list[data_ptr->target_number].chunk_size;
+        const uint32_t chunk_size = ccapi_data->service.firmware_update.target.item[data_ptr->target_number].chunk_size;
         uint32_t next_tail_offset = ccapi_data->service.firmware_update.processing.tail_offset;
         uint32_t next_head_offset = 0;
         ccapi_bool_t last_chunk;
@@ -296,13 +296,13 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             ASSERT_MSG_GOTO(info_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 
-            info_ptr->version.major = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.major;
-            info_ptr->version.minor = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.minor;
-            info_ptr->version.revision = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.revision;
-            info_ptr->version.build = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].version.build;
+            info_ptr->version.major = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.major;
+            info_ptr->version.minor = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.minor;
+            info_ptr->version.revision = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.revision;
+            info_ptr->version.build = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.build;
 
-            info_ptr->description = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].description;
-            info_ptr->filespec = ccapi_data->service.firmware_update.target.list[info_ptr->target_number].filespec;
+            info_ptr->description = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].description;
+            info_ptr->filespec = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].filespec;
            
             connector_status = connector_callback_continue;
 

@@ -68,8 +68,8 @@ TEST_GROUP(test_ccapi_fw_data_callback)
         ccapi_start_error_t error;
         ccapi_fw_service_t fw_service = {
                                             {
-                                                firmware_list, 
-                                                firmware_count
+                                                firmware_count,
+                                                firmware_list
                                             }, 
                                             {
                                                 NULL, 

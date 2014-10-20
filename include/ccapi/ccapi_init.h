@@ -50,8 +50,8 @@ typedef struct {
         ccapi_status_callback_t status_callback;
         struct {
                 ccapi_receive_service_t * receive;
-                ccapi_fw_service_t * firmware; /* EDPoTCP only */
-                ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDPoTCP only */
+                ccapi_fw_service_t * firmware; /* EDP/TCP only */
+                ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDP/TCP only */
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
         } service;

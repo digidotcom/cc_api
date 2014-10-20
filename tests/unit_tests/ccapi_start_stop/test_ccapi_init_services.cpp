@@ -67,7 +67,7 @@ TEST(test_ccapi_init_services, testServicesSupported)
     ccapi_start_error_t error;
     void * pointer = pointer; /* Not-NULL */
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
-    ccapi_fw_service_t fw_service = {{firmware_list, firmware_count}, {NULL, test_fw_data_cb, NULL}};
+    ccapi_fw_service_t fw_service = {{firmware_count, firmware_list}, {NULL, test_fw_data_cb, NULL}};
     ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
 
     th_fill_start_structure_with_good_parameters(&start);
@@ -99,8 +99,8 @@ TEST(test_ccapi_init_services, testServicesSupported)
 
         for (target=0 ; target < firmware_count ; target++)
         {
-            CHECK(ccapi_data_single_instance->service.firmware_update.target.list[target].maximum_size == firmware_list[target].maximum_size);
-            CHECK(ccapi_data_single_instance->service.firmware_update.target.list[target].chunk_size == firmware_list[target].chunk_size);
+            CHECK(ccapi_data_single_instance->service.firmware_update.target.item[target].maximum_size == firmware_list[target].maximum_size);
+            CHECK(ccapi_data_single_instance->service.firmware_update.target.item[target].chunk_size == firmware_list[target].chunk_size);
         }
     }
 

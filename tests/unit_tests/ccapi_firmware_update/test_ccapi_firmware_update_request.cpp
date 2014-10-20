@@ -54,8 +54,8 @@ TEST_GROUP(test_ccapi_fw_start_no_callback)
         ccapi_start_error_t error;
         ccapi_fw_service_t fw_service = {
                                             {
-                                                firmware_list, 
-                                                firmware_count
+                                                firmware_count,
+                                                firmware_list
                                             }, 
                                             {
                                                 NULL, 
@@ -161,7 +161,7 @@ TEST(test_ccapi_fw_start_no_callback, testStartChunkSize0)
 
     CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
 
-    CHECK_EQUAL(ccapi_data_single_instance->service.firmware_update.target.list[2].chunk_size, 1024);
+    CHECK_EQUAL(ccapi_data_single_instance->service.firmware_update.target.item[2].chunk_size, 1024);
 }
 
 TEST(test_ccapi_fw_start_no_callback, testStartOk_nocallback)
@@ -188,8 +188,8 @@ TEST_GROUP(test_ccapi_fw_start_callback)
         ccapi_start_error_t error;
         ccapi_fw_service_t fw_service = {
                                             {
-                                                firmware_list, 
-                                                firmware_count
+                                                firmware_count,
+                                                firmware_list
                                             }, 
                                             {
                                                 test_fw_request_cb, 
