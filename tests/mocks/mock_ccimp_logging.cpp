@@ -114,11 +114,4 @@ ccimp_status_t ccimp_hal_halt(void)
 }
 #endif
 
-/* TODO: Move to mock_ccimp_reset.cpp */
-ccimp_status_t ccimp_hal_reset(void)
-{
-    /* We don't want real implementation */
-    /* return ccimp_hal_reset_real(); */
-    return CCIMP_STATUS_OK;
-}
 }
