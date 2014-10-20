@@ -129,6 +129,30 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         }
     }
 #endif
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->service.firmware_update.target.count && ccapi_data->service.firmware_update.target.item != NULL)
+    {
+        unsigned char target_num;
+
+        for (target_num = 0; target_num < ccapi_data->service.firmware_update.target.count; target_num++)
+        {
+            if (ccapi_data->service.firmware_update.target.item[target_num].description != NULL)
+            {
+                ccapi_free(ccapi_data->service.firmware_update.target.item[target_num].description);
+            }
+
+            if (ccapi_data->service.firmware_update.target.item[target_num].filespec != NULL)
+            {
+                ccapi_free(ccapi_data->service.firmware_update.target.item[target_num].filespec);
+            }
+        }
+
+        ccapi_free(ccapi_data->service.firmware_update.target.item);
+
+        ccapi_data->service.firmware_update.target.count = 0;
+        ccapi_data->service.firmware_update.target.item = NULL;
+    }
+#endif
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
@@ -208,6 +232,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->initiate_action_syncr = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
+    ccapi_data->service.firmware_update.target.count = 0;
+    ccapi_data->service.firmware_update.target.item = NULL;
     ccapi_data->config.receive_supported = CCAPI_FALSE;
 
     if (start == NULL)
@@ -283,7 +309,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
             memcpy(ccapi_data->service.firmware_update.target.item, start->service.firmware->target.item, list_size);
 
-            for (target_num = 0 ; target_num < start->service.firmware->target.count; target_num++)
+            for (target_num = 0; target_num < start->service.firmware->target.count; target_num++)
             {
                 size_t const description_size = strlen(start->service.firmware->target.item[target_num].description) + 1;
                 size_t const filespec_size = strlen(start->service.firmware->target.item[target_num].filespec) + 1;
