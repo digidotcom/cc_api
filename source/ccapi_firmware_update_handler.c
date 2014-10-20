@@ -132,7 +132,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     }
 
     {
-        const uint32_t chunk_size = ccapi_data->service.firmware_update.target.item[data_ptr->target_number].chunk_size;
+        uint32_t const chunk_size = ccapi_data->service.firmware_update.target.item[data_ptr->target_number].chunk_size;
         uint32_t next_tail_offset = ccapi_data->service.firmware_update.processing.tail_offset;
         uint32_t next_head_offset = 0;
         ccapi_bool_t last_chunk;
@@ -142,8 +142,8 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
         while (source_bytes_remaining)
         {
-            const uint32_t room_in_chunk = chunk_size - next_tail_offset % chunk_size;
-            const uint32_t bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
+            uint32_t const room_in_chunk = chunk_size - next_tail_offset % chunk_size;
+            uint32_t const bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
             next_head_offset = next_tail_offset + bytes_to_copy;
             last_chunk = next_head_offset == ccapi_data->service.firmware_update.processing.total_size ? CCAPI_TRUE : CCAPI_FALSE;
 
