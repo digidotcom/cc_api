@@ -45,7 +45,7 @@ ccimp_status_t ccimp_hal_reset(void)
     switch (behavior)
     {
         case MOCK_RESET_DISABLED:
-            /* ccimp_status = ccimp_hal_reset_real(); */
+            ccimp_status = /* ccimp_hal_reset_real(); */ CCIMP_STATUS_OK;
             break;
         default:
             mock_scope_c("ccimp_hal_reset")->actualCall("ccimp_hal_reset");
