@@ -20,7 +20,7 @@
 const uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF};
 const uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01};
 
-static firmware_target_t firmware_list[] = {
+static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{1,0,0,0}, (char*)"Bootloader",  (char*)".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
         {{0,0,1,0}, (char*)"Kernel",      (char*)".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */

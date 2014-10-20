@@ -31,7 +31,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
 {
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_request_error_t ccapi_fw_request_error;
-    firmware_target_t * fw_target_item = NULL;
+    ccapi_firmware_target_t * fw_target_item = NULL;
 
     ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 

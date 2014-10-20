@@ -56,12 +56,12 @@ typedef struct {
     char * filespec;
     size_t maximum_size;
     size_t chunk_size;
-} firmware_target_t;
+} ccapi_firmware_target_t;
 
 typedef struct {
     struct {
         uint8_t count;
-        firmware_target_t * item;
+        ccapi_firmware_target_t * item;
     } target;
     struct {
         ccapi_fw_request_cb_t request_cb;

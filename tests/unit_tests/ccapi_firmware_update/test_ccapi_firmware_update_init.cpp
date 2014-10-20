@@ -12,7 +12,7 @@
 
 #include "test_helper_functions.h"
 
-static firmware_target_t firmware_list[] = {
+static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{1,0,0,0}, (char*)"Bootloader",  (char*)".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
         {{0,0,1,0}, (char*)"Kernel",      (char*)".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */

@@ -11,7 +11,7 @@
 */
 #include "test_helper_functions.h"
 
-static firmware_target_t firmware_list[] = {
+static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{0,0,1,0}, (char*)"Test",        (char*)".*\\.test",         32,                16         }   /* any *.test files */
     };
