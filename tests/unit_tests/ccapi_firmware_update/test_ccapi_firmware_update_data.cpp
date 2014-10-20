@@ -128,9 +128,11 @@ TEST(test_ccapi_fw_data_callback, testDataStartNotCalled)
 
     request.firmware_request = connector_request_id_firmware_download_data;
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
-    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(connector_callback_error, status);
 
-    CHECK(connector_firmware_download_data.status == connector_firmware_status_device_error);
+    WAIT_FOR_ASSERT();
+    ASSERT_IF_NOT_HIT_DO ("ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE", "source/ccapi_firmware_update_handler.c", "ccapi_process_firmware_update_data", 
+                                                     FAIL_TEST("'update_started == CCAPI_TRUE' not hitted"));
 
     CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 }

@@ -116,18 +116,12 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
     ASSERT_MSG_GOTO(data_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 
+    ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE, done);
+
     connector_status = connector_callback_continue;
     data_ptr->status = connector_firmware_status_success;
 
     /* ccapi_logging_line("ccapi_process_fw_data target_number=%d, offset=0x%x, size=%d", data_ptr->target_number, data_ptr->image.offset, data_ptr->image.bytes_used); */
-
-    if (ccapi_data->service.firmware_update.processing.update_started == CCAPI_FALSE)
-    {
-        ccapi_logging_line("update_data arrived when update was not started!");
-
-        data_ptr->status = connector_firmware_status_device_error;
-        goto done;
-    }
 
     if (data_ptr->image.offset != ccapi_data->service.firmware_update.processing.tail_offset)
     {
@@ -201,18 +195,12 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
 
     ASSERT_MSG_GOTO(complete_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 
+    ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE, done);
+
     connector_status = connector_callback_continue;
     complete_ptr->status = connector_firmware_download_success;
 
     ccapi_logging_line("ccapi_process_firmware_update_complete for target_number='%d'", complete_ptr->target_number);
-
-    if (ccapi_data->service.firmware_update.processing.update_started == CCAPI_FALSE)
-    {
-        ccapi_logging_line("update_complete arrived when update was not started!");
-
-        complete_ptr->status = connector_firmware_download_not_complete;
-        goto done;
-    }
 
     if (ccapi_data->service.firmware_update.processing.head_offset != ccapi_data->service.firmware_update.processing.total_size)
     {
