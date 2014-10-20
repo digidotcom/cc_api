@@ -31,6 +31,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
 {
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_request_error_t ccapi_fw_request_error;
+    firmware_target_t * fw_target_item = NULL;
 
     ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
 
@@ -47,8 +48,10 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    if (ccapi_data->service.firmware_update.target.item[start_ptr->target_number].maximum_size != 0 && 
-        ccapi_data->service.firmware_update.target.item[start_ptr->target_number].maximum_size < start_ptr->code_size)
+    fw_target_item = &ccapi_data->service.firmware_update.target.item[start_ptr->target_number];
+
+    if (fw_target_item->maximum_size != 0 && 
+        fw_target_item->maximum_size < start_ptr->code_size)
     {
         start_ptr->status = connector_firmware_status_download_invalid_size;
         goto done;
@@ -86,11 +89,11 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         }
     } 
 
-    if (ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size == 0)
+    if (fw_target_item->chunk_size == 0)
     {
-        ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size = 1024;
+        fw_target_item->chunk_size = 1024;
     }
-    ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(ccapi_data->service.firmware_update.target.item[start_ptr->target_number].chunk_size);
+    ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(fw_target_item->chunk_size);
     if (ccapi_data->service.firmware_update.processing.chunk_data == NULL)
     {
         start_ptr->status = connector_firmware_status_encountered_error;
@@ -128,7 +131,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
     if (data_ptr->image.offset != ccapi_data->service.firmware_update.processing.tail_offset)
     {
-        ccapi_logging_line("Invalid offset: 0x%x != 0x%x !", data_ptr->image.offset, ccapi_data->service.firmware_update.processing.tail_offset);
+        ccapi_logging_line("Out of order packet: offset 0x%x != 0x%x !", data_ptr->image.offset, ccapi_data->service.firmware_update.processing.tail_offset);
 
         data_ptr->status = connector_firmware_status_invalid_offset;
         goto done;
@@ -352,7 +355,7 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             ccapi_logging_line("ccapi_process_firmware_update_reset");
 
-            (void)data;
+            UNUSED_ARGUMENT(data);
 
             ccimp_status = ccimp_hal_reset();
             connector_status = connector_callback_continue;
