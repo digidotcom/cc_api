@@ -123,7 +123,7 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
 static void app_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
 {
 
-    printf("app_fw_cancel_cb for target='%d'. cancel_reason='%d'", target, cancel_reason);
+    printf("app_fw_cancel_cb for target='%d'. cancel_reason='%d'\n", target, cancel_reason);
 
     if (fp != NULL)
         fclose(fp);
@@ -136,13 +136,13 @@ static ccapi_start_error_t app_start_ccapi(void)
     ccapi_start_t start = {0};
     ccapi_fw_service_t fw_service = {
                                         {
-                                            firmware_list, 
-                                            firmware_count
+                                            firmware_count,
+                                            firmware_list
                                         }, 
                                         {
                                             app_fw_request_cb, 
                                             app_fw_data_cb, 
-                                            NULL
+                                            app_fw_cancel_cb
                                         }
                                     };
 
