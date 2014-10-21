@@ -138,12 +138,12 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         {
             if (ccapi_data->service.firmware_update.target.item[target_num].description != NULL)
             {
-                ccapi_free(ccapi_data->service.firmware_update.target.item[target_num].description);
+                ccapi_free((void *)ccapi_data->service.firmware_update.target.item[target_num].description);
             }
 
             if (ccapi_data->service.firmware_update.target.item[target_num].filespec != NULL)
             {
-                ccapi_free(ccapi_data->service.firmware_update.target.item[target_num].filespec);
+                ccapi_free((void*)ccapi_data->service.firmware_update.target.item[target_num].filespec);
             }
         }
 
@@ -313,18 +313,22 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             {
                 size_t const description_size = strlen(start->service.firmware->target.item[target_num].description) + 1;
                 size_t const filespec_size = strlen(start->service.firmware->target.item[target_num].filespec) + 1;
+                char * description;
+                char * filespec;
 
-                ccapi_data->service.firmware_update.target.item[target_num].description = ccapi_malloc(description_size);
-                error = check_malloc(ccapi_data->service.firmware_update.target.item[target_num].description);
+                description = ccapi_malloc(description_size);
+                error = check_malloc(description);
                 if (error != CCAPI_START_ERROR_NONE)
                     goto done;
-                 memcpy(ccapi_data->service.firmware_update.target.item[target_num].description, start->service.firmware->target.item[target_num].description, description_size);
+                memcpy(description, start->service.firmware->target.item[target_num].description, description_size);
+                ccapi_data->service.firmware_update.target.item[target_num].description = description;
 
-                ccapi_data->service.firmware_update.target.item[target_num].filespec = ccapi_malloc(filespec_size);
-                error = check_malloc(ccapi_data->service.firmware_update.target.item[target_num].filespec);
+                filespec = ccapi_malloc(filespec_size);
+                error = check_malloc(filespec);
                 if (error != CCAPI_START_ERROR_NONE)
                     goto done;
-                 memcpy(ccapi_data->service.firmware_update.target.item[target_num].filespec, start->service.firmware->target.item[target_num].filespec, filespec_size);
+                memcpy(filespec, start->service.firmware->target.item[target_num].filespec, filespec_size);
+                ccapi_data->service.firmware_update.target.item[target_num].filespec = filespec;
             }
 
             ccapi_data->service.firmware_update.user_callbacks.request_cb = start->service.firmware->callback.request_cb;

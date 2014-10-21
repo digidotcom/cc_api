@@ -52,8 +52,8 @@ typedef struct {
         uint8_t revision;
         uint8_t build;
     } version;
-    char * description;
-    char * filespec;
+    char const * description;
+    char const * filespec;
     size_t maximum_size;
     size_t chunk_size;
 } ccapi_firmware_target_t;
