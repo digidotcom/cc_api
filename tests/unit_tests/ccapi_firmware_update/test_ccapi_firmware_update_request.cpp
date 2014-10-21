@@ -161,7 +161,7 @@ TEST(test_ccapi_fw_start_no_callback, testStartChunkSize0)
 
     CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
 
-    CHECK_EQUAL(ccapi_data_single_instance->service.firmware_update.target.item[2].chunk_size, 1024);
+    CHECK_EQUAL(ccapi_data_single_instance->service.firmware_update.config.target.item[2].chunk_size, 1024);
 }
 
 TEST(test_ccapi_fw_start_no_callback, testStartOk_nocallback)

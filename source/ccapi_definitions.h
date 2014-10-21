@@ -116,6 +116,7 @@ typedef struct {
         } file_system;
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
         struct {
+            ccapi_fw_service_t config;
             struct {
                 ccapi_bool_t update_started;
                 uint8_t * chunk_data;
@@ -123,15 +124,6 @@ typedef struct {
                 uint32_t head_offset;
                 uint32_t tail_offset;
             } processing;
-            struct {
-                uint8_t count;
-                ccapi_firmware_target_t * item;
-            } target;
-            struct {
-                ccapi_fw_request_cb_t request_cb;
-                ccapi_fw_data_cb_t data_cb;
-                ccapi_fw_cancel_cb_t cancel_cb;
-            } user_callbacks;
         } firmware_update;
 #endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)

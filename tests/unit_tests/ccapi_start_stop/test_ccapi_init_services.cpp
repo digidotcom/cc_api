@@ -88,10 +88,10 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK_EQUAL(receive_service.status_cb, ccapi_data_single_instance->service.receive.user_callbacks.status_cb);
 
     CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_TRUE);
-    CHECK_EQUAL(fw_service.target.count, ccapi_data_single_instance->service.firmware_update.target.count);
-    CHECK_EQUAL(fw_service.callback.request_cb, ccapi_data_single_instance->service.firmware_update.user_callbacks.request_cb);
-    CHECK_EQUAL(fw_service.callback.data_cb, ccapi_data_single_instance->service.firmware_update.user_callbacks.data_cb);
-    CHECK_EQUAL(fw_service.callback.cancel_cb, ccapi_data_single_instance->service.firmware_update.user_callbacks.cancel_cb);
+    CHECK_EQUAL(fw_service.target.count, ccapi_data_single_instance->service.firmware_update.config.target.count);
+    CHECK_EQUAL(fw_service.callback.request_cb, ccapi_data_single_instance->service.firmware_update.config.callback.request_cb);
+    CHECK_EQUAL(fw_service.callback.data_cb, ccapi_data_single_instance->service.firmware_update.config.callback.data_cb);
+    CHECK_EQUAL(fw_service.callback.cancel_cb, ccapi_data_single_instance->service.firmware_update.config.callback.cancel_cb);
 
     /* TODO: Check 'maximum_size' and 'chunk_size' as it won't be checked in test_ccapi_fw_init_callback */
     {
@@ -99,8 +99,8 @@ TEST(test_ccapi_init_services, testServicesSupported)
 
         for (target=0 ; target < firmware_count ; target++)
         {
-            CHECK(ccapi_data_single_instance->service.firmware_update.target.item[target].maximum_size == firmware_list[target].maximum_size);
-            CHECK(ccapi_data_single_instance->service.firmware_update.target.item[target].chunk_size == firmware_list[target].chunk_size);
+            CHECK(ccapi_data_single_instance->service.firmware_update.config.target.item[target].maximum_size == firmware_list[target].maximum_size);
+            CHECK(ccapi_data_single_instance->service.firmware_update.config.target.item[target].chunk_size == firmware_list[target].chunk_size);
         }
     }
 

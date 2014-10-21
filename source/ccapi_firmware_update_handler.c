@@ -33,7 +33,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     ccapi_fw_request_error_t ccapi_fw_request_error;
     ccapi_firmware_target_t * fw_target_item = NULL;
 
-    ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+    ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
     connector_status = connector_callback_continue;
     start_ptr->status = connector_firmware_status_success;
@@ -48,7 +48,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    fw_target_item = &ccapi_data->service.firmware_update.target.item[start_ptr->target_number];
+    fw_target_item = &ccapi_data->service.firmware_update.config.target.item[start_ptr->target_number];
 
     if (fw_target_item->maximum_size != 0 && 
         fw_target_item->maximum_size < start_ptr->code_size)
@@ -57,9 +57,9 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    if (ccapi_data->service.firmware_update.user_callbacks.request_cb != NULL)
+    if (ccapi_data->service.firmware_update.config.callback.request_cb != NULL)
     {
-        ccapi_fw_request_error = ccapi_data->service.firmware_update.user_callbacks.request_cb(start_ptr->target_number, start_ptr->filename, start_ptr->code_size);
+        ccapi_fw_request_error = ccapi_data->service.firmware_update.config.callback.request_cb(start_ptr->target_number, start_ptr->filename, start_ptr->code_size);
 
         switch (ccapi_fw_request_error)
         {
@@ -114,7 +114,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_data_error_t ccapi_fw_data_error;
 
-    ASSERT_MSG_GOTO(data_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+    ASSERT_MSG_GOTO(data_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
     ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE, done);
 
@@ -132,7 +132,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     }
 
     {
-        uint32_t const chunk_size = ccapi_data->service.firmware_update.target.item[data_ptr->target_number].chunk_size;
+        uint32_t const chunk_size = ccapi_data->service.firmware_update.config.target.item[data_ptr->target_number].chunk_size;
         uint32_t next_tail_offset = ccapi_data->service.firmware_update.processing.tail_offset;
         uint32_t next_head_offset = 0;
         ccapi_bool_t last_chunk;
@@ -156,7 +156,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
                 if (last_chunk || next_head_offset % chunk_size == 0)
                 {
                     /*printf("head_offset=0x%x\n",ccapi_data->service.firmware_update.processing.head_offset);*/
-                    ccapi_fw_data_error = ccapi_data->service.firmware_update.user_callbacks.data_cb(data_ptr->target_number, 
+                    ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(data_ptr->target_number, 
                                                                                                      ccapi_data->service.firmware_update.processing.head_offset, 
                                                                                                      ccapi_data->service.firmware_update.processing.chunk_data, 
                                                                                                      next_head_offset - ccapi_data->service.firmware_update.processing.head_offset, 
@@ -193,7 +193,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
 {
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ASSERT_MSG_GOTO(complete_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+    ASSERT_MSG_GOTO(complete_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
     ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE, done);
 
@@ -219,13 +219,13 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 {
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ASSERT_MSG_GOTO(abort_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+    ASSERT_MSG_GOTO(abort_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
     connector_status = connector_callback_continue;
 
     ccapi_logging_line("ccapi_process_firmware_update_abort for target_number='%d'. status='%d'", abort_ptr->target_number, abort_ptr->status);
 
-    if (ccapi_data->service.firmware_update.user_callbacks.cancel_cb != NULL)
+    if (ccapi_data->service.firmware_update.config.callback.cancel_cb != NULL)
     {
         ccapi_fw_cancel_error_t cancel_reason;
 
@@ -258,7 +258,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
                 ASSERT_MSG_GOTO(abort_ptr->status >= connector_firmware_status_user_abort, done);
         }
 
-        ccapi_data->service.firmware_update.user_callbacks.cancel_cb(abort_ptr->target_number, cancel_reason);
+        ccapi_data->service.firmware_update.config.callback.cancel_cb(abort_ptr->target_number, cancel_reason);
     }
 
     free_and_stop_service(ccapi_data);
@@ -279,7 +279,7 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             ASSERT_MSG_GOTO(ccapi_data->config.firmware_supported == CCAPI_TRUE, done);
 
-            count_ptr->count = ccapi_data->service.firmware_update.target.count;
+            count_ptr->count = ccapi_data->service.firmware_update.config.target.count;
            
             connector_status = connector_callback_continue;
 
@@ -291,15 +291,15 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 
             ASSERT_MSG_GOTO(ccapi_data->config.firmware_supported == CCAPI_TRUE, done);
 
-            ASSERT_MSG_GOTO(info_ptr->target_number < ccapi_data->service.firmware_update.target.count, done);
+            ASSERT_MSG_GOTO(info_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
-            info_ptr->version.major = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.major;
-            info_ptr->version.minor = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.minor;
-            info_ptr->version.revision = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.revision;
-            info_ptr->version.build = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].version.build;
+            info_ptr->version.major = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].version.major;
+            info_ptr->version.minor = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].version.minor;
+            info_ptr->version.revision = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].version.revision;
+            info_ptr->version.build = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].version.build;
 
-            info_ptr->description = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].description;
-            info_ptr->filespec = ccapi_data->service.firmware_update.target.item[info_ptr->target_number].filespec;
+            info_ptr->description = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].description;
+            info_ptr->filespec = ccapi_data->service.firmware_update.config.target.item[info_ptr->target_number].filespec;
            
             connector_status = connector_callback_continue;
 
