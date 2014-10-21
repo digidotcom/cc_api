@@ -38,6 +38,15 @@ static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 
+static ccapi_cli_error_t test_cli_request_cb(ccapi_transport_t const transport, char const * const command, char const * * const output)
+{
+    (void)transport;
+    (void)command;
+    (void)output;
+
+    return CCAPI_CLI_ERROR_NONE;
+}
+
 TEST_GROUP(test_ccapi_init_services)
 {
     void setup()
@@ -69,9 +78,10 @@ TEST(test_ccapi_init_services, testServicesSupported)
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
     ccapi_fw_service_t fw_service = {{firmware_count, firmware_list}, {NULL, test_fw_data_cb, NULL}};
     ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
+    ccapi_cli_service_t cli_service = {test_cli_request_cb, NULL};
 
     th_fill_start_structure_with_good_parameters(&start);
-    start.service.cli = &pointer;
+    start.service.cli = &cli_service;
     start.service.receive = &receive_service;
     start.service.firmware = &fw_service;
     start.service.rci = &pointer;

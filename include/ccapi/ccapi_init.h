@@ -14,7 +14,6 @@
 #define _CCAPI_INIT_H_
 
 typedef void * ccapi_remote_config_service_t; /* STUB */
-typedef void * ccapi_cli_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
 
 typedef enum {
@@ -24,6 +23,7 @@ typedef enum {
     CCAPI_START_ERROR_INVALID_DEVICEID,
     CCAPI_START_ERROR_INVALID_URL,
     CCAPI_START_ERROR_INVALID_DEVICETYPE,
+    CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK,
     CCAPI_START_ERROR_INVALID_FIRMWARE_INFO,
     CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK,
     CCAPI_START_ERROR_INSUFFICIENT_MEMORY,

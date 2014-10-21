@@ -133,6 +133,13 @@ typedef struct {
             ccapi_receive_target_t * target_list;
         } receive;
 #endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+        struct {
+            ccapi_cli_service_t user_callbacks;
+        } cli;
+#endif
+#endif
     } service;
     struct {
         ccapi_tcp_info_t * info;

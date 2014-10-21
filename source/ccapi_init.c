@@ -239,6 +239,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->service.firmware_update.config.target.count = 0;
     ccapi_data->service.firmware_update.config.target.item = NULL;
     ccapi_data->config.receive_supported = CCAPI_FALSE;
+    ccapi_data->config.cli_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -364,6 +365,25 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+    if (start->service.cli != NULL)
+    {
+
+        /* Check required callbacks */
+        if (start->service.cli->request_cb == NULL)
+        {
+            error = CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK;
+            goto done;
+        }
+
+        ccapi_data->config.cli_supported = CCAPI_TRUE;
+        ccapi_data->service.cli.user_callbacks.request_cb = start->service.cli->request_cb;
+        ccapi_data->service.cli.user_callbacks.finished_cb = start->service.cli->finished_cb;
+    }
+#endif
+#endif
+
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
     error = check_malloc(ccapi_data->connector_handle);
     if (error != CCAPI_START_ERROR_NONE)
@@ -425,6 +445,7 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
@@ -598,6 +619,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
@@ -627,3 +649,4 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 
     return error;
 }
+
