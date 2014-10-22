@@ -227,6 +227,22 @@ done:
 }
 #endif /* (defined CONNECTOR_SM_CLI) */
 
+
+static connector_callback_status_t ccapi_process_cli_response_length(connector_sm_cli_response_length_t * const length_ptr)
+{
+    ccapi_svc_cli_t const * const svc_cli = (ccapi_svc_cli_t *)length_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_cli != NULL, done);
+
+    length_ptr->total_bytes = svc_cli->response_processing.length;
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -254,13 +270,20 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
         case connector_request_id_sm_ping_request:
         case connector_request_id_sm_ping_response:
-        case connector_request_id_sm_cli_response_length:
         case connector_request_id_sm_cli_status:
         case connector_request_id_sm_more_data:
         case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:
             ASSERT_MSG(0);
             break;
+        case connector_request_id_sm_cli_response_length:
+        {
+            connector_sm_cli_response_length_t * const length_ptr = data;
+            
+            connector_status = ccapi_process_cli_response_length(length_ptr);
+
+            break;
+        }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
