@@ -31,6 +31,7 @@ extern "C" {
 #include "mock_ccimp_filesystem.h"
 #include "mock_ccimp_logging.h"
 #include "mock_ccimp_os.h"
+#include "mock_ccimp_reset.h"
 #include "mock_connector_api.h"
 #include "mock_ccimp_network_tcp.h"
 #include "mock_ccimp_network_udp.h"

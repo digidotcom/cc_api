@@ -114,6 +114,18 @@ typedef struct {
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+        struct {
+            ccapi_fw_service_t config;
+            struct {
+                ccapi_bool_t update_started;
+                uint8_t * chunk_data;
+                uint32_t total_size;
+                uint32_t head_offset;
+                uint32_t tail_offset;
+            } processing;
+        } firmware_update;
+#endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         struct {
             ccapi_receive_service_t user_callbacks;
@@ -261,6 +273,9 @@ ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_system_t filesystem_request, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_firmware_t const firmware_service_request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data);

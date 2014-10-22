@@ -10,17 +10,21 @@
 * =======================================================================
 */
 
-#ifndef _CCAPI_H_
-#define _CCAPI_H_
+#ifndef _MOCK_CCIMP_RESET_H_
+#define _MOCK_CCIMP_RESET_H_
 
-#include "ccimp/ccimp_types.h"
-#include "ccapi/ccapi_transport.h"
-#include "ccapi/ccapi_filesystem.h"
-#include "ccapi/ccapi_firmware_update.h"
-#include "ccapi/ccapi_receive.h"
-#include "ccapi/ccapi_send.h"
-#include "ccapi/ccapi_datapoints.h"
-#include "ccapi/ccapi_datapoints_binary.h"
-#include "ccapi/ccapi_init.h"
+enum {
+    MOCK_RESET_DISABLED,
+    MOCK_RESET_ENABLED	/* Mock disabled. Do reset normally */
+};
+
+void Mock_ccimp_hal_reset_create(void);
+void Mock_ccimp_hal_reset_destroy(void);
+void Mock_ccimp_hal_reset_expectAndReturn(void * retval);
+
+extern "C" {
+ccimp_status_t ccimp_hal_reset_real(void);
+
+}
 
 #endif

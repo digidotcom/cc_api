@@ -132,6 +132,30 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         }
     }
 #endif
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->service.firmware_update.config.target.count && ccapi_data->service.firmware_update.config.target.item != NULL)
+    {
+        unsigned char target_num;
+
+        for (target_num = 0; target_num < ccapi_data->service.firmware_update.config.target.count; target_num++)
+        {
+            if (ccapi_data->service.firmware_update.config.target.item[target_num].description != NULL)
+            {
+                ccapi_free((void *)ccapi_data->service.firmware_update.config.target.item[target_num].description);
+            }
+
+            if (ccapi_data->service.firmware_update.config.target.item[target_num].filespec != NULL)
+            {
+                ccapi_free((void*)ccapi_data->service.firmware_update.config.target.item[target_num].filespec);
+            }
+        }
+
+        ccapi_free(ccapi_data->service.firmware_update.config.target.item);
+
+        ccapi_data->service.firmware_update.config.target.count = 0;
+        ccapi_data->service.firmware_update.config.target.item = NULL;
+    }
+#endif
 
     reset_heap_ptr(&ccapi_data->config.device_type);
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
@@ -211,6 +235,9 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->initiate_action_syncr = NULL;
 
+    ccapi_data->config.firmware_supported = CCAPI_FALSE;
+    ccapi_data->service.firmware_update.config.target.count = 0;
+    ccapi_data->service.firmware_update.config.target.item = NULL;
     ccapi_data->config.receive_supported = CCAPI_FALSE;
 
     if (start == NULL)
@@ -239,7 +266,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
     ccapi_data->config.cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_data->config.firmware_supported = start->service.firmware == NULL ? CCAPI_FALSE : CCAPI_TRUE;
     ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -256,6 +282,69 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     {
         ccapi_data->config.filesystem_supported = CCAPI_FALSE;
     }
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (start->service.firmware != NULL)
+    {
+        /* Check required callbacks */
+        if (start->service.firmware->callback.data_cb == NULL)
+        {
+            error = CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK;
+            goto done;
+        }
+
+        /* If target info is wrong, we won't let CCAPI start */ 
+        if (start->service.firmware->target.item == NULL || start->service.firmware->target.count == 0)
+        {
+            error = CCAPI_START_ERROR_INVALID_FIRMWARE_INFO;
+            goto done;
+        }
+
+        {
+            size_t const list_size = start->service.firmware->target.count * sizeof *start->service.firmware->target.item;
+            unsigned char target_num;
+
+            ccapi_data->service.firmware_update.config.target.count = start->service.firmware->target.count;
+
+            ccapi_data->service.firmware_update.config.target.item = ccapi_malloc(list_size);
+            error = check_malloc(ccapi_data->service.firmware_update.config.target.item);
+            if (error != CCAPI_START_ERROR_NONE)
+                goto done;
+
+            memcpy(ccapi_data->service.firmware_update.config.target.item, start->service.firmware->target.item, list_size);
+
+            for (target_num = 0; target_num < start->service.firmware->target.count; target_num++)
+            {
+                size_t const description_size = strlen(start->service.firmware->target.item[target_num].description) + 1;
+                size_t const filespec_size = strlen(start->service.firmware->target.item[target_num].filespec) + 1;
+                char * description;
+                char * filespec;
+
+                description = ccapi_malloc(description_size);
+                error = check_malloc(description);
+                if (error != CCAPI_START_ERROR_NONE)
+                    goto done;
+                memcpy(description, start->service.firmware->target.item[target_num].description, description_size);
+                ccapi_data->service.firmware_update.config.target.item[target_num].description = description;
+
+                filespec = ccapi_malloc(filespec_size);
+                error = check_malloc(filespec);
+                if (error != CCAPI_START_ERROR_NONE)
+                    goto done;
+                memcpy(filespec, start->service.firmware->target.item[target_num].filespec, filespec_size);
+                ccapi_data->service.firmware_update.config.target.item[target_num].filespec = filespec;
+            }
+
+            ccapi_data->service.firmware_update.config.callback.request_cb = start->service.firmware->callback.request_cb;
+            ccapi_data->service.firmware_update.config.callback.data_cb = start->service.firmware->callback.data_cb;
+            ccapi_data->service.firmware_update.config.callback.cancel_cb = start->service.firmware->callback.cancel_cb;
+
+            ccapi_data->service.firmware_update.processing.chunk_data = NULL;
+            ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
+            ccapi_data->config.firmware_supported = CCAPI_TRUE;
+        }
+    }
+#endif
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
@@ -336,6 +425,8 @@ done:
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:
@@ -507,6 +598,8 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_DEVICEID:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_SYNCR_FAILED:

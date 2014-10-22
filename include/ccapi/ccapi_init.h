@@ -13,7 +13,6 @@
 #ifndef _CCAPI_INIT_H_
 #define _CCAPI_INIT_H_
 
-typedef void * ccapi_firmware_service_t; /* STUB */
 typedef void * ccapi_remote_config_service_t; /* STUB */
 typedef void * ccapi_cli_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
@@ -25,6 +24,8 @@ typedef enum {
     CCAPI_START_ERROR_INVALID_DEVICEID,
     CCAPI_START_ERROR_INVALID_URL,
     CCAPI_START_ERROR_INVALID_DEVICETYPE,
+    CCAPI_START_ERROR_INVALID_FIRMWARE_INFO,
+    CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK,
     CCAPI_START_ERROR_INSUFFICIENT_MEMORY,
     CCAPI_START_ERROR_THREAD_FAILED,
     CCAPI_START_ERROR_SYNCR_FAILED,
@@ -49,8 +50,8 @@ typedef struct {
         ccapi_status_callback_t status_callback;
         struct {
                 ccapi_receive_service_t * receive;
-                ccapi_firmware_service_t * firmware; /* EDPoTCP only */
-                ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDPoTCP only */
+                ccapi_fw_service_t * firmware; /* EDP/TCP only */
+                ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDP/TCP only */
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
         } service;
