@@ -193,6 +193,21 @@ typedef struct
 ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);
 #endif
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+typedef struct
+{
+    ccapi_bool_t response_required;
+    ccapi_bool_t more_data;
+    ccapi_string_info_t request_string_info;
+    ccapi_string_info_t response_string_info;
+    ccapi_bool_t response_handled_internally;
+    ccapi_string_info_t response_processing;
+    ccapi_cli_error_t cli_error;
+} ccapi_svc_cli_t;
+#endif
+#endif
+
 #if (defined CCIMP_DATA_POINTS_ENABLED)
 
 typedef enum {
@@ -286,6 +301,9 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 #endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
 void ccapi_logging_line(char const * const format, ...);

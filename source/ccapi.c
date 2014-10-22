@@ -1518,6 +1518,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             status = ccapi_data_service_handler(request_id.data_service_request, data, ccapi_data);
             break;
 #endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case connector_class_id_short_message:
+            status = ccapi_sm_service_handler(request_id.sm_request, data, ccapi_data);
+            break;
+#endif
 #if (defined CCIMP_DATA_POINTS_ENABLED)
         case connector_class_id_data_point:
             status = ccapi_data_points_handler(request_id.data_point_request, data, ccapi_data);
