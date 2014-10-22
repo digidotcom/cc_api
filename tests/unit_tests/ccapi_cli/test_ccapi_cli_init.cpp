@@ -12,13 +12,13 @@
 
 #include "test_helper_functions.h"
 
-static ccapi_cli_error_t test_cli_request_cb(ccapi_transport_t const transport, char const * const command, char const * * const output)
+static void test_cli_request_cb(ccapi_transport_t const transport, char const * const command, char const * * const output)
 {
     (void)transport;
     (void)command;
     (void)output;
 
-    return CCAPI_CLI_ERROR_NONE;
+    return;
 }
 
 TEST_GROUP(test_ccapi_cli_init)
