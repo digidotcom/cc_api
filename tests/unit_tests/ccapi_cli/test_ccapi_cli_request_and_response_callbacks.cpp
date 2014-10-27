@@ -459,6 +459,69 @@ TEST(test_ccapi_cli_request_callback, testTwoResponses)
     }
 }
 
+TEST(test_ccapi_cli_request_callback, testERROR_NO_CLI_SUPPORT)
+{
+    connector_request_id_t request;
+    connector_sm_cli_request_t ccfsm_cli_request;
+    connector_sm_cli_response_t ccfsm_cli_response;
+    connector_callback_status_t status;
+
+    char const exp_response[] = "CCAPI Error 1 (CCAPI_CLI_ERROR_NO_CLI_SUPPORT)";
+
+    #define MAX_RESPONSE_SIZE 100
+    char response[MAX_RESPONSE_SIZE];
+
+    ccapi_data_single_instance->config.cli_supported = CCAPI_FALSE;
+
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_command = TEST_COMMAND;
+    ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+    ccapi_cli_request_desired_output = NULL;
+    ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.user_context = NULL;
+    ccfsm_cli_request.buffer = TEST_COMMAND;
+    ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
+    ccfsm_cli_request.response_required = connector_true;
+    ccfsm_cli_request.more_data = connector_false;
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_error, status);
+
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_cli_request_cb_called);
+
+    ccfsm_cli_response.transport = connector_transport_tcp;
+    ccfsm_cli_response.user_context = ccfsm_cli_request.user_context;
+    ccfsm_cli_response.buffer = response;
+    ccfsm_cli_response.bytes_available = MAX_RESPONSE_SIZE;
+    ccfsm_cli_response.bytes_used = 0;
+    ccfsm_cli_response.more_data = connector_true;
+
+    request.sm_request = connector_request_id_sm_cli_response;
+    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_response, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    {
+        ccapi_svc_cli_t * svc_cli = (ccapi_svc_cli_t *)ccfsm_cli_request.user_context;
+        CHECK_EQUAL(svc_cli->cli_error, CCAPI_CLI_ERROR_NO_CLI_SUPPORT);
+
+        CHECK(svc_cli->request_string_info.string == NULL);
+
+        CHECK(svc_cli->response_string_info.string != NULL);
+        STRCMP_EQUAL((char*)svc_cli->response_string_info.string, (char*)exp_response);
+        CHECK_EQUAL(svc_cli->response_string_info.length, sizeof exp_response - 1);
+
+        CHECK(svc_cli->response_processing.length == 0);
+
+        CHECK(ccfsm_cli_response.bytes_used == sizeof exp_response - 1);
+        CHECK(ccfsm_cli_response.more_data == connector_false);
+    }
+
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_cli_request_cb_called);
+}
+
 /* TODO: Add following test if we decide to have a max_request_size field:
          TEST(test_ccapi_receive_data_callback, testRequestTooBig)
 */
