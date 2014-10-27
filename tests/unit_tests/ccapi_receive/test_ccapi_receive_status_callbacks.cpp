@@ -173,6 +173,42 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_WithResponse)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_status_cb_called);
 }
 
+TEST(test_ccapi_receive_status_callback, testERROR_NO_RECEIVE_SUPPORT)
+{
+    connector_request_id_t request;
+    connector_data_service_status_t ccfsm_receive_status_data;
+    connector_callback_status_t status;
+
+    ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)malloc(sizeof *svc_receive);
+    char * target = (char *)malloc(sizeof(TEST_TARGET));
+    memcpy(target, TEST_TARGET, sizeof(TEST_TARGET));
+    svc_receive->target = target;
+    svc_receive->user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive->user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
+    svc_receive->response_required = CCAPI_TRUE;  
+    svc_receive->response_buffer_info.buffer = NULL;
+    svc_receive->response_buffer_info.length = 0;
+    svc_receive->response_handled_internally = CCAPI_TRUE;
+    svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+
+    ccapi_receive_status_expected_target = TEST_TARGET;
+    ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_receive_status_expected_response = NULL;
+    ccapi_receive_status_expected_receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+
+    ccfsm_receive_status_data.transport = connector_transport_tcp;
+    ccfsm_receive_status_data.user_context = svc_receive;
+    ccfsm_receive_status_data.status = connector_data_service_status_t::connector_data_service_status_cancel;
+
+    request.data_service_request = connector_request_id_data_service_receive_status;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_status_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_status_data.user_context == svc_receive);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_status_cb_called);
+}
+
 TEST(test_ccapi_receive_status_callback, testERROR_STATUS_CANCEL)
 {
     connector_request_id_t request;

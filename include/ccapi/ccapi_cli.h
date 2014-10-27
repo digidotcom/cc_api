@@ -16,11 +16,13 @@
 typedef enum {
     CCAPI_CLI_ERROR_NONE,
     CCAPI_CLI_ERROR_NO_CLI_SUPPORT,
-    CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY
+    CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY,
+    CCAPI_CLI_ERROR_STATUS_CANCEL,
+    CCAPI_CLI_ERROR_STATUS_ERROR
 } ccapi_cli_error_t;
 
 typedef void (*ccapi_cli_request_cb_t)(ccapi_transport_t const transport, char const * const command, char const * * const output);
-typedef void (*ccapi_cli_finished_cb_t)(char const * * const output);
+typedef void (*ccapi_cli_finished_cb_t)(char * const output, ccapi_cli_error_t cli_error);
 
 
 typedef struct {

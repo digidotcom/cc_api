@@ -52,9 +52,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
         cli_request_ptr->user_context = svc_cli;
 
-/*
-        svc_cli->max_request_size = CCAPI_RECEIVE_NO_LIMIT;
-*/
         svc_cli->request_string_info.string = NULL;
         svc_cli->request_string_info.length = 0;
         svc_cli->response_string_info.string = NULL;
@@ -153,17 +150,11 @@ static void fill_internal_error(ccapi_svc_cli_t * svc_cli)
 #define ENUM_TO_CASE_ERR(name)  case name:  cli_error_str = #name; cli_error_str_len = sizeof #name - 1; break
             ENUM_TO_CASE_ERR(CCAPI_CLI_ERROR_NO_CLI_SUPPORT);
             ENUM_TO_CASE_ERR(CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY);
-			/*
-            ENUM_TO_CASE_ERR(CCAPI_CLI_ERROR_REQUEST_TOO_BIG);
-			*/
 #undef ENUM_TO_CASE_ERR
 
             case CCAPI_CLI_ERROR_NONE:
-			/*
             case CCAPI_CLI_ERROR_STATUS_CANCEL:
-            case CCAPI_CLI_ERROR_STATUS_TIMEOUT:
-            case CCAPI_CLI_ERROR_STATUS_SESSION_ERROR:
-			*/
+            case CCAPI_CLI_ERROR_STATUS_ERROR:
             {
                 static char const this_cli_error_str[] = "Unexpected error";
                 cli_error_str = (char *)this_cli_error_str;
@@ -225,8 +216,53 @@ static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_r
 done:
     return connector_status;
 }
-#endif /* (defined CONNECTOR_SM_CLI) */
 
+static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_svc_cli_t * const svc_cli = (ccapi_svc_cli_t *)status_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_cli != NULL, done);
+
+    ccapi_logging_line("ccapi_process_cli_status: ccapi_cli_error= %d,  status: %d", svc_cli->cli_error, status_ptr->status);
+
+    /* Prior reported errors by ccapi have priority over the ones reported by the cloud */
+    if (svc_cli->cli_error == CCAPI_CLI_ERROR_NONE)
+    {
+        switch (status_ptr->status)
+        {
+            case connector_sm_cli_status_success:
+                svc_cli->cli_error = CCAPI_CLI_ERROR_NONE;
+                break;
+            case connector_sm_cli_status_cancel:
+                svc_cli->cli_error = CCAPI_CLI_ERROR_STATUS_CANCEL;
+                break;
+            case connector_sm_cli_status_error:
+                svc_cli->cli_error = CCAPI_CLI_ERROR_STATUS_ERROR;
+                break;
+        }
+    }
+
+    /* Call the user so he can free allocated response memory and handle errors  */
+    if (ccapi_data->config.cli_supported && ccapi_data->service.cli.user_callbacks.finished_cb != NULL)
+    {
+       const ccapi_bool_t should_user_free_response_buffer = !svc_cli->response_handled_internally && svc_cli->response_required && svc_cli->response_string_info.string != NULL;
+       ccapi_data->service.cli.user_callbacks.finished_cb(should_user_free_response_buffer ? svc_cli->response_string_info.string : NULL, svc_cli->cli_error);
+    }
+
+    /* Free resources */
+    if (svc_cli->response_handled_internally == CCAPI_TRUE)
+    {
+        ccapi_logging_line("ccapi_process_cli_status: Freeing response buffer at %p", svc_cli->response_string_info.string);
+        ccapi_free(svc_cli->response_string_info.string);
+    }
+    ccapi_free(svc_cli);
+
+    connector_status = connector_callback_continue;
+
+done:
+    return connector_status;
+}
 
 static connector_callback_status_t ccapi_process_cli_response_length(connector_sm_cli_response_length_t * const length_ptr)
 {
@@ -242,6 +278,7 @@ static connector_callback_status_t ccapi_process_cli_response_length(connector_s
 done:
     return connector_status;
 }
+#endif /* (defined CONNECTOR_SM_CLI) */
 
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
@@ -266,16 +303,14 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
             break;
         }
-#endif
-
-        case connector_request_id_sm_ping_request:
-        case connector_request_id_sm_ping_response:
         case connector_request_id_sm_cli_status:
-        case connector_request_id_sm_more_data:
-        case connector_request_id_sm_opaque_response:
-        case connector_request_id_sm_config_request:
-            ASSERT_MSG(0);
+        {
+            connector_sm_cli_status_t const * const status_ptr = data;
+
+            connector_status = ccapi_process_cli_status(status_ptr, ccapi_data);
+
             break;
+        }
         case connector_request_id_sm_cli_response_length:
         {
             connector_sm_cli_response_length_t * const length_ptr = data;
@@ -284,6 +319,15 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
             break;
         }
+#endif
+
+        case connector_request_id_sm_ping_request:
+        case connector_request_id_sm_ping_response:
+        case connector_request_id_sm_more_data:
+        case connector_request_id_sm_opaque_response:
+        case connector_request_id_sm_config_request:
+            ASSERT_MSG(0);
+            break;
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
