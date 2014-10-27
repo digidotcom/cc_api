@@ -577,9 +577,10 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
     {
         case connector_request_id_config_device_id:
         {
-            connector_config_pointer_data_t * const device_id = data;
+            connector_config_pointer_data_t * const ccfsm_device_id = data;
+            uint8_t * const ccapi_device_id = (uint8_t *)ccapi_data->config.device_id;
 
-            device_id->data = ccapi_data->config.device_id;
+            ccfsm_device_id->data = ccapi_device_id;
             break;
         }
         case connector_request_id_config_device_cloud_url:
