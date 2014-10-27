@@ -191,7 +191,7 @@ static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_r
     }
 
     /* We initialize the response buffer for internal errors just once */
-    if (svc_cli->cli_error != CCAPI_CLI_ERROR_NONE && svc_cli->response_handled_internally == CCAPI_FALSE)
+    if (svc_cli->cli_error != CCAPI_CLI_ERROR_NONE && !svc_cli->response_handled_internally)
     {
         svc_cli->response_handled_internally = CCAPI_TRUE;
 
@@ -208,7 +208,7 @@ static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_r
  
         cli_response_ptr->bytes_used = bytes_to_send;
         svc_cli->response_processing.length -= cli_response_ptr->bytes_used;
-        cli_response_ptr->more_data = svc_cli->response_processing.length > 0 ? connector_true : connector_false;
+        cli_response_ptr->more_data = svc_cli->response_processing.length > 0;
     }
 
     connector_status = connector_callback_continue;
