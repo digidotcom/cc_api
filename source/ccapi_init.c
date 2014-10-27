@@ -236,8 +236,10 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->initiate_action_syncr = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     ccapi_data->service.firmware_update.config.target.count = 0;
     ccapi_data->service.firmware_update.config.target.item = NULL;
+#endif
     ccapi_data->config.receive_supported = CCAPI_FALSE;
 
     if (start == NULL)
