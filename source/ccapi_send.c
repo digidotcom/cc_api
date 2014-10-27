@@ -87,7 +87,7 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
             break;
     }
 
-    if (*p_transport_started == CCAPI_FALSE)
+    if (!*p_transport_started)
     {
         ccapi_logging_line("checkargs_send_common: Transport not started");
 
@@ -314,7 +314,7 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
         }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
-        if (send_info->svc_send.sending_file == CCAPI_TRUE)
+        if (send_info->svc_send.sending_file)
         {
             ccimp_status_t const ccimp_status = ccapi_close_file(ccapi_data, send_info->svc_send.file_handler);
 
@@ -373,7 +373,7 @@ ccapi_send_error_t ccxapi_send_data_common(ccapi_data_t * const ccapi_data, ccap
     setup_send_data(send_info, data, bytes);
 
     send_info->svc_send.hint = hint;
-    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.response_required = CCAPI_BOOL_TO_CONNECTOR_BOOL(with_reply);
     send_info->header.timeout_in_seconds = timeout;
 
     error = perform_send(ccapi_data, send_info);
@@ -456,7 +456,7 @@ ccapi_send_error_t ccxapi_send_file_common(ccapi_data_t * const ccapi_data, ccap
     }
 
     send_info->svc_send.hint = hint;
-    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.response_required = CCAPI_BOOL_TO_CONNECTOR_BOOL(with_reply);
     send_info->header.timeout_in_seconds = timeout;
 
     error = perform_send(ccapi_data, send_info);

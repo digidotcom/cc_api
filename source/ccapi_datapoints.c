@@ -1076,7 +1076,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
             break;
     }
 
-    if (p_transport_started == NULL || *p_transport_started == CCAPI_FALSE)
+    if (p_transport_started == NULL || !*p_transport_started)
     {
         ccapi_logging_line("ccapi_dp_send_collection: Transport not started");
         error = CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED;
@@ -1116,7 +1116,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         chain_collection_ccfsm_data_streams(dp_collection);
 
         ccfsm_request.request_id = NULL;
-        ccfsm_request.response_required = with_reply ? connector_true : connector_false;
+        ccfsm_request.response_required = CCAPI_BOOL_TO_CONNECTOR_BOOL(with_reply);
         ccfsm_request.timeout_in_seconds = timeout;
         ccfsm_request.transport = ccapi_to_connector_transport(transport);
         ccfsm_request.user_context = transaction_info;

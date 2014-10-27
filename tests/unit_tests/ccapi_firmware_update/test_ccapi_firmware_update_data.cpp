@@ -131,8 +131,8 @@ TEST(test_ccapi_fw_data_callback, testDataStartNotCalled)
     CHECK_EQUAL(connector_callback_error, status);
 
     WAIT_FOR_ASSERT();
-    ASSERT_IF_NOT_HIT_DO ("ccapi_data->service.firmware_update.processing.update_started == CCAPI_TRUE", "source/ccapi_firmware_update_handler.c", "ccapi_process_firmware_update_data", 
-                                                     FAIL_TEST("'update_started == CCAPI_TRUE' not hitted"));
+    ASSERT_IF_NOT_HIT_DO ("ccapi_data->service.firmware_update.processing.update_started", "source/ccapi_firmware_update_handler.c", "ccapi_process_firmware_update_data", 
+                                                     FAIL_TEST("'update_started' not hitted"));
 
     CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
 }

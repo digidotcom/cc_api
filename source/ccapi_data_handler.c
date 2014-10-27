@@ -27,7 +27,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
         ASSERT_MSG_GOTO(svc_send != NULL, done);
         bytes_expected_to_read = send_ptr->bytes_available > svc_send->bytes_remaining ? svc_send->bytes_remaining : send_ptr->bytes_available;
 
-        if (svc_send->sending_file == CCAPI_FALSE)
+        if (!svc_send->sending_file)
         {
             memcpy(send_ptr->buffer, svc_send->next_data, bytes_expected_to_read);
             svc_send->next_data = ((char *)svc_send->next_data) + bytes_expected_to_read;
@@ -220,7 +220,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->response_processing.length = 0;
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
 
-        svc_receive->response_required = target_ptr->response_required == connector_true ? CCAPI_TRUE : CCAPI_FALSE;
+        svc_receive->response_required = CCAPI_BOOL(target_ptr->response_required);
 
         /* CCAPI_RECEIVE_ERROR_CCAPI_STOPPED is not handled here. We assume that if we get a request
            means that ccapi is running. That error will be used in add_receive_target()
@@ -277,7 +277,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
                 user_accepts = CCAPI_TRUE;
             }
 
-            if (user_accepts == CCAPI_TRUE)
+            if (user_accepts)
             {
                 connector_status = connector_callback_continue;
             }
@@ -425,7 +425,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
     }
 
     /* We initialize the response buffer for internal errors just once */
-    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && svc_receive->response_handled_internally == CCAPI_FALSE)
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && !svc_receive->response_handled_internally)
     {
         svc_receive->response_handled_internally = CCAPI_TRUE;
 
@@ -499,7 +499,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     {
         ccapi_free(svc_receive->target);
     }
-    if (svc_receive->response_handled_internally == CCAPI_TRUE)
+    if (svc_receive->response_handled_internally)
     {
         ccapi_logging_line("ccapi_process_device_request_status: Freeing response buffer at %p", svc_receive->response_buffer_info.buffer);
         ccapi_free(svc_receive->response_buffer_info.buffer);
