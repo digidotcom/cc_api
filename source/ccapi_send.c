@@ -373,7 +373,7 @@ ccapi_send_error_t ccxapi_send_data_common(ccapi_data_t * const ccapi_data, ccap
     setup_send_data(send_info, data, bytes);
 
     send_info->svc_send.hint = hint;
-    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.response_required = CCFSM_BOOL(with_reply);
     send_info->header.timeout_in_seconds = timeout;
 
     error = perform_send(ccapi_data, send_info);
@@ -456,7 +456,7 @@ ccapi_send_error_t ccxapi_send_file_common(ccapi_data_t * const ccapi_data, ccap
     }
 
     send_info->svc_send.hint = hint;
-    send_info->header.response_required = with_reply ? connector_true : connector_false;
+    send_info->header.response_required = CCFSM_BOOL(with_reply);
     send_info->header.timeout_in_seconds = timeout;
 
     error = perform_send(ccapi_data, send_info);

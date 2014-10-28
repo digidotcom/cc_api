@@ -42,7 +42,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     ccapi_logging_line("ccapi_process_cli_request");
 
-    if(cli_request_ptr->user_context == NULL)
+    if (cli_request_ptr->user_context == NULL)
     {
         if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &svc_cli->cli_error))
         {
@@ -83,16 +83,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
         ccimp_realloc_data.new_size = svc_cli->request_string_info.length + cli_request_ptr->bytes_used; /* buffer is already null terminated */
 
-#if 0
-        if (svc_cli->max_request_size != CCAPI_RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_cli->max_request_size)
-        {
-            ccapi_logging_line("ccapi_process_cli_request: request excess max_request_size (%d) for this command", svc_cli->max_request_size);
-
-            svc_cli->cli_error = CCAPI_CLI_ERROR_REQUEST_TOO_BIG;
-            goto done;
-        }
-#endif
-
         ccimp_realloc_data.old_size = svc_cli->request_string_info.length;
         ccimp_realloc_data.ptr = svc_cli->request_string_info.string;
         if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
@@ -123,7 +113,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
         {
             svc_cli->response_string_info.length = strlen(svc_cli->response_string_info.string);
 
-            if (svc_cli->response_string_info.length)
+            if (svc_cli->response_string_info.length != 0)
             {
                 svc_cli->response_string_info.length++; /* Add the null terminator */
 
@@ -208,7 +198,7 @@ static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_r
  
         cli_response_ptr->bytes_used = bytes_to_send;
         svc_cli->response_processing.length -= cli_response_ptr->bytes_used;
-        cli_response_ptr->more_data = svc_cli->response_processing.length > 0;
+        cli_response_ptr->more_data = CCFSM_BOOL(svc_cli->response_processing.length > 0);
     }
 
     connector_status = connector_callback_continue;
@@ -246,7 +236,7 @@ static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_sta
     /* Call the user so he can free allocated response memory and handle errors  */
     if (ccapi_data->config.cli_supported && ccapi_data->service.cli.user_callbacks.finished_cb != NULL)
     {
-       const ccapi_bool_t should_user_free_response_buffer = !svc_cli->response_handled_internally && svc_cli->response_required && svc_cli->response_string_info.string != NULL;
+       ccapi_bool_t const should_user_free_response_buffer = !svc_cli->response_handled_internally && svc_cli->response_required && svc_cli->response_string_info.string != NULL;
        ccapi_data->service.cli.user_callbacks.finished_cb(should_user_free_response_buffer ? svc_cli->response_string_info.string : NULL, svc_cli->cli_error);
     }
 

@@ -47,6 +47,7 @@
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
+#define CCFSM_BOOL(c)   ((c) ? connector_true : connector_false)
 #define CCAPI_RUNNING(c) ((c) != NULL && (c)->thread.connector_run->status == CCAPI_THREAD_RUNNING)
 
 #define CCAPI_BOOL_TO_CONNECTOR_BOOL(a)     ((a) == CCAPI_TRUE ? connector_true : connector_false)
