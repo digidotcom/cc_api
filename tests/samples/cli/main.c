@@ -39,21 +39,6 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->service.rci = NULL;
 }
 
-static ccapi_bool_t app_receive_default_accept_cb(char const * const target, ccapi_transport_t const transport)
-{
-    ccapi_bool_t accept_target = CCAPI_TRUE;
-
-    printf("app_receive_default_accept_cb: target = '%s'. transport = %d\n", target, transport);
-
-    if (transport == CCAPI_TRANSPORT_SMS)
-    {
-        /* Don't accept requests comming throught SMS for not registered targets */
-        accept_target = CCAPI_FALSE;
-    }
-
-    return accept_target;
-}
-
 #define FIX_RESPONSE "This is the command echo: "
 
 static void app_cli_request_cb(ccapi_transport_t const transport, char const * const command, char const * * const output)
