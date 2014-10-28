@@ -21,6 +21,7 @@
 #include "ccapi/ccapi_send.h"
 #include "ccapi/ccapi_datapoints.h"
 #include "ccapi/ccapi_datapoints_binary.h"
+#include "ccapi/ccapi_cli.h"
 #include "ccapi/ccapi_init.h"
 
 #endif

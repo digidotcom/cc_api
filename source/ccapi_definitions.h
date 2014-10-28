@@ -47,6 +47,7 @@
 
 #define reset_heap_ptr(pp) do { if (*(pp) != NULL) { ccapi_free(*(pp)); *(pp) = NULL; } } while (0)
 #define CCAPI_BOOL(v)   (!!(v) ? CCAPI_TRUE : CCAPI_FALSE)
+#define CCFSM_BOOL(c)   ((c) ? connector_true : connector_false)
 #define CCAPI_RUNNING(c) ((c) != NULL && (c)->thread.connector_run->status == CCAPI_THREAD_RUNNING)
 
 #define CCAPI_BOOL_TO_CONNECTOR_BOOL(a)     ((a) == CCAPI_TRUE ? connector_true : connector_false)
@@ -133,6 +134,13 @@ typedef struct {
             ccapi_receive_target_t * target_list;
         } receive;
 #endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+        struct {
+            ccapi_cli_service_t user_callbacks;
+        } cli;
+#endif
+#endif
     } service;
     struct {
         ccapi_tcp_info_t * info;
@@ -184,6 +192,21 @@ typedef struct
 } ccapi_svc_receive_t;
 
 ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);
+#endif
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+typedef struct
+{
+    ccapi_bool_t response_required;
+    ccapi_bool_t more_data;
+    ccapi_string_info_t request_string_info;
+    ccapi_string_info_t response_string_info;
+    ccapi_bool_t response_handled_internally;
+    ccapi_string_info_t response_processing;
+    ccapi_cli_error_t cli_error;
+} ccapi_svc_cli_t;
+#endif
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
@@ -279,6 +302,9 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
 #endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
 void ccapi_logging_line(char const * const format, ...);

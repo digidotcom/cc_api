@@ -50,7 +50,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 
         send_ptr->bytes_used = bytes_expected_to_read;
         svc_send->bytes_remaining -= send_ptr->bytes_used;
-        send_ptr->more_data = svc_send->bytes_remaining > 0 ? connector_true : connector_false;
+        send_ptr->more_data = CCFSM_BOOL(svc_send->bytes_remaining > 0);
 
         status = connector_callback_continue;
     }
@@ -227,7 +227,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
          */
 
         {
-            const size_t target_size = strlen(target_ptr->target) + 1;
+            size_t const target_size = strlen(target_ptr->target) + 1;
 
             if (!valid_receive_malloc((void**)&svc_receive->target, target_size, &svc_receive->receive_error))
             {
@@ -442,7 +442,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
  
         reply_ptr->bytes_used = bytes_to_send;
         svc_receive->response_processing.length -= reply_ptr->bytes_used;
-        reply_ptr->more_data = svc_receive->response_processing.length > 0 ? connector_true : connector_false;
+        reply_ptr->more_data = CCFSM_BOOL(svc_receive->response_processing.length > 0);
     }
 
     connector_status = connector_callback_continue;
@@ -488,7 +488,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     /* Call the user so he can free allocated response memory and handle errors  */
     if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
     {
-       const ccapi_bool_t should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
+       ccapi_bool_t const should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
        svc_receive->user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
                            should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
