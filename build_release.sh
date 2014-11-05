@@ -57,7 +57,6 @@ cp $LOCAL_DEMO_DIR/Makefile_for_demo $OUTPUT_DEMO_DIR/Makefile
 
 # Deactivate RCI service and Firmware Update
 sed -i -e 's/#define CCIMP_RCI_SERVICE_ENABLED/#undef CCIMP_RCI_SERVICE_ENABLED/' $OUTPUT_CCAPI_DIR/include/custom/custom_connector_config.h
-sed -i -e 's/#define CCIMP_FIRMWARE_SERVICE_ENABLED/#undef CCIMP_FIRMWARE_SERVICE_ENABLED/' $OUTPUT_CCAPI_DIR/include/custom/custom_connector_config.h
 
 # Uncomment errors and leave default MAC and Vendor ID
 sed -i '/#define MAC_ADDRESS_STRING/c\#define MAC_ADDRESS_STRING      "112233:445566"' $OUTPUT_DEMO_DIR/main.c
