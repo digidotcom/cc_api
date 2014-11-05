@@ -65,6 +65,8 @@ CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_data_handler.c
 CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_datapoints_binary.c
 CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_filesystem.c
 CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_filesystem_handler.c
+CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_firmware_update_handler.c
+CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_cli_handler.c
 
 PLATFORM_SRCS := $(PLATFORM_DIR)/ccimp_filesystem.c
 PLATFORM_SRCS += $(PLATFORM_DIR)/ccimp_hal.c  
