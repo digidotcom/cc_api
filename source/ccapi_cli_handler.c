@@ -17,6 +17,9 @@
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 
 #if (defined CONNECTOR_SM_CLI)
+
+#include <stdio.h>
+
 static ccapi_bool_t valid_cli_malloc(void * * ptr, size_t size, ccapi_cli_error_t * const error)
 {
     ccapi_bool_t success;

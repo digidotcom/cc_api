@@ -15,6 +15,9 @@
 #include "ccapi_definitions.h"
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
+
+#include <stdio.h>
+
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t * const send_ptr)
 {
     connector_callback_status_t status = connector_callback_error;
