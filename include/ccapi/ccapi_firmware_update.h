@@ -14,15 +14,15 @@
 #define _CCAPI_FIRMWARE_UPDATE_H_
 
 /* We enum here values with meaning for the cloud for the request operation */
-typedef enum {                                             /* TODO: Remove comments when moved to documentation */
+typedef enum {
     CCAPI_FW_REQUEST_ERROR_NONE,
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED,                /**< Callback denied firmware update */
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_SIZE,          /**< Callback returns invalid size */
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_VERSION,       /**< Callback returns invalid version */
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_UNAUTHENTICATED,       /**< Device Cloud has not been authenticated */
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_NOT_ALLOWED,           /**< Device Cloud is not allowed to provided updates */
-    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT,  /**< Callback rejects firmware update */
-    CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR               /**< Callback encountered an error that precludes the firmware update */
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_SIZE,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_VERSION,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_UNAUTHENTICATED,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_NOT_ALLOWED,
+    CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT,
+    CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR
 } ccapi_fw_request_error_t;
 
 /* Any error reported to cloud different than 0 have the same result: Failed with status[12]: Aborted By Target */
@@ -33,12 +33,12 @@ typedef enum {
 } ccapi_fw_data_error_t;
 
 /* Values that cc_fsm will forward as a cause */
-typedef enum {                                      /* TODO: Remove comments when moved to documentation */
-    CCAPI_FW_CANCEL_USER_ABORT,                     /**< User aborted firmware update */
-    CCAPI_FW_CANCEL_DEVICE_ERROR,                   /**< Device or Device Cloud encountered an error in the download data */
-    CCAPI_FW_CANCEL_INVALID_OFFSET,                 /**< connector_request_id_firmware_download_data callback found invalid offset. */
-    CCAPI_FW_CANCEL_INVALID_DATA,                   /**< connector_request_id_firmware_download_data callback found invalid data block.*/
-    CCAPI_FW_CANCEL_HARDWARE_ERROR                  /**< Callback found permanent hardware error */
+typedef enum {
+    CCAPI_FW_CANCEL_USER_ABORT,
+    CCAPI_FW_CANCEL_DEVICE_ERROR,
+    CCAPI_FW_CANCEL_INVALID_OFFSET,
+    CCAPI_FW_CANCEL_INVALID_DATA,
+    CCAPI_FW_CANCEL_HARDWARE_ERROR
 } ccapi_fw_cancel_error_t;
 
 typedef ccapi_fw_request_error_t (*ccapi_fw_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
