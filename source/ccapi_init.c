@@ -388,6 +388,20 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
 #endif
 
+#if (defined CONNECTOR_RCI_SERVICE)
+    if (start->service.rci != NULL)
+    {
+        if (start->service.rci->rci_data == NULL)
+        {
+            error = CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK; /* TODO */
+            goto done;
+        }
+
+        ccapi_data->config.rci_supported = CCAPI_TRUE;
+        ccapi_data->service.rci.rci_data = start->service.rci->rci_data;
+    }
+#endif
+
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
     error = check_malloc(ccapi_data->connector_handle);
     if (error != CCAPI_START_ERROR_NONE)

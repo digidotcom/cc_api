@@ -163,6 +163,12 @@ typedef struct {
             ccapi_svc_receive_t * svc_receive;
         } receive;
 #endif
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+        struct {
+            ccapi_rci_data_t const * rci_data;
+            ccapi_rci_info_t rci_info;
+        } rci;
+#endif
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
         struct {
@@ -322,6 +328,9 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
 #endif
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
 void ccapi_logging_line(char const * const format, ...);
