@@ -268,7 +268,7 @@ done:
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
 
-ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_handle_t * const file_handler)
+ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_file_handle_t * const file_handler)
 {
     ccimp_fs_file_open_t ccimp_fs_file_open_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -286,8 +286,9 @@ ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * con
 
     ccimp_fs_file_open_data.path = local_path;
     ccimp_fs_file_open_data.flags = flags;
-    ccimp_fs_file_open_data.errnum = (ccimp_fs_errnum_t)NULL;
+    ccimp_fs_file_open_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
     ccimp_fs_file_open_data.imp_context = ccapi_data->service.file_system.imp_context;
+    ccimp_fs_file_open_data.handle = CCIMP_FILESYSTEM_FILE_HANDLE_NOT_INITIALIZED;
 
     do {
         ccimp_status = ccimp_fs_file_open(&ccimp_fs_file_open_data);
@@ -321,7 +322,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
+ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_file_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used)
 {
     ccimp_fs_file_read_t ccimp_fs_file_read_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -342,7 +343,7 @@ ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_
     ccimp_fs_file_read_data.handle = file_handler;
     ccimp_fs_file_read_data.buffer = data;
     ccimp_fs_file_read_data.bytes_available = bytes_available;
-    ccimp_fs_file_read_data.errnum = (ccimp_fs_errnum_t)NULL;
+    ccimp_fs_file_read_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
     ccimp_fs_file_read_data.imp_context = ccapi_data->service.file_system.imp_context;
 
     do {
@@ -378,7 +379,7 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle_t const file_handler)
+ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_file_handle_t const file_handler)
 {
     ccimp_fs_file_close_t ccimp_fs_file_close_data = {0};
     ccapi_bool_t loop_done = CCAPI_FALSE;
@@ -395,7 +396,7 @@ ccimp_status_t ccapi_close_file(ccapi_data_t * const ccapi_data, ccimp_fs_handle
     }
 
     ccimp_fs_file_close_data.handle = file_handler;
-    ccimp_fs_file_close_data.errnum = (ccimp_fs_errnum_t)NULL;
+    ccimp_fs_file_close_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
     ccimp_fs_file_close_data.imp_context = ccapi_data->service.file_system.imp_context;
 
     do {
@@ -436,7 +437,7 @@ ccimp_status_t ccapi_get_dir_entry_status(ccapi_data_t * const ccapi_data, char 
     }
 
     ccimp_fs_dir_entry_status_data.path = local_path;
-    ccimp_fs_dir_entry_status_data.errnum = (ccimp_fs_errnum_t)NULL;
+    ccimp_fs_dir_entry_status_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
     ccimp_fs_dir_entry_status_data.imp_context = ccapi_data->service.file_system.imp_context;
 
     do {

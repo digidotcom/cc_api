@@ -239,7 +239,7 @@ static ccapi_send_error_t setup_send_file(ccapi_data_t * const ccapi_data, ccapi
     }
 
     {
-        ccimp_fs_handle_t file_handler;
+        ccimp_fs_file_handle_t file_handler;
         ccimp_status_t const ccimp_status = ccapi_open_file(ccapi_data, local_path, CCIMP_FILE_O_RDONLY, &file_handler);
 
         if (ccimp_status != CCIMP_STATUS_OK)

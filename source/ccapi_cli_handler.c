@@ -319,6 +319,7 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         case connector_request_id_sm_more_data:
         case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:
+        case connector_request_id_sm_request_connect:
             ASSERT_MSG(0);
             break;
     }
