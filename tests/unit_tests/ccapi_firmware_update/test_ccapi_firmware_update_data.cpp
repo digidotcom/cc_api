@@ -15,7 +15,7 @@ static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{0,0,1,0}, "Test",        ".*\\.test",         32,                16         }   /* any *.test files */
     };
-static uint8_t firmware_count = asizeof(firmware_list);
+static uint8_t firmware_count = ARRAY_SIZE(firmware_list);
 
 #define TEST_TARGET 0
 

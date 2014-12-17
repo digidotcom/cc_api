@@ -401,7 +401,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const data)
 {
     my_filesystem_context_t * const fs_context = (my_filesystem_context_t *)data->imp_context;
     mock_scope_c("ccimp_fs_dir_open")->actualCall("ccimp_fs_dir_open")->withParameterOfType("ccimp_fs_dir_open_t", "data", (void *)data);
-    data->handle = (uintptr_t)&dir_handle;
+    data->handle = &dir_handle;
     *fs_context = 6;
     data->errnum = ENOTDIR;
     return (ccimp_status_t)mock_scope_c("ccimp_fs_dir_open")->returnValue().value.intValue;

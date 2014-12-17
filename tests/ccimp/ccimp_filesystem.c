@@ -233,7 +233,7 @@ ccimp_status_t ccimp_fs_dir_open(ccimp_fs_dir_open_t * const dir_open_data)
         dir_data_t * dir_data = malloc(sizeof *dir_data);
         if (dir_data != NULL)
         {
-            dir_open_data->handle = (ccimp_fs_handle_t)dir_data;
+            dir_open_data->handle = dir_data;
             dir_data->dirp = dirp;
         }
         else

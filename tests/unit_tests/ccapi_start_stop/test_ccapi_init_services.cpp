@@ -17,7 +17,7 @@ static ccapi_firmware_target_t firmware_list[] = {
         {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
         {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
     };
-static uint8_t firmware_count = asizeof(firmware_list);
+static uint8_t firmware_count = ARRAY_SIZE(firmware_list);
 
 static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {

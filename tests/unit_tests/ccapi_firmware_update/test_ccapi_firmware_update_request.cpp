@@ -18,7 +18,7 @@ static ccapi_firmware_target_t firmware_list[] = {
         {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 },  /* any *.a files */
         {{0,0,1,0}, "TestDefVals", ".*\\.k",            0,                 0 }   /* any *.a files */
     };
-static uint8_t firmware_count = asizeof(firmware_list);
+static uint8_t firmware_count = ARRAY_SIZE(firmware_list);
 
 static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {

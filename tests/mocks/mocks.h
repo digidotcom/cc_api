@@ -15,6 +15,7 @@
 
 #include "CppUTestExt/MockSupport.h"
 #include "CppUTest/CommandLineTestRunner.h"
+#include <cstdio>
 
 extern "C" {
 #include "ccapi_definitions.h"

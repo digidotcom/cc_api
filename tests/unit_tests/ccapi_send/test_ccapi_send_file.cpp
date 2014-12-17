@@ -230,9 +230,9 @@ TEST(test_ccapi_send_file_no_reply, testOpenSEND_ERROR_ACCESSING_FILE)
     {
         ccimp_fs_file_open_t ccimp_open_data;
 
-        ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
+        ccimp_open_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
         ccimp_open_data.imp_context = NULL;
-        ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
+        ccimp_open_data.handle = CCIMP_FILESYSTEM_FILE_HANDLE_NOT_INITIALIZED;
         ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
         ccimp_open_data.path = LOCAL_PATH;
 
@@ -275,9 +275,9 @@ TEST(test_ccapi_send_file_no_reply, testReadSEND_ERROR_ACCESSING_FILE)
 
         ccimp_fs_file_open_t ccimp_open_data;
 
-        ccimp_open_data.errnum = (ccimp_fs_errnum_t)NULL;
+        ccimp_open_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
         ccimp_open_data.imp_context = ccapi_data_single_instance->service.file_system.imp_context;
-        ccimp_open_data.handle = (ccimp_fs_handle_t)NULL;
+        ccimp_open_data.handle = CCIMP_FILESYSTEM_FILE_HANDLE_NOT_INITIALIZED;
         ccimp_open_data.flags = CCIMP_FILE_O_RDONLY;
         ccimp_open_data.path = LOCAL_PATH;
 
@@ -285,7 +285,7 @@ TEST(test_ccapi_send_file_no_reply, testReadSEND_ERROR_ACCESSING_FILE)
 
         ccimp_fs_file_read_t ccimp_read_data;
 
-        ccimp_read_data.errnum = (ccimp_fs_errnum_t)NULL;
+        ccimp_read_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
         ccimp_read_data.imp_context = &my_fs_context;
         ccimp_read_data.handle = 5;
         ccimp_read_data.bytes_available = sizeof data;
