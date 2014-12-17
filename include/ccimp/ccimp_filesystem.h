@@ -34,10 +34,6 @@ typedef int64_t ccimp_file_offset_t;
 typedef int32_t ccimp_file_offset_t;
 #endif
 
-typedef uintptr_t ccimp_fs_errnum_t;
-
-typedef uintptr_t ccimp_fs_handle_t;
-
 typedef enum
 {
     CCIMP_SEEK_SET,
@@ -63,14 +59,14 @@ typedef struct {
     ccimp_fs_errnum_t errnum;
     char const * CONST path;
     int CONST flags;
-    ccimp_fs_handle_t handle;
+    ccimp_fs_file_handle_t handle;
 } ccimp_fs_file_open_t;
 
 typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_file_handle_t CONST handle;
     void * CONST buffer;
     size_t CONST bytes_available;
     size_t bytes_used;
@@ -80,7 +76,7 @@ typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_file_handle_t CONST handle;
     void const * CONST buffer;
     size_t CONST bytes_available;
     size_t bytes_used;
@@ -90,14 +86,14 @@ typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_file_handle_t CONST handle;
 } ccimp_fs_file_close_t;
 
 typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_file_handle_t CONST handle;
     ccimp_file_offset_t CONST requested_offset;
     ccimp_file_offset_t resulting_offset;
     ccimp_fs_seek_origin_t CONST origin;
@@ -107,7 +103,7 @@ typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_file_handle_t CONST handle;
     ccimp_file_offset_t CONST length_in_bytes ;
 } ccimp_fs_file_truncate_t;
 
@@ -123,14 +119,14 @@ typedef struct
     void * imp_context;
     ccimp_fs_errnum_t errnum;
     char const * CONST path;
-    ccimp_fs_handle_t handle;
+    ccimp_fs_dir_handle_t handle;
 } ccimp_fs_dir_open_t;
 
 typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_dir_handle_t CONST handle;
     char * CONST entry_name;
     size_t CONST bytes_available;
 } ccimp_fs_dir_read_entry_t;
@@ -139,7 +135,7 @@ typedef struct
 {
     void * imp_context;
     ccimp_fs_errnum_t errnum;
-    ccimp_fs_handle_t CONST handle;
+    ccimp_fs_dir_handle_t CONST handle;
 } ccimp_fs_dir_close_t;
 
 typedef struct {

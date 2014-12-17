@@ -242,4 +242,15 @@
 #define PRIsize "u"
 #endif
 
+typedef void * ccimp_network_handle_t;
+
+typedef long int ccimp_fs_file_handle_t;
+#define CCIMP_FILESYSTEM_FILE_HANDLE_NOT_INITIALIZED    -1
+
+typedef void * ccimp_fs_dir_handle_t;
+#define CCIMP_FILESYSTEM_DIR_HANDLE_NOT_INITIALIZED     NULL
+
+typedef long int ccimp_fs_errnum_t;
+#define CCIMP_FILESYSTEM_ERRNUM_NONE    0
+
 #endif
