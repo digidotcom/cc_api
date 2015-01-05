@@ -244,6 +244,8 @@
 
 typedef void * ccimp_network_handle_t;
 
+#define CCIMP_NETWORK_HANDLE_NOT_INITIALIZED    NULL
+
 typedef long int ccimp_fs_file_handle_t;
 #define CCIMP_FILESYSTEM_FILE_HANDLE_NOT_INITIALIZED    -1
 
