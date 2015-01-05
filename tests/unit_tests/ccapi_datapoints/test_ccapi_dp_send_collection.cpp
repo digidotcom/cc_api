@@ -60,6 +60,8 @@ TEST_GROUP(test_ccapi_dp_send_collection)
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
         dp_error = ccapi_dp_add(dp_collection, STREAM_ID, 1);
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+        th_check_collection_dp_count(dp_collection, 2);
     }
 
     void teardown()
@@ -111,6 +113,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionNoMemory4Transaction)
     th_expect_malloc(sizeof (ccapi_dp_transaction_info_t), TH_MALLOC_RETURN_NULL, false);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INSUFFICIENT_MEMORY, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionCreateSyncrFailed)
@@ -125,6 +128,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCreateSyncrFailed)
 
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionCCFSMFailure)
@@ -158,6 +162,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCCFSMFailure)
 
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_INITIATE_ACTION_FAILED, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPOk)
@@ -180,6 +185,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPOk)
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
+    th_check_collection_dp_count(dp_collection, 0);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseCloudError)
@@ -197,6 +203,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseCloudError)
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_CLOUD_ERROR, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorUnavailable)
@@ -214,6 +221,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorUnavailabl
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_UNAVAILABLE, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorBadRequest)
@@ -231,6 +239,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPResponseErrorBadRequest
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_RESPONSE_BAD_REQUEST, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusCancel)
@@ -248,6 +257,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusCancel)
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_CANCEL, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusInvalidData)
@@ -265,6 +275,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusInvalidData)
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_INVALID_DATA, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusTimeout)
@@ -282,6 +293,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusTimeout)
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_TIMEOUT, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusSessionError)
@@ -299,6 +311,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionTCPStatusSessionError)
     th_prepare_ccfsm_datapoint_response_and_status(dp_collection, connector_transport_tcp, &ccfsm_response, &ccfsm_status);
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_STATUS_SESSION_ERROR, dp_error);
+    th_check_collection_dp_count(dp_collection, 2);
 }
 
 TEST(test_ccapi_dp_send_collection, testSendCollectionWithReplyTCPOk)

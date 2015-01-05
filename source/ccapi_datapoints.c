@@ -44,6 +44,7 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_c
     }
 
     collection->ccapi_data_stream_list = NULL;
+    collection->dp_count = 0;
 
 done:
     if (dp_collection != NULL)
@@ -932,6 +933,22 @@ done:
     return error;
 }
 
+ccapi_dp_error_t ccapi_dp_get_collection_points_count(ccapi_dp_collection_handle_t const dp_collection, uint32_t * const count)
+{
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+
+    if (dp_collection == NULL || count == NULL)
+    {
+        error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
+        goto done;
+    }
+
+    *count = dp_collection->dp_count;
+done:
+    return error;
+}
+
+
 ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char const * const stream_id, ...)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
@@ -984,6 +1001,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
         ASSERT(ccfsm_datapoint != NULL);
         ccfsm_datapoint->next = data_stream->ccfsm_data_stream->point;
         data_stream->ccfsm_data_stream->point = ccfsm_datapoint;
+        dp_collection->dp_count += 1;
     }
 
 done:
@@ -1158,6 +1176,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         free_data_points_from_collection(dp_collection);
+        dp_collection->dp_count = 0;
     }
 
 done:

@@ -440,3 +440,13 @@ void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_
 
     return ptr;
 }
+
+void th_check_collection_dp_count(ccapi_dp_collection_handle_t dp_collection, uint32_t const expected_value)
+{
+    ccapi_dp_error_t dp_error;
+    uint32_t points_count;
+
+    dp_error = ccapi_dp_get_collection_points_count(dp_collection, &points_count);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    CHECK_EQUAL(expected_value, points_count);
+}

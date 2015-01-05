@@ -13,7 +13,7 @@
 #ifndef _CCAPI_DATAPOINTS_H_
 #define _CCAPI_DATAPOINTS_H_
 
-#define CCAPI_NO_ELEVATION   -6378000 /* Negative maximum Earth's radio */
+#define CCAPI_NO_ELEVATION   -6378000 /* Negative maximum Earth's radius */
 
 #define CCAPI_DP_KEY_DATA_INT32     "int32"
 #define CCAPI_DP_KEY_DATA_INT64     "int64"
@@ -77,6 +77,7 @@ ccapi_dp_error_t ccapi_dp_send_collection_with_reply(ccapi_transport_t transport
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string);
 ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id, char const * const format_string, char const * const units, char const * const forward_to);
 ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection_handle_t const dp_collection, char const * const stream_id);
+ccapi_dp_error_t ccapi_dp_get_collection_points_count(ccapi_dp_collection_handle_t const collection, uint32_t * const count);
 
 ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_handle_t const collection, char const * const stream_id, ...);
 
