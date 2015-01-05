@@ -285,6 +285,8 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsig
             case CCAPI_DP_ARG_DATA_FLOAT:
             case CCAPI_DP_ARG_DATA_DOUBLE:
             case CCAPI_DP_ARG_DATA_STRING:
+            case CCAPI_DP_ARG_DATA_JSON:
+            case CCAPI_DP_ARG_DATA_GEOJSON:
                 if (type_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'type' keyword");
@@ -433,6 +435,14 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
         {
             temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_STRING;
         }
+        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_JSON) == 0)
+        {
+            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_JSON;
+        }
+        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_GEOJSON) == 0)
+        {
+            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_GEOJSON;
+        }
         else if (strcmp(keyword, CCAPI_DP_KEY_TS_EPOCH) == 0)
         {
             temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_TIME_EPOCH;
@@ -514,6 +524,14 @@ static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_a
             case CCAPI_DP_ARG_DATA_STRING:
                 found = CCAPI_TRUE;
                 type = connector_data_point_type_string;
+                break;
+            case CCAPI_DP_ARG_DATA_JSON:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_json;
+                break;
+            case CCAPI_DP_ARG_DATA_GEOJSON:
+                found = CCAPI_TRUE;
+                type = connector_data_point_type_geojson;
                 break;
             case CCAPI_DP_ARG_TIME_EPOCH:
             case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
@@ -855,6 +873,8 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
             }
 
             case CCAPI_DP_ARG_DATA_STRING:
+            case CCAPI_DP_ARG_DATA_JSON:
+            case CCAPI_DP_ARG_DATA_GEOJSON:
             {
                 char const * const string_dp = va_arg(arg_list, char const * const);
 

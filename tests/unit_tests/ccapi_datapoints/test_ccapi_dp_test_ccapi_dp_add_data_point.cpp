@@ -177,6 +177,60 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddDouble)
     CHECK_EQUAL(double_number, ccfsm_data_point->data.element.native.double_value);
 }
 
+TEST(test_ccapi_dp_add_data_point, testDataPointAddJson)
+{
+    ccapi_dp_error_t dp_error;
+    char const * const json = "{Data:1}";
+
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, "stream1", CCAPI_DP_KEY_DATA_JSON);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add(dp_collection, "stream1", json);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    CHECK(dp_collection_spy->ccapi_data_stream_list != NULL);
+    CHECK(dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream->point != NULL);
+    CHECK(dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream->point->next == NULL);
+
+    connector_data_stream_t * ccfsm_data_stream = dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream;
+    connector_data_point_t * ccfsm_data_point = ccfsm_data_stream->point;
+
+    CHECK(connector_data_point_type_json == ccfsm_data_stream->type);
+    CHECK(connector_data_point_t::data::connector_data_type_native == ccfsm_data_point->data.type);
+    CHECK(connector_data_point_t::location::connector_location_type_ignore == ccfsm_data_point->location.type);
+    CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
+    CHECK(connector_data_point_t::time::connector_time_cloud == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
+
+    STRCMP_EQUAL(json, ccfsm_data_point->data.element.native.string_value);
+}
+
+TEST(test_ccapi_dp_add_data_point, testDataPointAddGeoJson)
+{
+    ccapi_dp_error_t dp_error;
+    char const * const geojson = "{Data:1}";
+
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, "stream1", CCAPI_DP_KEY_DATA_GEOJSON);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add(dp_collection, "stream1", geojson);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    CHECK(dp_collection_spy->ccapi_data_stream_list != NULL);
+    CHECK(dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream->point != NULL);
+    CHECK(dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream->point->next == NULL);
+
+    connector_data_stream_t * ccfsm_data_stream = dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream;
+    connector_data_point_t * ccfsm_data_point = ccfsm_data_stream->point;
+
+    CHECK(connector_data_point_type_geojson == ccfsm_data_stream->type);
+    CHECK(connector_data_point_t::data::connector_data_type_native == ccfsm_data_point->data.type);
+    CHECK(connector_data_point_t::location::connector_location_type_ignore == ccfsm_data_point->location.type);
+    CHECK(connector_data_point_t::quality::connector_quality_type_ignore == ccfsm_data_point->quality.type);
+    CHECK(connector_data_point_t::time::connector_time_cloud == ccfsm_data_point->time.source);
+    CHECK(NULL == ccfsm_data_point->description);
+
+    STRCMP_EQUAL(geojson, ccfsm_data_point->data.element.native.string_value);
+}
+
 TEST(test_ccapi_dp_add_data_point, testDataPointAddStringTimeISO)
 {
     ccapi_dp_error_t dp_error;

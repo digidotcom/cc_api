@@ -20,6 +20,8 @@
 #define CCAPI_DP_KEY_DATA_FLOAT     "float"
 #define CCAPI_DP_KEY_DATA_DOUBLE    "double"
 #define CCAPI_DP_KEY_DATA_STRING    "string"
+#define CCAPI_DP_KEY_DATA_JSON      "json"
+#define CCAPI_DP_KEY_DATA_GEOJSON   "geojson"
 
 #define CCAPI_DP_KEY_TS_EPOCH       "ts_epoch"
 #define CCAPI_DP_KEY_TS_EPOCHMS     "ts_epoch_ms"
