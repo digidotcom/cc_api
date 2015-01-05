@@ -940,7 +940,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
     if (dp_collection == NULL)
     {
         error = CCAPI_DP_ERROR_INVALID_ARGUMENT;
-        goto done;
+        goto error;
     }
 
 

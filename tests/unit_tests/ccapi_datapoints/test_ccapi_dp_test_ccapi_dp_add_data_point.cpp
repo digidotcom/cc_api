@@ -35,7 +35,7 @@ TEST_GROUP(test_ccapi_dp_add_data_point)
     }
 };
 
-IGNORE_TEST(test_ccapi_dp_add_data_point, testDataPointAddInvalidArgument)
+TEST(test_ccapi_dp_add_data_point, testDataPointAddInvalidArgument)
 {
     ccapi_dp_error_t dp_error;
 
