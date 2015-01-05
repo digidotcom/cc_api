@@ -298,9 +298,9 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsig
                     type_found = CCAPI_TRUE;
                 }
                 break;
-            case CCAPI_DP_ARG_TIME_EPOCH:
-            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
-            case CCAPI_DP_ARG_TIME_ISO8601:
+            case CCAPI_DP_ARG_TS_EPOCH:
+            case CCAPI_DP_ARG_TS_EPOCHMS:
+            case CCAPI_DP_ARG_TS_ISO8601:
                 if (timestamp_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous 'timestamp' keyword");
@@ -312,7 +312,7 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsig
                     timestamp_found = CCAPI_TRUE;
                 }
                 break;
-            case CCAPI_DP_ARG_LOC:
+            case CCAPI_DP_ARG_LOCATION:
                 if (location_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_LOCATION "' order");
@@ -324,7 +324,7 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsig
                     location_found = CCAPI_TRUE;
                 }
                 break;
-            case CCAPI_DP_ARG_QUAL:
+            case CCAPI_DP_ARG_QUALITY:
                 if (quality_found)
                 {
                     ccapi_logging_line("ccapi_data_stream: ambiguous '" CCAPI_DP_KEY_QUALITY "' order");
@@ -389,6 +389,26 @@ done:
     return token_start;
 }
 
+static struct {
+  char const * key;
+  ccapi_dp_argument_t arg;
+} const key_arg_map[] = {
+#define INIT_KAM_ITEM(type) { CCAPI_DP_KEY_ ## type, CCAPI_DP_ARG_ ## type }
+  INIT_KAM_ITEM(DATA_INT32),
+  INIT_KAM_ITEM(DATA_INT64),
+  INIT_KAM_ITEM(DATA_FLOAT),
+  INIT_KAM_ITEM(DATA_DOUBLE),
+  INIT_KAM_ITEM(DATA_STRING),
+  INIT_KAM_ITEM(DATA_JSON),
+  INIT_KAM_ITEM(DATA_GEOJSON),
+  INIT_KAM_ITEM(TS_EPOCH),
+  INIT_KAM_ITEM(TS_EPOCHMS),
+  INIT_KAM_ITEM(TS_ISO8601),
+  INIT_KAM_ITEM(LOCATION),
+  INIT_KAM_ITEM(QUALITY)
+#undef INIT_KAM_ITEM
+};
+
 static ccapi_dp_error_t get_arg_list_from_format_string(char const * const format_string, ccapi_dp_argument_t * * const arg_list, unsigned int * const arg_list_count)
 {
     static char const * const keyword_separator = " ";
@@ -409,61 +429,26 @@ static ccapi_dp_error_t get_arg_list_from_format_string(char const * const forma
     keyword = get_next_keyword(&next_keyword, format_string_copy, keyword_separator);
     while (keyword != NULL)
     {
+        unsigned int const items = ARRAY_SIZE(key_arg_map);
+        unsigned int i;
+
         if (temp_arg_list_count > 3)
         {
             ccapi_logging_line("ccapi_data_stream: too many arguments '%s'", format_string);
             error = CCAPI_DP_ERROR_INVALID_FORMAT;
             goto done;
         }
-        if (strcmp(keyword, CCAPI_DP_KEY_DATA_INT32) == 0)
+
+        for (i = 0; i < items; i++)
         {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_INT32;
+            if (strcmp(keyword, key_arg_map[i].key) == 0)
+            {
+                temp_arg_list[temp_arg_list_count++] = key_arg_map[i].arg;
+                break;
+            }
         }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_INT64) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_INT64;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_FLOAT) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_FLOAT;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_DOUBLE) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_DOUBLE;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_STRING) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_STRING;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_JSON) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_JSON;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_DATA_GEOJSON) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_DATA_GEOJSON;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_TS_EPOCH) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_TIME_EPOCH;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_TS_EPOCHMS) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] =  CCAPI_DP_ARG_TIME_EPOCH_MSEC;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_TS_ISO8601) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] =  CCAPI_DP_ARG_TIME_ISO8601;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_LOCATION) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] =  CCAPI_DP_ARG_LOC;
-        }
-        else if (strcmp(keyword, CCAPI_DP_KEY_QUALITY) == 0)
-        {
-            temp_arg_list[temp_arg_list_count++] =  CCAPI_DP_ARG_QUAL;
-        }
-        else
+
+        if (i == items)
         {
             ccapi_logging_line("ccapi_data_stream: invalid keyword '%s'", keyword);
             temp_arg_list[temp_arg_list_count++] = CCAPI_DP_ARG_INVALID;
@@ -533,11 +518,11 @@ static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_a
                 found = CCAPI_TRUE;
                 type = connector_data_point_type_geojson;
                 break;
-            case CCAPI_DP_ARG_TIME_EPOCH:
-            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
-            case CCAPI_DP_ARG_TIME_ISO8601:
-            case CCAPI_DP_ARG_LOC:
-            case CCAPI_DP_ARG_QUAL:
+            case CCAPI_DP_ARG_TS_EPOCH:
+            case CCAPI_DP_ARG_TS_EPOCHMS:
+            case CCAPI_DP_ARG_TS_ISO8601:
+            case CCAPI_DP_ARG_LOCATION:
+            case CCAPI_DP_ARG_QUALITY:
             case CCAPI_DP_ARG_INVALID:
                 break;
         }
@@ -889,7 +874,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 break;
             }
 
-            case CCAPI_DP_ARG_TIME_EPOCH:
+            case CCAPI_DP_ARG_TS_EPOCH:
             {
                 ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
@@ -899,7 +884,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 break;
             }
 
-            case CCAPI_DP_ARG_TIME_EPOCH_MSEC:
+            case CCAPI_DP_ARG_TS_EPOCHMS:
             {
                 ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
@@ -908,7 +893,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 break;
             }
 
-            case CCAPI_DP_ARG_TIME_ISO8601:
+            case CCAPI_DP_ARG_TS_ISO8601:
             {
                 ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 
@@ -923,7 +908,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 }
                 break;
             }
-            case CCAPI_DP_ARG_LOC:
+            case CCAPI_DP_ARG_LOCATION:
             {
                 ccapi_location_t const * const location = va_arg(arg_list, ccapi_location_t *);
 
@@ -933,7 +918,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 ccfsm_datapoint->location.value.native.elevation = location->elevation;
                 break;
             }
-            case CCAPI_DP_ARG_QUAL:
+            case CCAPI_DP_ARG_QUALITY:
             {
                 ccfsm_datapoint->quality.type = connector_quality_type_native;
                 ccfsm_datapoint->quality.value = (int)va_arg(arg_list, int32_t);
