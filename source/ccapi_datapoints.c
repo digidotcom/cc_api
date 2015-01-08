@@ -1055,6 +1055,7 @@ static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_co
         ccfsm_data_stream->point = NULL;
         current_data_stream = current_data_stream->next;
     }
+    dp_collection->dp_count = 0;
 }
 
 static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t const with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
@@ -1176,7 +1177,6 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         free_data_points_from_collection(dp_collection);
-        dp_collection->dp_count = 0;
     }
 
 done:
