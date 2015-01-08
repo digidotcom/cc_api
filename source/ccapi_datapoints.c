@@ -55,9 +55,10 @@ done:
     return error;
 }
 
-static void free_data_points_in_data_stream(connector_data_stream_t * data_stream)
+static unsigned int free_data_points_in_data_stream(connector_data_stream_t * data_stream)
 {
     connector_data_point_t * data_point = data_stream->point;
+    unsigned int dp_count = 0;
 
     while (data_point != NULL)
     {
@@ -95,7 +96,10 @@ static void free_data_points_in_data_stream(connector_data_stream_t * data_strea
         ccapi_free(data_point);
 
         data_point = next_point;
+        dp_count++;
     }
+
+    return dp_count;
 }
 
 static void free_ccfsm_stream(connector_data_stream_t * const ccfsm_stream_info)
@@ -752,6 +756,8 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
         {
             if (strcmp(current_data_stream->ccfsm_data_stream->stream_id, stream_id) == 0)
             {
+                unsigned int dp_freed_count;
+
                 found = CCAPI_TRUE;
 
                 if (previous_data_stream == NULL)
@@ -763,7 +769,8 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
                     previous_data_stream->next = current_data_stream->next;
                 }
 
-                free_data_points_in_data_stream(current_data_stream->ccfsm_data_stream);
+                dp_freed_count = free_data_points_in_data_stream(current_data_stream->ccfsm_data_stream);
+                dp_collection->dp_count -= dp_freed_count;
                 free_ccapi_data_stream(current_data_stream);
             }
 
