@@ -13,8 +13,6 @@
 #ifndef _CCAPI_DATAPOINTS_H_
 #define _CCAPI_DATAPOINTS_H_
 
-#define CCAPI_NO_ELEVATION   -6378000 /* Negative maximum Earth's radius */
-
 #define CCAPI_DP_KEY_DATA_INT32     "int32"
 #define CCAPI_DP_KEY_DATA_INT64     "int64"
 #define CCAPI_DP_KEY_DATA_FLOAT     "float"
