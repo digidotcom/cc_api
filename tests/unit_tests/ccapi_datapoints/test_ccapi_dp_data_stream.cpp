@@ -305,7 +305,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpoch)
     char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCH;
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
-    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH;
+    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TS_EPOCH;
     unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
@@ -336,10 +336,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpoch)
 TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpochMsec)
 {
     char const * const stream_id = "stream_1";
-    char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCHMS;
+    char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCH_MS;
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
-    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TIME_EPOCH_MSEC;
+    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TS_EPOCH_MS;
     unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
@@ -371,7 +371,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampISO8601)
     char const * const stream_id = "myISO8601-stream";
     char const * const format_string = CCAPI_DP_KEY_TS_ISO8601 " " CCAPI_DP_KEY_DATA_STRING;
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
-    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
+    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TS_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_STRING;
     unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
@@ -405,7 +405,7 @@ TEST(test_ccapi_dp_data_stream, testDataStreamLocation)
     char const * const format_string = CCAPI_DP_KEY_DATA_INT32 " " CCAPI_DP_KEY_LOCATION;
     connector_data_point_type_t const expected_type = connector_data_point_type_integer;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_INT32;
-    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
+    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOCATION;
     unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
@@ -438,8 +438,8 @@ TEST(test_ccapi_dp_data_stream, testDataStreamQuality)
     char const * const format_string = CCAPI_DP_KEY_DATA_FLOAT " " CCAPI_DP_KEY_LOCATION " " CCAPI_DP_KEY_QUALITY;
     connector_data_point_type_t const expected_type = connector_data_point_type_float;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_FLOAT;
-    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOC;
-    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_QUAL;
+    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_LOCATION;
+    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_QUALITY;
     unsigned int const expected_arg_count = 3;
     ccapi_dp_error_t dp_error;
 
@@ -471,10 +471,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamExtraFull)
     char const * const forward_to = "Kelvin";
 
     connector_data_point_type_t const expected_type = connector_data_point_type_float;
-    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
+    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TS_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
-    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
-    ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
+    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOCATION;
+    ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUALITY;
     unsigned int const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
@@ -511,10 +511,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamFull)
     char const * const stream_id = "temperature";
 
     connector_data_point_type_t const expected_type = connector_data_point_type_float;
-    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TIME_ISO8601;
+    ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_TS_ISO8601;
     ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_DATA_FLOAT;
-    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOC;
-    ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUAL;
+    ccapi_dp_argument_t const expected_arg_3 = CCAPI_DP_ARG_LOCATION;
+    ccapi_dp_argument_t const expected_arg_4 = CCAPI_DP_ARG_QUALITY;
     unsigned int const expected_arg_count = 4;
     ccapi_dp_error_t dp_error;
 
