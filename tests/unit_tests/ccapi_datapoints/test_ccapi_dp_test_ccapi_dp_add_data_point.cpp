@@ -101,7 +101,7 @@ TEST(test_ccapi_dp_add_data_point, testDataPointAddInt64LocEpochMS)
 
     timestamp.epoch_msec = 1399550817000;
 
-    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, "stream1", CCAPI_DP_KEY_DATA_INT64 " " CCAPI_DP_KEY_LOCATION " " CCAPI_DP_KEY_TS_EPOCHMS);
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, "stream1", CCAPI_DP_KEY_DATA_INT64 " " CCAPI_DP_KEY_LOCATION " " CCAPI_DP_KEY_TS_EPOCH_MS);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
 
     dp_error = ccapi_dp_add(dp_collection, "stream1", integer, &location, &timestamp);

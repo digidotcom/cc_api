@@ -299,7 +299,7 @@ static ccapi_bool_t valid_arg_list(ccapi_dp_argument_t const * const list, unsig
                 }
                 break;
             case CCAPI_DP_ARG_TS_EPOCH:
-            case CCAPI_DP_ARG_TS_EPOCHMS:
+            case CCAPI_DP_ARG_TS_EPOCH_MS:
             case CCAPI_DP_ARG_TS_ISO8601:
                 if (timestamp_found)
                 {
@@ -402,7 +402,7 @@ static struct {
   INIT_KAM_ITEM(DATA_JSON),
   INIT_KAM_ITEM(DATA_GEOJSON),
   INIT_KAM_ITEM(TS_EPOCH),
-  INIT_KAM_ITEM(TS_EPOCHMS),
+  INIT_KAM_ITEM(TS_EPOCH_MS),
   INIT_KAM_ITEM(TS_ISO8601),
   INIT_KAM_ITEM(LOCATION),
   INIT_KAM_ITEM(QUALITY)
@@ -519,7 +519,7 @@ static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_a
                 type = connector_data_point_type_geojson;
                 break;
             case CCAPI_DP_ARG_TS_EPOCH:
-            case CCAPI_DP_ARG_TS_EPOCHMS:
+            case CCAPI_DP_ARG_TS_EPOCH_MS:
             case CCAPI_DP_ARG_TS_ISO8601:
             case CCAPI_DP_ARG_LOCATION:
             case CCAPI_DP_ARG_QUALITY:
@@ -884,7 +884,7 @@ static ccapi_dp_error_t parse_argument_list_and_create_data_point(ccapi_dp_data_
                 break;
             }
 
-            case CCAPI_DP_ARG_TS_EPOCHMS:
+            case CCAPI_DP_ARG_TS_EPOCH_MS:
             {
                 ccapi_timestamp_t const * const timestamp = va_arg(arg_list, ccapi_timestamp_t *);
 

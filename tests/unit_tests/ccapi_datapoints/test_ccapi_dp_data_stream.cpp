@@ -336,10 +336,10 @@ TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpoch)
 TEST(test_ccapi_dp_data_stream, testDataStreamTimeStampEpochMsec)
 {
     char const * const stream_id = "stream_1";
-    char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCHMS;
+    char const * const format_string = CCAPI_DP_KEY_DATA_STRING " " CCAPI_DP_KEY_TS_EPOCH_MS;
     connector_data_point_type_t const expected_type = connector_data_point_type_string;
     ccapi_dp_argument_t const expected_arg_1 = CCAPI_DP_ARG_DATA_STRING;
-    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TS_EPOCHMS;
+    ccapi_dp_argument_t const expected_arg_2 = CCAPI_DP_ARG_TS_EPOCH_MS;
     unsigned int const expected_arg_count = 2;
     ccapi_dp_error_t dp_error;
 
