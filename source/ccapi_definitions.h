@@ -99,6 +99,31 @@ typedef struct ccapi_receive_target
     size_t max_request_size;
     struct ccapi_receive_target * next;
 } ccapi_receive_target_t;
+
+typedef enum {
+    CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA,
+    CCAPI_RECEIVE_USERCALLBACK_DATA_READY,
+    CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED,
+    CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED,
+} ccapi_receive_usercallback_status_t;
+
+typedef struct
+{
+    char * target;
+    connector_transport_t transport;
+    ccapi_bool_t response_required;
+    struct {
+        ccapi_receive_data_cb_t data_cb;
+        ccapi_receive_status_cb_t status_cb;
+    } user_callbacks;
+    size_t max_request_size;
+    ccapi_buffer_info_t request_buffer_info;
+    ccapi_buffer_info_t response_buffer_info;
+    ccapi_bool_t response_handled_internally;
+    ccapi_buffer_info_t response_processing;
+    ccapi_receive_error_t receive_error;
+    ccapi_receive_usercallback_status_t usercallback_status;
+} ccapi_svc_receive_t;
 #endif
 
 typedef struct {
@@ -106,6 +131,7 @@ typedef struct {
     ccapi_config_t config;
     struct {
         ccapi_thread_info_t * connector_run;
+        ccapi_thread_info_t * receive;
     } thread;
     void * initiate_action_syncr;
     void * file_system_syncr;
@@ -132,6 +158,7 @@ typedef struct {
             ccapi_receive_service_t user_callbacks;
             void * receive_syncr;
             ccapi_receive_target_t * target_list;
+            ccapi_svc_receive_t * svc_receive;
         } receive;
 #endif
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
@@ -174,22 +201,6 @@ typedef struct
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
 } ccapi_svc_send_t;
-
-typedef struct
-{
-    char * target;
-    ccapi_bool_t response_required;
-    struct {
-        ccapi_receive_data_cb_t data_cb;
-        ccapi_receive_status_cb_t status_cb;
-    } user_callbacks;
-    size_t max_request_size;
-    ccapi_buffer_info_t request_buffer_info;
-    ccapi_buffer_info_t response_buffer_info;
-    ccapi_bool_t response_handled_internally;
-    ccapi_buffer_info_t response_processing;
-    ccapi_receive_error_t receive_error;
-} ccapi_svc_receive_t;
 
 ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);
 #endif
@@ -273,6 +284,7 @@ typedef struct {
 extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;
 
+void ccapi_receive_thread(void * const argument);
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);

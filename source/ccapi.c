@@ -548,6 +548,55 @@ done:
     return;
 }
 
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+void ccapi_receive_thread(void * const argument)
+{
+    ccapi_data_t * const ccapi_data = argument;
+
+    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
+
+    ccapi_data->thread.receive->status = CCAPI_THREAD_RUNNING;
+    while (ccapi_data->thread.receive->status == CCAPI_THREAD_RUNNING)
+    {
+        ccapi_svc_receive_t * const svc_receive = ccapi_data->service.receive.svc_receive;
+        if (svc_receive != NULL)
+        {
+            switch (svc_receive->usercallback_status)
+            {
+                case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
+                case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
+                {
+                    break;
+                }
+                case CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED:
+                {
+                    ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
+
+                    /* Pass data to the user and get possible response from user */ 
+                    svc_receive->user_callbacks.data_cb(svc_receive->target, svc_receive->transport, 
+                                                                       &svc_receive->request_buffer_info, 
+                                                                       svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
+                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED;
+                    break;
+                }
+                case CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED:
+                {
+                    break;
+                }
+            }
+        }
+
+        ccimp_os_yield();
+    }
+    ASSERT_MSG_GOTO(ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_STOP, done);
+
+    ccapi_data->thread.receive->status = CCAPI_THREAD_NOT_STARTED;
+done:
+    return;
+}
+#endif
+
 connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_status_t const ccimp_status)
 {
     connector_callback_status_t callback_status = connector_callback_abort;

@@ -211,6 +211,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         target_ptr->user_context = svc_receive;
 
         svc_receive->target = NULL;
+        svc_receive->transport = target_ptr->transport;
+        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA;
         svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
         svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
         svc_receive->max_request_size = CCAPI_RECEIVE_NO_LIMIT;
@@ -247,7 +249,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
         /* Check if it's a registered target */
         {
-            ccapi_receive_target_t const * const added_target = *get_pointer_to_target_entry(ccapi_data, target_ptr->target);
+            ccapi_receive_target_t const * const added_target = *get_pointer_to_target_entry(ccapi_data, svc_receive->target);
 
             if (added_target != NULL)
             {
@@ -272,7 +274,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
             if (ccapi_data->service.receive.user_callbacks.accept_cb != NULL)
             {
-                user_accepts = ccapi_data->service.receive.user_callbacks.accept_cb(svc_receive->target, target_ptr->transport);
+                user_accepts = ccapi_data->service.receive.user_callbacks.accept_cb(svc_receive->target, svc_receive->transport);
             }
             else
             {
@@ -302,65 +304,101 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
 
-    ccapi_logging_line("ccapi_process_device_request_data for target = '%s'", svc_receive->target);
-
     if (!ccapi_data->config.receive_supported)
     {
         svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
         goto done;
     }
 
+    switch (svc_receive->usercallback_status)
     {
-        ccimp_os_realloc_t ccimp_realloc_data;
-
-        ccimp_realloc_data.new_size = svc_receive->request_buffer_info.length + data_ptr->bytes_used;
-
-        if (svc_receive->max_request_size != CCAPI_RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_receive->max_request_size)
+        case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
         {
-            ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
+            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA", svc_receive->target);
 
-            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG;
-            goto done;
-        }
+            {
+                ccimp_os_realloc_t ccimp_realloc_data;
 
-        ccimp_realloc_data.old_size = svc_receive->request_buffer_info.length;
-        ccimp_realloc_data.ptr = svc_receive->request_buffer_info.buffer;
-        if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
-        {
-            ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+                ccimp_realloc_data.new_size = svc_receive->request_buffer_info.length + data_ptr->bytes_used;
 
-            svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
-            goto done;
-        }
-        svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
+                if (svc_receive->max_request_size != CCAPI_RECEIVE_NO_LIMIT && ccimp_realloc_data.new_size > svc_receive->max_request_size)
+                {
+                    ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
+
+                    svc_receive->receive_error = CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG;
+                    goto done;
+                }
+
+                ccimp_realloc_data.old_size = svc_receive->request_buffer_info.length;
+                ccimp_realloc_data.ptr = svc_receive->request_buffer_info.buffer;
+                if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
+                {
+                    ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+
+                    svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+                    goto done;
+                }
+                svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
  
-        {
-            uint8_t * const dest_addr = (uint8_t *)svc_receive->request_buffer_info.buffer + svc_receive->request_buffer_info.length;
-            memcpy(dest_addr, data_ptr->buffer, data_ptr->bytes_used);
+                {
+                    uint8_t * const dest_addr = (uint8_t *)svc_receive->request_buffer_info.buffer + svc_receive->request_buffer_info.length;
+                    memcpy(dest_addr, data_ptr->buffer, data_ptr->bytes_used);
+                }
+                svc_receive->request_buffer_info.length += data_ptr->bytes_used;
+            }
+
+            if (data_ptr->more_data == connector_false)
+            {
+                svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_DATA_READY;
+
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_DATA_READY", svc_receive->target);
+
+                connector_status = connector_callback_busy;
+            }
+            else
+            {
+                connector_status = connector_callback_continue;
+            }
+
+            break;
         }
-        svc_receive->request_buffer_info.length += data_ptr->bytes_used;
-    }
 
-    if (data_ptr->more_data == connector_false)
-    {
-        ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
-
-        /* Pass data to the user and get possible response from user */ 
+        case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
         {
-            svc_receive->user_callbacks.data_cb(svc_receive->target, data_ptr->transport, 
-                                                               &svc_receive->request_buffer_info, 
-                                                               svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
+            if (ccapi_data->service.receive.svc_receive == NULL)
+            {
+                svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED;
 
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_DATA_READY->CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED", svc_receive->target);
+
+                ccapi_data->service.receive.svc_receive = svc_receive;
+            }
+
+            connector_status = connector_callback_busy;
+            break;
+        }
+        case CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED:
+        {
+            connector_status = connector_callback_busy;
+            break;
+        }
+        case CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED:
+        {
+            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED", svc_receive->target);
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
             if (svc_receive->response_required)
             {
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
+
+            ccapi_data->service.receive.svc_receive = NULL;
+
+            connector_status = connector_callback_continue;
+
+            break;
         }
     }
-
-    connector_status = connector_callback_continue;
 
 done:
     return connector_status;

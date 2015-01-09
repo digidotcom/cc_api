@@ -24,7 +24,8 @@
 typedef void (* ccimp_thread_start_t) (void * const argument);
 
 typedef enum {
-    CCIMP_THREAD_CONNECTOR_RUN
+    CCIMP_THREAD_CONNECTOR_RUN,
+    CCIMP_THREAD_RECEIVE
 } ccimp_thread_type_t;
 
 typedef struct

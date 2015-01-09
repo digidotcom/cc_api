@@ -26,7 +26,7 @@
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
-	
+    
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
     start->vendor_id = 0x030000DB; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
@@ -132,6 +132,8 @@ static void app_get_time_cb(char const * const target, ccapi_transport_t const t
         response_buffer_info->length = snprintf(response_buffer_info->buffer, max_length, "time: %s", ctime(&t));
     }
 
+sleep(10);
+
     return;
 }
 
@@ -179,6 +181,7 @@ int main (void)
         uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
         tcp_info.connection.type = CCAPI_CONNECTION_LAN;
+        tcp_info.connection.max_transactions = 10;
         memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);
         memcpy(tcp_info.connection.info.lan.mac_address, mac, sizeof tcp_info.connection.info.lan.mac_address);
 
@@ -204,7 +207,7 @@ int main (void)
         ccapi_udp_info_t udp_info = {{0}};
 
         udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
-        udp_info.limit.max_sessions = 1;
+        udp_info.limit.max_sessions = 0;
         udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
 
         udp_info.callback.close = NULL;
@@ -258,6 +261,7 @@ int main (void)
          * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
          */
         receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, NULL, DESIRED_MAX_REQUEST_SIZE);
+        receive_error = ccapi_receive_add_target("get_system_time1", app_get_time_cb, NULL, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
@@ -270,7 +274,7 @@ int main (void)
 
 #if (TEST_UDP == 1)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
-	for(;;)
+    for(;;)
     {   
         /* TODO: send ping instead of data*/
         ccapi_send_error_t send_error;
