@@ -564,7 +564,6 @@ void ccapi_receive_thread(void * const argument)
         {
             switch (svc_receive->usercallback_status)
             {
-                case CCAPI_RECEIVE_USERCALLBACK_IDLE:
                 case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
                 case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
                 {
@@ -591,8 +590,12 @@ void ccapi_receive_thread(void * const argument)
                 }
                 case CCAPI_RECEIVE_USERCALLBACK_SVC_FREE:
                 {
-                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_IDLE;
+                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
                     ccapi_data->service.receive.svc_receive = NULL;
+                    break;
+                }
+                case CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE:
+                {
                     break;
                 }
             }
