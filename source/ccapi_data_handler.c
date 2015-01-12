@@ -367,6 +367,11 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
         case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
         {
+            ccimp_status_t ccimp_status;
+
+            ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+
             if (ccapi_data->service.receive.svc_receive == NULL)
             {
                 svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED;
@@ -375,6 +380,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
                 ccapi_data->service.receive.svc_receive = svc_receive;
             }
+
+            ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 
             connector_status = connector_callback_busy;
             break;
