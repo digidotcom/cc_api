@@ -227,7 +227,10 @@ TEST(test_ccapi_receive_data_callback, testOK_BufferNULL)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
@@ -282,7 +285,10 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallOneResponseCall)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     ccfsm_receive_reply_data.transport = connector_transport_tcp;
@@ -346,7 +352,10 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoDataCalls)
     ccfsm_receive_data_data.more_data = connector_true;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     ccfsm_receive_data_data.transport = connector_transport_tcp;
@@ -356,7 +365,10 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoDataCalls)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
@@ -401,7 +413,10 @@ TEST(test_ccapi_receive_data_callback, testOK_ResponseNotRequired)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
@@ -455,7 +470,10 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     ccfsm_receive_reply_data.transport = connector_transport_tcp;
@@ -539,7 +557,10 @@ TEST(test_ccapi_receive_data_callback, testOK_OneDataCallTwoResponseCall_NoRoom)
     ccfsm_receive_data_data.more_data = connector_false;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     ccfsm_receive_reply_data.transport = connector_transport_tcp;
