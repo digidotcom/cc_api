@@ -619,7 +619,19 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         ccimp_os_yield();
     } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
 
-    /* TODO: stop receive thread */
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        if (ccapi_data->thread.receive->status == CCAPI_THREAD_RUNNING)
+        {
+            ccapi_data->thread.receive->status = CCAPI_THREAD_REQUEST_STOP;
+        }
+
+        do {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.receive->status != CCAPI_THREAD_NOT_STARTED);
+    }
+#endif
 
 done:
     switch (error)

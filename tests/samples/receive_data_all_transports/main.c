@@ -18,6 +18,10 @@
 #define DEVICE_TYPE_STRING      "Device type"
 #define DEVICE_CLOUD_URL_STRING "login.etherios.com"
 
+#if !(defined UNUSED_ARGUMENT)
+#define UNUSED_ARGUMENT(a)  (void)(a)
+#endif
+
 #define DESIRED_MAX_RESPONSE_SIZE 400
 
 #define TEST_UDP 1
@@ -137,6 +141,24 @@ sleep(10);
     return;
 }
 
+static ccapi_bool_t stop = CCAPI_FALSE;
+
+static void app_stop_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
+{
+    static char const stop_response[] = "I'll stop";
+
+    UNUSED_ARGUMENT(target);
+    UNUSED_ARGUMENT(request_buffer_info);
+    UNUSED_ARGUMENT(response_buffer_info);
+
+    printf("app_stop_cb: transport = %d\n", transport);
+
+    response_buffer_info->buffer = (void *)stop_response;
+    response_buffer_info->length = strlen(response_buffer_info->buffer);
+
+    stop = CCAPI_TRUE;
+}
+
 static void app_receive_default_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
     printf("app_receive_default_status_cb: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
@@ -146,6 +168,27 @@ static void app_receive_default_status_cb(char const * const target, ccapi_trans
         printf("app_receive_default_status_cb: Freeing response buffer at %p\n", response_buffer_info->buffer);
         free(response_buffer_info->buffer);
     }
+}
+
+static ccapi_bool_t check_stop(void)
+{
+    ccapi_stop_error_t stop_error = CCAPI_STOP_ERROR_NONE;
+
+    if (stop == CCAPI_TRUE)
+    {
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+
+        if (stop_error == CCAPI_STOP_ERROR_NONE)
+        {
+            printf("ccapi_stop success\n");
+        }
+        else
+        {
+            printf("ccapi_stop error %d\n", stop_error);
+        }
+    }
+
+    return stop;
 }
 
 int main (void)
@@ -270,12 +313,14 @@ int main (void)
         {
             printf("ccapi_receive_add_target failed with error %d\n", receive_error);
         }
+
+        ccapi_receive_add_target("stop", app_stop_cb, NULL, 0);
     }
 
 #if (TEST_UDP == 1)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
-    for(;;)
-    {   
+    do
+    {
         /* TODO: send ping instead of data*/
         ccapi_send_error_t send_error;
         #define SEND_DATA_UDP         "ping"
@@ -290,10 +335,13 @@ int main (void)
         }
         
         sleep(5);
-    }
+    } while (check_stop() != CCAPI_TRUE);   
 #else
     printf("Endless loop\n");
-    for(;;);
+    do
+    {
+        sleep(1);
+    } while (check_stop() != CCAPI_TRUE);   
 #endif
 
 done:
