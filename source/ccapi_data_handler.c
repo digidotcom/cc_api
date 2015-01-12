@@ -312,6 +312,8 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
     switch (svc_receive->usercallback_status)
     {
+        case CCAPI_RECEIVE_USERCALLBACK_IDLE:
+            break;
         case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
         {
             ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA", svc_receive->target);
@@ -392,12 +394,14 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
 
-            ccapi_data->service.receive.svc_receive = NULL;
+            svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FREE;
 
             connector_status = connector_callback_continue;
 
             break;
         }
+        case CCAPI_RECEIVE_USERCALLBACK_SVC_FREE:
+            break;
     }
 
 done:
@@ -524,6 +528,15 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
                 ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
                 break;
         }
+    }
+
+    if (svc_receive->usercallback_status != CCAPI_RECEIVE_USERCALLBACK_IDLE)
+    {
+        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FREE;
+        while (svc_receive->usercallback_status != CCAPI_RECEIVE_USERCALLBACK_IDLE)
+        {
+            ccimp_os_yield();
+        } 
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */

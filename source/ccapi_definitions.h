@@ -101,10 +101,12 @@ typedef struct ccapi_receive_target
 } ccapi_receive_target_t;
 
 typedef enum {
+    CCAPI_RECEIVE_USERCALLBACK_IDLE,
     CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA,
     CCAPI_RECEIVE_USERCALLBACK_DATA_READY,
     CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED,
     CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED,
+    CCAPI_RECEIVE_USERCALLBACK_SVC_FREE
 } ccapi_receive_usercallback_status_t;
 
 typedef struct

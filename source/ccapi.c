@@ -564,6 +564,7 @@ void ccapi_receive_thread(void * const argument)
         {
             switch (svc_receive->usercallback_status)
             {
+                case CCAPI_RECEIVE_USERCALLBACK_IDLE:
                 case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
                 case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
                 {
@@ -577,11 +578,21 @@ void ccapi_receive_thread(void * const argument)
                     svc_receive->user_callbacks.data_cb(svc_receive->target, svc_receive->transport, 
                                                                        &svc_receive->request_buffer_info, 
                                                                        svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
-                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED;
+                    /* Check that session keeps on active */
+                    if (svc_receive->usercallback_status == CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED)
+                    {
+                        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED;
+                    }
                     break;
                 }
                 case CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED:
                 {
+                    break;
+                }
+                case CCAPI_RECEIVE_USERCALLBACK_SVC_FREE:
+                {
+                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_IDLE;
+                    ccapi_data->service.receive.svc_receive = NULL;
                     break;
                 }
             }
