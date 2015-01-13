@@ -368,10 +368,7 @@ TEST(test_ccapi_receive_data_callback, testOK_TwoDataCalls)
     ccfsm_receive_data_data.more_data = connector_true;
 
     request.data_service_request = connector_request_id_data_service_receive_data;
-    do
-    {
-        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
-    } while ( status == connector_callback_busy);
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 
     ccfsm_receive_data_data.transport = connector_transport_tcp;
