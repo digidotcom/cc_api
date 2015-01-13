@@ -123,4 +123,14 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK(NULL == ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(NULL == ccapi_data_single_instance->service.file_system.virtual_dir_list);
     CHECK(NULL != ccapi_data_single_instance->file_system_syncr);
+
+    {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+    }
 }

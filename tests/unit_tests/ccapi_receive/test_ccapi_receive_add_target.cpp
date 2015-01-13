@@ -138,6 +138,14 @@ TEST_GROUP(test_ccapi_receive_add_target)
 
     void teardown()
     {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+
         Mock_destroy_all();
     }
 };
