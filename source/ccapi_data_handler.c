@@ -212,7 +212,7 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
         svc_receive->target = NULL;
         svc_receive->transport = target_ptr->transport;
-        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA;
+        svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_IDLE;
         svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
         svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
         svc_receive->max_request_size = CCAPI_RECEIVE_NO_LIMIT;
@@ -310,11 +310,11 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         goto done;
     }
 
-    switch (svc_receive->usercallback_status)
+    switch (svc_receive->receivethread_status)
     {
-        case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
+        case CCAPI_RECEIVE_THREAD_IDLE:
         {
-            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA", svc_receive->target);
+            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receivethread_status=CCAPI_RECEIVE_THREAD_IDLE", svc_receive->target);
 
             {
                 ccimp_os_realloc_t ccimp_realloc_data;
@@ -326,7 +326,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                     ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
 
                     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG;
-                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
+                    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
                     goto done;
                 }
 
@@ -337,7 +337,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                     ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
 
                     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
-                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
+                    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
                     goto done;
                 }
                 svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
@@ -351,9 +351,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             if (data_ptr->more_data == connector_false)
             {
-                svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_DATA_READY;
+                svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST;
 
-                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_DATA_READY", svc_receive->target);
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receivethread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST", svc_receive->target);
 
                 connector_status = connector_callback_busy;
             }
@@ -365,7 +365,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             break;
         }
 
-        case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
+        case CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST:
         {
             ccimp_status_t ccimp_status;
 
@@ -374,9 +374,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             if (ccapi_data->service.receive.svc_receive == NULL)
             {
-                svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED;
+                svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED;
 
-                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_DATA_READY->CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED", svc_receive->target);
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receivethread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST->CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED", svc_receive->target);
 
                 ccapi_data->service.receive.svc_receive = svc_receive;
             }
@@ -387,14 +387,14 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED:
+        case CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED:
         {
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED:
+        case CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED:
         {
-            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. usercallback_status=CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED", svc_receive->target);
+            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receivethread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED", svc_receive->target);
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
             if (svc_receive->response_required)
@@ -402,14 +402,14 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
 
-            svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FREE;
+            svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE_REQUESTED;
 
             connector_status = connector_callback_continue;
 
             break;
         }
-        case CCAPI_RECEIVE_USERCALLBACK_SVC_FREE:
-        case CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE:
+        case CCAPI_RECEIVE_THREAD_FREE_REQUESTED:
+        case CCAPI_RECEIVE_THREAD_FREE:
             break;
     }
 
@@ -539,10 +539,10 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
         }
     }
 
-    if (svc_receive->usercallback_status != CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE)
+    if (svc_receive->receivethread_status != CCAPI_RECEIVE_THREAD_FREE)
     {
-        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FREE;
-        while (svc_receive->usercallback_status != CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE)
+        svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE_REQUESTED;
+        while (svc_receive->receivethread_status != CCAPI_RECEIVE_THREAD_FREE)
         {
             ccimp_os_yield();
         } 

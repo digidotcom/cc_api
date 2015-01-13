@@ -562,14 +562,14 @@ void ccapi_receive_thread(void * const argument)
         ccapi_svc_receive_t * const svc_receive = ccapi_data->service.receive.svc_receive;
         if (svc_receive != NULL)
         {
-            switch (svc_receive->usercallback_status)
+            switch (svc_receive->receivethread_status)
             {
-                case CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA:
-                case CCAPI_RECEIVE_USERCALLBACK_DATA_READY:
+                case CCAPI_RECEIVE_THREAD_IDLE:
+                case CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST:
                 {
                     break;
                 }
-                case CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED:
+                case CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED:
                 {
                     ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
 
@@ -578,23 +578,23 @@ void ccapi_receive_thread(void * const argument)
                                                                        &svc_receive->request_buffer_info, 
                                                                        svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
                     /* Check that session keeps on active */
-                    if (svc_receive->usercallback_status == CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED)
+                    if (svc_receive->receivethread_status == CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED)
                     {
-                        svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED;
+                        svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED;
                     }
                     break;
                 }
-                case CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED:
+                case CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED:
                 {
                     break;
                 }
-                case CCAPI_RECEIVE_USERCALLBACK_SVC_FREE:
+                case CCAPI_RECEIVE_THREAD_FREE_REQUESTED:
                 {
-                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
+                    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
                     ccapi_data->service.receive.svc_receive = NULL;
                     break;
                 }
-                case CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE:
+                case CCAPI_RECEIVE_THREAD_FREE:
                 {
                     break;
                 }

@@ -101,13 +101,13 @@ typedef struct ccapi_receive_target
 } ccapi_receive_target_t;
 
 typedef enum {
-    CCAPI_RECEIVE_USERCALLBACK_COLLECTING_DATA,
-    CCAPI_RECEIVE_USERCALLBACK_DATA_READY,
-    CCAPI_RECEIVE_USERCALLBACK_SVC_QUEUED,
-    CCAPI_RECEIVE_USERCALLBACK_SVC_FINISHED,
-    CCAPI_RECEIVE_USERCALLBACK_SVC_FREE,
-    CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE
-} ccapi_receive_usercallback_status_t;
+    CCAPI_RECEIVE_THREAD_IDLE,
+    CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST,
+    CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED,
+    CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED,
+    CCAPI_RECEIVE_THREAD_FREE_REQUESTED,
+    CCAPI_RECEIVE_THREAD_FREE
+} ccapi_receive_thread_status_t;
 
 typedef struct
 {
@@ -124,7 +124,7 @@ typedef struct
     ccapi_bool_t response_handled_internally;
     ccapi_buffer_info_t response_processing;
     ccapi_receive_error_t receive_error;
-    ccapi_receive_usercallback_status_t usercallback_status;
+    ccapi_receive_thread_status_t receivethread_status;
 } ccapi_svc_receive_t;
 #endif
 
