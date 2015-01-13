@@ -326,6 +326,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                     ccapi_logging_line("ccapi_process_device_request_data: request excess max_request_size (%d) for this target", svc_receive->max_request_size);
 
                     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG;
+                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
                     goto done;
                 }
 
@@ -336,6 +337,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                     ccapi_logging_line("ccapi_process_device_request_data: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
 
                     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+                    svc_receive->usercallback_status = CCAPI_RECEIVE_USERCALLBACK_SVC_IDLE;
                     goto done;
                 }
                 svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
