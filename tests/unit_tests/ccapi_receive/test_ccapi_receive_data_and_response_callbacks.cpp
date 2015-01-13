@@ -31,6 +31,8 @@ static ccapi_bool_t ccapi_receive_data_cb_called = CCAPI_FALSE;
 static ccapi_buffer_info_t * ccapi_receive_data_expected_request = NULL;
 static ccapi_buffer_info_t * ccapi_receive_data_expected_response = NULL;
 static ccapi_buffer_info_t * ccapi_receive_data_desired_response = NULL;
+static ccapi_bool_t ccapi_receive_data_lock_cb[2] = {CCAPI_FALSE, CCAPI_FALSE};
+static unsigned int ccapi_receive_data_lock_index = 0;
 
 void clean_ccapi_receive_data(void)
 {
@@ -40,6 +42,10 @@ void clean_ccapi_receive_data(void)
     ccapi_receive_data_expected_response = NULL;
     ccapi_receive_data_cb_called = CCAPI_FALSE;
     ccapi_receive_data_desired_response = NULL;
+
+    ccapi_receive_data_lock_cb[0] = CCAPI_FALSE;
+    ccapi_receive_data_lock_cb[1] = CCAPI_FALSE;
+    ccapi_receive_data_lock_index = 0;
 }
 
 static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
@@ -61,6 +67,11 @@ static void test_receive_data_cb(char const * const target, ccapi_transport_t co
     }
 
     ccapi_receive_data_cb_called = CCAPI_TRUE;
+
+    while (ccapi_receive_data_lock_cb[ccapi_receive_data_lock_index])
+    {
+    }
+    ccapi_receive_data_lock_index++;
 
     return;
 }
@@ -755,4 +766,246 @@ TEST(test_ccapi_receive_data_callback, testRequestTooBig)
     }
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_receive_data_cb_called);
+}
+
+
+TEST(test_ccapi_receive_data_callback, testOK_DataCallbackBusy)
+{
+    connector_request_id_t request;
+    connector_data_service_receive_data_t ccfsm_receive_data_data;
+    connector_data_service_receive_reply_data_t ccfsm_receive_reply_data;
+    connector_callback_status_t status;
+
+    uint8_t const data[] = DATA;
+    uint8_t const exp_response[] = RESPONSE;
+    ccapi_buffer_info_t expected_request;
+    ccapi_buffer_info_t expected_response;
+
+    #define MAX_RESPONSE_SIZE 100
+    uint8_t response[MAX_RESPONSE_SIZE];
+
+    ccapi_svc_receive_t svc_receive = {0};
+    const char target[] = TEST_TARGET;
+    svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
+    svc_receive.response_required = CCAPI_TRUE;  
+
+    ccapi_receive_data_expected_target = TEST_TARGET;
+    ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
+    expected_request.buffer = (void *)data;
+    expected_request.length = sizeof data;
+    ccapi_receive_data_expected_request = &expected_request;
+    ccapi_receive_data_expected_response = &svc_receive.response_buffer_info;
+
+    expected_response.buffer = (void *)exp_response;
+    expected_response.length = sizeof exp_response;
+    ccapi_receive_data_desired_response = &expected_response;
+
+    ccfsm_receive_data_data.transport = connector_transport_tcp;
+    ccfsm_receive_data_data.user_context = &svc_receive;
+    ccfsm_receive_data_data.buffer = data;
+    ccfsm_receive_data_data.bytes_used = sizeof data;
+    ccfsm_receive_data_data.more_data = connector_false;
+
+    ccapi_receive_data_lock_cb[0] = CCAPI_TRUE;
+
+    request.data_service_request = connector_request_id_data_service_receive_data;
+    {
+        unsigned int i = 0;
+        do
+        {      
+            status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+            i++;
+            if (i == 1000)
+            {
+                ccapi_receive_data_lock_cb[0] = CCAPI_FALSE;
+            }
+        } while ( status == connector_callback_busy);
+        CHECK_EQUAL(connector_callback_continue, status);
+    }
+
+    ccfsm_receive_reply_data.transport = connector_transport_tcp;
+    ccfsm_receive_reply_data.user_context = &svc_receive;
+    ccfsm_receive_reply_data.buffer = response;
+    ccfsm_receive_reply_data.bytes_available = MAX_RESPONSE_SIZE;
+    ccfsm_receive_reply_data.bytes_used = 0;
+    ccfsm_receive_reply_data.more_data = connector_true;
+
+    request.data_service_request = connector_request_id_data_service_receive_reply_data;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_reply_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
+    {
+        CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK(svc_receive.request_buffer_info.buffer != NULL);
+        CHECK(svc_receive.request_buffer_info.length == sizeof data);
+
+        CHECK(svc_receive.response_buffer_info.buffer != NULL);
+        CHECK(svc_receive.response_buffer_info.length == sizeof exp_response);
+        CHECK(svc_receive.response_processing.length == 0);
+
+        CHECK(memcmp(response, exp_response, sizeof exp_response) == 0);
+        CHECK(ccfsm_receive_reply_data.bytes_used == sizeof exp_response);
+        CHECK(ccfsm_receive_reply_data.more_data == connector_false);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
+}
+
+TEST(test_ccapi_receive_data_callback, testOK_TwoConcurrentDataRequests)
+{
+    connector_request_id_t request;
+    connector_data_service_receive_data_t ccfsm_receive_data_data;
+    connector_data_service_receive_data_t ccfsm_receive_data_data2;
+    connector_data_service_receive_reply_data_t ccfsm_receive_reply_data;
+    connector_callback_status_t status;
+
+    uint8_t const data[] = DATA;
+    uint8_t const data2[] = DATA2;
+    uint8_t const exp_response[] = RESPONSE;
+    ccapi_buffer_info_t expected_request;
+    ccapi_buffer_info_t expected_response;
+
+    #define MAX_RESPONSE_SIZE 100
+    uint8_t response[MAX_RESPONSE_SIZE];
+
+    ccapi_svc_receive_t svc_receive = {0};
+    ccapi_svc_receive_t svc_receive2 = {0};
+    const char target[] = TEST_TARGET;
+    svc_receive.target = (char*)target;
+    svc_receive.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
+    svc_receive.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
+    svc_receive.response_required = CCAPI_TRUE;  
+    svc_receive2.target = (char*)target;
+    svc_receive2.user_callbacks.data_cb = ccapi_data_single_instance->service.receive.user_callbacks.data_cb;
+    svc_receive2.user_callbacks.status_cb = ccapi_data_single_instance->service.receive.user_callbacks.status_cb;
+    svc_receive2.max_request_size = CCAPI_RECEIVE_NO_LIMIT;
+    svc_receive2.response_required = CCAPI_TRUE;  
+
+    ccapi_receive_data_expected_target = TEST_TARGET;
+    ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
+    expected_request.buffer = (void *)data;
+    expected_request.length = sizeof data;
+    ccapi_receive_data_expected_request = &expected_request;
+    ccapi_receive_data_expected_response = &svc_receive.response_buffer_info;
+
+    expected_response.buffer = (void *)exp_response;
+    expected_response.length = sizeof exp_response;
+    ccapi_receive_data_desired_response = &expected_response;
+
+    ccfsm_receive_data_data.transport = connector_transport_tcp;
+    ccfsm_receive_data_data.user_context = &svc_receive;
+    ccfsm_receive_data_data.buffer = data;
+    ccfsm_receive_data_data.bytes_used = sizeof data;
+    ccfsm_receive_data_data.more_data = connector_false;
+    ccfsm_receive_data_data2.transport = connector_transport_tcp;
+    ccfsm_receive_data_data2.user_context = &svc_receive2;
+    ccfsm_receive_data_data2.buffer = data2;
+    ccfsm_receive_data_data2.bytes_used = sizeof data2;
+    ccfsm_receive_data_data2.more_data = connector_false;
+
+    ccapi_receive_data_lock_cb[0] = CCAPI_TRUE;
+    ccapi_receive_data_lock_cb[1] = CCAPI_TRUE;
+
+    request.data_service_request = connector_request_id_data_service_receive_data;
+    {
+        unsigned int i = 0;
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data2, ccapi_data_single_instance);
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        ccapi_receive_data_lock_cb[0] = CCAPI_FALSE;
+
+        do
+        {      
+            status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data, ccapi_data_single_instance);
+        } while ( status == connector_callback_busy);
+        CHECK_EQUAL(connector_callback_continue, status);
+    }
+
+    ccfsm_receive_reply_data.transport = connector_transport_tcp;
+    ccfsm_receive_reply_data.user_context = &svc_receive;
+    ccfsm_receive_reply_data.buffer = response;
+    ccfsm_receive_reply_data.bytes_available = MAX_RESPONSE_SIZE;
+    ccfsm_receive_reply_data.bytes_used = 0;
+    ccfsm_receive_reply_data.more_data = connector_true;
+
+    request.data_service_request = connector_request_id_data_service_receive_reply_data;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_reply_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_data_data.user_context == &svc_receive);
+    {
+        CHECK_EQUAL(svc_receive.receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK(svc_receive.request_buffer_info.buffer != NULL);
+        CHECK(svc_receive.request_buffer_info.length == sizeof data);
+
+        CHECK(svc_receive.response_buffer_info.buffer != NULL);
+        CHECK(svc_receive.response_buffer_info.length == sizeof exp_response);
+        CHECK(svc_receive.response_processing.length == 0);
+
+        CHECK(memcmp(response, exp_response, sizeof exp_response) == 0);
+        CHECK(ccfsm_receive_reply_data.bytes_used == sizeof exp_response);
+        CHECK(ccfsm_receive_reply_data.more_data == connector_false);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
+
+    ccapi_receive_data_cb_called = CCAPI_FALSE;
+
+    ccapi_receive_data_expected_target = TEST_TARGET;
+    ccapi_receive_data_expected_transport = CCAPI_TRANSPORT_TCP;
+    expected_request.buffer = (void *)data2;
+    expected_request.length = sizeof data2;
+    ccapi_receive_data_expected_request = &expected_request;
+    ccapi_receive_data_expected_response = &svc_receive2.response_buffer_info;
+
+    ccapi_receive_data_lock_cb[1] = CCAPI_FALSE;
+
+    request.data_service_request = connector_request_id_data_service_receive_data;
+    do
+    {      
+        status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_data_data2, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    ccfsm_receive_reply_data.transport = connector_transport_tcp;
+    ccfsm_receive_reply_data.user_context = &svc_receive2;
+    ccfsm_receive_reply_data.buffer = response;
+    ccfsm_receive_reply_data.bytes_available = MAX_RESPONSE_SIZE;
+    ccfsm_receive_reply_data.bytes_used = 0;
+    ccfsm_receive_reply_data.more_data = connector_true;
+
+    request.data_service_request = connector_request_id_data_service_receive_reply_data;
+    status = ccapi_connector_callback(connector_class_id_data_service, request, &ccfsm_receive_reply_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_receive_data_data2.user_context == &svc_receive2);
+    {
+        CHECK_EQUAL(svc_receive2.receive_error, CCAPI_RECEIVE_ERROR_NONE);
+        CHECK(svc_receive2.request_buffer_info.buffer != NULL);
+        CHECK(svc_receive2.request_buffer_info.length == sizeof data2);
+
+        CHECK(svc_receive2.response_buffer_info.buffer != NULL);
+        CHECK(svc_receive2.response_buffer_info.length == sizeof exp_response);
+        CHECK(svc_receive2.response_processing.length == 0);
+
+        CHECK(memcmp(response, exp_response, sizeof exp_response) == 0);
+        CHECK(ccfsm_receive_reply_data.bytes_used == sizeof exp_response);
+        CHECK(ccfsm_receive_reply_data.more_data == connector_false);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_receive_data_cb_called);
 }
