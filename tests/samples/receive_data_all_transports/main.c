@@ -136,8 +136,6 @@ static void app_get_time_cb(char const * const target, ccapi_transport_t const t
         response_buffer_info->length = snprintf(response_buffer_info->buffer, max_length, "time: %s", ctime(&t));
     }
 
-sleep(10);
-
     return;
 }
 
@@ -250,7 +248,7 @@ int main (void)
         ccapi_udp_info_t udp_info = {{0}};
 
         udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
-        udp_info.limit.max_sessions = 0;
+        udp_info.limit.max_sessions = 10;
         udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
 
         udp_info.callback.close = NULL;
@@ -275,7 +273,7 @@ int main (void)
         ccapi_sms_info_t sms_info = {{0}};
 
         sms_info.start_timeout = CCAPI_TCP_START_WAIT_FOREVER;
-        sms_info.limit.max_sessions = 1;
+        sms_info.limit.max_sessions = 10;
         sms_info.limit.rx_timeout = CCAPI_SMS_RX_TIMEOUT_INFINITE;
 
         sms_info.callback.close = NULL;
