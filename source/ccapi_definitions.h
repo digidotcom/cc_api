@@ -243,6 +243,7 @@ typedef struct stream_seen {
 
 typedef struct ccapi_dp_collection {
     ccapi_dp_data_stream_t * ccapi_data_stream_list;
+    uint32_t dp_count;
     void * syncr;
 } ccapi_dp_collection_t;
 

@@ -78,4 +78,6 @@ void destroy_test_file(char const * const path);
 
 void * th_expect_malloc(size_t size, th_malloc_behavior_t behavior, bool expect_free);
 
+void th_check_collection_dp_count(ccapi_dp_collection_handle_t dp_collection, uint32_t const expected_value);
+
 #endif

@@ -42,6 +42,7 @@ TEST_GROUP(test_ccapi_dp_send_multi_stream_collection)
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
         dp_error = ccapi_dp_add(dp_collection, STREAM_2, -2);
         CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+        th_check_collection_dp_count(dp_collection, 4);
     }
 
     void teardown()
@@ -95,4 +96,5 @@ TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTC
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->point == NULL);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->next != NULL);
     CHECK(dp_collection->ccapi_data_stream_list->ccfsm_data_stream->next->point == NULL);
+    th_check_collection_dp_count(dp_collection, 0);
 }

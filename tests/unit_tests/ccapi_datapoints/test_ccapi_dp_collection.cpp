@@ -49,6 +49,7 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionInvalidArgument)
     CHECK_EQUAL(CCAPI_DP_ERROR_INVALID_ARGUMENT, dp_error);
 }
 
+
 TEST(test_ccapi_dp_collection, testCreateCollectionNotEnoughMemory)
 {
     ccapi_dp_collection_t * dp_collection = (ccapi_dp_collection_t *)&dp_collection;
@@ -85,6 +86,7 @@ TEST(test_ccapi_dp_collection, testCreateCollectionOk)
     CHECK(dp_collection != NULL);
     CHECK(dp_collection->syncr != NULL);
     CHECK(dp_collection->ccapi_data_stream_list == NULL);
+    CHECK(dp_collection->dp_count == 0);
 }
 
 TEST(test_ccapi_dp_collection, testClearCollectionSyncrFailed)

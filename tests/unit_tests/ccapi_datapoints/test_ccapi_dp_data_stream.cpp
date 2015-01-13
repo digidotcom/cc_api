@@ -844,3 +844,52 @@ TEST(test_ccapi_dp_data_stream, testDataStreamRemove1of3)
     CHECK(dp_collection_spy->ccapi_data_stream_list->next != NULL);
     STRCMP_EQUAL(stream_id_1, dp_collection_spy->ccapi_data_stream_list->next->ccfsm_data_stream->stream_id);
 }
+
+TEST(test_ccapi_dp_data_stream, testDataStreamRemoveNonEmptyStream)
+{
+    char const * const format_string = CCAPI_DP_KEY_DATA_INT32;
+    char const * const stream_id_1 = "fulanito";
+    char const * const stream_id_2 = "menganito";
+    char const * const stream_id_3 = "el-de-la-moto";
+    char const * const units = "temperature_math";
+    char const * const forward_to = "Kelvin";
+    ccapi_dp_error_t dp_error;
+
+    dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id_1, format_string, units, forward_to);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add_data_stream_to_collection(dp_collection, stream_id_2, format_string);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add_data_stream_to_collection_extra(dp_collection, stream_id_3, format_string, units, forward_to);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add(dp_collection, stream_id_1, 1);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    dp_error = ccapi_dp_add(dp_collection, stream_id_1, 2);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add(dp_collection, stream_id_2, 3);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    dp_error = ccapi_dp_add(dp_collection, stream_id_2, 4);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    dp_error = ccapi_dp_add(dp_collection, stream_id_2, 5);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    dp_error = ccapi_dp_add(dp_collection, stream_id_3, 6);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    dp_error = ccapi_dp_add(dp_collection, stream_id_3, 7);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    dp_error = ccapi_dp_add(dp_collection, stream_id_3, 8);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+
+    th_check_collection_dp_count(dp_collection, 8);
+
+    STRCMP_EQUAL(stream_id_3, dp_collection_spy->ccapi_data_stream_list->ccfsm_data_stream->stream_id);
+    STRCMP_EQUAL(stream_id_2, dp_collection_spy->ccapi_data_stream_list->next->ccfsm_data_stream->stream_id);
+    STRCMP_EQUAL(stream_id_1, dp_collection_spy->ccapi_data_stream_list->next->next->ccfsm_data_stream->stream_id);
+
+    dp_error = ccapi_dp_remove_data_stream_from_collection(dp_collection, stream_id_2);
+    CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
+    th_check_collection_dp_count(dp_collection, 8 - 3);
+}
