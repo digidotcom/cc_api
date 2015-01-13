@@ -552,7 +552,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
     {
        ccapi_bool_t const should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
-       svc_receive->user_callbacks.status_cb(svc_receive->target, status_ptr->transport, 
+       svc_receive->user_callbacks.status_cb(svc_receive->target, svc_receive->transport, 
                            should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
     }
