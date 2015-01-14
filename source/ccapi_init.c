@@ -306,7 +306,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
         {
             size_t const list_size = start->service.firmware->target.count * sizeof *start->service.firmware->target.item;
-            unsigned char target_num;
+            unsigned char target_num, chunk_pool_index;
 
             ccapi_data->service.firmware_update.config.target.count = start->service.firmware->target.count;
 
@@ -343,7 +343,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccapi_data->service.firmware_update.config.callback.data_cb = start->service.firmware->callback.data_cb;
             ccapi_data->service.firmware_update.config.callback.cancel_cb = start->service.firmware->callback.cancel_cb;
 
-            ccapi_data->service.firmware_update.processing.chunk_data = NULL;
+            for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
+            {
+                ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = NULL;
+            }
+
             ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
             ccapi_data->config.firmware_supported = CCAPI_TRUE;
         }

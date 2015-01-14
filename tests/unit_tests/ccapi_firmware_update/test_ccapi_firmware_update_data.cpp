@@ -101,6 +101,8 @@ TEST_GROUP(test_ccapi_fw_data_callback)
         error = ccapi_start(&start);
 
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data_single_instance->service.firmware_update.processing.target = TEST_TARGET; 
     }
 
     void teardown()
@@ -977,8 +979,6 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteBeforeAllDataArrives)
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_not_complete);
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
-
-        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 
@@ -1063,8 +1063,6 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteBoundary)
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_success);
 
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
-
-        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 
@@ -1144,7 +1142,6 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteNotBoundary)
         CHECK_EQUAL(connector_callback_continue, status);
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_success);
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
-        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 
@@ -1252,7 +1249,6 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteNotBoundaryBusy)
         CHECK_EQUAL(connector_callback_continue, status);
         CHECK(connector_firmware_download_complete.status == connector_firmware_download_success);
         CHECK_EQUAL(0, ccapi_firmware_data_cb_called);
-        CHECK(ccapi_data_single_instance->service.firmware_update.processing.chunk_data == NULL);
     }
 }
 

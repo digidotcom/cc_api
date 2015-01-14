@@ -18,10 +18,15 @@
 
 static void free_and_stop_service(ccapi_data_t * const ccapi_data)
 {
-    if (ccapi_data->service.firmware_update.processing.chunk_data != NULL)
+    unsigned char chunk_pool_index;
+
+    for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
     {
-        ccapi_free(ccapi_data->service.firmware_update.processing.chunk_data);
-        ccapi_data->service.firmware_update.processing.chunk_data = NULL;
+        if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data != NULL)
+        {
+            ccapi_free(ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data);
+            ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = NULL;
+        }
     }
 
     ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
@@ -32,6 +37,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_request_error_t ccapi_fw_request_error;
     ccapi_firmware_target_t * fw_target_item = NULL;
+    unsigned char chunk_pool_index;
 
     ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
@@ -93,13 +99,24 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     {
         fw_target_item->chunk_size = 1024;
     }
-    ccapi_data->service.firmware_update.processing.chunk_data = ccapi_malloc(fw_target_item->chunk_size);
-    if (ccapi_data->service.firmware_update.processing.chunk_data == NULL)
-    {
-        start_ptr->status = connector_firmware_status_encountered_error;
-        goto done;
-    }
 
+    for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
+    {
+        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].offset = 0;
+
+        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = ccapi_malloc(fw_target_item->chunk_size);
+        if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data == NULL)
+        {
+            start_ptr->status = connector_firmware_status_encountered_error;
+            goto done;
+        }
+
+        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].size = 0;
+        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].last_chunk = CCAPI_FALSE;
+    }
+    ccapi_data->service.firmware_update.processing.current_chunk = 0;
+
+    ccapi_data->service.firmware_update.processing.target = start_ptr->target_number;
     ccapi_data->service.firmware_update.processing.total_size = start_ptr->code_size;
     ccapi_data->service.firmware_update.processing.tail_offset = 0;
     ccapi_data->service.firmware_update.processing.head_offset = 0;
@@ -114,7 +131,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_data_error_t ccapi_fw_data_error;
 
-    ASSERT_MSG_GOTO(data_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
+    ASSERT_MSG_GOTO(data_ptr->target_number == ccapi_data->service.firmware_update.processing.target, done);
 
     ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started, done);
 
@@ -151,15 +168,15 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
             if (next_tail_offset >= ccapi_data->service.firmware_update.processing.head_offset)
             {
-                memcpy(&ccapi_data->service.firmware_update.processing.chunk_data[next_tail_offset % chunk_size], source_data, bytes_to_copy);
+                memcpy(&ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.current_chunk].data[next_tail_offset % chunk_size], source_data, bytes_to_copy);
 
                 if (last_chunk || next_head_offset % chunk_size == 0)
                 {
                     /*printf("head_offset=0x%x\n",ccapi_data->service.firmware_update.processing.head_offset);*/
-                    ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(data_ptr->target_number, 
-                                                                                                     ccapi_data->service.firmware_update.processing.head_offset, 
-                                                                                                     ccapi_data->service.firmware_update.processing.chunk_data, 
-                                                                                                     next_head_offset - ccapi_data->service.firmware_update.processing.head_offset, 
+                    ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(ccapi_data->service.firmware_update.processing.target,
+                                                                                                     ccapi_data->service.firmware_update.processing.head_offset,
+                                                                                                     ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.current_chunk].data,
+                                                                                                     next_head_offset - ccapi_data->service.firmware_update.processing.head_offset,
                                                                                                      last_chunk);
                     switch (ccapi_fw_data_error)
                     {
@@ -193,7 +210,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
 {
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ASSERT_MSG_GOTO(complete_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
+    ASSERT_MSG_GOTO(complete_ptr->target_number == ccapi_data->service.firmware_update.processing.target, done);
 
     ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started, done);
 

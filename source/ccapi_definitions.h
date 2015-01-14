@@ -128,6 +128,18 @@ typedef struct
 } ccapi_svc_receive_t;
 #endif
 
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+#define MAX_FW_CHUNKS 1
+
+typedef struct
+{
+    uint32_t offset;
+    uint8_t * data;
+    size_t size;
+    ccapi_bool_t last_chunk;   
+} ccapi_fw_chunk_info;
+#endif            
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
@@ -148,7 +160,9 @@ typedef struct {
             ccapi_fw_service_t config;
             struct {
                 ccapi_bool_t update_started;
-                uint8_t * chunk_data;
+                ccapi_fw_chunk_info chunk_pool[MAX_FW_CHUNKS];
+                uint8_t current_chunk;
+                unsigned int target;
                 uint32_t total_size;
                 uint32_t head_offset;
                 uint32_t tail_offset;
