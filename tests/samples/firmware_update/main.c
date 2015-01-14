@@ -11,6 +11,7 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE             "Device type"
@@ -93,13 +94,6 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
 
     printf("app_fw_data_cb: offset = 0x%" PRIx32 "\n", offset);
 
-    /* Return busy simulating a flash busy while writting */
-    if (busy++ % 3)
-    {
-        printf("busy\n");
-        return CCAPI_FW_DATA_ERROR_BUSY;
-    }
-
     printf("data = ");
     for (i=0; i < bytes_to_print; i++)
     {
@@ -117,6 +111,14 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
             fclose(fp);
     }
 
+    /* Return busy simulating a flash busy while writting */
+    if (!(busy++ % 10))
+    {
+        printf("busy\n");
+        sleep(1);
+    }
+
+    printf("done\n");
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 

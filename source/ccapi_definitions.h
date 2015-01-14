@@ -129,14 +129,16 @@ typedef struct
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+
 #define MAX_FW_CHUNKS 1
 
 typedef struct
 {
+    ccapi_bool_t in_use;
     uint32_t offset;
     uint8_t * data;
     size_t size;
-    ccapi_bool_t last_chunk;   
+    ccapi_bool_t last;
 } ccapi_fw_chunk_info;
 #endif            
 
