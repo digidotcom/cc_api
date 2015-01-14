@@ -146,6 +146,7 @@ typedef struct {
     struct {
         ccapi_thread_info_t * connector_run;
         ccapi_thread_info_t * receive;
+        ccapi_thread_info_t * firmware;
     } thread;
     void * initiate_action_syncr;
     void * file_system_syncr;
@@ -302,6 +303,7 @@ extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;
 
 void ccapi_receive_thread(void * const argument);
+void ccapi_firmware_thread(void * const argument);
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
