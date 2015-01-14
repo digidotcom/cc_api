@@ -18,6 +18,10 @@
 #define DEVICE_TYPE_STRING      "Device type"
 #define DEVICE_CLOUD_URL_STRING "login.etherios.com"
 
+#if !(defined UNUSED_ARGUMENT)
+#define UNUSED_ARGUMENT(a)  (void)(a)
+#endif
+
 #define DESIRED_MAX_RESPONSE_SIZE 400
 
 #define TEST_UDP 1
@@ -26,7 +30,7 @@
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
-	
+    
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
     start->vendor_id = 0x030000DB; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
@@ -135,6 +139,24 @@ static void app_get_time_cb(char const * const target, ccapi_transport_t const t
     return;
 }
 
+static ccapi_bool_t stop = CCAPI_FALSE;
+
+static void app_stop_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
+{
+    static char const stop_response[] = "I'll stop";
+
+    UNUSED_ARGUMENT(target);
+    UNUSED_ARGUMENT(request_buffer_info);
+    UNUSED_ARGUMENT(response_buffer_info);
+
+    printf("app_stop_cb: transport = %d\n", transport);
+
+    response_buffer_info->buffer = (void *)stop_response;
+    response_buffer_info->length = strlen(response_buffer_info->buffer);
+
+    stop = CCAPI_TRUE;
+}
+
 static void app_receive_default_status_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
 {
     printf("app_receive_default_status_cb: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
@@ -144,6 +166,27 @@ static void app_receive_default_status_cb(char const * const target, ccapi_trans
         printf("app_receive_default_status_cb: Freeing response buffer at %p\n", response_buffer_info->buffer);
         free(response_buffer_info->buffer);
     }
+}
+
+static ccapi_bool_t check_stop(void)
+{
+    ccapi_stop_error_t stop_error = CCAPI_STOP_ERROR_NONE;
+
+    if (stop == CCAPI_TRUE)
+    {
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+
+        if (stop_error == CCAPI_STOP_ERROR_NONE)
+        {
+            printf("ccapi_stop success\n");
+        }
+        else
+        {
+            printf("ccapi_stop error %d\n", stop_error);
+        }
+    }
+
+    return stop;
 }
 
 int main (void)
@@ -179,6 +222,7 @@ int main (void)
         uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}; /* 00049D:ABCDEF */
 
         tcp_info.connection.type = CCAPI_CONNECTION_LAN;
+        tcp_info.connection.max_transactions = 10;
         memcpy(tcp_info.connection.ip.address.ipv4, ipv4, sizeof tcp_info.connection.ip.address.ipv4);
         memcpy(tcp_info.connection.info.lan.mac_address, mac, sizeof tcp_info.connection.info.lan.mac_address);
 
@@ -204,7 +248,7 @@ int main (void)
         ccapi_udp_info_t udp_info = {{0}};
 
         udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
-        udp_info.limit.max_sessions = 1;
+        udp_info.limit.max_sessions = 10;
         udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
 
         udp_info.callback.close = NULL;
@@ -229,7 +273,7 @@ int main (void)
         ccapi_sms_info_t sms_info = {{0}};
 
         sms_info.start_timeout = CCAPI_TCP_START_WAIT_FOREVER;
-        sms_info.limit.max_sessions = 1;
+        sms_info.limit.max_sessions = 10;
         sms_info.limit.rx_timeout = CCAPI_SMS_RX_TIMEOUT_INFINITE;
 
         sms_info.callback.close = NULL;
@@ -257,7 +301,8 @@ int main (void)
         /* A request up to DESIRED_MAX_REQUEST_SIZE will success but app_get_time_cb() will complain that this command doesn't have arguments.
          * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
          */
-        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, NULL, DESIRED_MAX_REQUEST_SIZE);
+        receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
+        receive_error = ccapi_receive_add_target("get_system_time1", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
@@ -266,12 +311,14 @@ int main (void)
         {
             printf("ccapi_receive_add_target failed with error %d\n", receive_error);
         }
+
+        ccapi_receive_add_target("stop", app_stop_cb, NULL, 0);
     }
 
 #if (TEST_UDP == 1)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
-	for(;;)
-    {   
+    do
+    {
         /* TODO: send ping instead of data*/
         ccapi_send_error_t send_error;
         #define SEND_DATA_UDP         "ping"
@@ -286,10 +333,13 @@ int main (void)
         }
         
         sleep(5);
-    }
+    } while (check_stop() != CCAPI_TRUE);   
 #else
     printf("Endless loop\n");
-    for(;;);
+    do
+    {
+        sleep(1);
+    } while (check_stop() != CCAPI_TRUE);   
 #endif
 
 done:

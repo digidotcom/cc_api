@@ -86,6 +86,9 @@ ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_
         case CCIMP_THREAD_CONNECTOR_RUN:
             stack_size = 100 * 1024;
             break;
+        case CCIMP_THREAD_RECEIVE:
+            stack_size = 100 * 1024;
+            break;
     }
 
     ccode = pthread_attr_init(&attr);

@@ -233,6 +233,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.device_type = NULL;
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;
+    ccapi_data->thread.receive = NULL;
     ccapi_data->initiate_action_syncr = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
@@ -364,6 +365,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->service.receive.user_callbacks.data_cb = start->service.receive->data_cb;
         ccapi_data->service.receive.user_callbacks.status_cb = start->service.receive->status_cb;
         ccapi_data->service.receive.target_list = NULL;
+        ccapi_data->service.receive.svc_receive = NULL;
     }
 #endif
 
@@ -420,6 +422,32 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccimp_os_yield();
         } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
     }
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        ccapi_data->thread.receive = ccapi_malloc(sizeof *ccapi_data->thread.receive);
+        error = check_malloc(ccapi_data->thread.receive);
+        if (error != CCAPI_START_ERROR_NONE)
+            goto done;
+
+        ccapi_data->thread.receive->status = CCAPI_THREAD_REQUEST_START;
+        ccapi_data->thread.receive->ccimp_info.argument = ccapi_data;
+        ccapi_data->thread.receive->ccimp_info.start = ccapi_receive_thread;
+        ccapi_data->thread.receive->ccimp_info.type = CCIMP_THREAD_RECEIVE;
+
+        if (ccimp_os_create_thread(&ccapi_data->thread.receive->ccimp_info) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_THREAD_FAILED;
+            goto done;
+        }
+
+        do
+        {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_START);
+    }
+#endif
 
     ccapi_data->initiate_action_syncr = ccapi_syncr_create_and_release();
     if (ccapi_data->initiate_action_syncr == NULL)
@@ -591,6 +619,20 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     do {
         ccimp_os_yield();
     } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        if (ccapi_data->thread.receive->status == CCAPI_THREAD_RUNNING)
+        {
+            ccapi_data->thread.receive->status = CCAPI_THREAD_REQUEST_STOP;
+        }
+
+        do {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.receive->status != CCAPI_THREAD_NOT_STARTED);
+    }
+#endif
 
 done:
     switch (error)
