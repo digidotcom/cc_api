@@ -236,7 +236,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 {
     connector_callback_status_t connector_status = connector_callback_error;
 
-    ASSERT_MSG_GOTO(abort_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
+    ASSERT_MSG_GOTO(abort_ptr->target_number == ccapi_data->service.firmware_update.processing.target, done);
 
     connector_status = connector_callback_continue;
 

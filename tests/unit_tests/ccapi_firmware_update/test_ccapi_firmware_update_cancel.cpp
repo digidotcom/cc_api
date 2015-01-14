@@ -138,6 +138,8 @@ TEST_GROUP(test_ccapi_fw_abort_callback)
         error = ccapi_start(&start);
 
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_data_single_instance->service.firmware_update.processing.target = TEST_TARGET;
     }
 
     void teardown()
