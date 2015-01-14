@@ -110,7 +110,7 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_NoResponse)
     svc_receive->response_buffer_info.length = 0;
     svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
     ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -154,7 +154,7 @@ TEST(test_ccapi_receive_status_callback, testStatusOK_WithResponse)
     svc_receive->response_buffer_info.length = sizeof exp_response;
     svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     expected_response.buffer = (void *)exp_response;
     expected_response.length = sizeof exp_response;
@@ -202,7 +202,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_NO_RECEIVE_SUPPORT)
     svc_receive->response_buffer_info.length = 0;
     svc_receive->response_handled_internally = CCAPI_TRUE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
     ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -240,7 +240,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_CANCEL)
     svc_receive->response_buffer_info.length = 0;
     svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
     ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -278,7 +278,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_TIMEOUT)
     svc_receive->response_buffer_info.length = 0;
     svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
     ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;
@@ -316,7 +316,7 @@ TEST(test_ccapi_receive_status_callback, testERROR_STATUS_SESSION_ERROR)
     svc_receive->response_buffer_info.length = 0;
     svc_receive->response_handled_internally = CCAPI_FALSE;
     svc_receive->receive_error = CCAPI_RECEIVE_ERROR_NONE;
-    svc_receive->receivethread_status = CCAPI_RECEIVE_THREAD_FREE;
+    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
     ccapi_receive_status_expected_target = TEST_TARGET;
     ccapi_receive_status_expected_transport = CCAPI_TRANSPORT_TCP;

@@ -124,7 +124,7 @@ typedef struct
     ccapi_bool_t response_handled_internally;
     ccapi_buffer_info_t response_processing;
     ccapi_receive_error_t receive_error;
-    ccapi_receive_thread_status_t receivethread_status;
+    ccapi_receive_thread_status_t receive_thread_status;
 } ccapi_svc_receive_t;
 #endif
 
