@@ -71,7 +71,19 @@ TEST_GROUP(test_ccapi_fw_abort_no_callback)
 
         CHECK(error == CCAPI_START_ERROR_NONE);
 
-        ccapi_data_single_instance->service.firmware_update.processing.target = TEST_TARGET; 
+        {
+            connector_request_id_t request;
+            connector_callback_status_t status;
+            connector_firmware_download_start_t connector_firmware_download_start;
+
+            connector_firmware_download_start.target_number = TEST_TARGET;
+            connector_firmware_download_start.code_size = firmware_list[TEST_TARGET].chunk_size;
+
+            request.firmware_request = connector_request_id_firmware_download_start;
+            status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+            CHECK_EQUAL(connector_callback_continue, status);
+            CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
+        }
     }
 
     void teardown()
@@ -147,7 +159,19 @@ TEST_GROUP(test_ccapi_fw_abort_callback)
 
         CHECK(error == CCAPI_START_ERROR_NONE);
 
-        ccapi_data_single_instance->service.firmware_update.processing.target = TEST_TARGET;
+        {
+            connector_request_id_t request;
+            connector_callback_status_t status;
+            connector_firmware_download_start_t connector_firmware_download_start;
+
+            connector_firmware_download_start.target_number = TEST_TARGET;
+            connector_firmware_download_start.code_size = firmware_list[TEST_TARGET].chunk_size;
+
+            request.firmware_request = connector_request_id_firmware_download_start;
+            status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+            CHECK_EQUAL(connector_callback_continue, status);
+            CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
+        }
     }
 
     void teardown()

@@ -288,12 +288,24 @@ done:
 static connector_callback_status_t ccapi_process_firmware_update_abort(connector_firmware_download_abort_t * const abort_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
+    unsigned char chunk_pool_index;
 
     ASSERT_MSG_GOTO(abort_ptr->target_number == ccapi_data->service.firmware_update.processing.target, done);
+
+    ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started, done);
 
     connector_status = connector_callback_continue;
 
     ccapi_logging_line("ccapi_process_firmware_update_abort for target_number='%d'. status='%d'", abort_ptr->target_number, abort_ptr->status);
+
+    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
+    {
+        if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].in_use)
+        {
+            connector_status = connector_callback_busy;
+            goto done;
+        }
+    }
 
     if (ccapi_data->service.firmware_update.config.callback.cancel_cb != NULL)
     {
