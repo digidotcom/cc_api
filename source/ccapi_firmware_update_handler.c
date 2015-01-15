@@ -149,7 +149,6 @@ void ccapi_firmware_thread(void * const argument)
             switch (ccapi_fw_data_error)
             {
                 case CCAPI_FW_DATA_ERROR_NONE:
-                case CCAPI_FW_DATA_ERROR_BUSY: /* TODO */
                     ccapi_logging_line("-ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
                     chunk->in_use = CCAPI_FALSE;
                     break;    
