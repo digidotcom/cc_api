@@ -10,20 +10,21 @@
 #
 # ***************************************************************************
 # Use GNU C Compiler
+
 CPP = g++
 CC = gcc
 
 # Target Platform
-CCAPI_SOURCE_DIR = ./source
-CCAPI_INCLUDE = ./include
+CCAPI_SOURCE_DIR = source
+CCAPI_INCLUDE = include
 CONNECTOR_DIR = $(CCAPI_SOURCE_DIR)/cc_ansic
 CUSTOM_CONNECTOR_INCLUDE = $(CCAPI_SOURCE_DIR)/cc_ansic_custom_include
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
-UNIT_TEST_INCLUDE = ./tests/unit_tests
+UNIT_TEST_INCLUDE = tests/unit_tests
 
-TEST_DIR = ./tests/unit_tests
-MOCKS_DIR = ./tests/mocks
-CCIMP_SOURCE_DIR = ./tests/ccimp
+TEST_DIR = tests/unit_tests
+MOCKS_DIR = tests/mocks
+CCIMP_SOURCE_DIR = tests/ccimp
 
 # CFLAG Definition
 CFLAGS += $(DFLAGS)
@@ -35,6 +36,7 @@ CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
 CFLAGS += -Wall -Werror -Wextra -pedantic
 CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
 CFLAGS += -Wno-error=long-long
+CFLAGS += --coverage
 
 # Include POSIX and GNU features.
 CFLAGS += -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE
@@ -61,18 +63,25 @@ EXEC_NAME = test
 
 # since each of the samples shares private and platform files, do a clean each time we make
 .PHONY:all
-all: $(EXEC_NAME)
+all: test
 
 # Linking Flags.
-LDFLAGS += $(DFLAGS) -Wl,-Map,$(EXEC_NAME).map,--sort-common
+LDFLAGS += $(DFLAGS) -Wl,-Map,$(EXEC_NAME).map,--sort-common --coverage
 
 COBJS = $(CSRCS:.c=.o)
 CPPOBJS = $(CPPSRCS:.cpp=.o)
+GCOVOBJS = $(CSRCS:.c=.gcda) $(CSRCS:.c=.gcno) $(CPPSRCS:.cpp=.gcda) $(CPPSRCS:.cpp=.gcno)
 
 test: $(COBJS) $(CPPOBJS)
-	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
-	./$@
-	
+	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(EXEC_NAME)
+
+
+run_test: test
+	@-./$(EXEC_NAME)
+
+coverage: run_test
+	@-gcovr -r . --gcov-filter="$(CCAPI_SOURCE_DIR)/*"
+		
 .cpp.o:
 	$(CPP) -DUNIT_TEST $(CFLAGS) -c $< -o $@
 
@@ -81,4 +90,4 @@ test: $(COBJS) $(CPPOBJS)
 
 .PHONY: clean
 clean:
-	-rm -f $(COBJS) $(CPPOBJS)
+	-$(RM) -f $(COBJS) $(CPPOBJS) $(GCOVOBJS) $(EXEC_NAME)
