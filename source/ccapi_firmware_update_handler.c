@@ -32,6 +32,47 @@ static void free_and_stop_service(ccapi_data_t * const ccapi_data)
     ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
 }
 
+void ccapi_firmware_thread(void * const argument)
+{
+    ccapi_data_t * const ccapi_data = argument;
+
+    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
+
+    ccapi_data->thread.firmware->status = CCAPI_THREAD_RUNNING;
+    while (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
+    {
+        ccapi_fw_data_error_t ccapi_fw_data_error;
+        ccapi_fw_chunk_info * const chunk = &ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.current_chunk];
+
+        if (chunk->in_use == CCAPI_TRUE)
+        {
+            ccapi_logging_line("+ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
+            ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(ccapi_data->service.firmware_update.processing.target,
+                                                                                                     chunk->offset, chunk->data, chunk->size, chunk->last);
+            switch (ccapi_fw_data_error)
+            {
+                case CCAPI_FW_DATA_ERROR_NONE:
+                    break;    
+                case CCAPI_FW_DATA_ERROR_INVALID_DATA:
+                    ccapi_data->service.firmware_update.processing.data_error = ccapi_fw_data_error;
+                    break;    
+            }
+
+            chunk->in_use = CCAPI_FALSE;
+
+            ccapi_logging_line("-ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
+        }
+
+        ccimp_os_yield();
+    }
+    ASSERT_MSG_GOTO(ccapi_data->thread.firmware->status == CCAPI_THREAD_REQUEST_STOP, done);
+
+    ccapi_data->thread.firmware->status = CCAPI_THREAD_NOT_STARTED;
+done:
+    return;
+}
+
 static connector_callback_status_t ccapi_process_firmware_update_request(connector_firmware_download_start_t * const start_ptr, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
@@ -127,47 +168,6 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
 
 done:
     return connector_status;
-}
-
-void ccapi_firmware_thread(void * const argument)
-{
-    ccapi_data_t * const ccapi_data = argument;
-
-    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
-    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
-
-    ccapi_data->thread.firmware->status = CCAPI_THREAD_RUNNING;
-    while (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
-    {
-        ccapi_fw_data_error_t ccapi_fw_data_error;
-        ccapi_fw_chunk_info * const chunk = &ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.current_chunk];
-
-        if (chunk->in_use == CCAPI_TRUE)
-        {
-            ccapi_logging_line("+ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
-            ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(ccapi_data->service.firmware_update.processing.target,
-                                                                                                     chunk->offset, chunk->data, chunk->size, chunk->last);
-            switch (ccapi_fw_data_error)
-            {
-                case CCAPI_FW_DATA_ERROR_NONE:
-                    break;    
-                case CCAPI_FW_DATA_ERROR_INVALID_DATA:
-                    ccapi_data->service.firmware_update.processing.data_error = ccapi_fw_data_error;
-                    break;    
-            }
-
-            chunk->in_use = CCAPI_FALSE;
-
-            ccapi_logging_line("-ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
-        }
-
-        ccimp_os_yield();
-    }
-    ASSERT_MSG_GOTO(ccapi_data->thread.firmware->status == CCAPI_THREAD_REQUEST_STOP, done);
-
-    ccapi_data->thread.firmware->status = CCAPI_THREAD_NOT_STARTED;
-done:
-    return;
 }
 
 static connector_callback_status_t ccapi_process_firmware_update_data(connector_firmware_download_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
