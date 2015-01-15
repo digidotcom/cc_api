@@ -346,7 +346,6 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
 
     create_test_file(LOCAL_PATH, data, sizeof data);
 
-    {
         connector_request_data_service_send_t header;
 
         header.transport = connector_transport_tcp;
@@ -361,7 +360,6 @@ TEST(test_ccapi_send_file_with_reply, testReadSEND_ERROR_ACCESSING_FILE)
 
         if (ccapi_data_single_instance->config.filesystem_supported == CCAPI_FALSE)
             ccapi_data_single_instance->service.file_system.imp_context = NULL;
-    }
 
         ccimp_fs_file_open_t ccimp_open_data;
 
