@@ -130,7 +130,7 @@ typedef struct
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
 
-#define MAX_FW_CHUNKS 1
+#define MAX_FW_CHUNKS 1 /* TODO: Make it public ?? */
 
 typedef struct
 {
@@ -169,6 +169,7 @@ typedef struct {
                 uint32_t total_size;
                 uint32_t head_offset;
                 uint32_t tail_offset;
+                uint32_t source_bytes_processed;
             } processing;
         } firmware_update;
 #endif
