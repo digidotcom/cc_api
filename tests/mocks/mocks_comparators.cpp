@@ -12,7 +12,7 @@
 
 #include "mocks.h"
 
-#define ValueToStringFunction(type)     static SimpleString type##_ValueToString(void * object) {(void)object; return #type;}
+#define ValueToStringFunction(type)     static SimpleString type##_ValueToString(void const * const object) {(void)object; return #type;}
 #define compare_pointers(object1, object2)  do {if (object1 == NULL || object2 == NULL) return false; else if (object1 == object2) return true;} while(0)
 #define compare_strings(string1, string2)   do {if (string1 != string2 && (string1 == NULL || string2 == NULL)) return false;\
                                                 else if (strcmp(string1, string2) != 0) return false;                          } while(0)
@@ -41,12 +41,12 @@ ValueToStringFunction(ccimp_fs_error_desc_t)
 ValueToStringFunction(ccimp_fs_session_error_t)
 ValueToStringFunction(connector_request_data_point_t)
 
-static SimpleString ccimp_create_thread_info_t_ValueToString(void* object)
+static SimpleString ccimp_create_thread_info_t_ValueToString(void const * const object)
 {
     return StringFrom(((ccimp_create_thread_info_t*)object)->type);
 }
 
-static bool ccimp_network_open_t_IsEqual(void * object1, void * object2)
+static bool ccimp_network_open_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_network_open_t * open_data_1 = (ccimp_network_open_t*)object1;
     ccimp_network_open_t * open_data_2 = (ccimp_network_open_t*)object2;
@@ -60,7 +60,7 @@ static bool ccimp_network_open_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_network_send_t_IsEqual(void * object1, void * object2)
+static bool ccimp_network_send_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_network_send_t * send_data_1 = (ccimp_network_send_t*)object1;
     ccimp_network_send_t * send_data_2 = (ccimp_network_send_t*)object2;
@@ -82,7 +82,7 @@ static bool ccimp_network_send_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_network_receive_t_IsEqual(void * object1, void * object2)
+static bool ccimp_network_receive_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_network_receive_t * receive_data_1 = (ccimp_network_receive_t*)object1;
     ccimp_network_receive_t * receive_data_2 = (ccimp_network_receive_t*)object2;
@@ -104,7 +104,7 @@ static bool ccimp_network_receive_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_network_close_t_IsEqual(void * object1, void * object2)
+static bool ccimp_network_close_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_network_close_t * close_data_1 = (ccimp_network_close_t*)object1;
     ccimp_network_close_t * close_data_2 = (ccimp_network_close_t*)object2;
@@ -116,7 +116,7 @@ static bool ccimp_network_close_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
+static bool ccimp_create_thread_info_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_create_thread_info_t * create_thread_info1 = (ccimp_create_thread_info_t*)object1;
     ccimp_create_thread_info_t * create_thread_info2 = (ccimp_create_thread_info_t*)object2;
@@ -130,7 +130,7 @@ static bool ccimp_create_thread_info_t_IsEqual(void* object1, void* object2)
     return true;
 }
 
-static bool connector_transport_t_IsEqual(void * object1, void * object2)
+static bool connector_transport_t_IsEqual(void const * const object1, void const * const object2)
 {
     connector_transport_t * connector_transport_1 = (connector_transport_t *)object1;
     connector_transport_t * connector_transport_2 = (connector_transport_t *)object2;
@@ -143,7 +143,7 @@ static bool connector_transport_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool connector_initiate_stop_request_t_IsEqual(void * object1, void * object2)
+static bool connector_initiate_stop_request_t_IsEqual(void const * const object1, void const * const object2)
 {
     connector_initiate_stop_request_t * connector_initiate_stop_request_1 = (connector_initiate_stop_request_t *)object1;
     connector_initiate_stop_request_t * connector_initiate_stop_request_2 = (connector_initiate_stop_request_t *)object2;
@@ -161,7 +161,7 @@ static bool connector_initiate_stop_request_t_IsEqual(void * object1, void * obj
     return true;
 }
 
-static bool connector_request_data_service_send_t_IsEqual(void * object1, void * object2)
+static bool connector_request_data_service_send_t_IsEqual(void const * const object1, void const * const object2)
 {
     connector_request_data_service_send_t * connector_request_data_service_send_t_1 = (connector_request_data_service_send_t *)object1;
     connector_request_data_service_send_t * connector_request_data_service_send_t_2 = (connector_request_data_service_send_t *)object2;
@@ -186,7 +186,7 @@ static bool connector_request_data_service_send_t_IsEqual(void * object1, void *
     return true;
 }
 
-static bool ccimp_fs_file_open_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_open_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_open_t * ccimp_fs_file_open_1 = (ccimp_fs_file_open_t *)object1;
     ccimp_fs_file_open_t * ccimp_fs_file_open_2 = (ccimp_fs_file_open_t *)object2;
@@ -205,7 +205,7 @@ static bool ccimp_fs_file_open_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_read_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_read_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_read_t * ccimp_fs_file_read_1 = (ccimp_fs_file_read_t *)object1;
     ccimp_fs_file_read_t * ccimp_fs_file_read_2 = (ccimp_fs_file_read_t *)object2;
@@ -225,7 +225,7 @@ static bool ccimp_fs_file_read_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_write_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_write_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_write_t * ccimp_fs_file_write_1 = (ccimp_fs_file_write_t *)object1;
     ccimp_fs_file_write_t * ccimp_fs_file_write_2 = (ccimp_fs_file_write_t *)object2;
@@ -247,7 +247,7 @@ static bool ccimp_fs_file_write_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_seek_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_seek_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_seek_t * ccimp_fs_file_seek_1 = (ccimp_fs_file_seek_t *)object1;
     ccimp_fs_file_seek_t * ccimp_fs_file_seek_2 = (ccimp_fs_file_seek_t *)object2;
@@ -269,7 +269,7 @@ static bool ccimp_fs_file_seek_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_close_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_close_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_close_t * ccimp_fs_file_close_1 = (ccimp_fs_file_close_t *)object1;
     ccimp_fs_file_close_t * ccimp_fs_file_close_2 = (ccimp_fs_file_close_t *)object2;
@@ -285,7 +285,7 @@ static bool ccimp_fs_file_close_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_truncate_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_truncate_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_truncate_t * ccimp_fs_file_truncate_1 = (ccimp_fs_file_truncate_t *)object1;
     ccimp_fs_file_truncate_t * ccimp_fs_file_truncate_2 = (ccimp_fs_file_truncate_t *)object2;
@@ -303,7 +303,7 @@ static bool ccimp_fs_file_truncate_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_file_remove_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_file_remove_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_file_remove_t * ccimp_fs_file_remove_1 = (ccimp_fs_file_remove_t *)object1;
     ccimp_fs_file_remove_t * ccimp_fs_file_remove_2 = (ccimp_fs_file_remove_t *)object2;
@@ -319,7 +319,7 @@ static bool ccimp_fs_file_remove_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_dir_open_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_dir_open_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_dir_open_t * ccimp_fs_dir_open_1 = (ccimp_fs_dir_open_t *)object1;
     ccimp_fs_dir_open_t * ccimp_fs_dir_open_2 = (ccimp_fs_dir_open_t *)object2;
@@ -337,7 +337,7 @@ static bool ccimp_fs_dir_open_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_dir_read_entry_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_dir_read_entry_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_dir_read_entry_t * ccimp_fs_dir_read_entry_1 = (ccimp_fs_dir_read_entry_t *)object1;
     ccimp_fs_dir_read_entry_t * ccimp_fs_dir_read_entry_2 = (ccimp_fs_dir_read_entry_t *)object2;
@@ -356,7 +356,7 @@ static bool ccimp_fs_dir_read_entry_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_dir_entry_status_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_dir_entry_status_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_dir_entry_status_t * ccimp_fs_dir_entry_status_1 = (ccimp_fs_dir_entry_status_t *)object1;
     ccimp_fs_dir_entry_status_t * ccimp_fs_dir_entry_status_2 = (ccimp_fs_dir_entry_status_t *)object2;
@@ -377,7 +377,7 @@ static bool ccimp_fs_dir_entry_status_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_dir_close_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_dir_close_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_dir_close_t * ccimp_fs_dir_close_1 = (ccimp_fs_dir_close_t *)object1;
     ccimp_fs_dir_close_t * ccimp_fs_dir_close_2 = (ccimp_fs_dir_close_t *)object2;
@@ -392,7 +392,7 @@ static bool ccimp_fs_dir_close_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_get_hash_alg_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_get_hash_alg_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_get_hash_alg_t * ccimp_fs_hash_status_1 = (ccimp_fs_get_hash_alg_t *)object1;
     ccimp_fs_get_hash_alg_t * ccimp_fs_hash_status_2 = (ccimp_fs_get_hash_alg_t *)object2;
@@ -411,7 +411,7 @@ static bool ccimp_fs_get_hash_alg_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_hash_file_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_hash_file_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_hash_file_t * ccimp_fs_hash_file_1 = (ccimp_fs_hash_file_t *)object1;
     ccimp_fs_hash_file_t * ccimp_fs_hash_file_2 = (ccimp_fs_hash_file_t *)object2;
@@ -432,7 +432,7 @@ static bool ccimp_fs_hash_file_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_error_desc_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_error_desc_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_error_desc_t * ccimp_fs_error_desc_1 = (ccimp_fs_error_desc_t *)object1;
     ccimp_fs_error_desc_t * ccimp_fs_error_desc_2 = (ccimp_fs_error_desc_t *)object2;
@@ -453,7 +453,7 @@ static bool ccimp_fs_error_desc_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool ccimp_fs_session_error_t_IsEqual(void * object1, void * object2)
+static bool ccimp_fs_session_error_t_IsEqual(void const * const object1, void const * const object2)
 {
     ccimp_fs_session_error_t * ccimp_fs_session_error_1 = (ccimp_fs_session_error_t *)object1;
     ccimp_fs_session_error_t * ccimp_fs_session_error_2 = (ccimp_fs_session_error_t *)object2;
@@ -466,7 +466,7 @@ static bool ccimp_fs_session_error_t_IsEqual(void * object1, void * object2)
     return true;
 }
 
-static bool connector_request_data_point_t_IsEqual(void * object1, void * object2)
+static bool connector_request_data_point_t_IsEqual(void const * const object1, void const * const object2)
 {
     connector_request_data_point_t * connector_request_data_point_1 = (connector_request_data_point_t *)object1;
     connector_request_data_point_t * connector_request_data_point_2 = (connector_request_data_point_t *)object2;
