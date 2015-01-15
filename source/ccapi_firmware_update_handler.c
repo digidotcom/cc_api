@@ -20,7 +20,7 @@ static void free_and_stop_service(ccapi_data_t * const ccapi_data)
 {
     unsigned char chunk_pool_index;
 
-    for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
+    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
     {
         if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data != NULL)
         {
@@ -100,7 +100,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         fw_target_item->chunk_size = 1024;
     }
 
-    for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
+    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
     {
         ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].in_use = CCAPI_FALSE;
         ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].offset = 0;

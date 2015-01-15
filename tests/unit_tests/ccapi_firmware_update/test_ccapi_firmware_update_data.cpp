@@ -12,9 +12,6 @@
 #include "test_helper_functions.h"
 #include <unistd.h>
 
-
-#define CCAPI_CHUNK_POOL_SIZE 1 /* TODO: syncr with MAX_FW_CHUNKS in ccapi_definitions */
-
 static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
         {{0,0,1,0}, "Test",        ".*\\.test",         32,                16         }   /* any *.test files */
@@ -44,7 +41,7 @@ static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t
 {
     CHECK_EQUAL(ccapi_firmware_data_expected_target[ccapi_firmware_data_cb_called], target);
     CHECK_EQUAL(ccapi_firmware_data_expected_offset[ccapi_firmware_data_cb_called], offset);
-
+	
 #if 0
     {
         unsigned int i;

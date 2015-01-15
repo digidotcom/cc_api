@@ -129,9 +129,6 @@ typedef struct
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
-
-#define MAX_FW_CHUNKS 1 /* TODO: Make it public ?? */
-
 typedef struct
 {
     ccapi_bool_t in_use;
@@ -163,7 +160,7 @@ typedef struct {
             ccapi_fw_service_t config;
             struct {
                 ccapi_bool_t update_started;
-                ccapi_fw_chunk_info chunk_pool[MAX_FW_CHUNKS];
+                ccapi_fw_chunk_info chunk_pool[CCAPI_CHUNK_POOL_SIZE];
                 uint8_t current_chunk;
                 unsigned int target;
                 uint32_t total_size;

@@ -344,7 +344,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccapi_data->service.firmware_update.config.callback.data_cb = start->service.firmware->callback.data_cb;
             ccapi_data->service.firmware_update.config.callback.cancel_cb = start->service.firmware->callback.cancel_cb;
 
-            for (chunk_pool_index = 0; chunk_pool_index < MAX_FW_CHUNKS; chunk_pool_index++)
+            for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
             {
                 ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = NULL;
             }
