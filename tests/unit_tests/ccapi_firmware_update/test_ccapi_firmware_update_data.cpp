@@ -460,6 +460,80 @@ TEST(test_ccapi_fw_data_callback, testDataTwoBlocksThatMachChuncksBusy)
     ccapi_firmware_data_cb_called = 0;
 }
 
+TEST(test_ccapi_fw_data_callback, testErrorInvalidData)
+{
+    connector_request_id_t request;
+    connector_firmware_download_data_t connector_firmware_download_data;
+    connector_callback_status_t status;
+    uint8_t const data[] = DATA;
+
+    {
+        connector_firmware_download_start_t connector_firmware_download_start;
+
+        connector_firmware_download_start.target_number = TEST_TARGET;
+        connector_firmware_download_start.code_size = firmware_list[TEST_TARGET].maximum_size;
+
+        request.firmware_request = connector_request_id_firmware_download_start;
+        status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_start, ccapi_data_single_instance);
+        CHECK_EQUAL(connector_callback_continue, status);
+        CHECK(connector_firmware_download_start.status == connector_firmware_status_success);
+    }
+
+    /* First data block match first chunk */
+    connector_firmware_download_data.target_number = TEST_TARGET;
+    connector_firmware_download_data.image.offset = 0;
+    connector_firmware_download_data.image.data = &data[0];
+    connector_firmware_download_data.image.bytes_used = firmware_list[TEST_TARGET].chunk_size;
+
+    ccapi_firmware_data_expected_target[0] = connector_firmware_download_data.target_number;
+    ccapi_firmware_data_expected_offset[0] = connector_firmware_download_data.image.offset;
+    ccapi_firmware_data_expected_data[0] = &data[0];
+    ccapi_firmware_data_expected_size[0] = connector_firmware_download_data.image.bytes_used;
+    ccapi_firmware_data_expected_last_chunk[0] = CCAPI_FALSE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_INVALID_DATA;
+
+    request.firmware_request = connector_request_id_firmware_download_data;
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
+
+    /* The error reported in one chunk will be recognised one or more chunks later by the connector, when the firmware thread process it */
+    do
+    {
+        sched_yield();
+    } while (ccapi_firmware_data_cb_called == 0 || ccapi_data_single_instance->service.firmware_update.processing.chunk_pool[0].in_use == CCAPI_TRUE);
+    CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
+
+    CHECK(ccapi_data_single_instance->service.firmware_update.processing.data_error == CCAPI_FW_DATA_ERROR_INVALID_DATA);
+
+    ccapi_firmware_data_cb_called = 0;
+
+    /* second data block match second chunk */
+    connector_firmware_download_data.target_number = TEST_TARGET;
+    connector_firmware_download_data.image.offset = firmware_list[TEST_TARGET].chunk_size;
+    connector_firmware_download_data.image.data = &data[firmware_list[TEST_TARGET].chunk_size];
+    connector_firmware_download_data.image.bytes_used = firmware_list[TEST_TARGET].chunk_size;
+
+    ccapi_firmware_data_expected_target[0] = connector_firmware_download_data.target_number;
+    ccapi_firmware_data_expected_offset[0] = connector_firmware_download_data.image.offset;
+    ccapi_firmware_data_expected_data[0] = &data[firmware_list[TEST_TARGET].chunk_size];
+    ccapi_firmware_data_expected_size[0] = connector_firmware_download_data.image.bytes_used;
+    ccapi_firmware_data_expected_last_chunk[0] = CCAPI_TRUE;
+    ccapi_firmware_data_retval[0] = CCAPI_FW_DATA_ERROR_NONE;
+
+    request.firmware_request = connector_request_id_firmware_download_data;
+    do status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+#if (CCAPI_CHUNK_POOL_SIZE == 1)
+    while ( status == connector_callback_busy);
+#else
+    while (0);
+#endif
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(connector_firmware_download_data.status == connector_firmware_status_invalid_data);
+}
+
 TEST(test_ccapi_fw_data_callback, testDataFourBlocksSmallerThanChuncks)
 {
     connector_request_id_t request;

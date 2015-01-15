@@ -167,6 +167,7 @@ typedef struct {
                 uint32_t head_offset;
                 uint32_t tail_offset;
                 uint32_t source_bytes_processed;
+                ccapi_fw_data_error_t data_error;
             } processing;
         } firmware_update;
 #endif

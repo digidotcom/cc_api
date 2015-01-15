@@ -122,6 +122,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     ccapi_data->service.firmware_update.processing.tail_offset = 0;
     ccapi_data->service.firmware_update.processing.head_offset = 0;
     ccapi_data->service.firmware_update.processing.source_bytes_processed = 0;
+    ccapi_data->service.firmware_update.processing.data_error = CCAPI_FW_DATA_ERROR_NONE;
     ccapi_data->service.firmware_update.processing.update_started = CCAPI_TRUE;
 
 done:
@@ -149,15 +150,15 @@ void ccapi_firmware_thread(void * const argument)
             switch (ccapi_fw_data_error)
             {
                 case CCAPI_FW_DATA_ERROR_NONE:
-                    ccapi_logging_line("-ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
-                    chunk->in_use = CCAPI_FALSE;
                     break;    
                 case CCAPI_FW_DATA_ERROR_INVALID_DATA:
-                    /*data_ptr->status = connector_firmware_status_invalid_data;
-                      goto done;
-					 TODO */
+                    ccapi_data->service.firmware_update.processing.data_error = ccapi_fw_data_error;
                     break;    
             }
+
+            chunk->in_use = CCAPI_FALSE;
+
+            ccapi_logging_line("-ccapi_firmware_thread: processing offset=0x%x, size=%d, last=%d", chunk->offset, chunk->size, chunk->last);
         }
 
         ccimp_os_yield();
@@ -181,6 +182,14 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
     data_ptr->status = connector_firmware_status_success;
 
     /* ccapi_logging_line("ccapi_process_fw_data target_number=%d, offset=0x%x, size=%d", data_ptr->target_number, data_ptr->image.offset, data_ptr->image.bytes_used); */
+
+    if (ccapi_data->service.firmware_update.processing.data_error == CCAPI_FW_DATA_ERROR_INVALID_DATA)
+    {
+        ccapi_logging_line("Invalid data!");
+
+        data_ptr->status = connector_firmware_status_invalid_data;
+        goto done;
+    }
 
     if (data_ptr->image.offset != ccapi_data->service.firmware_update.processing.tail_offset - ccapi_data->service.firmware_update.processing.source_bytes_processed)
     {
