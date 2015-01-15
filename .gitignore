@@ -29,3 +29,6 @@ ccapi_app
 # Release tgz
 ccapi.tgz
 
+# Gcov files
+*.gcda
+*.gcno
