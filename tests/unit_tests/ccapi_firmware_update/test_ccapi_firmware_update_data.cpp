@@ -805,7 +805,9 @@ TEST(test_ccapi_fw_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundar
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 #else
-    TODO
+    /* We need two calls: first one completes first chunk and queues it (returns busy) and second call partilly fill second chunk */
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_busy, status);
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
@@ -916,7 +918,19 @@ TEST(test_ccapi_fw_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundar
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);    
 #else
-    TODO
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_busy, status);
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    ccapi_firmware_data_lock_cb[0] = CCAPI_FALSE;
+
+    do
+    {
+        sched_yield();
+    } while (ccapi_firmware_data_cb_called == 0);
+    CHECK_EQUAL(1, ccapi_firmware_data_cb_called);
+    ccapi_firmware_data_cb_called = 0;
 #endif
 
     /* Third data block is half a chunk. We should get the second callback */
@@ -992,11 +1006,13 @@ TEST(test_ccapi_fw_data_callback, testOneBlockIsTwoChunks)
     ccapi_firmware_data_retval[1] = CCAPI_FW_DATA_ERROR_NONE;
 
     request.firmware_request = connector_request_id_firmware_download_data;
-    do status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
 #if (CCAPI_CHUNK_POOL_SIZE == 1)
+    do status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
     while ( status == connector_callback_busy);
 #else
-    while (0);
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_busy, status);
+    status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
 #endif
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
@@ -1545,7 +1561,7 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteWaitAllPoolsFinish)
     }
 }
 
-#if (CCAPI_CHUNK_POOL_SIZE > 1)
+#if (CCAPI_CHUNK_POOL_SIZE > 2)
 TODO: Add tests that check pool boundary
 #endif
 
