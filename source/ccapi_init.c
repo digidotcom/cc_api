@@ -465,7 +465,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->thread.firmware->status = CCAPI_THREAD_REQUEST_START;
         ccapi_data->thread.firmware->ccimp_info.argument = ccapi_data;
         ccapi_data->thread.firmware->ccimp_info.start = ccapi_firmware_thread;
-        ccapi_data->thread.firmware->ccimp_info.type = CCIMP_THREAD_RECEIVE;
+        ccapi_data->thread.firmware->ccimp_info.type = CCIMP_THREAD_FIRMWARE;
 
         if (ccimp_os_create_thread(&ccapi_data->thread.firmware->ccimp_info) != CCIMP_STATUS_OK)
         {
