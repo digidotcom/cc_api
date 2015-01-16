@@ -16,7 +16,48 @@
 
 #if 1 /*(defined CONNECTOR_REMOTE_CONFIGURATION_SUPPORT) */
 
-#define CCAPI_RCI_BUSY  -2
+static ccapi_rci_query_setting_attribute_compare_to_t connector_to_ccapi_compare_to_attribute(rci_query_setting_attribute_compare_to_t const compare_to)
+{
+    ccapi_rci_query_setting_attribute_compare_to_t retval;
+
+    switch (compare_to)
+    {
+        case rci_query_setting_attribute_compare_to_none:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+            break;
+        case rci_query_setting_attribute_compare_to_current:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_CURRENT;
+            break;
+        case rci_query_setting_attribute_compare_to_stored:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_STORED;
+            break;
+        case rci_query_setting_attribute_compare_to_defaults:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_DEFAULTS;
+            break;
+    }
+
+    return retval;
+}
+
+static ccapi_rci_query_setting_attribute_source_t connector_to_ccapi_source_attribute(rci_query_setting_attribute_source_t const source)
+{
+    ccapi_rci_query_setting_attribute_source_t retval;
+
+    switch (source)
+    {
+        case rci_query_setting_attribute_source_current:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+            break;
+        case rci_query_setting_attribute_source_stored:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_STORED;
+            break;
+        case rci_query_setting_attribute_source_defaults:
+            retval = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_DEFAULTS;
+            break;
+    }
+
+    return retval;
+}
 
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data)
 {
@@ -36,8 +77,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             rci_info->action = CCAPI_RCI_ACTION_QUERY;
             rci_info->error_hint = NULL;
             rci_info->error_id = CCAPI_RCI_ERROR_ID_NO_MEMORY;
-            rci_info->group_instance = 0;
-            rci_info->group_type = CCAPI_RCI_GROUP_SETTING;
+            rci_info->group.instance = 0;
+            rci_info->group.type = CCAPI_RCI_GROUP_SETTING;
             error = session_start_cb(rci_info);
             break;
         }
@@ -60,7 +101,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             switch (group_type)
             {
                 case connector_remote_group_setting:
-                    rci_info->group_type = CCAPI_RCI_GROUP_SETTING;
+                    rci_info->group.type = CCAPI_RCI_GROUP_SETTING;
                     break;
                 case connector_remote_group_state:
                     rci_info->action = CCAPI_RCI_GROUP_STATE;
@@ -92,7 +133,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     group_table = &rci_data->state;
                     break;
             }
-            rci_info->group_instance = remote_config->group.index;
             rci_info->group.instance = remote_config->group.index;
 #if (defined RCI_PARSER_USES_GROUP_NAMES)
             rci_info->group.name = remote_config->group.name;
@@ -100,10 +140,21 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
             rci_info->element.name = NULL;
 #endif
+            if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
+            {
+                rci_info->query_setting.attributes.compare_to = connector_to_ccapi_compare_to_attribute(remote_config->attribute.compare_to);
+                rci_info->query_setting.attributes.source = connector_to_ccapi_source_attribute(remote_config->attribute.source);
+                rci_info->query_setting.matches = CCAPI_FALSE;
+            }
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             start_callback = group->callbacks.start;
             error = start_callback(rci_info);
+
+            if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
+            {
+                remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
+            }
             break;
         }
         case connector_request_id_remote_config_group_process:
@@ -118,7 +169,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             switch (group_type)
             {
                 case connector_remote_group_setting:
-                    rci_info->group_type = CCAPI_RCI_GROUP_SETTING;
+                    rci_info->group.type = CCAPI_RCI_GROUP_SETTING;
                     group_table = &rci_data->settings;
                     break;
                 case connector_remote_group_state:
@@ -127,7 +178,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
             }
 
-            rci_info->group_instance = remote_config->group.index;
+            rci_info->group.instance = remote_config->group.index;
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
 
@@ -140,6 +191,11 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 {
                     ccapi_rci_function_t const process_callback = element->get;
                     void * p_element = NULL;
+
+                    if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
+                    {
+                        remote_config->response.compare_matches = CCAPI_FALSE;
+                    }
 
                     switch (remote_config->element.type)
                     {
@@ -243,6 +299,12 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     rci_info->element.name = remote_config->element.name;
 #endif
                     error = process_callback(rci_info, p_element);
+
+                    if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
+                    {
+                        remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
+                        rci_info->query_setting.matches = CCAPI_FALSE;
+                    }
                     break;
                 }
                 case CCAPI_RCI_ACTION_SET:
@@ -356,7 +418,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             ccapi_rci_group_t const * group;
             ccapi_rci_function_t end_callback;
 
-            switch (rci_info->group_type)
+            switch (rci_info->group.type)
             {
                 case CCAPI_RCI_GROUP_SETTING:
                     group_table = &rci_data->settings;
@@ -366,7 +428,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
             }
 
-            rci_info->group_instance = remote_config->group.index;
+            rci_info->group.instance = remote_config->group.index;
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             ASSERT(group_id < group_table->count);
@@ -409,21 +471,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 
     if (error != 0)
     {
-        if (error == (unsigned int)CCAPI_RCI_BUSY)
-        {
-            status = connector_callback_busy;
-        }
-        else
-        {
-            remote_config->error_id = error;
-#if 0
-            /* TODO */
-            if (error != (unsigned int)connector_rci_error_not_available)
-            {
-                remote_config->response.error_hint = rci_info->error_hint;
-            }
-#endif
-        }
+        remote_config->error_id = error;
     }
     remote_config->user_context = rci_info->user_context;
 

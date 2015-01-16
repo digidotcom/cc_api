@@ -46,6 +46,24 @@ typedef enum {
     CCAPI_RCI_GROUP_STATE
 } ccapi_rci_group_type_t;
 
+typedef enum {
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT,
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_STORED,
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_DEFAULTS
+} ccapi_rci_query_setting_attribute_source_t;
+
+typedef enum {
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE,
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_CURRENT,
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_STORED,
+    CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_DEFAULTS
+} ccapi_rci_query_setting_attribute_compare_to_t;
+
+typedef struct {
+    ccapi_rci_query_setting_attribute_source_t source;
+    ccapi_rci_query_setting_attribute_compare_to_t compare_to;
+} ccapi_rci_query_setting_attributes_t;
+
 typedef struct rci_data {
     struct {
         unsigned int CONST instance;
@@ -59,6 +77,11 @@ typedef struct rci_data {
         char const * name;
     } element;
 #endif
+    struct {
+        ccapi_rci_query_setting_attributes_t CONST attributes;
+        ccapi_bool_t matches;
+    } query_setting;
+
     ccapi_rci_action_t CONST action;
     ccapi_rci_error_id_t error_id;
     char const * error_hint;
