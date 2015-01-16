@@ -13,9 +13,6 @@
 #ifndef _CCAPI_FIRMWARE_UPDATE_H_
 #define _CCAPI_FIRMWARE_UPDATE_H_
 
-/* Pool of chunks allocated to process firmware update */
-#define CCAPI_CHUNK_POOL_SIZE 2
-
 /* We enum here values with meaning for the cloud for the request operation */
 typedef enum {
     CCAPI_FW_REQUEST_ERROR_NONE,

@@ -11,6 +11,7 @@
 */
 #include "test_helper_functions.h"
 #include <unistd.h>
+#include "../../../source/ccapi_definitions.h" /* To get CCAPI_CHUNK_POOL_SIZE */
 
 static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size       chunk_size */
