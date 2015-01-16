@@ -160,10 +160,11 @@ typedef struct {
             ccapi_fw_service_t config;
             struct {
                 ccapi_bool_t update_started;
-                ccapi_fw_chunk_info chunk_pool[CCAPI_CHUNK_POOL_SIZE];
-                uint8_t current_chunk;
                 unsigned int target;
                 uint32_t total_size;
+                ccapi_fw_chunk_info chunk_pool[CCAPI_CHUNK_POOL_SIZE];
+                uint8_t chunk_pool_head;
+                uint8_t chunk_pool_tail;
                 uint32_t head_offset;
                 uint32_t tail_offset;
                 uint32_t source_bytes_processed;
