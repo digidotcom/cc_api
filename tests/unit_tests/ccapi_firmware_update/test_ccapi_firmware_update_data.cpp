@@ -47,7 +47,7 @@ static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t
     {
         unsigned int i;
         uint8_t * pData = (uint8_t*)data;
-        for (i=0; i<size; i++)
+        for (i = 0; i < size; i++)
         {
             printf("0x%x,", pData[i]);
         }
@@ -93,7 +93,7 @@ TEST_GROUP(test_ccapi_fw_data_callback)
 
         {
             unsigned int i;
-            for (i=0; i<MAX_CALLBACK_CALLS; i++)
+            for (i = 0; i < MAX_CALLBACK_CALLS; i++)
             { 
                 ccapi_firmware_data_expected_target[i] = (unsigned int)-1;
                 ccapi_firmware_data_expected_offset[i] = 0;
@@ -271,7 +271,7 @@ TEST(test_ccapi_fw_data_callback, testDataTotalsizeEqualsChunksizeBusy)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -402,7 +402,7 @@ TEST(test_ccapi_fw_data_callback, testDataTwoBlocksThatMachChuncksBusy)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -443,7 +443,7 @@ TEST(test_ccapi_fw_data_callback, testDataTwoBlocksThatMachChuncksBusy)
 
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -683,7 +683,7 @@ TEST(test_ccapi_fw_data_callback, testDataFourBlocksSmallerThanChuncksBusy)
 
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -735,7 +735,7 @@ TEST(test_ccapi_fw_data_callback, testDataFourBlocksSmallerThanChuncksBusy)
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -895,7 +895,7 @@ TEST(test_ccapi_fw_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundar
 
 #if (CCAPI_CHUNK_POOL_SIZE == 1)
     /* The ccapi_connector_callback returns busy until the user callback is processed as there are no more chunk pool */
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
         status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
@@ -952,7 +952,7 @@ TEST(test_ccapi_fw_data_callback, testDataThreeBlocksThatDoNotMatchChunckBoundar
     status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
-    for (i=0 ; i < 1000 ; i++)
+    for (i = 0 ; i < 1000 ; i++)
     {
         sched_yield();
     }
@@ -1424,7 +1424,7 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteNotBoundaryBusy)
         CHECK_EQUAL(connector_callback_continue, status);
         CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-        for (i=0 ; i < 1000 ; i++)
+        for (i = 0 ; i < 1000 ; i++)
         {
             sched_yield();
         }
@@ -1463,7 +1463,7 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteNotBoundaryBusy)
         CHECK_EQUAL(connector_callback_continue, status);
         CHECK(connector_firmware_download_data.status == connector_firmware_status_success);
 
-        for (i=0 ; i < 1000 ; i++)
+        for (i = 0 ; i < 1000 ; i++)
         {
             sched_yield();
         }
@@ -1543,7 +1543,7 @@ TEST(test_ccapi_fw_data_callback, testDataCompleteWaitAllPoolsFinish)
         connector_firmware_download_complete.target_number = TEST_TARGET;
 
         request.firmware_request = connector_request_id_firmware_download_complete;
-        for (i=0 ; i < 1000 ; i++)
+        for (i = 0 ; i < 1000 ; i++)
         {
             status = ccapi_connector_callback(connector_class_id_firmware, request, &connector_firmware_download_complete, ccapi_data_single_instance);
             CHECK_EQUAL(connector_callback_busy, status);
