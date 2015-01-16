@@ -47,9 +47,19 @@ typedef enum {
 } ccapi_rci_group_type_t;
 
 typedef struct rci_data {
-    unsigned int CONST group_instance;
+    struct {
+        unsigned int CONST instance;
+        ccapi_rci_group_type_t CONST type;
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+        char const * name;
+#endif
+    } group;
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+    struct {
+        char const * name;
+    } element;
+#endif
     ccapi_rci_action_t CONST action;
-    ccapi_rci_group_type_t CONST group_type;
     ccapi_rci_error_id_t error_id;
     char const * error_hint;
     void * user_context;

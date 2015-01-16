@@ -66,6 +66,12 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     rci_info->action = CCAPI_RCI_GROUP_STATE;
                     break;
             }
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+            rci_info->group.name = NULL;
+#endif
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+            rci_info->element.name = NULL;
+#endif
             error = action_start_cb(rci_info);
             break;
         }
@@ -87,6 +93,13 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
             }
             rci_info->group_instance = remote_config->group.index;
+            rci_info->group.instance = remote_config->group.index;
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+            rci_info->group.name = remote_config->group.name;
+#endif
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+            rci_info->element.name = NULL;
+#endif
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             start_callback = group->callbacks.start;
@@ -226,7 +239,9 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         default:
                             assert(0);
                     }
-
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+                    rci_info->element.name = remote_config->element.name;
+#endif
                     error = process_callback(rci_info, p_element);
                     break;
                 }
@@ -358,6 +373,13 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             group = &group_table->groups[group_id];
             end_callback = group->callbacks.end;
             error = end_callback(rci_info);
+
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+            rci_info->group.name = NULL;
+#endif
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+            rci_info->element.name = NULL;
+#endif
             break;
         }
         case connector_request_id_remote_config_action_end:
@@ -365,6 +387,12 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             ccapi_rci_function_t const action_end_cb = rci_data->callbacks.end_action;
 
             error = action_end_cb(rci_info);
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+            rci_info->group.name = NULL;
+#endif
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+            rci_info->element.name = NULL;
+#endif
             break;
         }
         case connector_request_id_remote_config_session_end:
