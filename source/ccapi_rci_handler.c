@@ -76,7 +76,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 
             rci_info->action = CCAPI_RCI_ACTION_QUERY;
             rci_info->error_hint = NULL;
-            rci_info->error_id = CCAPI_RCI_ERROR_ID_NO_MEMORY;
             rci_info->group.instance = 0;
             rci_info->group.type = CCAPI_RCI_GROUP_SETTING;
             error = session_start_cb(rci_info);

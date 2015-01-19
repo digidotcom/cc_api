@@ -20,23 +20,6 @@
 #endif
 
 typedef enum {
-    CCAPI_RCI_STRING,
-    CCAPI_RCI_INTEGER
-    /* TODO */
-} ccapi_rci_type_t;
-
-typedef enum {
-    CCAPI_RCI_ERROR_NONE,
-    CCAPI_RCI_ERROR
-} ccapi_rci_error_t;
-
-typedef enum {
-    CCAPI_RCI_ERROR_ID_BAD_DESCRIPTOR,
-    CCAPI_RCI_ERROR_ID_NO_MEMORY
-    /* TODO: build from config.rci*/
-} ccapi_rci_error_id_t;
-
-typedef enum {
     CCAPI_RCI_ACTION_SET,
     CCAPI_RCI_ACTION_QUERY
 } ccapi_rci_action_t;
@@ -64,7 +47,7 @@ typedef struct {
     ccapi_rci_query_setting_attribute_compare_to_t compare_to;
 } ccapi_rci_query_setting_attributes_t;
 
-typedef struct rci_data {
+typedef struct {
     struct {
         unsigned int CONST instance;
         ccapi_rci_group_type_t CONST type;
@@ -83,7 +66,6 @@ typedef struct rci_data {
     } query_setting;
 
     ccapi_rci_action_t CONST action;
-    ccapi_rci_error_id_t error_id;
     char const * error_hint;
     void * user_context;
 } ccapi_rci_info_t;
