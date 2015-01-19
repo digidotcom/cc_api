@@ -11,6 +11,7 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE             "Device type"
@@ -22,7 +23,7 @@ const uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01};
 
 static ccapi_firmware_target_t firmware_list[] = {
        /* version   description    filespec             maximum_size       chunk_size */
-        {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
+        {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   1 * 1024 },  /* any *.bin files */
         {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
     };
 static uint8_t firmware_count = (sizeof(firmware_list)/sizeof(firmware_list[0]));
@@ -86,19 +87,13 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
 {
     size_t const max_bytes_to_print = 4;
     size_t const bytes_to_print = (size > max_bytes_to_print) ? max_bytes_to_print : size;
+    unsigned long const prog_time_ms = firmware_list[target].chunk_size / 1024 * 1000 * 1000 / 32;  /* Simulate a 32 KByte/second flash programming time */
     size_t i;
-    static unsigned int busy = 0;
-
-    (void)target;
 
     printf("app_fw_data_cb: offset = 0x%" PRIx32 "\n", offset);
 
-    /* Return busy simulating a flash busy while writting */
-    if (busy++ % 3)
-    {
-        printf("busy\n");
-        return CCAPI_FW_DATA_ERROR_BUSY;
-    }
+    if (offset == 0)
+        printf("prog_time_ms=%ld\n", prog_time_ms);
 
     printf("data = ");
     for (i=0; i < bytes_to_print; i++)
@@ -110,6 +105,8 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
     printf("length = %" PRIsize " last_chunk=%d\n", size, last_chunk);
 
     fwrite(data, 1, size, fp);
+    
+    usleep(prog_time_ms);
 
     if (last_chunk)
 	{
@@ -117,6 +114,7 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
             fclose(fp);
     }
 
+    printf("done\n");
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 

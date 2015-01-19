@@ -234,6 +234,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->thread.receive = NULL;
+    ccapi_data->thread.firmware = NULL;
     ccapi_data->initiate_action_syncr = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
@@ -307,6 +308,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         {
             size_t const list_size = start->service.firmware->target.count * sizeof *start->service.firmware->target.item;
             unsigned char target_num;
+            unsigned char chunk_pool_index;
 
             ccapi_data->service.firmware_update.config.target.count = start->service.firmware->target.count;
 
@@ -343,7 +345,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccapi_data->service.firmware_update.config.callback.data_cb = start->service.firmware->callback.data_cb;
             ccapi_data->service.firmware_update.config.callback.cancel_cb = start->service.firmware->callback.cancel_cb;
 
-            ccapi_data->service.firmware_update.processing.chunk_data = NULL;
+            for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
+            {
+                ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = NULL;
+            }
+
             ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
             ccapi_data->config.firmware_supported = CCAPI_TRUE;
         }
@@ -446,6 +452,32 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         {
             ccimp_os_yield();
         } while (ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_START);
+    }
+#endif
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->config.firmware_supported)
+    {
+        ccapi_data->thread.firmware = ccapi_malloc(sizeof *ccapi_data->thread.firmware);
+        error = check_malloc(ccapi_data->thread.firmware);
+        if (error != CCAPI_START_ERROR_NONE)
+            goto done;
+
+        ccapi_data->thread.firmware->status = CCAPI_THREAD_REQUEST_START;
+        ccapi_data->thread.firmware->ccimp_info.argument = ccapi_data;
+        ccapi_data->thread.firmware->ccimp_info.start = ccapi_firmware_thread;
+        ccapi_data->thread.firmware->ccimp_info.type = CCIMP_THREAD_FIRMWARE;
+
+        if (ccimp_os_create_thread(&ccapi_data->thread.firmware->ccimp_info) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_THREAD_FAILED;
+            goto done;
+        }
+
+        do
+        {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.firmware->status == CCAPI_THREAD_REQUEST_START);
     }
 #endif
 
@@ -631,6 +663,20 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         do {
             ccimp_os_yield();
         } while (ccapi_data->thread.receive->status != CCAPI_THREAD_NOT_STARTED);
+    }
+#endif
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->config.firmware_supported)
+    {
+        if (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
+        {
+            ccapi_data->thread.firmware->status = CCAPI_THREAD_REQUEST_STOP;
+        }
+
+        do {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.firmware->status != CCAPI_THREAD_NOT_STARTED);
     }
 #endif
 

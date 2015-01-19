@@ -128,12 +128,28 @@ typedef struct
 } ccapi_svc_receive_t;
 #endif
 
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+
+/* Pool of chunks allocated to process firmware update */
+#define CCAPI_CHUNK_POOL_SIZE 2
+
+typedef struct
+{
+    ccapi_bool_t in_use;
+    uint32_t offset;
+    uint8_t * data;
+    size_t size;
+    ccapi_bool_t last;
+} ccapi_fw_chunk_info;
+#endif            
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
     struct {
         ccapi_thread_info_t * connector_run;
         ccapi_thread_info_t * receive;
+        ccapi_thread_info_t * firmware;
     } thread;
     void * initiate_action_syncr;
     void * file_system_syncr;
@@ -148,10 +164,15 @@ typedef struct {
             ccapi_fw_service_t config;
             struct {
                 ccapi_bool_t update_started;
-                uint8_t * chunk_data;
+                unsigned int target;
                 uint32_t total_size;
+                ccapi_fw_chunk_info chunk_pool[CCAPI_CHUNK_POOL_SIZE];
+                uint8_t chunk_pool_head;
+                uint8_t chunk_pool_tail;
                 uint32_t head_offset;
                 uint32_t tail_offset;
+                uint32_t ccfsm_bytes_processed;
+                ccapi_fw_data_error_t data_error;
             } processing;
         } firmware_update;
 #endif
@@ -288,6 +309,7 @@ extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_syncr;
 
 void ccapi_receive_thread(void * const argument);
+void ccapi_firmware_thread(void * const argument);
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
