@@ -40,10 +40,10 @@ void ccapi_receive_thread(void * const argument)
                 }
                 case CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED:
                 {
-                    ASSERT_MSG_GOTO(svc_receive->user_callbacks.data_cb != NULL, done);
+                    ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
 
                     /* Pass data to the user and get possible response from user */ 
-                    svc_receive->user_callbacks.data_cb(svc_receive->target, svc_receive->transport, 
+                    svc_receive->user_callback.data(svc_receive->target, svc_receive->transport, 
                                                                        &svc_receive->request_buffer_info, 
                                                                        svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
                     /* Check that session keeps on active */
@@ -274,8 +274,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         svc_receive->target = NULL;
         svc_receive->transport = target_ptr->transport;
         svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_IDLE;
-        svc_receive->user_callbacks.data_cb = ccapi_data->service.receive.user_callbacks.data_cb;
-        svc_receive->user_callbacks.status_cb = ccapi_data->service.receive.user_callbacks.status_cb;
+        svc_receive->user_callback.data = ccapi_data->service.receive.user_callback.data;
+        svc_receive->user_callback.status = ccapi_data->service.receive.user_callback.status;
         svc_receive->max_request_size = CCAPI_RECEIVE_NO_LIMIT;
         svc_receive->request_buffer_info.buffer = NULL;
         svc_receive->request_buffer_info.length = 0;
@@ -315,15 +315,15 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
             if (added_target != NULL)
             {
                 svc_receive->max_request_size = added_target->max_request_size;
-                svc_receive->user_callbacks.data_cb = added_target->user_callbacks.data_cb;
-                svc_receive->user_callbacks.status_cb = added_target->user_callbacks.status_cb;
+                svc_receive->user_callback.data = added_target->user_callback.data;
+                svc_receive->user_callback.status = added_target->user_callback.status;
 
                 connector_status = connector_callback_continue;
                 goto done;
             }
         }
 
-        if (svc_receive->user_callbacks.data_cb == NULL)
+        if (svc_receive->user_callback.data == NULL)
         {
             svc_receive->receive_error = CCAPI_RECEIVE_ERROR_INVALID_DATA_CB;
             goto done;
@@ -333,9 +333,9 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
         {
             ccapi_bool_t user_accepts;
 
-            if (ccapi_data->service.receive.user_callbacks.accept_cb != NULL)
+            if (ccapi_data->service.receive.user_callback.accept != NULL)
             {
-                user_accepts = ccapi_data->service.receive.user_callbacks.accept_cb(svc_receive->target, svc_receive->transport);
+                user_accepts = ccapi_data->service.receive.user_callback.accept(svc_receive->target, svc_receive->transport);
             }
             else
             {
@@ -610,10 +610,10 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */
-    if (ccapi_data->config.receive_supported && svc_receive->user_callbacks.status_cb != NULL)
+    if (ccapi_data->config.receive_supported && svc_receive->user_callback.status != NULL)
     {
        ccapi_bool_t const should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
-       svc_receive->user_callbacks.status_cb(svc_receive->target, svc_receive->transport, 
+       svc_receive->user_callback.status(svc_receive->target, svc_receive->transport, 
                            should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL, 
                            svc_receive->receive_error);
     }

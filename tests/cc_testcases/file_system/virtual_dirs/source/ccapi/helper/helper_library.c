@@ -103,8 +103,8 @@ void fill_filesystem_service(ccapi_start_t * start)
     static ccapi_filesystem_service_t filesystem_service;
 
     /* Fill the connection callbacks for the transport */
-    filesystem_service.access_cb = ccapi_filesystem_access_callback;
-    filesystem_service.changed_cb = ccapi_filesystem_changed_callback;
+    filesystem_service.access = ccapi_filesystem_access_callback;
+    filesystem_service.changed = ccapi_filesystem_changed_callback;
 
     /* Set the Filesystem service */
     start->service.file_system = &filesystem_service;

@@ -93,9 +93,9 @@ typedef struct ccapi_receive_target
 {
     char * target;
     struct {
-        ccapi_receive_data_cb_t data_cb;
-        ccapi_receive_status_cb_t status_cb;
-    } user_callbacks;
+        ccapi_receive_data_cb_t data;
+        ccapi_receive_status_cb_t status;
+    } user_callback;
     size_t max_request_size;
     struct ccapi_receive_target * next;
 } ccapi_receive_target_t;
@@ -115,9 +115,9 @@ typedef struct
     connector_transport_t transport;
     ccapi_bool_t response_required;
     struct {
-        ccapi_receive_data_cb_t data_cb;
-        ccapi_receive_status_cb_t status_cb;
-    } user_callbacks;
+        ccapi_receive_data_cb_t data;
+        ccapi_receive_status_cb_t status;
+    } user_callback;
     size_t max_request_size;
     ccapi_buffer_info_t request_buffer_info;
     ccapi_buffer_info_t response_buffer_info;
@@ -155,7 +155,7 @@ typedef struct {
     void * file_system_syncr;
     struct {
         struct {
-            ccapi_filesystem_service_t user_callbacks;
+            ccapi_filesystem_service_t user_callback;
             ccapi_fs_virtual_dir_t * virtual_dir_list;
             void * imp_context;
         } file_system;
@@ -178,7 +178,7 @@ typedef struct {
 #endif
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         struct {
-            ccapi_receive_service_t user_callbacks;
+            ccapi_receive_service_t user_callback;
             void * receive_syncr;
             ccapi_receive_target_t * target_list;
             ccapi_svc_receive_t * svc_receive;
@@ -187,7 +187,7 @@ typedef struct {
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
         struct {
-            ccapi_cli_service_t user_callbacks;
+            ccapi_cli_service_t user_callback;
         } cli;
 #endif
 #endif

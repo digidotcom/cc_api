@@ -198,9 +198,9 @@ int main (void)
     fill_start_structure_with_good_parameters(&start);
 
     start.service.receive = &receive_service;
-    receive_service.accept_cb = app_receive_default_accept_cb;
-    receive_service.data_cb = app_receive_default_data_cb;
-    receive_service.status_cb = app_receive_default_status_cb;
+    receive_service.accept = app_receive_default_accept_cb;
+    receive_service.data = app_receive_default_data_cb;
+    receive_service.status = app_receive_default_status_cb;
 
     start_error = ccapi_start(&start);
 

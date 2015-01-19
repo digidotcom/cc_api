@@ -77,8 +77,8 @@ TEST_GROUP(test_ccapi_fs_mapping)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.user_callbacks.changed_cb);
-        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.user_callbacks.access_cb);
+        CHECK_EQUAL(fs_service.changed, ccapi_data_single_instance->service.file_system.user_callback.changed);
+        CHECK_EQUAL(fs_service.access, ccapi_data_single_instance->service.file_system.user_callback.access);
         /* Simulate that imp_context was previously set by other call (file_open) */
         ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
     }

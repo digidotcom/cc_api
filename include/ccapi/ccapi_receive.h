@@ -37,9 +37,9 @@ typedef void (*ccapi_receive_data_cb_t)(char const * const target, ccapi_transpo
 typedef void (*ccapi_receive_status_cb_t)(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error);
 
 typedef struct {
-    ccapi_receive_accept_cb_t accept_cb;
-    ccapi_receive_data_cb_t data_cb;
-    ccapi_receive_status_cb_t status_cb;
+    ccapi_receive_accept_cb_t accept;
+    ccapi_receive_data_cb_t data;
+    ccapi_receive_status_cb_t status;
 } ccapi_receive_service_t;
 
 ccapi_receive_error_t ccapi_receive_add_target(char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t maximum_request_size);

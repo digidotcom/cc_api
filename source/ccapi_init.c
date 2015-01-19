@@ -277,8 +277,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (start->service.file_system != NULL)
     {
         ccapi_data->config.filesystem_supported = CCAPI_TRUE;
-        ccapi_data->service.file_system.user_callbacks.access_cb = start->service.file_system->access_cb;
-        ccapi_data->service.file_system.user_callbacks.changed_cb = start->service.file_system->changed_cb;
+        ccapi_data->service.file_system.user_callback.access = start->service.file_system->access;
+        ccapi_data->service.file_system.user_callback.changed = start->service.file_system->changed;
         ccapi_data->service.file_system.imp_context = NULL;
         ccapi_data->service.file_system.virtual_dir_list = NULL;
     }
@@ -292,7 +292,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (start->service.firmware != NULL)
     {
         /* Check required callbacks */
-        if (start->service.firmware->callback.data_cb == NULL)
+        if (start->service.firmware->callback.data == NULL)
         {
             error = CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK;
             goto done;
@@ -341,9 +341,9 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
                 ccapi_data->service.firmware_update.config.target.item[target_num].filespec = filespec;
             }
 
-            ccapi_data->service.firmware_update.config.callback.request_cb = start->service.firmware->callback.request_cb;
-            ccapi_data->service.firmware_update.config.callback.data_cb = start->service.firmware->callback.data_cb;
-            ccapi_data->service.firmware_update.config.callback.cancel_cb = start->service.firmware->callback.cancel_cb;
+            ccapi_data->service.firmware_update.config.callback.request = start->service.firmware->callback.request;
+            ccapi_data->service.firmware_update.config.callback.data = start->service.firmware->callback.data;
+            ccapi_data->service.firmware_update.config.callback.cancel = start->service.firmware->callback.cancel;
 
             for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
             {
@@ -367,9 +367,9 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         }
 
         ccapi_data->config.receive_supported = CCAPI_TRUE;
-        ccapi_data->service.receive.user_callbacks.accept_cb = start->service.receive->accept_cb;
-        ccapi_data->service.receive.user_callbacks.data_cb = start->service.receive->data_cb;
-        ccapi_data->service.receive.user_callbacks.status_cb = start->service.receive->status_cb;
+        ccapi_data->service.receive.user_callback.accept = start->service.receive->accept;
+        ccapi_data->service.receive.user_callback.data = start->service.receive->data;
+        ccapi_data->service.receive.user_callback.status = start->service.receive->status;
         ccapi_data->service.receive.target_list = NULL;
         ccapi_data->service.receive.svc_receive = NULL;
     }
@@ -381,15 +381,15 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     {
 
         /* Check required callbacks */
-        if (start->service.cli->request_cb == NULL)
+        if (start->service.cli->request == NULL)
         {
             error = CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK;
             goto done;
         }
 
         ccapi_data->config.cli_supported = CCAPI_TRUE;
-        ccapi_data->service.cli.user_callbacks.request_cb = start->service.cli->request_cb;
-        ccapi_data->service.cli.user_callbacks.finished_cb = start->service.cli->finished_cb;
+        ccapi_data->service.cli.user_callback.request = start->service.cli->request;
+        ccapi_data->service.cli.user_callback.finished = start->service.cli->finished;
     }
 #endif
 #endif

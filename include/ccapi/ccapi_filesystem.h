@@ -36,8 +36,8 @@ typedef ccapi_fs_access_t (*ccapi_fs_access_cb_t)(char const * const local_path,
 typedef void (*ccapi_fs_changed_cb_t)(char const * const local_path, ccapi_fs_changed_t const request);
 
 typedef struct {
-    ccapi_fs_access_cb_t access_cb;
-    ccapi_fs_changed_cb_t changed_cb;
+    ccapi_fs_access_cb_t access;
+    ccapi_fs_changed_cb_t changed;
 } ccapi_filesystem_service_t;
 
 typedef enum {

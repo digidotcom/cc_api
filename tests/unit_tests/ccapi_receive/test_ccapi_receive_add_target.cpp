@@ -131,9 +131,9 @@ TEST_GROUP(test_ccapi_receive_add_target)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
-        CHECK_EQUAL(receive_service.data_cb, ccapi_data_single_instance->service.receive.user_callbacks.data_cb);
-        CHECK_EQUAL(receive_service.status_cb, ccapi_data_single_instance->service.receive.user_callbacks.status_cb);
+        CHECK_EQUAL(receive_service.accept, ccapi_data_single_instance->service.receive.user_callback.accept);
+        CHECK_EQUAL(receive_service.data, ccapi_data_single_instance->service.receive.user_callback.data);
+        CHECK_EQUAL(receive_service.status, ccapi_data_single_instance->service.receive.user_callback.status);
     }
 
     void teardown()
@@ -233,8 +233,8 @@ TEST(test_ccapi_receive_add_target, testTargetAdded)
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_NONE);
-        CHECK(svc_receive->user_callbacks.data_cb == specific_receive_data_cb);
-        CHECK(svc_receive->user_callbacks.status_cb == specific_receive_status_cb);
+        CHECK(svc_receive->user_callback.data == specific_receive_data_cb);
+        CHECK(svc_receive->user_callback.status == specific_receive_status_cb);
     }
 
     CHECK_EQUAL(CCAPI_FALSE, generic_receive_accept_cb_called);
@@ -265,8 +265,8 @@ TEST(test_ccapi_receive_add_target, testTargetNotAdded)
     {
         ccapi_svc_receive_t * svc_receive = (ccapi_svc_receive_t *)ccfsm_receive_target_data.user_context;
         CHECK_EQUAL(svc_receive->receive_error, CCAPI_RECEIVE_ERROR_NONE);
-        CHECK(svc_receive->user_callbacks.data_cb == generic_receive_data_cb);
-        CHECK(svc_receive->user_callbacks.status_cb == generic_receive_status_cb);
+        CHECK(svc_receive->user_callback.data == generic_receive_data_cb);
+        CHECK(svc_receive->user_callback.status == generic_receive_status_cb);
     }
 
     CHECK_EQUAL(CCAPI_TRUE, generic_receive_accept_cb_called);

@@ -164,12 +164,12 @@ int main (void)
     get_mac_from_string(mac_address, MAC_ADDRESS_STRING);
     get_ipv4_from_string(ipv4, IPV4_ADDRESS_STRING);
 
-    filesystem_service.access_cb = NULL;
-    filesystem_service.changed_cb = NULL;
+    filesystem_service.access = NULL;
+    filesystem_service.changed = NULL;
 
-    receive_service.accept_cb = NULL;
-    receive_service.data_cb = NULL;
-    receive_service.status_cb = NULL;
+    receive_service.accept = NULL;
+    receive_service.data = NULL;
+    receive_service.status = NULL;
 
     start.device_cloud_url = DEVICE_CLOUD_URL;
     get_device_id_from_mac(start.device_id, mac_address);

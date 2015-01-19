@@ -85,8 +85,8 @@ int main (void)
     fill_start_structure_with_good_parameters(&start);
 
     start.service.cli = &cli_service;
-    cli_service.request_cb = app_cli_request_cb;
-    cli_service.finished_cb = app_cli_finished_cb;
+    cli_service.request = app_cli_request_cb;
+    cli_service.finished = app_cli_finished_cb;
 
     start_error = ccapi_start(&start);
 

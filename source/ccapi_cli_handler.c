@@ -106,7 +106,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     if (cli_request_ptr->more_data == connector_false)
     {
-        ccapi_data->service.cli.user_callbacks.request_cb(cli_request_ptr->transport, 
+        ccapi_data->service.cli.user_callback.request(cli_request_ptr->transport, 
                                                           svc_cli->request_string_info.string,
                                                           svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
 
@@ -237,10 +237,10 @@ static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_sta
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */
-    if (ccapi_data->config.cli_supported && ccapi_data->service.cli.user_callbacks.finished_cb != NULL)
+    if (ccapi_data->config.cli_supported && ccapi_data->service.cli.user_callback.finished != NULL)
     {
        ccapi_bool_t const should_user_free_response_buffer = !svc_cli->response_handled_internally && svc_cli->response_required && svc_cli->response_string_info.string != NULL;
-       ccapi_data->service.cli.user_callbacks.finished_cb(should_user_free_response_buffer ? svc_cli->response_string_info.string : NULL, svc_cli->cli_error);
+       ccapi_data->service.cli.user_callback.finished(should_user_free_response_buffer ? svc_cli->response_string_info.string : NULL, svc_cli->cli_error);
     }
 
     /* Free resources */

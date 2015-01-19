@@ -59,7 +59,7 @@ TEST_GROUP(test_ccapi_fs_changed)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.user_callbacks.changed_cb);
+        CHECK_EQUAL(fs_service.changed, ccapi_data_single_instance->service.file_system.user_callback.changed);
     }
 
     void teardown()

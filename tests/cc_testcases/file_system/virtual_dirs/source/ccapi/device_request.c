@@ -233,9 +233,9 @@ void fill_device_request_service(ccapi_start_t * start)
     static ccapi_receive_service_t receive_service;
 
     /* Fill the connection callbacks for the transport */
-    receive_service.accept_cb = ccapi_device_request_accept_callback;
-    receive_service.data_cb = ccapi_device_request_data_callback;
-    receive_service.status_cb = ccapi_device_request_status_callback;
+    receive_service.accept = ccapi_device_request_accept_callback;
+    receive_service.data = ccapi_device_request_data_callback;
+    receive_service.status = ccapi_device_request_status_callback;
 
     /* Set the Filesystem service */
     start->service.receive = &receive_service;

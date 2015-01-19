@@ -49,7 +49,7 @@ void ccapi_firmware_thread(void * const argument)
         if (chunk_pool_tail->in_use == CCAPI_TRUE)
         {
             ccapi_logging_line("+ccapi_firmware_thread: processing pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_tail, chunk_pool_tail->offset, chunk_pool_tail->size, chunk_pool_tail->last);
-            ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(ccapi_data->service.firmware_update.processing.target,
+            ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data(ccapi_data->service.firmware_update.processing.target,
                                                                                                      chunk_pool_tail->offset, chunk_pool_tail->data, chunk_pool_tail->size, chunk_pool_tail->last);
             switch (ccapi_fw_data_error)
             {
@@ -109,9 +109,9 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         goto done;
     }
 
-    if (ccapi_data->service.firmware_update.config.callback.request_cb != NULL)
+    if (ccapi_data->service.firmware_update.config.callback.request != NULL)
     {
-        ccapi_fw_request_error = ccapi_data->service.firmware_update.config.callback.request_cb(start_ptr->target_number, start_ptr->filename, start_ptr->code_size);
+        ccapi_fw_request_error = ccapi_data->service.firmware_update.config.callback.request(start_ptr->target_number, start_ptr->filename, start_ptr->code_size);
 
         switch (ccapi_fw_request_error)
         {
@@ -324,7 +324,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
         }
     }
 
-    if (ccapi_data->service.firmware_update.config.callback.cancel_cb != NULL)
+    if (ccapi_data->service.firmware_update.config.callback.cancel != NULL)
     {
         ccapi_fw_cancel_error_t cancel_reason;
 
@@ -357,7 +357,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
                 ASSERT_MSG_GOTO(abort_ptr->status >= connector_firmware_status_user_abort, done);
         }
 
-        ccapi_data->service.firmware_update.config.callback.cancel_cb(abort_ptr->target_number, cancel_reason);
+        ccapi_data->service.firmware_update.config.callback.cancel(abort_ptr->target_number, cancel_reason);
     }
 
     free_and_stop_service(ccapi_data);

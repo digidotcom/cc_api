@@ -105,7 +105,7 @@ TEST_GROUP(test_ccapi_receive_accept_callback_MissingAcceptCallback)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
+        CHECK_EQUAL(receive_service.accept, ccapi_data_single_instance->service.receive.user_callback.accept);
     }
 
     void teardown()
@@ -167,7 +167,7 @@ TEST_GROUP(test_ccapi_receive_accept_callback_MissingCallbacks)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
+        CHECK_EQUAL(receive_service.accept, ccapi_data_single_instance->service.receive.user_callback.accept);
     }
 
     void teardown()
@@ -229,7 +229,7 @@ TEST_GROUP(test_ccapi_receive_accept_callback)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
+        CHECK_EQUAL(receive_service.accept, ccapi_data_single_instance->service.receive.user_callback.accept);
     }
 
     void teardown()

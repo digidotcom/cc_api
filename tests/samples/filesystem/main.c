@@ -126,8 +126,8 @@ static ccapi_start_error_t app_start_ccapi(void)
     start.device_cloud_url = DEVICE_CLOUD_URL;
     start.device_type = DEVICE_TYPE;
 
-    fs_service.access_cb = ccapi_fs_access_cb;
-    fs_service.changed_cb = ccapi_fs_changed_cb;
+    fs_service.access = ccapi_fs_access_cb;
+    fs_service.changed = ccapi_fs_changed_cb;
     start.service.file_system = &fs_service;
     start_error = ccapi_start(&start);
     if (start_error == CCAPI_START_ERROR_NONE)

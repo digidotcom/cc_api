@@ -320,9 +320,9 @@ static ccimp_status_t ccapi_fs_file_open(ccapi_data_t * const ccapi_data, connec
     }
     ASSERT_MSG_GOTO(request != CCAPI_FS_REQUEST_UNKNOWN, done);
 
-    if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
+    if (ccapi_data->service.file_system.user_callback.access != NULL)
     {
-        access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_open_data.path, request);
+        access = ccapi_data->service.file_system.user_callback.access(ccimp_open_data.path, request);
     }
     else
     {
@@ -489,13 +489,13 @@ static ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, conne
 
     ccimp_status = ccimp_fs_file_close(&ccimp_close_data);
 
-    if (ccapi_data->service.file_system.user_callbacks.changed_cb != NULL)
+    if (ccapi_data->service.file_system.user_callback.changed != NULL)
     {
         switch (ccapi_fs_handle->request)
         {
             case CCAPI_FS_REQUEST_READWRITE:
             case CCAPI_FS_REQUEST_WRITE:
-                ccapi_data->service.file_system.user_callbacks.changed_cb(ccapi_fs_handle->file_path, CCAPI_FS_CHANGED_MODIFIED);
+                ccapi_data->service.file_system.user_callback.changed(ccapi_fs_handle->file_path, CCAPI_FS_CHANGED_MODIFIED);
                 break;
             case CCAPI_FS_REQUEST_LIST:
             case CCAPI_FS_REQUEST_READ:
@@ -570,9 +570,9 @@ static ccimp_status_t ccapi_fs_file_remove(ccapi_data_t * const ccapi_data, conn
     ccimp_remove_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
     ccimp_remove_data.imp_context = ccapi_data->service.file_system.imp_context;
 
-    if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
+    if (ccapi_data->service.file_system.user_callback.access != NULL)
     {
-        access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_remove_data.path, CCAPI_FS_REQUEST_REMOVE);
+        access = ccapi_data->service.file_system.user_callback.access(ccimp_remove_data.path, CCAPI_FS_REQUEST_REMOVE);
     }
     else
     {
@@ -587,9 +587,9 @@ static ccimp_status_t ccapi_fs_file_remove(ccapi_data_t * const ccapi_data, conn
             {
                 case CCIMP_STATUS_OK:
                 {
-                    if (ccapi_data->service.file_system.user_callbacks.changed_cb != NULL)
+                    if (ccapi_data->service.file_system.user_callback.changed != NULL)
                     {
-                        ccapi_data->service.file_system.user_callbacks.changed_cb(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
+                        ccapi_data->service.file_system.user_callback.changed(ccimp_remove_data.path, CCAPI_FS_CHANGED_REMOVED);
                     }
                     break;
                 }
@@ -644,9 +644,9 @@ static ccimp_status_t ccapi_fs_dir_open(ccapi_data_t * const ccapi_data, connect
         ccimp_dir_open_data.handle = CCIMP_FILESYSTEM_DIR_HANDLE_NOT_INITIALIZED;
         ccimp_dir_open_data.imp_context = ccapi_data->service.file_system.imp_context;
 
-        if (ccapi_data->service.file_system.user_callbacks.access_cb != NULL)
+        if (ccapi_data->service.file_system.user_callback.access != NULL)
         {
-            access = ccapi_data->service.file_system.user_callbacks.access_cb(ccimp_dir_open_data.path, CCAPI_FS_REQUEST_LIST);
+            access = ccapi_data->service.file_system.user_callback.access(ccimp_dir_open_data.path, CCAPI_FS_REQUEST_LIST);
         }
         else
         {

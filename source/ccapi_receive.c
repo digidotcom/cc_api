@@ -70,8 +70,8 @@ static ccapi_receive_target_t * create_target_entry(char const * const target, c
         goto done;
     }
 
-    new_target_entry->user_callbacks.data_cb = data_cb;
-    new_target_entry->user_callbacks.status_cb = status_cb;
+    new_target_entry->user_callback.data = data_cb;
+    new_target_entry->user_callback.status = status_cb;
     new_target_entry->max_request_size = max_request_size;
     new_target_entry->next = NULL;
 

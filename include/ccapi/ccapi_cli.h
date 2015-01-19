@@ -26,8 +26,8 @@ typedef void (*ccapi_cli_finished_cb_t)(char * const output, ccapi_cli_error_t c
 
 
 typedef struct {
-    ccapi_cli_request_cb_t request_cb;
-    ccapi_cli_finished_cb_t finished_cb;
+    ccapi_cli_request_cb_t request;
+    ccapi_cli_finished_cb_t finished;
 } ccapi_cli_service_t;
 
 #endif

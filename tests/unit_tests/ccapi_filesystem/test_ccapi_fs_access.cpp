@@ -44,7 +44,7 @@ TEST_GROUP(test_ccapi_fs_access)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.user_callbacks.access_cb);
+        CHECK_EQUAL(fs_service.access, ccapi_data_single_instance->service.file_system.user_callback.access);
     }
 
     void teardown()

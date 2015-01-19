@@ -93,15 +93,15 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK(ccapi_data_single_instance->config.cli_supported == CCAPI_TRUE);
 
     CHECK(ccapi_data_single_instance->config.receive_supported == CCAPI_TRUE);
-    CHECK_EQUAL(receive_service.accept_cb, ccapi_data_single_instance->service.receive.user_callbacks.accept_cb);
-    CHECK_EQUAL(receive_service.data_cb, ccapi_data_single_instance->service.receive.user_callbacks.data_cb);
-    CHECK_EQUAL(receive_service.status_cb, ccapi_data_single_instance->service.receive.user_callbacks.status_cb);
+    CHECK_EQUAL(receive_service.accept, ccapi_data_single_instance->service.receive.user_callback.accept);
+    CHECK_EQUAL(receive_service.data, ccapi_data_single_instance->service.receive.user_callback.data);
+    CHECK_EQUAL(receive_service.status, ccapi_data_single_instance->service.receive.user_callback.status);
 
     CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_TRUE);
     CHECK_EQUAL(fw_service.target.count, ccapi_data_single_instance->service.firmware_update.config.target.count);
-    CHECK_EQUAL(fw_service.callback.request_cb, ccapi_data_single_instance->service.firmware_update.config.callback.request_cb);
-    CHECK_EQUAL(fw_service.callback.data_cb, ccapi_data_single_instance->service.firmware_update.config.callback.data_cb);
-    CHECK_EQUAL(fw_service.callback.cancel_cb, ccapi_data_single_instance->service.firmware_update.config.callback.cancel_cb);
+    CHECK_EQUAL(fw_service.callback.request, ccapi_data_single_instance->service.firmware_update.config.callback.request);
+    CHECK_EQUAL(fw_service.callback.data, ccapi_data_single_instance->service.firmware_update.config.callback.data);
+    CHECK_EQUAL(fw_service.callback.cancel, ccapi_data_single_instance->service.firmware_update.config.callback.cancel);
 
     /* TODO: Check 'maximum_size' and 'chunk_size' as it won't be checked in test_ccapi_fw_init_callback */
     {
@@ -117,8 +117,8 @@ TEST(test_ccapi_init_services, testServicesSupported)
     CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_TRUE);
 
     CHECK(ccapi_data_single_instance->config.filesystem_supported == CCAPI_TRUE);
-    CHECK_EQUAL(fs_service.access_cb, ccapi_data_single_instance->service.file_system.user_callbacks.access_cb);
-    CHECK_EQUAL(fs_service.changed_cb, ccapi_data_single_instance->service.file_system.user_callbacks.changed_cb);
+    CHECK_EQUAL(fs_service.access, ccapi_data_single_instance->service.file_system.user_callback.access);
+    CHECK_EQUAL(fs_service.changed, ccapi_data_single_instance->service.file_system.user_callback.changed);
 
     CHECK(NULL == ccapi_data_single_instance->service.file_system.imp_context);
     CHECK(NULL == ccapi_data_single_instance->service.file_system.virtual_dir_list);

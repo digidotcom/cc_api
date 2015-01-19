@@ -63,9 +63,9 @@ typedef struct {
         ccapi_firmware_target_t * item;
     } target;
     struct {
-        ccapi_fw_request_cb_t request_cb;
-        ccapi_fw_data_cb_t data_cb;
-        ccapi_fw_cancel_cb_t cancel_cb;
+        ccapi_fw_request_cb_t request;
+        ccapi_fw_data_cb_t data;
+        ccapi_fw_cancel_cb_t cancel;
     } callback;
 } ccapi_fw_service_t;
 

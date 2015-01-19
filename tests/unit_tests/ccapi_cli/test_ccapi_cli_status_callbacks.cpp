@@ -65,8 +65,8 @@ TEST_GROUP(test_ccapi_cli_finished_callback)
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
-        CHECK_EQUAL(cli_service.request_cb, ccapi_data_single_instance->service.cli.user_callbacks.request_cb);
-        CHECK_EQUAL(cli_service.finished_cb, ccapi_data_single_instance->service.cli.user_callbacks.finished_cb);
+        CHECK_EQUAL(cli_service.request, ccapi_data_single_instance->service.cli.user_callback.request);
+        CHECK_EQUAL(cli_service.finished, ccapi_data_single_instance->service.cli.user_callback.finished);
     }
 
     void teardown()
