@@ -307,7 +307,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
         {
             size_t const list_size = start->service.firmware->target.count * sizeof *start->service.firmware->target.item;
-            unsigned char target_num, chunk_pool_index;
+            unsigned char target_num;
+            unsigned char chunk_pool_index;
 
             ccapi_data->service.firmware_update.config.target.count = start->service.firmware->target.count;
 

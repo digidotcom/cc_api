@@ -43,13 +43,14 @@ void ccapi_firmware_thread(void * const argument)
     while (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
     {
         ccapi_fw_data_error_t ccapi_fw_data_error;
-        ccapi_fw_chunk_info * const chunk = &ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_tail];
+        ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
+        ccapi_fw_chunk_info * const chunk_pool_tail = &chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_tail];
 
-        if (chunk->in_use == CCAPI_TRUE)
+        if (chunk_pool_tail->in_use == CCAPI_TRUE)
         {
-            ccapi_logging_line("+ccapi_firmware_thread: processing pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_tail, chunk->offset, chunk->size, chunk->last);
+            ccapi_logging_line("+ccapi_firmware_thread: processing pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_tail, chunk_pool_tail->offset, chunk_pool_tail->size, chunk_pool_tail->last);
             ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data_cb(ccapi_data->service.firmware_update.processing.target,
-                                                                                                     chunk->offset, chunk->data, chunk->size, chunk->last);
+                                                                                                     chunk_pool_tail->offset, chunk_pool_tail->data, chunk_pool_tail->size, chunk_pool_tail->last);
             switch (ccapi_fw_data_error)
             {
                 case CCAPI_FW_DATA_ERROR_NONE:
@@ -59,7 +60,7 @@ void ccapi_firmware_thread(void * const argument)
                     break;    
             }
 
-            chunk->in_use = CCAPI_FALSE;
+            chunk_pool_tail->in_use = CCAPI_FALSE;
             ccapi_data->service.firmware_update.processing.chunk_pool_tail++;
             if (ccapi_data->service.firmware_update.processing.chunk_pool_tail == CCAPI_CHUNK_POOL_SIZE)
             {
@@ -83,7 +84,6 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     connector_callback_status_t connector_status = connector_callback_error;
     ccapi_fw_request_error_t ccapi_fw_request_error;
     ccapi_firmware_target_t * fw_target_item = NULL;
-    unsigned char chunk_pool_index;
 
     ASSERT_MSG_GOTO(start_ptr->target_number < ccapi_data->service.firmware_update.config.target.count, done);
 
@@ -146,20 +146,25 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
         fw_target_item->chunk_size = 1024;
     }
 
-    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
     {
-        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].in_use = CCAPI_FALSE;
-        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].offset = 0;
-
-        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = ccapi_malloc(fw_target_item->chunk_size);
-        if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data == NULL)
+        unsigned char chunk_pool_index;
+        for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
         {
-            start_ptr->status = connector_firmware_status_encountered_error;
-            goto done;
-        }
+            ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
 
-        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].size = 0;
-        ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].last = CCAPI_FALSE;
+            chunk_pool[chunk_pool_index].in_use = CCAPI_FALSE;
+            chunk_pool[chunk_pool_index].offset = 0;
+
+            chunk_pool[chunk_pool_index].data = ccapi_malloc(fw_target_item->chunk_size);
+            if (chunk_pool[chunk_pool_index].data == NULL)
+            {
+                start_ptr->status = connector_firmware_status_encountered_error;
+                goto done;
+            }
+
+            chunk_pool[chunk_pool_index].size = 0;
+            chunk_pool[chunk_pool_index].last = CCAPI_FALSE;
+        }
     }
     ccapi_data->service.firmware_update.processing.chunk_pool_head = 0;
     ccapi_data->service.firmware_update.processing.chunk_pool_tail = 0;
@@ -208,7 +213,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
         uint32_t const chunk_size = ccapi_data->service.firmware_update.config.target.item[data_ptr->target_number].chunk_size;
         uint32_t const tail_offset = ccapi_data->service.firmware_update.processing.tail_offset;
         uint32_t const room_in_chunk = chunk_size - tail_offset % chunk_size;
-        uint8_t const * const source_data = (uint8_t *)data_ptr->image.data + ccapi_data->service.firmware_update.processing.ccfsm_bytes_processed;
+        uint8_t const * const source_data = data_ptr->image.data + ccapi_data->service.firmware_update.processing.ccfsm_bytes_processed;
         size_t const source_bytes_remaining = data_ptr->image.bytes_used - ccapi_data->service.firmware_update.processing.ccfsm_bytes_processed;
         uint32_t const bytes_to_copy = source_bytes_remaining > room_in_chunk ? room_in_chunk : source_bytes_remaining;
         uint32_t const next_head_offset = tail_offset + bytes_to_copy;
@@ -220,18 +225,19 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
 
         if (tail_offset >= ccapi_data->service.firmware_update.processing.head_offset)
         {
-            memcpy(&ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_head].data[tail_offset % chunk_size], source_data, bytes_to_copy);
+            ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
+            ccapi_fw_chunk_info * const chunk_pool_head = &chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_head];
+
+            memcpy(&chunk_pool_head->data[tail_offset % chunk_size], source_data, bytes_to_copy);
 
             if (last_chunk || next_head_offset % chunk_size == 0)
             {
-                ccapi_fw_chunk_info * const chunk = &ccapi_data->service.firmware_update.processing.chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_head];
-
-                chunk->offset = ccapi_data->service.firmware_update.processing.head_offset;
-                chunk->size = next_head_offset - ccapi_data->service.firmware_update.processing.head_offset;
+                chunk_pool_head->offset = ccapi_data->service.firmware_update.processing.head_offset;
+                chunk_pool_head->size = next_head_offset - ccapi_data->service.firmware_update.processing.head_offset;
                 ccapi_data->service.firmware_update.processing.head_offset = next_head_offset;
-                chunk->last = last_chunk;
-                ccapi_logging_line("ccapi_process_fw_data queued: pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_head, chunk->offset, chunk->size, chunk->last);
-                chunk->in_use = CCAPI_TRUE;
+                chunk_pool_head->last = last_chunk;
+                ccapi_logging_line("ccapi_process_fw_data queued: pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_head, chunk_pool_head->offset, chunk_pool_head->size, chunk_pool_head->last);
+                chunk_pool_head->in_use = CCAPI_TRUE;
                 ccapi_data->service.firmware_update.processing.chunk_pool_head++;
                 if (ccapi_data->service.firmware_update.processing.chunk_pool_head == CCAPI_CHUNK_POOL_SIZE)
                 {

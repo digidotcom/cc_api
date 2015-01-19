@@ -13,11 +13,11 @@
 #include <unistd.h>
 #include "../../../source/ccapi_definitions.h" /* To get CCAPI_CHUNK_POOL_SIZE */
 
-#define TEST_CHUCK_SIZE 16
+#define TEST_CHUNK_SIZE 16
 
 static ccapi_firmware_target_t firmware_list[] = {
        /* version   description           filespec                    maximum_size                               chunk_size     */
-        {{0,0,1,0}, "Test",        ".*\\.test",        TEST_CHUCK_SIZE * (CCAPI_CHUNK_POOL_SIZE + 1),         TEST_CHUCK_SIZE         }   /* any *.test files */
+        {{0,0,1,0}, "Test",        ".*\\.test",        TEST_CHUNK_SIZE * (CCAPI_CHUNK_POOL_SIZE + 1),         TEST_CHUNK_SIZE         }   /* any *.test files */
     };
 static uint8_t firmware_count = ARRAY_SIZE(firmware_list);
 
@@ -65,6 +65,7 @@ static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t
 
     while (ccapi_firmware_data_lock_cb[ccapi_firmware_data_cb_called])
     {
+        sched_yield();
     }
 
     return ccapi_firmware_data_retval[ccapi_firmware_data_cb_called++];
