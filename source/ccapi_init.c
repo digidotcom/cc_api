@@ -221,13 +221,13 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     {
         ccimp_os_lock_create_t create_data;
     
-        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock_object) != CCIMP_STATUS_OK)
+        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock) != CCIMP_STATUS_OK)
         {
             error = CCAPI_START_ERROR_LOCK_FAILED;
             goto done;
         }
 
-        logging_lock = create_data.lock_object;
+        logging_lock = create_data.lock;
     }
 
     ccapi_data->config.device_type = NULL;

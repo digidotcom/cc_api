@@ -59,21 +59,21 @@ typedef struct {
 #define OS_LOCK_ACQUIRE_INFINITE           ((unsigned long)-1)
 
 typedef struct {
-    void CONST * lock_object;
+    void CONST * lock;
 } ccimp_os_lock_create_t;
 
 typedef struct {
-    void * CONST lock_object;
+    void * CONST lock;
     unsigned long CONST timeout_ms;
     ccapi_bool_t acquired;
 } ccimp_os_lock_acquire_t;
 
 typedef struct {
-    void * CONST lock_object;
+    void * CONST lock;
 } ccimp_os_lock_release_t;
 
 typedef struct {
-    void * CONST lock_object;
+    void * CONST lock;
 } ccimp_os_lock_destroy_t;
 
 ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info);

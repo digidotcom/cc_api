@@ -14,11 +14,11 @@
 
 TEST_GROUP(test_ccapi_os_lock)
 {
-    void * lock_object;
+    void * lock;
 
     void setup()
     {
-        lock_object = NULL;
+        lock = NULL;
         {
             ccimp_os_lock_create_t create_data;
             ccimp_status_t status;
@@ -27,9 +27,9 @@ TEST_GROUP(test_ccapi_os_lock)
 
             CHECK(status == CCIMP_STATUS_OK);
 
-            lock_object= create_data.lock_object;
+            lock= create_data.lock;
         }
-        CHECK(lock_object != NULL);
+        CHECK(lock != NULL);
 
         Mock_create_all();
     }
@@ -42,7 +42,7 @@ TEST_GROUP(test_ccapi_os_lock)
             ccimp_os_lock_destroy_t destroy_data;
             ccimp_status_t status;
 
-            destroy_data.lock_object = lock_object;
+            destroy_data.lock = lock;
         
             status = ccimp_os_lock_destroy(&destroy_data);
 
@@ -57,7 +57,7 @@ TEST(test_ccapi_os_lock, CreateLeavesObjectInClearedState)
 
     ccimp_os_lock_acquire_t acquire_data;
 
-    acquire_data.lock_object = lock_object;       
+    acquire_data.lock = lock;       
     acquire_data.timeout_ms= 100;
 
     /* Should fail to acquire the object as it's created in clear state */
@@ -72,7 +72,7 @@ static void * thread_release(void * argument)
     ccimp_status_t status;
     ccimp_os_lock_release_t release_data;
 
-    release_data.lock_object = argument;
+    release_data.lock = argument;
         
     status = ccimp_os_lock_release(&release_data);
 
@@ -99,9 +99,9 @@ TEST(test_ccapi_os_lock, AcquireClearsObjectAutomatically)
     ccimp_os_lock_acquire_t acquire_data;
     ccimp_status_t status;
 
-    acquire_data.lock_object = lock_object;
+    acquire_data.lock = lock;
 
-    create_thread_release(lock_object);
+    create_thread_release(lock);
 
     /* Wait infinite. The other thread should release the object */
     acquire_data.timeout_ms= OS_LOCK_ACQUIRE_INFINITE;
@@ -129,8 +129,8 @@ IGNORE_TEST(test_ccapi_os_lock, ReleaseMaxCountIs1)
     ccimp_os_lock_release_t release_data;
     ccimp_status_t status;
 
-    acquire_data.lock_object = lock_object;       
-    release_data.lock_object = lock_object;       
+    acquire_data.lock = lock;       
+    release_data.lock = lock;       
 
     status = ccimp_os_lock_release(&release_data);
     CHECK(status == CCIMP_STATUS_OK);

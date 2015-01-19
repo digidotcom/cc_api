@@ -113,45 +113,45 @@ void * ccapi_lock_create(void)
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
             ccapi_logging_line("ccapi_lock_create() failed!");
-            create_data.lock_object = NULL;
+            create_data.lock = NULL;
             break;
     }
 
-    return create_data.lock_object;
+    return create_data.lock;
 }
 
 void * ccapi_lock_create_and_release(void)
 {
     ccimp_status_t ccimp_status;
-    void * lock_object = ccapi_lock_create();
+    void * lock = ccapi_lock_create();
 
-    if (lock_object == NULL)
+    if (lock == NULL)
     {
         goto done;
     }
 
-    ccimp_status = ccapi_lock_release(lock_object);
+    ccimp_status = ccapi_lock_release(lock);
     switch(ccimp_status)
     {
         case CCIMP_STATUS_OK:
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            lock_object = NULL;
+            lock = NULL;
             goto done;
     }
 
 done:
-    return lock_object;
+    return lock;
 }
 
-ccimp_status_t ccapi_lock_acquire(void * const lock_object)
+ccimp_status_t ccapi_lock_acquire(void * const lock)
 {
     ccimp_os_lock_acquire_t acquire_data;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
 
-    ASSERT_MSG_GOTO(lock_object != NULL, done);
-    acquire_data.lock_object = lock_object;
+    ASSERT_MSG_GOTO(lock != NULL, done);
+    acquire_data.lock = lock;
     acquire_data.timeout_ms = OS_LOCK_ACQUIRE_INFINITE;
 
     ccimp_status = ccimp_os_lock_acquire(&acquire_data);
@@ -164,20 +164,20 @@ done:
     return ccimp_status;
 }
 
-ccimp_status_t ccapi_lock_release(void * const lock_object)
+ccimp_status_t ccapi_lock_release(void * const lock)
 {
     ccimp_os_lock_release_t release_data;
 
-    release_data.lock_object = lock_object;
+    release_data.lock = lock;
         
     return ccimp_os_lock_release(&release_data);
 }
 
-ccimp_status_t ccapi_lock_destroy(void * const lock_object)
+ccimp_status_t ccapi_lock_destroy(void * const lock)
 {
     ccimp_os_lock_destroy_t destroy_data;
 
-    destroy_data.lock_object = lock_object;
+    destroy_data.lock = lock;
 
     return ccimp_os_lock_destroy(&destroy_data);
 }

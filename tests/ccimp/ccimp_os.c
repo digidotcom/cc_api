@@ -175,7 +175,7 @@ ccimp_status_t ccimp_os_lock_create(ccimp_os_lock_create_t * const data)
         goto done;
     }
 
-    data->lock_object = sem;
+    data->lock = sem;
 done:
     return status;
 }
@@ -184,7 +184,7 @@ ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
 {
     struct timespec ts = { 0 };
     int s;
-    sem_t * sem = data->lock_object;
+    sem_t * sem = data->lock;
 
     assert(sem);
 
@@ -254,7 +254,7 @@ ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
 
 ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data)
 {
-    sem_t * const sem = data->lock_object;
+    sem_t * const sem = data->lock;
 
     assert(sem);
 
@@ -269,7 +269,7 @@ ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data)
 
 ccimp_status_t ccimp_os_lock_destroy(ccimp_os_lock_destroy_t * const data)
 {
-    sem_t * const sem = data->lock_object;
+    sem_t * const sem = data->lock;
 
     assert(sem);
 

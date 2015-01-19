@@ -45,7 +45,7 @@ static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_in
 
     ASSERT_MSG_GOTO(send_info->svc_send.send_lock != NULL, done);
     
-    acquire_data.lock_object = send_info->svc_send.send_lock;
+    acquire_data.lock = send_info->svc_send.send_lock;
     acquire_data.timeout_ms= timeout_ms;
 
     status = ccimp_os_lock_acquire(&acquire_data);
@@ -179,7 +179,7 @@ static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, cca
             goto done;
         }
 
-        send_info->svc_send.send_lock = create_data.lock_object;
+        send_info->svc_send.send_lock = create_data.lock;
     }
 
     send_info->header.transport = ccapi_to_connector_transport(transport);

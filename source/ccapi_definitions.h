@@ -317,9 +317,9 @@ char * ccapi_strdup(char const * const string);
 
 void * ccapi_lock_create(void);
 void * ccapi_lock_create_and_release(void);
-ccimp_status_t ccapi_lock_acquire(void * lock_object);
-ccimp_status_t ccapi_lock_release(void * lock_object);
-ccimp_status_t ccapi_lock_destroy(void * lock_object);
+ccimp_status_t ccapi_lock_acquire(void * lock);
+ccimp_status_t ccapi_lock_release(void * lock);
+ccimp_status_t ccapi_lock_destroy(void * lock);
 connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_transport_stop_t behavior);
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_file_handle_t * file_handler);
 ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_file_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);
