@@ -131,7 +131,9 @@ typedef struct
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
 
 /* Pool of chunks allocated to process firmware update */
+#if !(defined CCAPI_CHUNK_POOL_SIZE)
 #define CCAPI_CHUNK_POOL_SIZE 2
+#endif
 
 typedef struct
 {
