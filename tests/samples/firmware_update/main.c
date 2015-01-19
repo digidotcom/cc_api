@@ -129,6 +129,29 @@ static void app_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t 
     return;
 }
 
+static void app_fw_reset_cb(unsigned int const target, ccapi_bool_t * system_reset, ccapi_firmware_target_version_t * new_version)
+{
+    printf("app_fw_reset_cb for target='%d'. Current version='%d.%d.%d.%d'\n", target, new_version->major, new_version->minor, new_version->revision, new_version->build);
+
+    switch (target)
+    {
+        case 0:
+        {
+            new_version->build++;
+
+            *system_reset = CCAPI_FALSE;
+
+            break;
+        }
+        case 1:
+        {
+            *system_reset = CCAPI_TRUE;
+
+            break;
+        }
+    }
+}
+
 static ccapi_start_error_t app_start_ccapi(void)
 {
     ccapi_start_t start = {0};
@@ -140,7 +163,8 @@ static ccapi_start_error_t app_start_ccapi(void)
                                         {
                                             app_fw_request_cb, 
                                             app_fw_data_cb, 
-                                            app_fw_cancel_cb
+                                            app_fw_cancel_cb,
+                                            app_fw_reset_cb
                                         }
                                     };
 

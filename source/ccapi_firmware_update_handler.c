@@ -366,6 +366,35 @@ done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_firmware_update_reset(connector_firmware_reset_t * const reset_ptr, ccapi_data_t * const ccapi_data)
+{
+    connector_callback_status_t connector_status = connector_callback_error;
+    ccapi_bool_t system_reset = CCAPI_TRUE;
+
+    ASSERT_MSG_GOTO(reset_ptr->target_number == ccapi_data->service.firmware_update.processing.target, done);
+
+    connector_status = connector_callback_continue;
+
+    ccapi_logging_line("ccapi_process_firmware_update_reset for target_number='%d'", reset_ptr->target_number);
+
+    if (ccapi_data->service.firmware_update.config.callback.reset != NULL)
+    {
+        ccapi_firmware_target_version_t * version = &ccapi_data->service.firmware_update.config.target.item[reset_ptr->target_number].version;
+
+        ccapi_data->service.firmware_update.config.callback.reset(reset_ptr->target_number, &system_reset, version);
+    }
+
+    if (system_reset)
+    {
+        ccimp_status_t const ccimp_status = ccimp_hal_reset();
+
+        connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
+    }
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_firmware_t const firmware_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status = connector_callback_error;
@@ -438,15 +467,9 @@ connector_callback_status_t ccapi_firmware_service_handler(connector_request_id_
         }
         case connector_request_id_firmware_target_reset:
         {
-            ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+            connector_firmware_reset_t * const reset_ptr = data;
 
-            ccapi_logging_line("ccapi_process_firmware_update_reset");
-
-            UNUSED_ARGUMENT(data);
-
-            ccimp_status = ccimp_hal_reset();
-            connector_status = connector_callback_continue;
-            connector_status = connector_callback_status_from_ccimp_status(ccimp_status);
+            connector_status = ccapi_process_firmware_update_reset(reset_ptr, ccapi_data);
 
             break;  
         }

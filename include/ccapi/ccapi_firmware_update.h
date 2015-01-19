@@ -40,17 +40,20 @@ typedef enum {
     CCAPI_FW_CANCEL_HARDWARE_ERROR
 } ccapi_fw_cancel_error_t;
 
+typedef struct {
+    uint8_t major;
+    uint8_t minor;
+    uint8_t revision;
+    uint8_t build;
+} ccapi_firmware_target_version_t;
+
 typedef ccapi_fw_request_error_t (*ccapi_fw_request_cb_t)(unsigned int const target, char const * const filename, size_t const total_size);
 typedef ccapi_fw_data_error_t (*ccapi_fw_data_cb_t)(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk);
 typedef void (*ccapi_fw_cancel_cb_t)(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason);
+typedef void (*ccapi_fw_reset_cb_t)(unsigned int const target, ccapi_bool_t * system_reset, ccapi_firmware_target_version_t * version);
 
 typedef struct {
-    struct {
-        uint8_t major;
-        uint8_t minor;
-        uint8_t revision;
-        uint8_t build;
-    } version;
+    ccapi_firmware_target_version_t version;
     char const * description;
     char const * filespec;
     size_t maximum_size;
@@ -66,6 +69,7 @@ typedef struct {
         ccapi_fw_request_cb_t request;
         ccapi_fw_data_cb_t data;
         ccapi_fw_cancel_cb_t cancel;
+        ccapi_fw_reset_cb_t reset;
     } callback;
 } ccapi_fw_service_t;
 
