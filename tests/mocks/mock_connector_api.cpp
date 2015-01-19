@@ -188,7 +188,7 @@ void Mock_connector_run_destroy(void)
         }
     } while (finished == connector_false);
 
-    if (sem_destroy(&sem) == -1) printf("ccimp_os_syncr_destroy error\n");
+    if (sem_destroy(&sem) == -1) printf("ccimp_os_lock_destroy error\n");
 
     return;
 }

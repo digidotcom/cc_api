@@ -16,7 +16,7 @@ TEST_GROUP(test_ccapi_logging)
 {
     void setup()
     {
-        /* We need to start at least one instance of the connector so syncr object is created */
+        /* We need to start at least one instance of the connector so lock object is created */
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
 

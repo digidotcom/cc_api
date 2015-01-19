@@ -69,7 +69,7 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     ccimp_status_t ccimp_status;
     ccapi_receive_target_t * target_entry;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 
     target_entry = ccapi_data->service.receive.target_list;
@@ -83,7 +83,7 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
         target_entry = next_target_entry;
     }
 
-    ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 }
 #endif
@@ -93,9 +93,9 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
-    if (ccapi_data->file_system_syncr != NULL)
+    if (ccapi_data->file_system_lock != NULL)
     {
-        ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->file_system_syncr);
+        ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->file_system_lock);
 
         switch (ccimp_status)
         {
@@ -124,9 +124,9 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             free_receive_target_list(ccapi_data);
         }
 
-        if (ccapi_data->service.receive.receive_syncr != NULL)
+        if (ccapi_data->service.receive.receive_lock != NULL)
         {
-            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->service.receive.receive_syncr);
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->service.receive.receive_lock);
 
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
@@ -161,9 +161,9 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     reset_heap_ptr(&ccapi_data->config.device_cloud_url);
     reset_heap_ptr(&ccapi_data->thread.connector_run);
 
-    if (ccapi_data->initiate_action_syncr != NULL)
+    if (ccapi_data->initiate_action_lock != NULL)
     {   
-        ccimp_status_t const ccimp_status = ccapi_syncr_destroy(ccapi_data->initiate_action_syncr);
+        ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->initiate_action_lock);
 
         switch (ccimp_status)
         {
@@ -212,22 +212,22 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
-    ccapi_data->initiate_action_syncr = NULL;
+    ccapi_data->initiate_action_lock = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
-    ccapi_data->file_system_syncr = NULL;
+    ccapi_data->file_system_lock = NULL;
 
-    /* Initialize one single time for all connector instances the logging syncr object */
-    if (logging_syncr == NULL)
+    /* Initialize one single time for all connector instances the logging lock object */
+    if (logging_lock == NULL)
     {
-        ccimp_os_syncr_create_t create_data;
+        ccimp_os_lock_create_t create_data;
     
-        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK || ccapi_syncr_release(create_data.syncr_object) != CCIMP_STATUS_OK)
+        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock_object) != CCIMP_STATUS_OK)
         {
             error = CCAPI_START_ERROR_SYNCR_FAILED;
             goto done;
         }
 
-        logging_syncr = create_data.syncr_object;
+        logging_lock = create_data.lock_object;
     }
 
     ccapi_data->config.device_type = NULL;
@@ -235,7 +235,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->thread.receive = NULL;
     ccapi_data->thread.firmware = NULL;
-    ccapi_data->initiate_action_syncr = NULL;
+    ccapi_data->initiate_action_lock = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -359,8 +359,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (start->service.receive != NULL)
     {
-        ccapi_data->service.receive.receive_syncr = ccapi_syncr_create_and_release();
-        if (ccapi_data->service.receive.receive_syncr == NULL)
+        ccapi_data->service.receive.receive_lock = ccapi_lock_create_and_release();
+        if (ccapi_data->service.receive.receive_lock == NULL)
         {
             error = CCAPI_START_ERROR_SYNCR_FAILED;
             goto done;
@@ -481,16 +481,16 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
-    ccapi_data->initiate_action_syncr = ccapi_syncr_create_and_release();
-    if (ccapi_data->initiate_action_syncr == NULL)
+    ccapi_data->initiate_action_lock = ccapi_lock_create_and_release();
+    if (ccapi_data->initiate_action_lock == NULL)
     {
         error = CCAPI_START_ERROR_SYNCR_FAILED;
         goto done;
     }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
-    ccapi_data->file_system_syncr = ccapi_syncr_create_and_release();
-    if (ccapi_data->file_system_syncr == NULL)
+    ccapi_data->file_system_lock = ccapi_lock_create_and_release();
+    if (ccapi_data->file_system_lock == NULL)
     {
         error = CCAPI_START_ERROR_SYNCR_FAILED;
         goto done;

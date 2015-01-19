@@ -26,9 +26,9 @@
 #define ccimp_os_create_thread      ccimp_os_create_thread_real
 #define ccimp_os_get_system_time    ccimp_os_get_system_time_real
 #define ccimp_os_yield              ccimp_os_yield_real
-#define ccimp_os_syncr_create       ccimp_os_syncr_create_real
-#define ccimp_os_syncr_acquire      ccimp_os_syncr_acquire_real
-#define ccimp_os_syncr_release      ccimp_os_syncr_release_real
+#define ccimp_os_lock_create       ccimp_os_lock_create_real
+#define ccimp_os_lock_acquire      ccimp_os_lock_acquire_real
+#define ccimp_os_lock_release      ccimp_os_lock_release_real
 #endif
 
 #define ccapi_logging_line_info(message) /* TODO */
@@ -155,36 +155,36 @@ ccimp_status_t ccimp_os_yield(void)
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
+ccimp_status_t ccimp_os_lock_create(ccimp_os_lock_create_t * const data)
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
     sem_t * const sem = (sem_t *) malloc(sizeof *sem);
 
     if (sem == NULL)
     {
-        printf("ccimp_os_syncr_create insufficent memory\n");
+        printf("ccimp_os_lock_create insufficent memory\n");
         status = CCIMP_STATUS_ERROR;
         goto done;
     }
 
     if (sem_init(sem, 0, 0) == -1)
     {
-        printf("ccimp_os_syncr_create error\n");
+        printf("ccimp_os_lock_create error\n");
         free(sem);
         status = CCIMP_STATUS_ERROR;
         goto done;
     }
 
-    data->syncr_object = sem;
+    data->lock_object = sem;
 done:
     return status;
 }
 
-ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
+ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
 {
     struct timespec ts = { 0 };
     int s;
-    sem_t * sem = data->syncr_object;
+    sem_t * sem = data->lock_object;
 
     assert(sem);
 
@@ -192,12 +192,12 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
 
     if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT)
     {
-        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_trywait()\n");
+        ccapi_logging_line_info("ccimp_os_lock_acquire: about to call sem_trywait()\n");
         s = sem_trywait(sem);
     }
     else if (data->timeout_ms == OS_SYNCR_ACQUIRE_INFINITE)
     {
-        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_wait()\n");
+        ccapi_logging_line_info("ccimp_os_lock_acquire: about to call sem_wait()\n");
         s = sem_wait(sem);
     }
     else
@@ -205,7 +205,7 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
         /* Calculate relative interval as current time plus number of milliseconds requested */
         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
         {
-            printf("ccimp_os_syncr_acquire: clock_gettime error\n");
+            printf("ccimp_os_lock_acquire: clock_gettime error\n");
             return CCIMP_STATUS_ERROR;
         }
 
@@ -222,7 +222,7 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
             ts.tv_nsec %= NSEC_ROLL_OVER;
         }
 
-        ccapi_logging_line_info("ccimp_os_syncr_acquire: about to call sem_timedwait()\n");
+        ccapi_logging_line_info("ccimp_os_lock_acquire: about to call sem_timedwait()\n");
         s = sem_timedwait(sem, &ts);
     }
 
@@ -231,11 +231,11 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
     {
         if (errno == ETIMEDOUT)
         {
-            ccapi_logging_line_info("ccimp_os_syncr_acquire: timed out\n");
+            ccapi_logging_line_info("ccimp_os_lock_acquire: timed out\n");
         }
         else if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT && errno == EAGAIN)
         {
-            ccapi_logging_line_info("ccimp_os_syncr_acquire: not signaled\n");
+            ccapi_logging_line_info("ccimp_os_lock_acquire: not signaled\n");
         }
         else
         {
@@ -245,37 +245,37 @@ ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
     } 
     else
     {
-        ccapi_logging_line_info("ccimp_os_syncr_acquire: got it\n");
+        ccapi_logging_line_info("ccimp_os_lock_acquire: got it\n");
         data->acquired = CCAPI_TRUE;
     }
 
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data)
+ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data)
 {
-    sem_t * const sem = data->syncr_object;
+    sem_t * const sem = data->lock_object;
 
     assert(sem);
 
     if (sem_post(sem) == -1) 
     {
-        printf("ccimp_os_syncr_release error\n");
+        printf("ccimp_os_lock_release error\n");
         return CCIMP_STATUS_ERROR;
     }
 
     return CCIMP_STATUS_OK;
 }
 
-ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t * const data)
+ccimp_status_t ccimp_os_lock_destroy(ccimp_os_lock_destroy_t * const data)
 {
-    sem_t * const sem = data->syncr_object;
+    sem_t * const sem = data->lock_object;
 
     assert(sem);
 
     if (sem_destroy(sem) == -1) 
     {
-        printf("ccimp_os_syncr_destroy error\n");
+        printf("ccimp_os_lock_destroy error\n");
         return CCIMP_STATUS_ERROR;
     }
 

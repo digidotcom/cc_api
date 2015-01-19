@@ -201,9 +201,9 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
             break;
     }
 
-    ASSERT_MSG_GOTO(svc_send->send_syncr != NULL, done);
+    ASSERT_MSG_GOTO(svc_send->send_lock != NULL, done);
     
-    switch (ccapi_syncr_release(svc_send->send_syncr))
+    switch (ccapi_lock_release(svc_send->send_lock))
     {
         case CCIMP_STATUS_OK:
             connector_status = connector_callback_continue;
@@ -430,7 +430,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         {
             ccimp_status_t ccimp_status;
 
-            ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+            ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 
             if (ccapi_data->service.receive.svc_receive == NULL)
@@ -442,7 +442,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 ccapi_data->service.receive.svc_receive = svc_receive;
             }
 
-            ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+            ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 
             connector_status = connector_callback_busy;

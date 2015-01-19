@@ -12,24 +12,24 @@
 
 #include "test_helper_functions.h"
 
-TEST_GROUP(test_ccapi_os_syncr)
+TEST_GROUP(test_ccapi_os_lock)
 {
-    void * syncr_object;
+    void * lock_object;
 
     void setup()
     {
-        syncr_object = NULL;
+        lock_object = NULL;
         {
-            ccimp_os_syncr_create_t create_data;
+            ccimp_os_lock_create_t create_data;
             ccimp_status_t status;
     
-            status = ccimp_os_syncr_create(&create_data);
+            status = ccimp_os_lock_create(&create_data);
 
             CHECK(status == CCIMP_STATUS_OK);
 
-            syncr_object= create_data.syncr_object;
+            lock_object= create_data.lock_object;
         }
-        CHECK(syncr_object != NULL);
+        CHECK(lock_object != NULL);
 
         Mock_create_all();
     }
@@ -39,29 +39,29 @@ TEST_GROUP(test_ccapi_os_syncr)
         Mock_destroy_all();
 
         {
-            ccimp_os_syncr_destroy_t destroy_data;
+            ccimp_os_lock_destroy_t destroy_data;
             ccimp_status_t status;
 
-            destroy_data.syncr_object = syncr_object;
+            destroy_data.lock_object = lock_object;
         
-            status = ccimp_os_syncr_destroy(&destroy_data);
+            status = ccimp_os_lock_destroy(&destroy_data);
 
             CHECK(status == CCIMP_STATUS_OK);
         }
     }
 };
 
-TEST(test_ccapi_os_syncr, CreateLeavesObjectInClearedState)
+TEST(test_ccapi_os_lock, CreateLeavesObjectInClearedState)
 {
     ccimp_status_t status;
 
-    ccimp_os_syncr_acquire_t acquire_data;
+    ccimp_os_lock_acquire_t acquire_data;
 
-    acquire_data.syncr_object = syncr_object;       
+    acquire_data.lock_object = lock_object;       
     acquire_data.timeout_ms= 100;
 
     /* Should fail to acquire the object as it's created in clear state */
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(acquire_data.acquired == CCAPI_FALSE);
@@ -70,11 +70,11 @@ TEST(test_ccapi_os_syncr, CreateLeavesObjectInClearedState)
 static void * thread_release(void * argument)
 {
     ccimp_status_t status;
-    ccimp_os_syncr_release_t release_data;
+    ccimp_os_lock_release_t release_data;
 
-    release_data.syncr_object = argument;
+    release_data.lock_object = argument;
         
-    status = ccimp_os_syncr_release(&release_data);
+    status = ccimp_os_lock_release(&release_data);
 
     CHECK(status == CCIMP_STATUS_OK);
 
@@ -94,19 +94,19 @@ pthread_t create_thread_release(void * argument)
     return pthread;
 }
 
-TEST(test_ccapi_os_syncr, AcquireClearsObjectAutomatically)
+TEST(test_ccapi_os_lock, AcquireClearsObjectAutomatically)
 {
-    ccimp_os_syncr_acquire_t acquire_data;
+    ccimp_os_lock_acquire_t acquire_data;
     ccimp_status_t status;
 
-    acquire_data.syncr_object = syncr_object;
+    acquire_data.lock_object = lock_object;
 
-    create_thread_release(syncr_object);
+    create_thread_release(lock_object);
 
     /* Wait infinite. The other thread should release the object */
     acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
 
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(acquire_data.acquired == CCAPI_TRUE);
@@ -114,7 +114,7 @@ TEST(test_ccapi_os_syncr, AcquireClearsObjectAutomatically)
     /* Should fail to acquire again the object */
     acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_NOWAIT;
 
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(acquire_data.acquired == CCAPI_FALSE);
@@ -123,26 +123,26 @@ TEST(test_ccapi_os_syncr, AcquireClearsObjectAutomatically)
 /* This test fails as linux semaphores don't support max count.
    TODO: Should we delete that limitation?
  */
-IGNORE_TEST(test_ccapi_os_syncr, ReleaseMaxCountIs1)
+IGNORE_TEST(test_ccapi_os_lock, ReleaseMaxCountIs1)
 {
-    ccimp_os_syncr_acquire_t acquire_data;
-    ccimp_os_syncr_release_t release_data;
+    ccimp_os_lock_acquire_t acquire_data;
+    ccimp_os_lock_release_t release_data;
     ccimp_status_t status;
 
-    acquire_data.syncr_object = syncr_object;       
-    release_data.syncr_object = syncr_object;       
+    acquire_data.lock_object = lock_object;       
+    release_data.lock_object = lock_object;       
 
-    status = ccimp_os_syncr_release(&release_data);
+    status = ccimp_os_lock_release(&release_data);
     CHECK(status == CCIMP_STATUS_OK);
 
     /* This should have no effect */
-    status = ccimp_os_syncr_release(&release_data);
+    status = ccimp_os_lock_release(&release_data);
     CHECK(status == CCIMP_STATUS_OK);
 
     /* Wait infinite. The object should be released */
     acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
 
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(acquire_data.acquired == CCAPI_TRUE);
@@ -150,7 +150,7 @@ IGNORE_TEST(test_ccapi_os_syncr, ReleaseMaxCountIs1)
     /* Should fail to acquire again the object as Max Count is 1 */
     acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_NOWAIT;
 
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     CHECK(status == CCIMP_STATUS_OK);
     CHECK(acquire_data.acquired == CCAPI_FALSE);

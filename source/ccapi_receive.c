@@ -21,7 +21,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
     ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
     ccimp_status_t ccimp_status;
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -39,7 +39,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
         ccapi_data->service.receive.target_list = new_entry;
     }
 
-    ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -191,7 +191,7 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -211,7 +211,7 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
         *p_target = next_target_entry;
     }
 
-    ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
+    ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:

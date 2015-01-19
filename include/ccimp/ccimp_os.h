@@ -59,22 +59,22 @@ typedef struct {
 #define OS_SYNCR_ACQUIRE_INFINITE           ((unsigned long)-1)
 
 typedef struct {
-    void CONST * syncr_object;
-} ccimp_os_syncr_create_t;
+    void CONST * lock_object;
+} ccimp_os_lock_create_t;
 
 typedef struct {
-    void * CONST syncr_object;
+    void * CONST lock_object;
     unsigned long CONST timeout_ms;
     ccapi_bool_t acquired;
-} ccimp_os_syncr_acquire_t;
+} ccimp_os_lock_acquire_t;
 
 typedef struct {
-    void * CONST syncr_object;
-} ccimp_os_syncr_release_t;
+    void * CONST lock_object;
+} ccimp_os_lock_release_t;
 
 typedef struct {
-    void * CONST syncr_object;
-} ccimp_os_syncr_destroy_t;
+    void * CONST lock_object;
+} ccimp_os_lock_destroy_t;
 
 ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info);
 ccimp_status_t ccimp_os_free(ccimp_os_free_t * const free_info);
@@ -85,10 +85,10 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield(void);
 
-ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data);
-ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data);
-ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data);
-ccimp_status_t ccimp_os_syncr_destroy(ccimp_os_syncr_destroy_t * const data);
+ccimp_status_t ccimp_os_lock_create(ccimp_os_lock_create_t * const data);
+ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data);
+ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data);
+ccimp_status_t ccimp_os_lock_destroy(ccimp_os_lock_destroy_t * const data);
 
 
 #endif

@@ -34,7 +34,7 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMResponseCallbackErrorMapping)
     connector_callback_status_t connector_status;
     ccapi_dp_transaction_info_t transaction_info;
 
-    transaction_info.syncr = ccapi_syncr_create();
+    transaction_info.lock = ccapi_lock_create();
     dp_respose.hint = NULL;
     dp_respose.transport = connector_transport_tcp;
     dp_respose.user_context = &transaction_info;
@@ -68,14 +68,14 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMStatusCallbackReleaseFailed)
     connector_callback_status_t connector_status;
     ccapi_dp_transaction_info_t transaction_info;
 
-    transaction_info.syncr = ccapi_syncr_create();
+    transaction_info.lock = ccapi_lock_create();
     dp_status.transport = connector_transport_tcp;
     dp_status.status = connector_data_point_status_t::connector_data_point_status_complete;
     dp_status.session_error = connector_session_error_none;
     dp_status.user_context = &transaction_info;
     request_id.data_point_request = connector_request_id_data_point_status;
 
-    Mock_ccimp_os_syncr_release_return(CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_lock_release_return(CCIMP_STATUS_ERROR);
 
     connector_status = ccapi_connector_callback(connector_class_id_data_point, request_id, &dp_status, (void *)ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_error, connector_status);
@@ -88,7 +88,7 @@ TEST(test_ccapi_dp_ccfsm_callbacks, testCCFSMStatusCallbackErrorMapping)
     connector_callback_status_t connector_status;
     ccapi_dp_transaction_info_t transaction_info;
 
-    transaction_info.syncr = ccapi_syncr_create();
+    transaction_info.lock = ccapi_lock_create();
 
     dp_status.transport = connector_transport_tcp;
     dp_status.session_error = connector_session_error_none;

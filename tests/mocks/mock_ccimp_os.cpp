@@ -105,53 +105,53 @@ void Mock_ccimp_os_get_system_time_return(unsigned long retval)
     mock("ccimp_os_get_system_time").expectOneCall("ccimp_os_get_system_time").andReturnValue((int)retval);
 }
 
-void Mock_ccimp_os_syncr_create_create(void)
+void Mock_ccimp_os_lock_create_create(void)
 {
-    mock("ccimp_os_syncr_create").setData("behavior", MOCK_MALLOC_DISABLED);
+    mock("ccimp_os_lock_create").setData("behavior", MOCK_MALLOC_DISABLED);
     return;
 }
-void Mock_ccimp_os_syncr_create_destroy(void)
+void Mock_ccimp_os_lock_create_destroy(void)
 {
-    mock("ccimp_os_syncr_create").checkExpectations();
+    mock("ccimp_os_lock_create").checkExpectations();
 }
 
-void Mock_ccimp_os_syncr_create_return(unsigned long retval)
+void Mock_ccimp_os_lock_create_return(unsigned long retval)
 {
-    mock("ccimp_os_syncr_create").expectOneCall("ccimp_os_syncr_create").andReturnValue((int)retval);
-    mock("ccimp_os_syncr_create").setData("behavior", MOCK_MALLOC_ENABLED);
+    mock("ccimp_os_lock_create").expectOneCall("ccimp_os_lock_create").andReturnValue((int)retval);
+    mock("ccimp_os_lock_create").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
-void Mock_ccimp_os_syncr_acquire_create(void)
+void Mock_ccimp_os_lock_acquire_create(void)
 {
-    mock("ccimp_os_syncr_acquire").setData("behavior", MOCK_MALLOC_DISABLED);
+    mock("ccimp_os_lock_acquire").setData("behavior", MOCK_MALLOC_DISABLED);
     return;
 }
-void Mock_ccimp_os_syncr_acquire_destroy(void)
+void Mock_ccimp_os_lock_acquire_destroy(void)
 {
-    mock("ccimp_os_syncr_acquire").checkExpectations();
+    mock("ccimp_os_lock_acquire").checkExpectations();
 }
 
-void Mock_ccimp_os_syncr_acquire_return(unsigned long retval)
+void Mock_ccimp_os_lock_acquire_return(unsigned long retval)
 {
-    mock("ccimp_os_syncr_acquire").expectOneCall("ccimp_os_syncr_acquire").andReturnValue((int)retval);
-    mock("ccimp_os_syncr_acquire").setData("behavior", MOCK_MALLOC_ENABLED);
+    mock("ccimp_os_lock_acquire").expectOneCall("ccimp_os_lock_acquire").andReturnValue((int)retval);
+    mock("ccimp_os_lock_acquire").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
-void Mock_ccimp_os_syncr_release_create(void)
+void Mock_ccimp_os_lock_release_create(void)
 {
-    mock("ccimp_os_syncr_release").setData("behavior", MOCK_MALLOC_DISABLED);
+    mock("ccimp_os_lock_release").setData("behavior", MOCK_MALLOC_DISABLED);
     return;
 }
 
-void Mock_ccimp_os_syncr_release_destroy(void)
+void Mock_ccimp_os_lock_release_destroy(void)
 {
-    mock("ccimp_os_syncr_release").checkExpectations();
+    mock("ccimp_os_lock_release").checkExpectations();
 }
 
-void Mock_ccimp_os_syncr_release_return(unsigned long retval)
+void Mock_ccimp_os_lock_release_return(unsigned long retval)
 {
-    mock("ccimp_os_syncr_release").expectOneCall("ccimp_os_syncr_release").andReturnValue((int)retval);
-    mock("ccimp_os_syncr_release").setData("behavior", MOCK_MALLOC_ENABLED);
+    mock("ccimp_os_lock_release").expectOneCall("ccimp_os_lock_release").andReturnValue((int)retval);
+    mock("ccimp_os_lock_release").setData("behavior", MOCK_MALLOC_ENABLED);
 }
 
 extern "C" {
@@ -276,54 +276,54 @@ ccimp_status_t ccimp_os_yield(void)
     return ccimp_os_yield_real();
 }
 
-ccimp_status_t ccimp_os_syncr_create(ccimp_os_syncr_create_t * const data)
+ccimp_status_t ccimp_os_lock_create(ccimp_os_lock_create_t * const data)
 {
-    int const behavior = mock_scope_c("ccimp_os_syncr_create")->getData("behavior").value.intValue;
+    int const behavior = mock_scope_c("ccimp_os_lock_create")->getData("behavior").value.intValue;
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
         case MOCK_SYNCR_DISABLED:
-            ccimp_status = ccimp_os_syncr_create_real(data);
+            ccimp_status = ccimp_os_lock_create_real(data);
             break;
         default:
-            mock_scope_c("ccimp_os_syncr_create")->actualCall("ccimp_os_syncr_create");
-            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_syncr_create")->returnValue().value.intValue;
+            mock_scope_c("ccimp_os_lock_create")->actualCall("ccimp_os_lock_create");
+            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_lock_create")->returnValue().value.intValue;
             break;
     }
 
     return ccimp_status;
 }
 
-ccimp_status_t ccimp_os_syncr_acquire(ccimp_os_syncr_acquire_t * const data)
+ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
 {
-    int const behavior = mock_scope_c("ccimp_os_syncr_acquire")->getData("behavior").value.intValue;
+    int const behavior = mock_scope_c("ccimp_os_lock_acquire")->getData("behavior").value.intValue;
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
         case MOCK_SYNCR_DISABLED:
-            ccimp_status = ccimp_os_syncr_acquire_real(data);
+            ccimp_status = ccimp_os_lock_acquire_real(data);
             break;
         default:
-            mock_scope_c("ccimp_os_syncr_acquire")->actualCall("ccimp_os_syncr_acquire");
-            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_syncr_acquire")->returnValue().value.intValue;
+            mock_scope_c("ccimp_os_lock_acquire")->actualCall("ccimp_os_lock_acquire");
+            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_lock_acquire")->returnValue().value.intValue;
             break;
     }
 
     return ccimp_status;
 }
 
-ccimp_status_t ccimp_os_syncr_release(ccimp_os_syncr_release_t * const data)
+ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data)
 {
-    int const behavior = mock_scope_c("ccimp_os_syncr_release")->getData("behavior").value.intValue;
+    int const behavior = mock_scope_c("ccimp_os_lock_release")->getData("behavior").value.intValue;
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
         case MOCK_SYNCR_DISABLED:
-            ccimp_status = ccimp_os_syncr_release_real(data);
+            ccimp_status = ccimp_os_lock_release_real(data);
             break;
         default:
-            mock_scope_c("ccimp_os_syncr_release")->actualCall("ccimp_os_syncr_release");
-            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_syncr_release")->returnValue().value.intValue;
+            mock_scope_c("ccimp_os_lock_release")->actualCall("ccimp_os_lock_release");
+            ccimp_status = (ccimp_status_t)mock_scope_c("ccimp_os_lock_release")->returnValue().value.intValue;
             break;
     }
 

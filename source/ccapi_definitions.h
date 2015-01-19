@@ -151,8 +151,8 @@ typedef struct {
         ccapi_thread_info_t * receive;
         ccapi_thread_info_t * firmware;
     } thread;
-    void * initiate_action_syncr;
-    void * file_system_syncr;
+    void * initiate_action_lock;
+    void * file_system_lock;
     struct {
         struct {
             ccapi_filesystem_service_t user_callback;
@@ -179,7 +179,7 @@ typedef struct {
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
         struct {
             ccapi_receive_service_t user_callback;
-            void * receive_syncr;
+            void * receive_lock;
             ccapi_receive_target_t * target_list;
             ccapi_svc_receive_t * svc_receive;
         } receive;
@@ -218,7 +218,7 @@ typedef struct
     void * next_data;
     ccimp_fs_file_handle_t file_handler;
     size_t bytes_remaining;
-    void * send_syncr;
+    void * send_lock;
     ccapi_send_error_t request_error;
     ccapi_send_error_t response_error;
     ccapi_send_error_t status_error;
@@ -278,11 +278,11 @@ typedef struct stream_seen {
 typedef struct ccapi_dp_collection {
     ccapi_dp_data_stream_t * ccapi_data_stream_list;
     uint32_t dp_count;
-    void * syncr;
+    void * lock;
 } ccapi_dp_collection_t;
 
 typedef struct {
-    void * syncr;
+    void * lock;
     ccapi_string_info_t * hint;
     ccapi_dp_error_t response_error;
     ccapi_dp_error_t status;
@@ -306,7 +306,7 @@ typedef struct {
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;
-extern void * logging_syncr;
+extern void * logging_lock;
 
 void ccapi_receive_thread(void * const argument);
 void ccapi_firmware_thread(void * const argument);
@@ -315,11 +315,11 @@ void * ccapi_malloc(size_t size);
 ccimp_status_t ccapi_free(void * ptr);
 char * ccapi_strdup(char const * const string);
 
-void * ccapi_syncr_create(void);
-void * ccapi_syncr_create_and_release(void);
-ccimp_status_t ccapi_syncr_acquire(void * syncr_object);
-ccimp_status_t ccapi_syncr_release(void * syncr_object);
-ccimp_status_t ccapi_syncr_destroy(void * syncr_object);
+void * ccapi_lock_create(void);
+void * ccapi_lock_create_and_release(void);
+ccimp_status_t ccapi_lock_acquire(void * lock_object);
+ccimp_status_t ccapi_lock_release(void * lock_object);
+ccimp_status_t ccapi_lock_destroy(void * lock_object);
 connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t transport, ccapi_transport_stop_t behavior);
 ccimp_status_t ccapi_open_file(ccapi_data_t * const ccapi_data, char const * const local_path, int const flags, ccimp_fs_file_handle_t * file_handler);
 ccimp_status_t ccapi_read_file(ccapi_data_t * const ccapi_data, ccimp_fs_file_handle_t const file_handler, void * const data, size_t const bytes_available, size_t * const bytes_used);

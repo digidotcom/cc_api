@@ -68,7 +68,7 @@ TEST(test_ccapi_dp_collection, testCreateCollectionSyncrFailed)
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, true);
-    Mock_ccimp_os_syncr_create_return(CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_lock_create_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
@@ -84,7 +84,7 @@ TEST(test_ccapi_dp_collection, testCreateCollectionOk)
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection != NULL);
-    CHECK(dp_collection->syncr != NULL);
+    CHECK(dp_collection->lock != NULL);
     CHECK(dp_collection->ccapi_data_stream_list == NULL);
     CHECK(dp_collection->dp_count == 0);
 }
@@ -98,7 +98,7 @@ TEST(test_ccapi_dp_collection, testClearCollectionSyncrFailed)
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     CHECK(dp_collection != NULL);
 
-    Mock_ccimp_os_syncr_acquire_return(CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_lock_acquire_return(CCIMP_STATUS_ERROR);
     dp_error = ccapi_dp_clear_collection(dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
 }
@@ -135,7 +135,7 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionAcquireFailed)
     ccapi_dp_error_t dp_error;
 
     th_expect_malloc(sizeof (ccapi_dp_collection_t), TH_MALLOC_RETURN_NORMAL, false);
-    Mock_ccimp_os_syncr_acquire_return(CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_lock_acquire_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);

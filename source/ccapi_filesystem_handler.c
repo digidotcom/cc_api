@@ -1015,19 +1015,19 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
 {
     connector_callback_status_t connector_status;
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+    ccapi_bool_t lock_acquired = CCAPI_FALSE;
 
     {
-        ccimp_status_t const ccapi_syncr_acquire_status = ccapi_syncr_acquire(ccapi_data->file_system_syncr);
+        ccimp_status_t const ccapi_lock_acquire_status = ccapi_lock_acquire(ccapi_data->file_system_lock);
 
-        switch (ccapi_syncr_acquire_status)
+        switch (ccapi_lock_acquire_status)
         {
             case CCIMP_STATUS_OK:
-                syncr_acquired = CCAPI_TRUE;
+                lock_acquired = CCAPI_TRUE;
                 break;
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
-                ccimp_status = ccapi_syncr_acquire_status;
+                ccimp_status = ccapi_lock_acquire_status;
                 goto done;
         }
     }
@@ -1156,17 +1156,17 @@ connector_callback_status_t ccapi_filesystem_handler(connector_request_id_file_s
     }
 
 done:
-    if (syncr_acquired)
+    if (lock_acquired)
     {
-        ccimp_status_t const ccapi_syncr_release_status = ccapi_syncr_release(ccapi_data->file_system_syncr);
+        ccimp_status_t const ccapi_lock_release_status = ccapi_lock_release(ccapi_data->file_system_lock);
 
-        switch (ccapi_syncr_release_status)
+        switch (ccapi_lock_release_status)
         {
             case CCIMP_STATUS_OK:
                 break;
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
-                ccimp_status = ccapi_syncr_release_status;
+                ccimp_status = ccapi_lock_release_status;
                 break;
         }
     }

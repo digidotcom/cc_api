@@ -16,7 +16,7 @@
 
 #if (defined CCIMP_DEBUG_ENABLED)
 
-void * logging_syncr = NULL;
+void * logging_lock = NULL;
 
 /* TODO:
        - categories
@@ -26,9 +26,9 @@ static ccimp_status_t ccapi_logging_lock_acquire(void)
 {
     ccimp_status_t status = CCIMP_STATUS_ERROR;
     
-    if (logging_syncr != NULL)
+    if (logging_lock != NULL)
     {
-        status = ccapi_syncr_acquire(logging_syncr);
+        status = ccapi_lock_acquire(logging_lock);
     }
 
     return status;
@@ -38,9 +38,9 @@ static ccimp_status_t ccapi_logging_lock_release(void)
 {
     ccimp_status_t status = CCIMP_STATUS_ERROR;
     
-    if (logging_syncr != NULL)
+    if (logging_lock != NULL)
     {
-        status = ccapi_syncr_release(logging_syncr);
+        status = ccapi_lock_release(logging_lock);
     }
 
     return status;

@@ -124,7 +124,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCreateSyncrFailed)
     th_start_tcp_lan_ipv4();
 
     th_expect_malloc(sizeof (ccapi_dp_transaction_info_t), TH_MALLOC_RETURN_NORMAL, true);
-    Mock_ccimp_os_syncr_create_return(CCIMP_STATUS_ERROR);
+    Mock_ccimp_os_lock_create_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);

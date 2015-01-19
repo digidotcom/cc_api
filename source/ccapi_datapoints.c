@@ -35,8 +35,8 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_c
         goto done;
     }
 
-    collection->syncr = ccapi_syncr_create_and_release();
-    if (collection->syncr == NULL)
+    collection->lock = ccapi_lock_create_and_release();
+    if (collection->lock == NULL)
     {
         error = CCAPI_DP_ERROR_SYNCR_FAILED;
         reset_heap_ptr(&collection);
@@ -144,7 +144,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+    ccimp_status = ccapi_lock_acquire(dp_collection->lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -157,7 +157,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
 
     free_collection(dp_collection);
 
-    ccimp_status = ccapi_syncr_release(dp_collection->syncr);
+    ccimp_status = ccapi_lock_release(dp_collection->lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
@@ -183,11 +183,11 @@ ccapi_dp_error_t ccapi_dp_destroy_collection(ccapi_dp_collection_t * const dp_co
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_destroy(dp_collection->syncr);
+    ccimp_status = ccapi_lock_destroy(dp_collection->lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
-            dp_collection->syncr = NULL;
+            dp_collection->lock = NULL;
             break;
         case CCIMP_STATUS_ERROR:
             error = CCAPI_DP_ERROR_SYNCR_FAILED;
@@ -582,7 +582,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
     unsigned int arg_count;
     ccapi_dp_data_stream_t * ccapi_stream_info = NULL;
     connector_data_stream_t * ccfsm_stream_info = NULL;
-    ccapi_bool_t syncr_acquired = CCAPI_FALSE;
+    ccapi_bool_t lock_acquired = CCAPI_FALSE;
     ccimp_status_t ccimp_status;
 
     if (dp_collection == NULL)
@@ -621,11 +621,11 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
         goto done;
     }
 
-    ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+    ccimp_status = ccapi_lock_acquire(dp_collection->lock);
     switch (ccimp_status)
     {
         case CCIMP_STATUS_OK:
-            syncr_acquired = CCAPI_TRUE;
+            lock_acquired = CCAPI_TRUE;
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
@@ -702,9 +702,9 @@ done:
         free_ccfsm_stream(ccfsm_stream_info);
     }
 
-    if (syncr_acquired)
+    if (lock_acquired)
     {
-        ccimp_status = ccapi_syncr_release(dp_collection->syncr);
+        ccimp_status = ccapi_lock_release(dp_collection->lock);
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -738,7 +738,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
     {
         ccimp_status_t ccimp_status;
 
-        ccimp_status = ccapi_syncr_acquire(dp_collection->syncr);
+        ccimp_status = ccapi_lock_acquire(dp_collection->lock);
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -785,7 +785,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
     {
         ccimp_status_t ccimp_status;
 
-        ccimp_status = ccapi_syncr_release(dp_collection->syncr);
+        ccimp_status = ccapi_lock_release(dp_collection->lock);
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -973,7 +973,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
     }
 
 
-    switch (ccapi_syncr_acquire(dp_collection->syncr))
+    switch (ccapi_lock_acquire(dp_collection->lock))
     {
         case CCIMP_STATUS_OK:
             break;
@@ -1017,7 +1017,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
     }
 
 done:
-    switch (ccapi_syncr_release(dp_collection->syncr))
+    switch (ccapi_lock_release(dp_collection->lock))
     {
         case CCIMP_STATUS_OK:
             break;
@@ -1126,14 +1126,14 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         transaction_info->hint = hint;
-        transaction_info->syncr =  ccapi_syncr_create();
-        if (transaction_info->syncr == NULL)
+        transaction_info->lock =  ccapi_lock_create();
+        if (transaction_info->lock == NULL)
         {
             error = CCAPI_DP_ERROR_SYNCR_FAILED;
             goto done;
         }
 
-        switch (ccapi_syncr_acquire(dp_collection->syncr))
+        switch (ccapi_lock_acquire(dp_collection->lock))
         {
             case CCIMP_STATUS_OK:
                 collection_lock_acquired = CCAPI_TRUE;
@@ -1162,7 +1162,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         }
 
         {
-            ccimp_status_t const ccimp_status = ccapi_syncr_acquire(transaction_info->syncr);
+            ccimp_status_t const ccimp_status = ccapi_lock_acquire(transaction_info->lock);
 
             switch (ccimp_status)
             {
@@ -1196,7 +1196,7 @@ done:
 
     if (collection_lock_acquired)
     {
-        switch (ccapi_syncr_release(dp_collection->syncr))
+        switch (ccapi_lock_release(dp_collection->lock))
         {
             case CCIMP_STATUS_OK:
                 break;

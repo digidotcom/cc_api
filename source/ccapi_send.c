@@ -40,15 +40,15 @@ static ccapi_bool_t valid_malloc(void * * const ptr, size_t const size, ccapi_se
 
 static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_info, unsigned long const timeout_ms)
 {
-    ccimp_os_syncr_acquire_t acquire_data;
+    ccimp_os_lock_acquire_t acquire_data;
     ccimp_status_t status = CCIMP_STATUS_ERROR;
 
-    ASSERT_MSG_GOTO(send_info->svc_send.send_syncr != NULL, done);
+    ASSERT_MSG_GOTO(send_info->svc_send.send_lock != NULL, done);
     
-    acquire_data.syncr_object = send_info->svc_send.send_syncr;
+    acquire_data.lock_object = send_info->svc_send.send_lock;
     acquire_data.timeout_ms= timeout_ms;
 
-    status = ccimp_os_syncr_acquire(&acquire_data);
+    status = ccimp_os_lock_acquire(&acquire_data);
 
     if (status == CCIMP_STATUS_OK && acquire_data.acquired != CCAPI_TRUE)
         status = CCIMP_STATUS_ERROR;
@@ -171,15 +171,15 @@ static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, cca
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
     {
-        ccimp_os_syncr_create_t create_data;
+        ccimp_os_lock_create_t create_data;
 
-        if (ccimp_os_syncr_create(&create_data) != CCIMP_STATUS_OK)
+        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
         {
             error = CCAPI_SEND_ERROR_SYNCR_FAILED;
             goto done;
         }
 
-        send_info->svc_send.send_syncr = create_data.syncr_object;
+        send_info->svc_send.send_lock = create_data.lock_object;
     }
 
     send_info->header.transport = ccapi_to_connector_transport(transport);
@@ -306,9 +306,9 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
     /* Free resources */
     if (send_info != NULL)
     {
-        if (send_info->svc_send.send_syncr != NULL)
+        if (send_info->svc_send.send_lock != NULL)
         {
-            ccimp_status_t const ccimp_status = ccapi_syncr_destroy(send_info->svc_send.send_syncr); 
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(send_info->svc_send.send_lock); 
 
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
