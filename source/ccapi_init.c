@@ -415,7 +415,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_START;
         ccapi_data->thread.connector_run->ccimp_info.argument = ccapi_data;
         ccapi_data->thread.connector_run->ccimp_info.start = ccapi_connector_run_thread;
-        ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_CONNECTOR_RUN;
+        ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_FSM;
 
         if (ccimp_os_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCIMP_STATUS_OK)
         {

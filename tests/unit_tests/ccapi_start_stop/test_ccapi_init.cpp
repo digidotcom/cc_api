@@ -198,7 +198,7 @@ TEST(test_ccapi_init, testStartOk)
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
-    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_FSM;
     /* expected_create_thread_connector_run.start */
     Mock_ccimp_os_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
@@ -265,7 +265,7 @@ TEST(test_ccapi_init, testStartThreadFail)
     Mock_ccimp_os_free_expectAndReturn(malloc_for_ccapi_data, CCIMP_STATUS_OK);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
-    expected_create_thread_connector_run.type = CCIMP_THREAD_CONNECTOR_RUN;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_FSM;
     Mock_ccimp_os_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_DONT_CREATE_THREAD, CCIMP_STATUS_ERROR);
 
     th_fill_start_structure_with_good_parameters(&start);
