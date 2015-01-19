@@ -43,7 +43,7 @@ ValueToStringFunction(connector_request_data_point_t)
 
 static SimpleString ccimp_create_thread_info_t_ValueToString(void const * const object)
 {
-    return StringFrom(((ccimp_create_thread_info_t*)object)->type);
+    return StringFrom(((ccimp_os_create_thread_info_t*)object)->type);
 }
 
 static bool ccimp_network_open_t_IsEqual(void const * const object1, void const * const object2)
@@ -118,8 +118,8 @@ static bool ccimp_network_close_t_IsEqual(void const * const object1, void const
 
 static bool ccimp_create_thread_info_t_IsEqual(void const * const object1, void const * const object2)
 {
-    ccimp_create_thread_info_t * create_thread_info1 = (ccimp_create_thread_info_t*)object1;
-    ccimp_create_thread_info_t * create_thread_info2 = (ccimp_create_thread_info_t*)object2;
+    ccimp_os_create_thread_info_t * create_thread_info1 = (ccimp_os_create_thread_info_t*)object1;
+    ccimp_os_create_thread_info_t * create_thread_info2 = (ccimp_os_create_thread_info_t*)object2;
 
     compare_pointers(object1, object2);
     if (create_thread_info1->argument != create_thread_info2->argument)

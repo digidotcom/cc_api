@@ -76,7 +76,7 @@ typedef enum {
 } ccapi_thread_status_t;
 
 typedef struct {
-    ccimp_create_thread_info_t ccimp_info;
+    ccimp_os_create_thread_info_t ccimp_info;
     ccapi_thread_status_t status;
 } ccapi_thread_info_t;
 

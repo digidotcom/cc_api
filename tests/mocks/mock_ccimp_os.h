@@ -48,7 +48,7 @@ void Mock_ccimp_os_free_notExpected(void);
 
 void Mock_ccimp_os_create_thread_create(void);
 void Mock_ccimp_os_create_thread_destroy(void);
-void Mock_ccimp_os_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
+void Mock_ccimp_os_create_thread_expectAndReturn(ccimp_os_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval);
 
 void Mock_ccimp_os_get_system_time_create(void);
 void Mock_ccimp_os_get_system_time_destroy(void);
@@ -70,7 +70,7 @@ extern "C" {
 ccimp_status_t ccimp_os_malloc_real(ccimp_os_malloc_t * malloc_info);
 ccimp_status_t ccimp_os_free_real(ccimp_os_free_t * free_info);
 ccimp_status_t ccimp_os_realloc_real(ccimp_os_realloc_t * free_info);
-ccimp_status_t ccimp_os_create_thread_real(ccimp_create_thread_info_t * const create_thread_info);
+ccimp_status_t ccimp_os_create_thread_real(ccimp_os_create_thread_info_t * const create_thread_info);
 ccimp_status_t ccimp_os_get_system_time_real(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield_real(void);
 ccimp_status_t ccimp_os_syncr_create_real(ccimp_os_syncr_create_t * const data);

@@ -27,7 +27,7 @@ TEST_GROUP(test_ccapi_fs_mapping_stop_ccapi)
 
     void setup()
     {
-        static ccimp_create_thread_info_t mem_for_thread_connector_run;
+        static ccimp_os_create_thread_info_t mem_for_thread_connector_run;
         ccapi_start_t start;
         ccapi_filesystem_service_t fs_service = {NULL, NULL};
         ccapi_start_error_t start_error;

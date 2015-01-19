@@ -64,14 +64,14 @@ ccimp_status_t ccimp_os_realloc(ccimp_os_realloc_t * const realloc_info)
 
 static void * thread_wrapper(void * argument)
 {
-    ccimp_create_thread_info_t * create_thread_info = (ccimp_create_thread_info_t *)argument;
+    ccimp_os_create_thread_info_t * create_thread_info = (ccimp_os_create_thread_info_t *)argument;
 
     create_thread_info->start(create_thread_info->argument);
 
     return NULL;
 }
 
-ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info)
+ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const create_thread_info)
 {
     pthread_t pthread;
     int ccode;

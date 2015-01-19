@@ -72,7 +72,7 @@ void Mock_ccimp_os_free_notExpected(void)
 
 void Mock_ccimp_os_create_thread_create(void)
 {
-    mock().installComparator("ccimp_create_thread_info_t", ccimp_create_thread_info_t_comparator);
+    mock().installComparator("ccimp_os_create_thread_info_t", ccimp_create_thread_info_t_comparator);
     return;
 }
 
@@ -81,10 +81,10 @@ void Mock_ccimp_os_create_thread_destroy(void)
     mock("ccimp_create_thread").checkExpectations();
 }
 
-void Mock_ccimp_os_create_thread_expectAndReturn(ccimp_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval)
+void Mock_ccimp_os_create_thread_expectAndReturn(ccimp_os_create_thread_info_t * const create_thread_info, mock_thread_bahavior_t behavior, ccimp_status_t retval)
 {
     mock("ccimp_create_thread").expectOneCall("ccimp_create_thread")
-            .withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info)
+            .withParameterOfType("ccimp_os_create_thread_info_t", "parameterName", create_thread_info)
             .andReturnValue(retval);
 
     mock("ccimp_create_thread").setData("behavior", behavior);
@@ -158,7 +158,7 @@ extern "C" {
 #include "CppUTestExt/MockSupport_c.h"
 #include "ccapi_definitions.h"
 
-ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info)
+ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const create_thread_info)
 {
     uint8_t behavior;
 
@@ -173,21 +173,21 @@ ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_
     }
     else if (behavior == MOCK_THREAD_ENABLED_NORMAL)
     {
-        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_os_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Create thread correctly */
         return ccimp_os_create_thread_real(create_thread_info);
     }
     else if (behavior == MOCK_THREAD_ENABLED_DONT_CREATE_THREAD)
     {
-        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_os_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Don't create thread, return FALSE */
         return CCIMP_STATUS_ERROR;
     }
     else if (behavior == MOCK_THREAD_ENABLED_ARGUMENT_NULL)
     {
-        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_create_thread_info_t", "parameterName", create_thread_info);
+        mock_scope_c("ccimp_create_thread")->actualCall("ccimp_create_thread")->withParameterOfType("ccimp_os_create_thread_info_t", "parameterName", create_thread_info);
 
         /* Create thread setting argument to NULL */
         create_thread_info->argument = NULL;

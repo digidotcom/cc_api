@@ -21,19 +21,19 @@
 #define CONST   const
 #endif
 
-typedef void (* ccimp_thread_start_t) (void * const argument);
+typedef void (* ccimp_os_thread_start_t) (void * const argument);
 
 typedef enum {
     CCIMP_THREAD_CONNECTOR_RUN,
     CCIMP_THREAD_RECEIVE
-} ccimp_thread_type_t;
+} ccimp_os_thread_type_t;
 
 typedef struct
 {
-    ccimp_thread_type_t CONST type;
-    ccimp_thread_start_t CONST start;
+    ccimp_os_thread_type_t CONST type;
+    ccimp_os_thread_start_t CONST start;
     void * CONST argument;
-} ccimp_create_thread_info_t;
+} ccimp_os_create_thread_info_t;
 
 typedef struct {
     size_t CONST size;
@@ -79,7 +79,7 @@ ccimp_status_t ccimp_os_malloc(ccimp_os_malloc_t * const malloc_info);
 ccimp_status_t ccimp_os_free(ccimp_os_free_t * const free_info);
 ccimp_status_t ccimp_os_realloc(ccimp_os_realloc_t * const realloc_info);
 
-ccimp_status_t ccimp_os_create_thread(ccimp_create_thread_info_t * const create_thread_info);
+ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const create_thread_info);
 
 ccimp_status_t ccimp_os_get_system_time(ccimp_os_system_up_time_t * const system_up_time);
 ccimp_status_t ccimp_os_yield(void);
