@@ -38,7 +38,7 @@ ccapi_dp_error_t ccapi_dp_create_collection(ccapi_dp_collection_t * * const dp_c
     collection->lock = ccapi_lock_create_and_release();
     if (collection->lock == NULL)
     {
-        error = CCAPI_DP_ERROR_SYNCR_FAILED;
+        error = CCAPI_DP_ERROR_LOCK_FAILED;
         reset_heap_ptr(&collection);
         goto done;
     }
@@ -151,7 +151,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -164,7 +164,7 @@ ccapi_dp_error_t ccapi_dp_clear_collection(ccapi_dp_collection_t * const dp_coll
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -190,7 +190,7 @@ ccapi_dp_error_t ccapi_dp_destroy_collection(ccapi_dp_collection_t * const dp_co
             dp_collection->lock = NULL;
             break;
         case CCIMP_STATUS_ERROR:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             /* No break */
         case CCIMP_STATUS_BUSY:
             goto done;
@@ -629,7 +629,7 @@ ccapi_dp_error_t ccapi_dp_add_data_stream_to_collection_extra(ccapi_dp_collectio
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -711,7 +711,7 @@ done:
                 break;
             case CCIMP_STATUS_ERROR:
             case CCIMP_STATUS_BUSY:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                error = CCAPI_DP_ERROR_LOCK_FAILED;
         }
     }
 
@@ -745,7 +745,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
                 break;
             case CCIMP_STATUS_ERROR:
             case CCIMP_STATUS_BUSY:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                error = CCAPI_DP_ERROR_LOCK_FAILED;
                 goto done;
         }
     }
@@ -792,7 +792,7 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
                 break;
             case CCIMP_STATUS_ERROR:
             case CCIMP_STATUS_BUSY:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                error = CCAPI_DP_ERROR_LOCK_FAILED;
                 goto done;
         }
     }
@@ -979,7 +979,7 @@ ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_t * const dp_collection, char 
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto error;
     }
 
@@ -1023,7 +1023,7 @@ done:
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto error;
     }
 
@@ -1129,7 +1129,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         transaction_info->lock =  ccapi_lock_create();
         if (transaction_info->lock == NULL)
         {
-            error = CCAPI_DP_ERROR_SYNCR_FAILED;
+            error = CCAPI_DP_ERROR_LOCK_FAILED;
             goto done;
         }
 
@@ -1140,7 +1140,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
                 break;
             case CCIMP_STATUS_ERROR:
             case CCIMP_STATUS_BUSY:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                error = CCAPI_DP_ERROR_LOCK_FAILED;
                 goto done;
         }
 
@@ -1171,7 +1171,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
                 case CCIMP_STATUS_BUSY:
                 case CCIMP_STATUS_ERROR:
                     ccapi_logging_line("ccapi_dp_send_collection: lock_acquire failed");
-                    error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                    error = CCAPI_DP_ERROR_LOCK_FAILED;
                     goto done;
             }
 
@@ -1202,7 +1202,7 @@ done:
                 break;
             case CCIMP_STATUS_ERROR:
             case CCIMP_STATUS_BUSY:
-                error = CCAPI_DP_ERROR_SYNCR_FAILED;
+                error = CCAPI_DP_ERROR_LOCK_FAILED;
         }
     }
 
@@ -1211,7 +1211,7 @@ done:
 
 ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection)
 {
-    return send_collection(ccapi_data, transport, dp_collection, CCAPI_FALSE, OS_SYNCR_ACQUIRE_INFINITE, NULL);
+    return send_collection(ccapi_data, transport, dp_collection, CCAPI_FALSE, OS_LOCK_ACQUIRE_INFINITE, NULL);
 }
 
 ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint)

@@ -49,7 +49,7 @@ typedef enum {
     CCAPI_FS_ERROR_NOT_A_DIR,
     CCAPI_FS_ERROR_NOT_MAPPED,
     CCAPI_FS_ERROR_ALREADY_MAPPED,
-    CCAPI_FS_ERROR_SYNCR_FAILED
+    CCAPI_FS_ERROR_LOCK_FAILED
 } ccapi_fs_error_t;
 
 ccapi_fs_error_t ccapi_fs_add_virtual_dir(char const * const virtual_dir, char const * const local_dir);

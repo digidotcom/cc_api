@@ -27,7 +27,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -45,7 +45,7 @@ static ccapi_fs_error_t add_virtual_dir_entry(ccapi_data_t * const ccapi_data, c
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
     }
 
@@ -231,7 +231,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -252,7 +252,7 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_FS_ERROR_SYNCR_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             goto done;
     }
 done:

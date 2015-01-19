@@ -190,12 +190,12 @@ ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
 
     data->acquired = CCAPI_FALSE;
 
-    if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT)
+    if (data->timeout_ms == OS_LOCK_ACQUIRE_NOWAIT)
     {
         ccapi_logging_line_info("ccimp_os_lock_acquire: about to call sem_trywait()\n");
         s = sem_trywait(sem);
     }
-    else if (data->timeout_ms == OS_SYNCR_ACQUIRE_INFINITE)
+    else if (data->timeout_ms == OS_LOCK_ACQUIRE_INFINITE)
     {
         ccapi_logging_line_info("ccimp_os_lock_acquire: about to call sem_wait()\n");
         s = sem_wait(sem);
@@ -233,7 +233,7 @@ ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
         {
             ccapi_logging_line_info("ccimp_os_lock_acquire: timed out\n");
         }
-        else if (data->timeout_ms == OS_SYNCR_ACQUIRE_NOWAIT && errno == EAGAIN)
+        else if (data->timeout_ms == OS_LOCK_ACQUIRE_NOWAIT && errno == EAGAIN)
         {
             ccapi_logging_line_info("ccimp_os_lock_acquire: not signaled\n");
         }

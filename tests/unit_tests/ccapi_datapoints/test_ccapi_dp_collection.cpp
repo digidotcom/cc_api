@@ -71,7 +71,7 @@ TEST(test_ccapi_dp_collection, testCreateCollectionSyncrFailed)
     Mock_ccimp_os_lock_create_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_create_collection(&dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
+    CHECK_EQUAL(CCAPI_DP_ERROR_LOCK_FAILED, dp_error);
     CHECK(dp_collection == NULL);
 }
 
@@ -100,7 +100,7 @@ TEST(test_ccapi_dp_collection, testClearCollectionSyncrFailed)
 
     Mock_ccimp_os_lock_acquire_return(CCIMP_STATUS_ERROR);
     dp_error = ccapi_dp_clear_collection(dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
+    CHECK_EQUAL(CCAPI_DP_ERROR_LOCK_FAILED, dp_error);
 }
 
 TEST(test_ccapi_dp_collection, testClearEmptyCollection)
@@ -140,7 +140,7 @@ TEST(test_ccapi_dp_collection, testDestroyCollectionAcquireFailed)
     dp_error = ccapi_dp_create_collection(&dp_collection);
     CHECK_EQUAL(CCAPI_DP_ERROR_NONE, dp_error);
     dp_error = ccapi_dp_destroy_collection(dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
+    CHECK_EQUAL(CCAPI_DP_ERROR_LOCK_FAILED, dp_error);
 }
 
 TEST_GROUP(test_ccapi_dp_collection_destroy_and_clear)

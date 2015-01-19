@@ -282,7 +282,7 @@ ccimp_status_t ccimp_os_lock_create(ccimp_os_lock_create_t * const data)
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
-        case MOCK_SYNCR_DISABLED:
+        case MOCK_LOCK_DISABLED:
             ccimp_status = ccimp_os_lock_create_real(data);
             break;
         default:
@@ -300,7 +300,7 @@ ccimp_status_t ccimp_os_lock_acquire(ccimp_os_lock_acquire_t * const data)
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
-        case MOCK_SYNCR_DISABLED:
+        case MOCK_LOCK_DISABLED:
             ccimp_status = ccimp_os_lock_acquire_real(data);
             break;
         default:
@@ -318,7 +318,7 @@ ccimp_status_t ccimp_os_lock_release(ccimp_os_lock_release_t * const data)
     ccimp_status_t ccimp_status;
     switch (behavior)
     {
-        case MOCK_SYNCR_DISABLED:
+        case MOCK_LOCK_DISABLED:
             ccimp_status = ccimp_os_lock_release_real(data);
             break;
         default:

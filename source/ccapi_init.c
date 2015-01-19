@@ -223,7 +223,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     
         if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock_object) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            error = CCAPI_START_ERROR_LOCK_FAILED;
             goto done;
         }
 
@@ -362,7 +362,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->service.receive.receive_lock = ccapi_lock_create_and_release();
         if (ccapi_data->service.receive.receive_lock == NULL)
         {
-            error = CCAPI_START_ERROR_SYNCR_FAILED;
+            error = CCAPI_START_ERROR_LOCK_FAILED;
             goto done;
         }
 
@@ -484,7 +484,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->initiate_action_lock = ccapi_lock_create_and_release();
     if (ccapi_data->initiate_action_lock == NULL)
     {
-        error = CCAPI_START_ERROR_SYNCR_FAILED;
+        error = CCAPI_START_ERROR_LOCK_FAILED;
         goto done;
     }
 
@@ -492,7 +492,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->file_system_lock = ccapi_lock_create_and_release();
     if (ccapi_data->file_system_lock == NULL)
     {
-        error = CCAPI_START_ERROR_SYNCR_FAILED;
+        error = CCAPI_START_ERROR_LOCK_FAILED;
         goto done;
     }
 #endif
@@ -512,7 +512,7 @@ done:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
-        case CCAPI_START_ERROR_SYNCR_FAILED:
+        case CCAPI_START_ERROR_LOCK_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
             if (ccapi_data != NULL)
             {
@@ -714,7 +714,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
-        case CCAPI_START_ERROR_SYNCR_FAILED:
+        case CCAPI_START_ERROR_LOCK_FAILED:
         case CCAPI_START_ERROR_ALREADY_STARTED:
             ccapi_data_single_instance = NULL;
             break;

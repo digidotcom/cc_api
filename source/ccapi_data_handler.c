@@ -500,7 +500,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
             case CCAPI_RECEIVE_ERROR_INVALID_TARGET:
             case CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED:
             case CCAPI_RECEIVE_ERROR_TARGET_ALREADY_ADDED:
-            case CCAPI_RECEIVE_ERROR_SYNCR_FAILED:
+            case CCAPI_RECEIVE_ERROR_LOCK_FAILED:
             case CCAPI_RECEIVE_ERROR_STATUS_CANCEL:
             case CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT:
             case CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR:

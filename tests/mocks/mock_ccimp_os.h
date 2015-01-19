@@ -26,8 +26,8 @@ enum {
 };
 
 enum {
-    MOCK_SYNCR_DISABLED,
-    MOCK_SYNCR_ENABLED
+    MOCK_LOCK_DISABLED,
+    MOCK_LOCK_ENABLED
 };
 
 typedef enum {

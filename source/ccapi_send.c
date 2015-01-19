@@ -175,7 +175,7 @@ static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, cca
 
         if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_SEND_ERROR_SYNCR_FAILED;
+            error = CCAPI_SEND_ERROR_LOCK_FAILED;
             goto done;
         }
 
@@ -284,12 +284,12 @@ static ccapi_send_error_t perform_send(ccapi_data_t * const ccapi_data, ccapi_se
 
     if (status == connector_success)
     {
-        ccimp_status_t const result = ccapi_send_lock_acquire(send_info, OS_SYNCR_ACQUIRE_INFINITE);
+        ccimp_status_t const result = ccapi_send_lock_acquire(send_info, OS_LOCK_ACQUIRE_INFINITE);
 
         if (result != CCIMP_STATUS_OK)
         {
             ccapi_logging_line("perform_send: lock_acquire failed");
-            error = CCAPI_SEND_ERROR_SYNCR_FAILED;
+            error = CCAPI_SEND_ERROR_LOCK_FAILED;
         }
     }
     else

@@ -52,9 +52,9 @@ void show_virtual_dir_error_and_stop(ccapi_fs_error_t error)
     {
         printf("CCAPI_FS_ERROR_ALREADY_MAPPED\n");
     }
-    else if  ( error == CCAPI_FS_ERROR_SYNCR_FAILED )
+    else if  ( error == CCAPI_FS_ERROR_LOCK_FAILED )
     {
-        printf("CCAPI_FS_ERROR_SYNCR_FAILED\n");
+        printf("CCAPI_FS_ERROR_LOCK_FAILED\n");
     }
     else if  ( error == CCAPI_FS_ERROR_NONE )
     {

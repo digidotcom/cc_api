@@ -104,7 +104,7 @@ TEST(test_ccapi_os_lock, AcquireClearsObjectAutomatically)
     create_thread_release(lock_object);
 
     /* Wait infinite. The other thread should release the object */
-    acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
+    acquire_data.timeout_ms= OS_LOCK_ACQUIRE_INFINITE;
 
     status = ccimp_os_lock_acquire(&acquire_data);
 
@@ -112,7 +112,7 @@ TEST(test_ccapi_os_lock, AcquireClearsObjectAutomatically)
     CHECK(acquire_data.acquired == CCAPI_TRUE);
 
     /* Should fail to acquire again the object */
-    acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_NOWAIT;
+    acquire_data.timeout_ms= OS_LOCK_ACQUIRE_NOWAIT;
 
     status = ccimp_os_lock_acquire(&acquire_data);
 
@@ -140,7 +140,7 @@ IGNORE_TEST(test_ccapi_os_lock, ReleaseMaxCountIs1)
     CHECK(status == CCIMP_STATUS_OK);
 
     /* Wait infinite. The object should be released */
-    acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_INFINITE;
+    acquire_data.timeout_ms= OS_LOCK_ACQUIRE_INFINITE;
 
     status = ccimp_os_lock_acquire(&acquire_data);
 
@@ -148,7 +148,7 @@ IGNORE_TEST(test_ccapi_os_lock, ReleaseMaxCountIs1)
     CHECK(acquire_data.acquired == CCAPI_TRUE);
 
     /* Should fail to acquire again the object as Max Count is 1 */
-    acquire_data.timeout_ms= OS_SYNCR_ACQUIRE_NOWAIT;
+    acquire_data.timeout_ms= OS_LOCK_ACQUIRE_NOWAIT;
 
     status = ccimp_os_lock_acquire(&acquire_data);
 

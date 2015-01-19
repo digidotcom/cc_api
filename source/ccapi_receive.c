@@ -28,7 +28,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_SYNCR_FAILED;
+            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -46,7 +46,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_SYNCR_FAILED;
+            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
     }
 
@@ -198,7 +198,7 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_SYNCR_FAILED;
+            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -218,7 +218,7 @@ ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_data_t * const ccapi_da
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_SYNCR_FAILED;
+            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
             goto done;
     }
 done:

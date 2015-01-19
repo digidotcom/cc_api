@@ -78,7 +78,7 @@ TEST(test_ccapi_dp_send_multi_stream_collection, testSendMultiStreamCollectionTC
 
     ccfsm_request.request_id = NULL;
     ccfsm_request.response_required = connector_false;
-    ccfsm_request.timeout_in_seconds = OS_SYNCR_ACQUIRE_INFINITE;
+    ccfsm_request.timeout_in_seconds = OS_LOCK_ACQUIRE_INFINITE;
     ccfsm_request.transport = connector_transport_tcp;
     ccfsm_request.user_context = malloc_for_transaction;
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;

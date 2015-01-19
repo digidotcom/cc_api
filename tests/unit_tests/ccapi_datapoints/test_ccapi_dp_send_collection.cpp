@@ -34,7 +34,7 @@ static void th_prepare_ccfsm_datapoint_response_and_status(ccapi_dp_collection_t
 
     ccfsm_request.request_id = NULL;
     ccfsm_request.response_required = connector_false;
-    ccfsm_request.timeout_in_seconds = OS_SYNCR_ACQUIRE_INFINITE;
+    ccfsm_request.timeout_in_seconds = OS_LOCK_ACQUIRE_INFINITE;
     ccfsm_request.transport = transport;
     ccfsm_request.user_context = malloc_for_transaction;
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
@@ -127,7 +127,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCreateSyncrFailed)
     Mock_ccimp_os_lock_create_return(CCIMP_STATUS_ERROR);
 
     dp_error = ccapi_dp_send_collection(CCAPI_TRANSPORT_TCP, dp_collection);
-    CHECK_EQUAL(CCAPI_DP_ERROR_SYNCR_FAILED, dp_error);
+    CHECK_EQUAL(CCAPI_DP_ERROR_LOCK_FAILED, dp_error);
     th_check_collection_dp_count(dp_collection, 2);
 }
 
@@ -153,7 +153,7 @@ TEST(test_ccapi_dp_send_collection, testSendCollectionCCFSMFailure)
 
     ccfsm_request.request_id = NULL;
     ccfsm_request.response_required = connector_false;
-    ccfsm_request.timeout_in_seconds = OS_SYNCR_ACQUIRE_INFINITE;
+    ccfsm_request.timeout_in_seconds = OS_LOCK_ACQUIRE_INFINITE;
     ccfsm_request.transport = connector_transport_tcp;
     ccfsm_request.user_context = malloc_for_transaction;
     ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;

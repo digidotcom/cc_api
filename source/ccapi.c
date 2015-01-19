@@ -152,7 +152,7 @@ ccimp_status_t ccapi_lock_acquire(void * const lock_object)
 
     ASSERT_MSG_GOTO(lock_object != NULL, done);
     acquire_data.lock_object = lock_object;
-    acquire_data.timeout_ms = OS_SYNCR_ACQUIRE_INFINITE;
+    acquire_data.timeout_ms = OS_LOCK_ACQUIRE_INFINITE;
 
     ccimp_status = ccimp_os_lock_acquire(&acquire_data);
     if (ccimp_status == CCIMP_STATUS_OK && acquire_data.acquired != CCAPI_TRUE)
