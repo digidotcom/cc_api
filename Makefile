@@ -22,6 +22,9 @@ CUSTOM_CONNECTOR_INCLUDE = $(CCAPI_SOURCE_DIR)/cc_ansic_custom_include
 CONNECTOR_INCLUDE = $(CONNECTOR_DIR)/public/include
 UNIT_TEST_INCLUDE = tests/unit_tests
 
+CONFIG_GENERATOR_BUILD = $(CONNECTOR_DIR)/tools/config/build.xml
+CONFIG_GENERATOR_BIN = $(CONNECTOR_DIR)/tools/config/dist/ConfigGenerator.jar
+
 TEST_DIR = tests/unit_tests
 MOCKS_DIR = tests/mocks
 CCIMP_SOURCE_DIR = tests/ccimp
@@ -72,8 +75,16 @@ COBJS = $(CSRCS:.c=.o)
 CPPOBJS = $(CPPSRCS:.cpp=.o)
 GCOVOBJS = $(CSRCS:.c=.gcda) $(CSRCS:.c=.gcno) $(CPPSRCS:.cpp=.gcda) $(CPPSRCS:.cpp=.gcno)
 
-test: $(COBJS) $(CPPOBJS)
+ConfigGenerator:
+	ant -f $(CONFIG_GENERATOR_BUILD)
+
+auto_generated_files: ConfigGenerator
+	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -type=global_header
+
+test_binary: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(EXEC_NAME)
+	
+test: auto_generated_files test_binary
 
 
 run_test: test

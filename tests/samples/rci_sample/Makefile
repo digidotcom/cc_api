@@ -20,6 +20,9 @@ CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic/public/include
 CCAPI_PUBLIC_HEADER_DIR=../../../include
 CUSTOM_CCFSM_PUBLIC_HEADER_DIR=../../../source/cc_ansic_custom_include
 
+CONFIG_GENERATOR_BUILD = ../../../source/cc_ansic/tools/config/build.xml
+CONFIG_GENERATOR_BIN = ../../../source/cc_ansic/tools/config/dist/ConfigGenerator.jar
+
 # Location of Platform Src Code.
 PLATFORM_DIR=../../ccimp
 
@@ -49,7 +52,7 @@ CFLAGS += -iquote$(PLATFORM_DIR)
 CFLAGS += -g -O0 -DDEBUG
 
 # Target output to generate.
-APP_SRCS = ccapi_rci_functions.c  main.c  remote_config.c ccapi_rci_data.c
+APP_SRCS = ccapi_rci_functions.c  main.c  rci_config.c ccapi_rci_data.c
 CC_PRIVATE_SRCS = $(CCFSM_PRIVATE_DIR)/connector_api.c
 CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_data_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_tcp.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_udp.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_sms.c $(CCAPI_PRIVATE_DIR)/ccapi_send.c $(CCAPI_PRIVATE_DIR)/ccapi_receive.c $(CCAPI_PRIVATE_DIR)/ccapi_rci_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem.c $(CCAPI_PRIVATE_DIR)/ccapi_firmware_update_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_cli_handler.c
 PLATFORM_SRCS = $(PLATFORM_DIR)/ccimp_os.c $(PLATFORM_DIR)/ccimp_logging.c $(PLATFORM_DIR)/ccimp_hal.c $(PLATFORM_DIR)/ccimp_network_tcp.c $(PLATFORM_DIR)/ccimp_network_udp.c $(PLATFORM_DIR)/ccimp_network_sms.c $(PLATFORM_DIR)/dns_helper.c $(PLATFORM_DIR)/ccimp_filesystem.c
@@ -70,9 +73,18 @@ LDFLAGS += $(DFLAGS) -Wl,-Map,$(SAMPLE).map,--sort-common
 
 OBJS = $(SRCS:.c=.o)
 
-$(SAMPLE): $(OBJS)
-	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
+ConfigGenerator:
+	ant -f $(CONFIG_GENERATOR_BUILD)
+
+auto_generated_files: ConfigGenerator
+	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CCFSM_PUBLIC_HEADER_DIR) -noBackup -type=global_header
+	java -jar $(CONFIG_GENERATOR_BIN) username:password "Linux Application" 1.0.0.0 -vendor=0x2001371 -noUpload -noBackup -ccapi config.rci
+
 	
+exec: $(OBJS)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $(SAMPLE)
+
+$(SAMPLE): auto_generated_files exec
 
 
 .PHONY: clean
