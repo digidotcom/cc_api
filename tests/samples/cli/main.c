@@ -57,7 +57,7 @@ static void app_cli_request_cb(ccapi_transport_t const transport, char const * c
     /* Provide response to the cloud */
     if (output != NULL)
     {
-        response = malloc(sizeof(FIX_RESPONSE) + strlen(command));
+        response = malloc(sizeof(FIX_RESPONSE) + strlen(command) + strlen("''"));
         printf("app_cli_request_cb: Providing response in buffer at %p\n", response);
 
         sprintf(response, FIX_RESPONSE "'%s'", command);
