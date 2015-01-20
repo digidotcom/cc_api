@@ -23,16 +23,6 @@ static ccapi_firmware_target_t firmware_list[] = {
         {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
         {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
     };
-static uint8_t const firmware_count = (sizeof(firmware_list)/sizeof(firmware_list[0]));
-
-static ccapi_fw_request_error_t app_fw_request_cb(unsigned int const target, char const * const filename, size_t const total_size)
-{
-    (void)target;
-    (void)total_size;
-    (void)filename;
-
-    return CCAPI_FW_REQUEST_ERROR_NONE;
-}
 
 static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
@@ -45,33 +35,23 @@ static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t 
     return CCAPI_FW_DATA_ERROR_NONE;
 }
 
-static void app_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
-{
-    (void)target;
-    (void)cancel_reason;
-    return;
-}
-
-ccapi_fw_service_t  fw_service = {
-                                        {
-                                            2,
-                                            firmware_list
-                                        },
-                                        {
-                                            app_fw_request_cb,
-                                            app_fw_data_cb,
-                                            app_fw_cancel_cb
-                                        }
-                                    };
-
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     static ccapi_rci_service_t rci_service;
+    static ccapi_fw_service_t  fw_service;
+
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x04, 0x9D, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA};
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
     
     rci_service.rci_data = &ccapi_rci_data;
+
+    fw_service.target.count = ARRAY_SIZE(firmware_list);
+    fw_service.target.item = firmware_list;
+    fw_service.callback.data_cb = app_fw_data_cb;
+    fw_service.callback.cancel_cb = NULL;
+    fw_service.callback.request_cb = NULL;
+
     start->vendor_id = 0x2001371; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
     start->device_cloud_url = device_cloud_url;
