@@ -134,8 +134,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
     {
         svc_cli = cli_request_ptr->user_context;
 
-        ASSERT_MSG_GOTO(svc_cli->more_data, done);
-
         svc_cli->more_data = CCAPI_BOOL(cli_request_ptr->more_data);
     }
 
