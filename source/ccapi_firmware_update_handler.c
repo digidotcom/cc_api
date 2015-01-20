@@ -20,7 +20,7 @@ static void free_and_stop_service(ccapi_data_t * const ccapi_data)
 {
     unsigned char chunk_pool_index;
 
-    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
+    for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
     {
         if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data != NULL)
         {
@@ -147,11 +147,11 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
     }
 
     {
+        ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
         unsigned char chunk_pool_index;
-        for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
-        {
-            ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
 
+        for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
+        {
             chunk_pool[chunk_pool_index].in_use = CCAPI_FALSE;
             chunk_pool[chunk_pool_index].offset = 0;
 
@@ -278,7 +278,7 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
     connector_status = connector_callback_continue;
     complete_ptr->status = connector_firmware_download_success;
 
-    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
+    for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
     {
         if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].in_use)
         {
@@ -315,7 +315,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 
     ccapi_logging_line("ccapi_process_firmware_update_abort for target_number='%d'. status='%d'", abort_ptr->target_number, abort_ptr->status);
 
-    for (chunk_pool_index = 0; chunk_pool_index < CCAPI_CHUNK_POOL_SIZE; chunk_pool_index++)
+    for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
     {
         if (ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].in_use)
         {
