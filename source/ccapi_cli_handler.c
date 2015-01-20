@@ -105,8 +105,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     ASSERT_MSG_GOTO(cli_request_ptr->buffer != NULL && cli_request_ptr->bytes_used, done);
 
-    ccapi_logging_line("ccapi_process_cli_request");
-
     if (cli_request_ptr->user_context == NULL)
     {
         if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &svc_cli->cli_error))
