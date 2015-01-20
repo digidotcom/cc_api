@@ -114,6 +114,14 @@ TEST_GROUP(test_ccapi_cli_request_callback)
 
     void teardown()
     {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+
         Mock_destroy_all();
     }
 };
@@ -139,7 +147,10 @@ TEST(test_ccapi_cli_request_callback, testRequestEmpty)
     ccfsm_cli_request.more_data = connector_false;
 
     request.sm_request = connector_request_id_sm_cli_request;
-    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_cli_request.user_context != NULL);
@@ -201,7 +212,10 @@ TEST(test_ccapi_cli_request_callback, testOneRequest)
     ccfsm_cli_request.more_data = connector_false;
 
     request.sm_request = connector_request_id_sm_cli_request;
-    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_cli_request.user_context != NULL);
@@ -262,7 +276,10 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
     ccfsm_cli_request.more_data = connector_false;
 
     request.sm_request = connector_request_id_sm_cli_request;
-    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_cli_request.user_context != NULL);
@@ -303,7 +320,10 @@ TEST(test_ccapi_cli_request_callback, testOneResponse)
     ccfsm_cli_request.more_data = connector_false;
 
     request.sm_request = connector_request_id_sm_cli_request;
-    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_cli_request.user_context != NULL);
@@ -379,7 +399,10 @@ TEST(test_ccapi_cli_request_callback, testTwoResponses)
     ccfsm_cli_request.more_data = connector_false;
 
     request.sm_request = connector_request_id_sm_cli_request;
-    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK(ccfsm_cli_request.user_context != NULL);
@@ -520,6 +543,8 @@ TEST(test_ccapi_cli_request_callback, testERROR_NO_CLI_SUPPORT)
     }
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_cli_request_cb_called);
+
+    ccapi_data_single_instance->config.cli_supported = CCAPI_TRUE;
 }
 
 /* TODO: Add following test if we decide to have a max_request_size field:
