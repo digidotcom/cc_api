@@ -338,8 +338,8 @@ static void group_process_set(connector_remote_config_t * const remote_config, u
         case connector_element_type_mac_addr:
         case connector_element_type_datetime:
         {
-            char const * const string_ptr = (char *)th_rci_get_value_ptr();
-            STRCMP_EQUAL(set_value.string_value, string_ptr);
+            char const * const * const string_ptr = (char * *)th_rci_get_value_ptr();
+            STRCMP_EQUAL(set_value.string_value, *string_ptr);
             break;
         }
         case connector_element_type_int32:
@@ -610,8 +610,8 @@ TEST(test_ccapi_rci, testRCISetSettingGroup1)
     set_value.boolean_value = connector_true;
     group_process_set(&remote_config, connector_setting_group_1_el_bool, connector_element_type_boolean, set_value, "rci_setting_group_1_el_bool_set", CCAPI_SETTING_GROUP_1_ERROR_ERROR_1);
 
-    //set_value.float_value = -15.26;
-    //group_process_set(&remote_config, connector_setting_group_1_el_float, connector_element_type_float, set_value, "rci_setting_group_1_el_float_set", CCAPI_GLOBAL_ERROR_NONE);
+    set_value.float_value = -15.26;
+    group_process_set(&remote_config, connector_setting_group_1_el_float, connector_element_type_float, set_value, "rci_setting_group_1_el_float_set", CCAPI_GLOBAL_ERROR_NONE);
 
 
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);

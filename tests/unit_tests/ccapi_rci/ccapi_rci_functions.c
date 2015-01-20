@@ -48,11 +48,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_get(ccapi_rci_info_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_set(ccapi_rci_info_t * const info, ccapi_setting_group_1_el_enum_id_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_set(ccapi_rci_info_t * const info, ccapi_setting_group_1_el_enum_id_t const * const value)
 {
-    static ccapi_setting_group_1_el_enum_id_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -62,11 +60,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_uint32_get(ccapi_rci_inf
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_uint32_set(ccapi_rci_info_t * const info, uint32_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_uint32_set(ccapi_rci_info_t * const info, uint32_t const * const value)
 {
-    static uint32_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -76,11 +72,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_on_off_get(ccapi_rci_inf
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_on_off_set(ccapi_rci_info_t * const info, ccapi_on_off_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_on_off_set(ccapi_rci_info_t * const info, ccapi_on_off_t const * const value)
 {
-    static ccapi_on_off_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -90,11 +84,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_hex_get(ccapi_rci_info_t
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_hex_set(ccapi_rci_info_t * const info, uint32_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_hex_set(ccapi_rci_info_t * const info, uint32_t const * const value)
 {
-    static uint32_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -104,11 +96,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_0xhex_get(ccapi_rci_info
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_0xhex_set(ccapi_rci_info_t * const info, uint32_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_0xhex_set(ccapi_rci_info_t * const info, uint32_t const * const value)
 {
-    static uint32_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -118,11 +108,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_signed_get(ccapi_rci_inf
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_signed_set(ccapi_rci_info_t * const info, int32_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_signed_set(ccapi_rci_info_t * const info, int32_t const * const value)
 {
-    static int32_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -132,11 +120,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_bool_get(ccapi_rci_info_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_bool_set(ccapi_rci_info_t * const info, ccapi_bool_t const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_bool_set(ccapi_rci_info_t * const info, ccapi_bool_t const * const value)
 {
-    static ccapi_bool_t static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -146,11 +132,9 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_get(ccapi_rci_info
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_set(ccapi_rci_info_t * const info, float const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_set(ccapi_rci_info_t * const info, float const * const value)
 {
-    static float static_value;
-    static_value = value;
-    th_set_value_ptr(&static_value);
+    th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
@@ -170,7 +154,7 @@ ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_get(ccapi_rci_inf
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -182,13 +166,13 @@ ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_get(ccapi_rci_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_password_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_password_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -210,7 +194,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_get(ccapi_rci_info_t * co
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -222,7 +206,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_get(ccapi_rci_info_t 
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -234,7 +218,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_get(ccapi_rci_info_t 
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -246,7 +230,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_get(ccapi_rci_info_t * c
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -258,7 +242,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_get(ccapi_rci_info_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_set(ccapi_rci_info_t * const info, char const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_set(ccapi_rci_info_t * const info, char const * const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);

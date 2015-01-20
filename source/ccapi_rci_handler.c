@@ -341,14 +341,14 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_MAC_ADDR
                         case connector_element_type_mac_addr:
 #endif
-                            error = process_callback(rci_info, remote_config->element.value->string_value);
+                            error = process_callback(rci_info, &remote_config->element.value->string_value);
                             break;
 #endif
 
 #if defined RCI_PARSER_USES_INT32
                         case connector_element_type_int32:
                         {
-                            error = process_callback(rci_info, remote_config->element.value->signed_integer_value);
+                            error = process_callback(rci_info, &remote_config->element.value->signed_integer_value);
                             break;
                         }
 #endif
@@ -366,7 +366,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         case connector_element_type_0x_hex32:
 #endif
                         {
-                            error = process_callback(rci_info, remote_config->element.value->unsigned_integer_value);
+                            error = process_callback(rci_info, &remote_config->element.value->unsigned_integer_value);
                             break;
                         }
 #endif
@@ -374,7 +374,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_FLOAT
                         case connector_element_type_float:
                         {
-                            error = process_callback(rci_info, remote_config->element.value->float_value);
+                            error = process_callback(rci_info, &remote_config->element.value->float_value);
                             break;
                         }
 #endif
@@ -382,7 +382,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_ENUM
                         case connector_element_type_enum:
                         {
-                            error = process_callback(rci_info, remote_config->element.value->enum_value);
+                            error = process_callback(rci_info, &remote_config->element.value->enum_value);
                             break;
                         }
 #endif
@@ -390,7 +390,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_ON_OFF
                         case connector_element_type_on_off:
                         {
-                            error = process_callback(rci_info, remote_config->element.value->on_off_value);
+                            error = process_callback(rci_info, &remote_config->element.value->on_off_value);
                             break;
                         }
 #endif
@@ -398,7 +398,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_BOOLEAN
                         case connector_element_type_boolean:
                         {
-                            error = process_callback(rci_info, remote_config->element.value->boolean_value);
+                            error = process_callback(rci_info, &remote_config->element.value->boolean_value);
                             break;
                         }
 #endif
