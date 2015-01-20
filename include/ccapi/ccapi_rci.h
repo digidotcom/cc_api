@@ -52,12 +52,12 @@ typedef struct {
         unsigned int CONST instance;
         ccapi_rci_group_type_t CONST type;
 #if (defined RCI_PARSER_USES_GROUP_NAMES)
-        char const * name;
+        char const * CONST name;
 #endif
     } group;
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
     struct {
-        char const * name;
+        char const * CONST name;
     } element;
 #endif
     struct {
