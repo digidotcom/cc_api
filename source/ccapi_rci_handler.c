@@ -172,7 +172,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     group_table = &rci_data->settings;
                     break;
                 case connector_remote_group_state:
-                    rci_info->action = CCAPI_RCI_GROUP_STATE;
+                    rci_info->group.type = CCAPI_RCI_GROUP_STATE;
                     group_table = &rci_data->state;
                     break;
             }
@@ -291,8 +291,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             break;
                         }
 #endif
-                        default:
-                            assert(0);
                     }
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
                     rci_info->element.name = remote_config->element.name;
