@@ -14,7 +14,7 @@
 
 #include "ccapi_definitions.h"
 
-#if 1 /*(defined CONNECTOR_REMOTE_CONFIGURATION_SUPPORT) */
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
 
 static ccapi_rci_query_setting_attribute_compare_to_t connector_to_ccapi_compare_to_attribute(rci_query_setting_attribute_compare_to_t const compare_to)
 {
