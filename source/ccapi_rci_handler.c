@@ -106,6 +106,13 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     rci_info->group.type = CCAPI_RCI_GROUP_STATE;
                     break;
             }
+
+            if (rci_info->action == CCAPI_RCI_ACTION_QUERY && rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
+            {
+                rci_info->query_setting.attributes.compare_to = connector_to_ccapi_compare_to_attribute(remote_config->attribute.compare_to);
+                rci_info->query_setting.attributes.source = connector_to_ccapi_source_attribute(remote_config->attribute.source);
+                rci_info->query_setting.matches = CCAPI_FALSE;
+            }
 #if (defined RCI_PARSER_USES_GROUP_NAMES)
             rci_info->group.name = NULL;
 #endif
@@ -139,12 +146,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
             rci_info->element.name = NULL;
 #endif
-            if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
-            {
-                rci_info->query_setting.attributes.compare_to = connector_to_ccapi_compare_to_attribute(remote_config->attribute.compare_to);
-                rci_info->query_setting.attributes.source = connector_to_ccapi_source_attribute(remote_config->attribute.source);
-                rci_info->query_setting.matches = CCAPI_FALSE;
-            }
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             start_callback = group->callbacks.start;
