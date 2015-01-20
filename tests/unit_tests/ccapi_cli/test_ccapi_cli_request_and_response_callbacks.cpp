@@ -47,7 +47,7 @@ TEST_GROUP(test_ccapi_cli_request_callback_NoCliSupport)
 
         th_fill_start_structure_with_good_parameters(&start);
 
-        ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+        ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
         ccapi_cli_request_expected_command = NULL;
         ccapi_cli_request_expected_output_null = CCAPI_TRUE;
         ccapi_cli_request_cb_called = CCAPI_FALSE;
@@ -68,7 +68,7 @@ TEST(test_ccapi_cli_request_callback_NoCliSupport, testNoCliSupport)
     connector_sm_cli_request_t ccfsm_cli_request;
     connector_callback_status_t status;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_COMMAND;
     ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
@@ -101,7 +101,7 @@ TEST_GROUP(test_ccapi_cli_request_callback)
         th_fill_start_structure_with_good_parameters(&start);
         start.service.cli = &cli_service;
 
-        ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+        ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
         ccapi_cli_request_expected_command = NULL;
         ccapi_cli_request_expected_output_null = CCAPI_TRUE;
         ccapi_cli_request_desired_output = NULL;
@@ -134,12 +134,12 @@ TEST(test_ccapi_cli_request_callback, testRequestEmpty)
 
     #define REQUEST_EMPTY ""
 
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;    
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;    
     ccapi_cli_request_expected_command = REQUEST_EMPTY;
     ccapi_cli_request_expected_output_null = CCAPI_TRUE;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = REQUEST_EMPTY;
     ccfsm_cli_request.bytes_used = sizeof(REQUEST_EMPTY);
@@ -172,12 +172,12 @@ TEST(test_ccapi_cli_request_callback, testRequestNULL)
 
     #define TARGET_NULL NULL
 
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;    
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;    
     ccapi_cli_request_expected_command = TARGET_NULL;
     ccapi_cli_request_expected_output_null = CCAPI_TRUE;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TARGET_NULL;
     ccfsm_cli_request.bytes_used = 0;
@@ -199,12 +199,12 @@ TEST(test_ccapi_cli_request_callback, testOneRequest)
     connector_sm_cli_request_t ccfsm_cli_request;
     connector_callback_status_t status;
     
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
     ccapi_cli_request_expected_command = TEST_COMMAND;
     ccapi_cli_request_expected_output_null = CCAPI_TRUE;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_COMMAND;
     ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
@@ -242,12 +242,12 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
     connector_sm_cli_request_t ccfsm_cli_request;
     connector_callback_status_t status;
     
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
     ccapi_cli_request_expected_command = TEST_2_COMMAND;
     ccapi_cli_request_expected_output_null = CCAPI_TRUE;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_2_COMMAND_A;
     ccfsm_cli_request.bytes_used = TEST_2_COMMAND_A_SIZE;
@@ -268,7 +268,7 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_cli_request_cb_called);
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = ccfsm_cli_request.user_context;
     ccfsm_cli_request.buffer = TEST_2_COMMAND_B;
     ccfsm_cli_request.bytes_used = TEST_2_COMMAND_B_SIZE;
@@ -306,13 +306,13 @@ TEST(test_ccapi_cli_request_callback, testOneResponse)
 
     char const exp_response[] = TEST_OUTPUT;
     
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
     ccapi_cli_request_expected_command = TEST_COMMAND;
     ccapi_cli_request_expected_output_null = CCAPI_FALSE;
     ccapi_cli_request_desired_output = exp_response;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_COMMAND;
     ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
@@ -345,7 +345,7 @@ TEST(test_ccapi_cli_request_callback, testOneResponse)
         #define MAX_RESPONSE_SIZE 100
         char response[MAX_RESPONSE_SIZE];
 
-        ccfsm_cli_response.transport = connector_transport_tcp;
+        ccfsm_cli_response.transport = connector_transport_udp;
         ccfsm_cli_response.user_context = ccfsm_cli_request.user_context;
         ccfsm_cli_response.buffer = response;
         ccfsm_cli_response.bytes_available = MAX_RESPONSE_SIZE;
@@ -385,13 +385,13 @@ TEST(test_ccapi_cli_request_callback, testTwoResponses)
 
     char const exp_response[] = TEST_OUTPUT;
     
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
     ccapi_cli_request_expected_command = TEST_COMMAND;
     ccapi_cli_request_expected_output_null = CCAPI_FALSE;
     ccapi_cli_request_desired_output = exp_response;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_COMMAND;
     ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
@@ -427,7 +427,7 @@ TEST(test_ccapi_cli_request_callback, testTwoResponses)
         #define CALL1_SIZE 5
         #define CALL2_SIZE (sizeof exp_response - CALL1_SIZE)
 
-        ccfsm_cli_response.transport = connector_transport_tcp;
+        ccfsm_cli_response.transport = connector_transport_udp;
         ccfsm_cli_response.user_context = ccfsm_cli_request.user_context;
         ccfsm_cli_response.buffer = response;
         ccfsm_cli_response.bytes_available = CALL1_SIZE;
@@ -453,7 +453,7 @@ TEST(test_ccapi_cli_request_callback, testTwoResponses)
             CHECK(ccfsm_cli_response.more_data == connector_true);
         }
 
-        ccfsm_cli_response.transport = connector_transport_tcp;
+        ccfsm_cli_response.transport = connector_transport_udp;
         ccfsm_cli_response.user_context = ccfsm_cli_request.user_context;
         ccfsm_cli_response.buffer = response + CALL1_SIZE;
         ccfsm_cli_response.bytes_available = MAX_RESPONSE_SIZE - CALL1_SIZE;
@@ -496,13 +496,13 @@ TEST(test_ccapi_cli_request_callback, testERROR_NO_CLI_SUPPORT)
 
     ccapi_data_single_instance->config.cli_supported = CCAPI_FALSE;
 
-    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_TCP;
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
     ccapi_cli_request_expected_command = TEST_COMMAND;
     ccapi_cli_request_expected_output_null = CCAPI_TRUE;
     ccapi_cli_request_desired_output = NULL;
     ccapi_cli_request_cb_called = CCAPI_FALSE;
 
-    ccfsm_cli_request.transport = connector_transport_tcp;
+    ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_COMMAND;
     ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
@@ -515,7 +515,7 @@ TEST(test_ccapi_cli_request_callback, testERROR_NO_CLI_SUPPORT)
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_cli_request_cb_called);
 
-    ccfsm_cli_response.transport = connector_transport_tcp;
+    ccfsm_cli_response.transport = connector_transport_udp;
     ccfsm_cli_response.user_context = ccfsm_cli_request.user_context;
     ccfsm_cli_response.buffer = response;
     ccfsm_cli_response.bytes_available = MAX_RESPONSE_SIZE;
