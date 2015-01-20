@@ -52,7 +52,9 @@ CCIMP_SOURCES = $(wildcard $(CCIMP_SOURCE_DIR)/*.c)
 TESTS_SOURCES := $(shell find $(TEST_DIR) -name '*.cpp')
 MOCKS_SOURCES = $(wildcard $(MOCKS_DIR)/*.cpp)
 
-CSRCS = $(CCAPI_SOURCES) $(CCIMP_SOURCES) 
+RCI_TESTS_SOURCES = $(wildcard $(TEST_DIR)/ccapi_rci/*.c)
+
+CSRCS = $(CCAPI_SOURCES) $(CCIMP_SOURCES) $(RCI_TESTS_SOURCES)
 
 CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 
@@ -80,6 +82,7 @@ ConfigGenerator:
 
 auto_generated_files: ConfigGenerator
 	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -type=global_header
+	java -jar $(CONFIG_GENERATOR_BIN) username:password -noUpload "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noBackup -ccapi $(TEST_DIR)/ccapi_rci/config.rci
 
 test_binary: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(EXEC_NAME)
