@@ -824,6 +824,7 @@ TEST(test_ccapi_receive_data_callback, testOK_DataCallbackBusy)
             }
         } while ( status == connector_callback_busy);
         CHECK_EQUAL(connector_callback_continue, status);
+        CHECK(i > 1000);
     }
 
     ccfsm_receive_reply_data.transport = connector_transport_tcp;

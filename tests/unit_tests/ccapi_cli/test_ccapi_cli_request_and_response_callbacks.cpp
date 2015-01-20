@@ -20,6 +20,8 @@ static char const * ccapi_cli_request_expected_command;
 static ccapi_bool_t ccapi_cli_request_expected_output_null;
 static char const * ccapi_cli_request_desired_output;
 static ccapi_bool_t ccapi_cli_request_cb_called;
+static ccapi_bool_t ccapi_cli_request_lock_cb[2] = {CCAPI_FALSE, CCAPI_FALSE};
+static unsigned int ccapi_cli_request_lock_index = 0;
 
 static void test_cli_request_cb(ccapi_transport_t const transport, char const * const command, char const * * const output)
 {
@@ -33,6 +35,11 @@ static void test_cli_request_cb(ccapi_transport_t const transport, char const * 
     }
 
     ccapi_cli_request_cb_called = CCAPI_TRUE;
+
+    while (ccapi_cli_request_lock_cb[ccapi_cli_request_lock_index])
+    {
+    }
+    ccapi_cli_request_lock_index++;
 
     return;
 }
@@ -51,6 +58,9 @@ TEST_GROUP(test_ccapi_cli_request_callback_NoCliSupport)
         ccapi_cli_request_expected_command = NULL;
         ccapi_cli_request_expected_output_null = CCAPI_TRUE;
         ccapi_cli_request_cb_called = CCAPI_FALSE;
+        ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
+        ccapi_cli_request_lock_cb[1] = CCAPI_FALSE;
+        ccapi_cli_request_lock_index = 0;
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
@@ -106,6 +116,9 @@ TEST_GROUP(test_ccapi_cli_request_callback)
         ccapi_cli_request_expected_output_null = CCAPI_TRUE;
         ccapi_cli_request_desired_output = NULL;
         ccapi_cli_request_cb_called = CCAPI_FALSE;
+        ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
+        ccapi_cli_request_lock_cb[1] = CCAPI_FALSE;
+        ccapi_cli_request_lock_index = 0;
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
@@ -229,12 +242,57 @@ TEST(test_ccapi_cli_request_callback, testOneRequest)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
 }
 
+TEST(test_ccapi_cli_request_callback, testOneRequestBusy)
+{
+    connector_request_id_t request;
+    connector_sm_cli_request_t ccfsm_cli_request;
+    connector_callback_status_t status;
+    
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
+    ccapi_cli_request_expected_command = TEST_COMMAND;
+    ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+    ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+    ccfsm_cli_request.transport = connector_transport_udp;
+    ccfsm_cli_request.user_context = NULL;
+    ccfsm_cli_request.buffer = TEST_COMMAND;
+    ccfsm_cli_request.bytes_used = TEST_COMMAND_SIZE;
+    ccfsm_cli_request.response_required = connector_false;
+    ccfsm_cli_request.more_data = connector_false;
+
+    ccapi_cli_request_lock_cb[0] = CCAPI_TRUE;
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    {
+        unsigned int i = 0;
+        do
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+            i++;
+            if (i == 1000)
+            {
+                ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
+            }
+        } while ( status == connector_callback_busy);
+        CHECK_EQUAL(connector_callback_continue, status);
+        CHECK(i > 1000);
+    }
+
+    CHECK(ccfsm_cli_request.user_context != NULL);
+
+    {
+        ccapi_svc_cli_t * svc_cli = (ccapi_svc_cli_t *)ccfsm_cli_request.user_context;
+        CHECK_EQUAL(svc_cli->cli_error, CCAPI_CLI_ERROR_NONE);
+        CHECK_EQUAL(svc_cli->response_required, CCAPI_FALSE);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
+}
+
 #define TEST_2_COMMAND "1234567890"
 #define TEST_2_COMMAND_SIZE (sizeof(TEST_2_COMMAND))
 #define TEST_2_COMMAND_A "12345"
-#define TEST_2_COMMAND_A_SIZE 5
 #define TEST_2_COMMAND_B "67890"
-#define TEST_2_COMMAND_B_SIZE (5 + 1)
 
 TEST(test_ccapi_cli_request_callback, testTwoRequests)
 {
@@ -250,7 +308,7 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
     ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = NULL;
     ccfsm_cli_request.buffer = TEST_2_COMMAND_A;
-    ccfsm_cli_request.bytes_used = TEST_2_COMMAND_A_SIZE;
+    ccfsm_cli_request.bytes_used = strlen(TEST_2_COMMAND_A);
     ccfsm_cli_request.response_required = connector_false;
     ccfsm_cli_request.more_data = connector_true;
 
@@ -271,7 +329,7 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
     ccfsm_cli_request.transport = connector_transport_udp;
     ccfsm_cli_request.user_context = ccfsm_cli_request.user_context;
     ccfsm_cli_request.buffer = TEST_2_COMMAND_B;
-    ccfsm_cli_request.bytes_used = TEST_2_COMMAND_B_SIZE;
+    ccfsm_cli_request.bytes_used = strlen(TEST_2_COMMAND_B) + 1;
     ccfsm_cli_request.response_required = connector_false;
     ccfsm_cli_request.more_data = connector_false;
 
@@ -293,6 +351,94 @@ TEST(test_ccapi_cli_request_callback, testTwoRequests)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
 
 
+}
+
+TEST(test_ccapi_cli_request_callback, testTwoConcurrentRequests)
+{
+    connector_request_id_t request;
+    connector_sm_cli_request_t ccfsm_cli_request;
+    connector_sm_cli_request_t ccfsm_cli_request2;
+    connector_callback_status_t status;
+    
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
+    ccapi_cli_request_expected_command = TEST_2_COMMAND_A;
+    ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+    ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+    ccfsm_cli_request.transport = connector_transport_udp;
+    ccfsm_cli_request.user_context = NULL;
+    ccfsm_cli_request.buffer = TEST_2_COMMAND_A;
+    ccfsm_cli_request.bytes_used = strlen(TEST_2_COMMAND_A) + 1;
+    ccfsm_cli_request.response_required = connector_false;
+    ccfsm_cli_request.more_data = connector_false;
+    ccfsm_cli_request2.transport = connector_transport_udp;
+    ccfsm_cli_request2.user_context = NULL;
+    ccfsm_cli_request2.buffer = TEST_2_COMMAND_B;
+    ccfsm_cli_request2.bytes_used = strlen(TEST_2_COMMAND_B) + 1;
+    ccfsm_cli_request2.response_required = connector_false;
+    ccfsm_cli_request2.more_data = connector_false;
+
+    ccapi_cli_request_lock_cb[0] = CCAPI_TRUE;
+    ccapi_cli_request_lock_cb[1] = CCAPI_TRUE;
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    {
+        unsigned int i = 0;
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
+
+        do
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+        } while ( status == connector_callback_busy);
+        CHECK_EQUAL(connector_callback_continue, status);
+    }
+
+
+    CHECK(ccfsm_cli_request.user_context != NULL);
+
+    {
+        ccapi_svc_cli_t * svc_cli = (ccapi_svc_cli_t *)ccfsm_cli_request.user_context;
+        CHECK_EQUAL(svc_cli->cli_error, CCAPI_CLI_ERROR_NONE);
+        CHECK_EQUAL(svc_cli->response_required, CCAPI_FALSE);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
+
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
+    ccapi_cli_request_expected_command = TEST_2_COMMAND_B;
+    ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+    ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+    ccapi_cli_request_lock_cb[1] = CCAPI_FALSE;
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK(ccfsm_cli_request2.user_context != NULL);
+
+    {
+        ccapi_svc_cli_t * svc_cli = (ccapi_svc_cli_t *)ccfsm_cli_request2.user_context;
+        CHECK_EQUAL(svc_cli->cli_error, CCAPI_CLI_ERROR_NONE);
+        CHECK_EQUAL(svc_cli->response_required, CCAPI_FALSE);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
 }
 
 #define TEST_OUTPUT "this is my response string"
