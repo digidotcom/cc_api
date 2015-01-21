@@ -143,7 +143,16 @@ typedef struct
     size_t size;
     ccapi_bool_t last;
 } ccapi_fw_chunk_info;
-#endif            
+#endif
+
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+typedef enum {
+    CCAPI_RCI_THREAD_IDLE,
+    CCAPI_RCI_THREAD_CB_QUEUED,
+    CCAPI_RCI_THREAD_CB_PROCESSED,
+    CCAPI_RCI_THREAD_FREE_REQUESTED
+} ccapi_rci_thread_status_t;
+#endif
 
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
@@ -176,6 +185,7 @@ typedef struct {
     ccapi_config_t config;
     struct {
         ccapi_thread_info_t * connector_run;
+        ccapi_thread_info_t * rci;
         ccapi_thread_info_t * receive;
         ccapi_thread_info_t * cli;
         ccapi_thread_info_t * firmware;
@@ -217,6 +227,10 @@ typedef struct {
         struct {
             ccapi_rci_data_t const * rci_data;
             ccapi_rci_info_t rci_info;
+            ccapi_rci_thread_status_t rci_thread_status;
+            ccapi_rci_function_t callback_queued;
+            void * varg;
+            unsigned int error;
         } rci;
 #endif
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
@@ -329,6 +343,7 @@ typedef struct {
 extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_lock;
 
+void ccapi_rci_thread(void * const argument);
 void ccapi_receive_thread(void * const argument);
 void ccapi_cli_thread(void * const argument);
 void ccapi_firmware_thread(void * const argument);

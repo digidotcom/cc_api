@@ -59,13 +59,76 @@ static ccapi_rci_query_setting_attribute_source_t connector_to_ccapi_source_attr
     return retval;
 }
 
+void ccapi_rci_thread(void * const argument)
+{
+    ccapi_data_t * const ccapi_data = argument;
+
+    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
+
+    ccapi_data->thread.rci->status = CCAPI_THREAD_RUNNING;
+    while (ccapi_data->thread.rci->status == CCAPI_THREAD_RUNNING)
+    {
+        switch (ccapi_data->service.rci.rci_thread_status)
+        {
+            case CCAPI_RCI_THREAD_IDLE:
+            {
+                break;
+            }
+            case CCAPI_RCI_THREAD_CB_QUEUED:
+            {
+                ASSERT_MSG_GOTO(ccapi_data->service.rci.callback_queued != NULL, done);
+
+                /* Pass data to the user */ 
+                if (ccapi_data->service.rci.varg == NULL)
+                {
+                    ccapi_data->service.rci.error = ccapi_data->service.rci.callback_queued(&ccapi_data->service.rci.rci_info);
+                   }
+                else
+                {
+                    ccapi_data->service.rci.error = ccapi_data->service.rci.callback_queued(&ccapi_data->service.rci.rci_info, ccapi_data->service.rci.varg);
+                   }
+                   
+                /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+                if (ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED)
+                {
+                    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_PROCESSED;
+                }
+                break;
+            }
+            case CCAPI_RCI_THREAD_CB_PROCESSED:
+            {
+                break;
+            }
+            case CCAPI_RCI_THREAD_FREE_REQUESTED: /* TODO: remove this state */
+            {
+                //ccapi_data->service.rci.svc_rci = NULL;
+                ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
+                break;
+            }
+        }
+
+        ccimp_os_yield();
+    }
+    ASSERT_MSG_GOTO(ccapi_data->thread.rci->status == CCAPI_THREAD_REQUEST_STOP, done);
+
+    ccapi_data->thread.rci->status = CCAPI_THREAD_NOT_STARTED;
+done:
+    return;
+}
+
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t status;
     connector_remote_config_t * const remote_config = data;
     ccapi_rci_data_t const * const rci_data = ccapi_data->service.rci.rci_data;
     ccapi_rci_info_t * const rci_info = &ccapi_data->service.rci.rci_info;
-    unsigned int error;
+
+switch (ccapi_data->service.rci.rci_thread_status)
+{
+case CCAPI_RCI_THREAD_IDLE:
+
+    ASSERT(ccapi_data->service.rci.callback_queued == NULL);
 
     rci_info->user_context = remote_config->user_context;
     switch (request_id)
@@ -81,7 +144,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             rci_info->query_setting.matches = CCAPI_FALSE;
             rci_info->query_setting.attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
             rci_info->query_setting.attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
-            error = session_start_cb(rci_info);
+            ccapi_data->service.rci.callback_queued = session_start_cb;
             break;
         }
         case connector_request_id_remote_config_action_start:
@@ -121,7 +184,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
             rci_info->element.name = NULL;
 #endif
-            error = action_start_cb(rci_info);
+            ccapi_data->service.rci.callback_queued = action_start_cb;
             break;
         }
         case connector_request_id_remote_config_group_start:
@@ -148,7 +211,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             start_callback = group->callbacks.start;
-            error = start_callback(rci_info);
+            ccapi_data->service.rci.callback_queued = start_callback;
 
             if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
             {
@@ -295,7 +358,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
                     rci_info->element.name = remote_config->element.name;
 #endif
-                    error = process_callback(rci_info, p_element);
+                    ccapi_data->service.rci.callback_queued = process_callback; /* TODO (rci_info, p_element); */
+                    ccapi_data->service.rci.varg = p_element;
 
                     if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
                     {
@@ -341,14 +405,16 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_MAC_ADDR
                         case connector_element_type_mac_addr:
 #endif
-                            error = process_callback(rci_info, remote_config->element.value->string_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; /* TODO (rci_info, remote_config->element.value->string_value);*/
+                            ccapi_data->service.rci.varg = (void *)remote_config->element.value->string_value;
                             break;
 #endif
 
 #if defined RCI_PARSER_USES_INT32
                         case connector_element_type_int32:
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->signed_integer_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->signed_integer_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->signed_integer_value;
                             break;
                         }
 #endif
@@ -366,7 +432,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         case connector_element_type_0x_hex32:
 #endif
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->unsigned_integer_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->unsigned_integer_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->unsigned_integer_value;
                             break;
                         }
 #endif
@@ -374,7 +441,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_FLOAT
                         case connector_element_type_float:
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->float_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->float_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->float_value;
                             break;
                         }
 #endif
@@ -382,7 +450,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_ENUM
                         case connector_element_type_enum:
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->enum_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->enum_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->enum_value;
                             break;
                         }
 #endif
@@ -390,7 +459,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_ON_OFF
                         case connector_element_type_on_off:
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->on_off_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->on_off_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->on_off_value;
                             break;
                         }
 #endif
@@ -398,7 +468,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_BOOLEAN
                         case connector_element_type_boolean:
                         {
-                            error = process_callback(rci_info, &remote_config->element.value->boolean_value);
+                            ccapi_data->service.rci.callback_queued = process_callback; //(rci_info, &remote_config->element.value->boolean_value);
+                            ccapi_data->service.rci.varg = (void *)&remote_config->element.value->boolean_value;
                             break;
                         }
 #endif
@@ -431,7 +502,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             ASSERT(group_id < group_table->count);
             group = &group_table->groups[group_id];
             end_callback = group->callbacks.end;
-            error = end_callback(rci_info);
+            ccapi_data->service.rci.callback_queued = end_callback;
 
 #if (defined RCI_PARSER_USES_GROUP_NAMES)
             rci_info->group.name = NULL;
@@ -445,27 +516,57 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
         {
             ccapi_rci_function_t const action_end_cb = rci_data->callbacks.end_action;
 
-            error = action_end_cb(rci_info);
+            ccapi_data->service.rci.callback_queued = action_end_cb;
             break;
         }
         case connector_request_id_remote_config_session_end:
         {
             ccapi_rci_function_t const session_end_cb = rci_data->callbacks.end_session;
 
-            error = session_end_cb(rci_info);
+            ccapi_data->service.rci.callback_queued = session_end_cb;
             break;
         }
         case connector_request_id_remote_config_session_cancel:
+            /* TODO */
             ASSERT(connector_false);
             break;
     }
 
-    if (error != 0)
+    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_QUEUED;
+
+    status = connector_callback_busy;
+
+    break;
+
+case CCAPI_RCI_THREAD_CB_QUEUED:
+
+    status = connector_callback_busy;
+
+    break;
+
+case CCAPI_RCI_THREAD_CB_PROCESSED:
+
+    if (ccapi_data->service.rci.error != 0)
     {
-        remote_config->error_id = error;
+        remote_config->error_id = ccapi_data->service.rci.error;
     }
     remote_config->user_context = rci_info->user_context;
+
+    ccapi_data->service.rci.callback_queued = NULL;
+    ccapi_data->service.rci.varg = NULL;
+
+    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_FREE_REQUESTED; /* TODO: go directly to idle */
+
     status = connector_callback_continue;
+
+    break;
+
+case CCAPI_RCI_THREAD_FREE_REQUESTED:
+
+    status = connector_callback_busy;
+
+    break;
+}
 
     return status;
 }

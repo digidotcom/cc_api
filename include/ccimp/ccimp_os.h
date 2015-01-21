@@ -25,6 +25,7 @@ typedef void (* ccimp_os_thread_start_t) (void * const argument);
 
 typedef enum {
     CCIMP_THREAD_FSM,
+    CCIMP_THREAD_RCI,
     CCIMP_THREAD_RECEIVE,
     CCIMP_THREAD_CLI,
     CCIMP_THREAD_FIRMWARE
