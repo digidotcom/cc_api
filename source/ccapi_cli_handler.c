@@ -36,11 +36,11 @@ void ccapi_cli_thread(void * const argument)
             switch (svc_cli->cli_thread_status)
             {
                 case CCAPI_CLI_THREAD_IDLE:
-                case CCAPI_CLI_THREAD_REQUESTCALLBACK_READY:
+                case CCAPI_CLI_THREAD_REQUEST_CB_READY:
                 {
                     break;
                 }
-                case CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED:
+                case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
                 {
                     ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
 
@@ -50,13 +50,13 @@ void ccapi_cli_thread(void * const argument)
                                                                        svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
    
                     /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
-                    if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED)
+                    if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
                     {
-                        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUESTCALLBACK_PROCESSED;
+                        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
                     }
                     break;
                 }
-                case CCAPI_CLI_THREAD_REQUESTCALLBACK_PROCESSED:
+                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
                 {
                     break;
                 }
@@ -173,9 +173,9 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
             if (!cli_request_ptr->more_data)
             {
-                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUESTCALLBACK_READY;
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_READY;
 
-                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUESTCALLBACK_READY");
+                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY");
 
                 connector_status = connector_callback_busy;
             }
@@ -186,28 +186,28 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
             break;
         }
-        case CCAPI_CLI_THREAD_REQUESTCALLBACK_READY:
+        case CCAPI_CLI_THREAD_REQUEST_CB_READY:
         {
             if (ccapi_data->service.cli.svc_cli == NULL)
             {
-                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED;
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_QUEUED;
 
                 ccapi_data->service.cli.svc_cli = svc_cli;
 
-                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUESTCALLBACK_READY->CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED");
+                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY->CCAPI_CLI_THREAD_REQUEST_CB_QUEUED");
             }
 
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED:
+        case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
         {
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_CLI_THREAD_REQUESTCALLBACK_PROCESSED:
+        case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
         {
-            ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUESTCALLBACK_PROCESSED");
+            ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED");
             ccapi_free(svc_cli->request_string_info.string);
 
             if (svc_cli->response_required && svc_cli->response_string_info.string != NULL)
