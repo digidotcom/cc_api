@@ -786,6 +786,13 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             service_id->length = strlen(ccapi_data->transport_sms.info->cloud_config.service_id);
             break;
         }
+        case connector_request_id_config_rci_descriptor_data:
+        {
+            connector_config_rci_descriptor_data_t * const rci_descriptor_data = data;
+
+            rci_descriptor_data->rci_data = ccapi_data->service.rci.rci_data->rci_desc;
+            break;
+        }
 #endif
         default:
             status = connector_callback_unrecognized;
@@ -1528,6 +1535,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
         case connector_class_id_data_point:
             status = ccapi_data_points_handler(request_id.data_point_request, data, ccapi_data);
+            break;
+#endif
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+        case connector_class_id_remote_config:
+            status = ccapi_rci_handler(request_id.remote_config_request, data, ccapi_data);
             break;
 #endif
         default:

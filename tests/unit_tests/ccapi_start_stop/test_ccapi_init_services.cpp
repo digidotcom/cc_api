@@ -72,19 +72,20 @@ TEST(test_ccapi_init_services, testServicesNotSupported)
 
 TEST(test_ccapi_init_services, testServicesSupported)
 {
+    void * pointer = &pointer; /* Not-NULL */
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    void * pointer = pointer; /* Not-NULL */
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
     ccapi_fw_service_t fw_service = {{firmware_count, firmware_list}, {NULL, test_fw_data_cb, NULL}};
     ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
     ccapi_cli_service_t cli_service = {test_cli_request_cb, NULL};
+    ccapi_rci_service_t rci_service = {(ccapi_rci_data_t const *)pointer};
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.cli = &cli_service;
     start.service.receive = &receive_service;
     start.service.firmware = &fw_service;
-    start.service.rci = &pointer;
+    start.service.rci = &rci_service;
     start.service.file_system = &fs_service;
 
     error = ccapi_start(&start);

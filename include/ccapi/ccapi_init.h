@@ -13,7 +13,6 @@
 #ifndef _CCAPI_INIT_H_
 #define _CCAPI_INIT_H_
 
-typedef void * ccapi_remote_config_service_t; /* STUB */
 typedef void * ccapi_status_callback_t; /* STUB */
 
 typedef enum {
@@ -51,7 +50,7 @@ typedef struct {
         struct {
                 ccapi_receive_service_t * receive;
                 ccapi_fw_service_t * firmware; /* EDP/TCP only */
-                ccapi_remote_config_service_t * rci; /* TBD what this means */ /* EDP/TCP only */
+                ccapi_rci_service_t * rci; /* EDP/TCP only */
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
         } service;
