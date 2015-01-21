@@ -129,15 +129,15 @@ static void app_fw_cancel_cb(unsigned int const target, ccapi_fw_cancel_error_t 
     return;
 }
 
-static void app_fw_reset_cb(unsigned int const target, ccapi_bool_t * system_reset, ccapi_firmware_target_version_t * new_version)
+static void app_fw_reset_cb(unsigned int const target, ccapi_bool_t * system_reset, ccapi_firmware_target_version_t * version)
 {
-    printf("app_fw_reset_cb for target='%d'. Current version='%d.%d.%d.%d'\n", target, new_version->major, new_version->minor, new_version->revision, new_version->build);
+    printf("app_fw_reset_cb for target='%d'. Current version='%d.%d.%d.%d'\n", target, version->major, version->minor, version->revision, version->build);
 
     switch (target)
     {
         case 0:
         {
-            new_version->build++;
+            version->build++;
 
             *system_reset = CCAPI_FALSE;
 
