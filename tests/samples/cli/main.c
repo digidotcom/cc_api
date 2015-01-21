@@ -21,6 +21,8 @@
 #define TEST_UDP 1
 #define TEST_SMS 0
 
+static ccapi_bool_t stop = CCAPI_FALSE;
+
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
@@ -46,10 +48,16 @@ static void app_cli_request_cb(ccapi_transport_t const transport, char const * c
     char * response;
     printf("app_cli_request_cb: transport = %d, command = '%s'\n", transport, command);
 
+
+    if (!strcmp(command, "stop"))
+    {
+        stop = CCAPI_TRUE;
+    }
+
     /* Provide response to the cloud */
     if (output != NULL)
     {
-        response = malloc(sizeof(FIX_RESPONSE) + strlen(command));
+        response = malloc(sizeof(FIX_RESPONSE) + strlen(command) + strlen("''"));
         printf("app_cli_request_cb: Providing response in buffer at %p\n", response);
 
         sprintf(response, FIX_RESPONSE "'%s'", command);
@@ -74,6 +82,27 @@ static void app_cli_finished_cb(char * const output, ccapi_cli_error_t cli_error
         printf("app_cli_finished_cb: Freeing response buffer at %p\n", output);
         free(output);
     }
+}
+
+static ccapi_bool_t check_stop(void)
+{
+    ccapi_stop_error_t stop_error = CCAPI_STOP_ERROR_NONE;
+
+    if (stop == CCAPI_TRUE)
+    {
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+
+        if (stop_error == CCAPI_STOP_ERROR_NONE)
+        {
+            printf("ccapi_stop success\n");
+        }
+        else
+        {
+            printf("ccapi_stop error %d\n", stop_error);
+        }
+    }
+
+    return stop;
 }
 
 int main (void)
@@ -107,7 +136,7 @@ int main (void)
         ccapi_udp_info_t udp_info = {{0}};
 
         udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
-        udp_info.limit.max_sessions = 1;
+        udp_info.limit.max_sessions = 10;
         udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
 
         udp_info.callback.close = NULL;
@@ -132,7 +161,7 @@ int main (void)
         ccapi_sms_info_t sms_info = {{0}};
 
         sms_info.start_timeout = CCAPI_TCP_START_WAIT_FOREVER;
-        sms_info.limit.max_sessions = 1;
+        sms_info.limit.max_sessions = 10;
         sms_info.limit.rx_timeout = CCAPI_SMS_RX_TIMEOUT_INFINITE;
 
         sms_info.callback.close = NULL;
@@ -155,7 +184,7 @@ int main (void)
 
 #if (TEST_UDP == 1)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
-	for(;;)
+    do
     {   
         /* TODO: send ping instead of data*/
         ccapi_send_error_t send_error;
@@ -171,10 +200,13 @@ int main (void)
         }
         
         sleep(5);
-    }
+    } while (check_stop() != CCAPI_TRUE);
 #else
     printf("Endless loop\n");
-    for(;;);
+    do
+    {
+        sleep(1);
+    } while (check_stop() != CCAPI_TRUE);
 #endif
 
 done:

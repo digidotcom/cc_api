@@ -20,6 +20,68 @@
 
 #include <stdio.h>
 
+void ccapi_cli_thread(void * const argument)
+{
+    ccapi_data_t * const ccapi_data = argument;
+
+    /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
+    ASSERT_MSG_GOTO(ccapi_data != NULL, done);
+
+    ccapi_data->thread.cli->status = CCAPI_THREAD_RUNNING;
+    while (ccapi_data->thread.cli->status == CCAPI_THREAD_RUNNING)
+    {
+        ccapi_svc_cli_t * const svc_cli = ccapi_data->service.cli.svc_cli;
+        if (svc_cli != NULL)
+        {
+            switch (svc_cli->cli_thread_status)
+            {
+                case CCAPI_CLI_THREAD_IDLE:
+                case CCAPI_CLI_THREAD_REQUEST_CB_READY:
+                {
+                    break;
+                }
+                case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
+                {
+                    ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
+
+                    /* Pass data to the user and get possible response from user */ 
+                    ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
+                                                                       svc_cli->request_string_info.string,
+                                                                       svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
+   
+                    /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+                    if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
+                    {
+                        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
+                    }
+                    break;
+                }
+                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
+                {
+                    break;
+                }
+                case CCAPI_CLI_THREAD_FREE_REQUESTED:
+                {
+                    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
+                    ccapi_data->service.cli.svc_cli = NULL;
+                    break;
+                }
+                case CCAPI_CLI_THREAD_FREE:
+                {
+                    break;
+                }
+            }
+        }
+
+        ccimp_os_yield();
+    }
+    ASSERT_MSG_GOTO(ccapi_data->thread.cli->status == CCAPI_THREAD_REQUEST_STOP, done);
+
+    ccapi_data->thread.cli->status = CCAPI_THREAD_NOT_STARTED;
+done:
+    return;
+}
+
 static ccapi_bool_t valid_cli_malloc(void * * ptr, size_t size, ccapi_cli_error_t * const error)
 {
     ccapi_bool_t success;
@@ -43,8 +105,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     ASSERT_MSG_GOTO(cli_request_ptr->buffer != NULL && cli_request_ptr->bytes_used, done);
 
-    ccapi_logging_line("ccapi_process_cli_request");
-
     if (cli_request_ptr->user_context == NULL)
     {
         if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &svc_cli->cli_error))
@@ -55,6 +115,8 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
         cli_request_ptr->user_context = svc_cli;
 
+        svc_cli->transport = cli_request_ptr->transport;
+        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_IDLE;
         svc_cli->request_string_info.string = NULL;
         svc_cli->request_string_info.length = 0;
         svc_cli->response_string_info.string = NULL;
@@ -70,8 +132,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
     {
         svc_cli = cli_request_ptr->user_context;
 
-        ASSERT_MSG_GOTO(svc_cli->more_data, done);
-
         svc_cli->more_data = CCAPI_BOOL(cli_request_ptr->more_data);
     }
 
@@ -81,51 +141,97 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
         goto done;
     }
 
+    switch (svc_cli->cli_thread_status)
     {
-        ccimp_os_realloc_t ccimp_realloc_data;
-
-        ccimp_realloc_data.new_size = svc_cli->request_string_info.length + cli_request_ptr->bytes_used; /* buffer is already null terminated */
-
-        ccimp_realloc_data.old_size = svc_cli->request_string_info.length;
-        ccimp_realloc_data.ptr = svc_cli->request_string_info.string;
-        if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
+        case CCAPI_CLI_THREAD_IDLE:
         {
-            ccapi_logging_line("ccapi_process_cli_request: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+            ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_IDLE");
 
-            svc_cli->cli_error = CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY;
-            goto done;
-        }
-        svc_cli->request_string_info.string = ccimp_realloc_data.ptr;
- 
-        {
-            uint8_t * const dest_addr = (uint8_t *)svc_cli->request_string_info.string + svc_cli->request_string_info.length;
-            memcpy(dest_addr, cli_request_ptr->buffer, cli_request_ptr->bytes_used);
-        }
-        svc_cli->request_string_info.length += cli_request_ptr->bytes_used;
-    }
-
-    if (cli_request_ptr->more_data == connector_false)
-    {
-        ccapi_data->service.cli.user_callback.request(cli_request_ptr->transport, 
-                                                          svc_cli->request_string_info.string,
-                                                          svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
-
-        ccapi_free(svc_cli->request_string_info.string);
-
-        if (svc_cli->response_required && svc_cli->response_string_info.string != NULL)
-        {
-            svc_cli->response_string_info.length = strlen(svc_cli->response_string_info.string);
-
-            if (svc_cli->response_string_info.length != 0)
             {
-                svc_cli->response_string_info.length++; /* Add the null terminator */
+                ccimp_os_realloc_t ccimp_realloc_data;
 
-                memcpy(&svc_cli->response_processing, &svc_cli->response_string_info, sizeof svc_cli->response_string_info);
+                ccimp_realloc_data.new_size = svc_cli->request_string_info.length + cli_request_ptr->bytes_used; /* buffer is already null terminated */
+
+                ccimp_realloc_data.old_size = svc_cli->request_string_info.length;
+                ccimp_realloc_data.ptr = svc_cli->request_string_info.string;
+                if (ccimp_os_realloc(&ccimp_realloc_data) != CCIMP_STATUS_OK)
+                {
+                    ccapi_logging_line("ccapi_process_cli_request: error ccimp_os_realloc for %d bytes", ccimp_realloc_data.new_size);
+
+                    svc_cli->cli_error = CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY;
+                    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
+                    goto done;
+                }
+                svc_cli->request_string_info.string = ccimp_realloc_data.ptr;
+ 
+                {
+                    uint8_t * const dest_addr = (uint8_t *)svc_cli->request_string_info.string + svc_cli->request_string_info.length;
+                    memcpy(dest_addr, cli_request_ptr->buffer, cli_request_ptr->bytes_used);
+                }
+                svc_cli->request_string_info.length += cli_request_ptr->bytes_used;
             }
-        }
-    }
 
-    connector_status = connector_callback_continue;
+            if (!cli_request_ptr->more_data)
+            {
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_READY;
+
+                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY");
+
+                connector_status = connector_callback_busy;
+            }
+            else
+            {
+                connector_status = connector_callback_continue;
+            }
+
+            break;
+        }
+        case CCAPI_CLI_THREAD_REQUEST_CB_READY:
+        {
+            if (ccapi_data->service.cli.svc_cli == NULL)
+            {
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_QUEUED;
+
+                ccapi_data->service.cli.svc_cli = svc_cli;
+
+                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY->CCAPI_CLI_THREAD_REQUEST_CB_QUEUED");
+            }
+
+            connector_status = connector_callback_busy;
+            break;
+        }
+        case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
+        {
+            connector_status = connector_callback_busy;
+            break;
+        }
+        case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
+        {
+            ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED");
+            ccapi_free(svc_cli->request_string_info.string);
+
+            if (svc_cli->response_required && svc_cli->response_string_info.string != NULL)
+            {
+                svc_cli->response_string_info.length = strlen(svc_cli->response_string_info.string);
+
+                if (svc_cli->response_string_info.length != 0)
+                {
+                    svc_cli->response_string_info.length++; /* Add the null terminator */
+
+                    memcpy(&svc_cli->response_processing, &svc_cli->response_string_info, sizeof svc_cli->response_processing);
+                }
+            }
+
+            svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE_REQUESTED;
+
+            connector_status = connector_callback_continue;
+
+            break;
+        }
+        case CCAPI_CLI_THREAD_FREE_REQUESTED:
+        case CCAPI_CLI_THREAD_FREE:
+            break;
+    }
 
 done:
     return connector_status;
@@ -234,6 +340,15 @@ static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_sta
                 svc_cli->cli_error = CCAPI_CLI_ERROR_STATUS_ERROR;
                 break;
         }
+    }
+
+    if (svc_cli->cli_thread_status != CCAPI_CLI_THREAD_FREE)
+    {
+        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE_REQUESTED;
+        while (svc_cli->cli_thread_status != CCAPI_CLI_THREAD_FREE)
+        {
+            ccimp_os_yield();
+        } 
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */

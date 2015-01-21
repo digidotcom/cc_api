@@ -71,6 +71,14 @@ TEST_GROUP(test_ccapi_cli_finished_callback)
 
     void teardown()
     {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+
         Mock_destroy_all();
     }
 };
@@ -82,16 +90,18 @@ TEST(test_ccapi_cli_finished_callback, testStatusOK_NoResponse)
     connector_callback_status_t status;
 
     ccapi_svc_cli_t * svc_cli = (ccapi_svc_cli_t *)malloc(sizeof *svc_cli);
+    svc_cli->transport = connector_transport_udp;
     svc_cli->response_required = CCAPI_TRUE;  
     svc_cli->response_string_info.string = NULL;
     svc_cli->response_string_info.length = 0;
     svc_cli->response_handled_internally = CCAPI_FALSE;
     svc_cli->cli_error = CCAPI_CLI_ERROR_NONE;
+    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
     ccapi_cli_finished_expected_output_null = CCAPI_TRUE;
     ccapi_cli_finished_expected_cli_error = CCAPI_CLI_ERROR_NONE;
 
-    ccfsm_cli_status_data.transport = connector_transport_tcp;
+    ccfsm_cli_status_data.transport = connector_transport_udp;
     ccfsm_cli_status_data.user_context = svc_cli;
     ccfsm_cli_status_data.status = connector_sm_cli_status_t::connector_sm_cli_status_success;
 
@@ -122,12 +132,13 @@ TEST(test_ccapi_cli_finished_callback, testStatusOK_WithResponse)
 
     svc_cli->response_handled_internally = CCAPI_FALSE;
     svc_cli->cli_error = CCAPI_CLI_ERROR_NONE;
+    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
     ccapi_cli_finished_expected_output_null = CCAPI_FALSE;
     ccapi_cli_finished_expected_output = exp_response;
     ccapi_cli_finished_expected_cli_error = CCAPI_CLI_ERROR_NONE;
 
-    ccfsm_cli_status_data.transport = connector_transport_tcp;
+    ccfsm_cli_status_data.transport = connector_transport_udp;
     ccfsm_cli_status_data.user_context = svc_cli;
     ccfsm_cli_status_data.status = connector_sm_cli_status_t::connector_sm_cli_status_success;
 
@@ -159,11 +170,12 @@ TEST(test_ccapi_cli_finished_callback, testERROR_NO_RECEIVE_SUPPORT)
     svc_cli->response_string_info.length = 0;
     svc_cli->response_handled_internally = CCAPI_TRUE;
     svc_cli->cli_error = CCAPI_CLI_ERROR_NO_CLI_SUPPORT;
+    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
     ccapi_cli_finished_expected_output_null = CCAPI_TRUE;
     ccapi_cli_finished_expected_cli_error = CCAPI_CLI_ERROR_NO_CLI_SUPPORT;
 
-    ccfsm_cli_status_data.transport = connector_transport_tcp;
+    ccfsm_cli_status_data.transport = connector_transport_udp;
     ccfsm_cli_status_data.user_context = svc_cli;
     ccfsm_cli_status_data.status = connector_sm_cli_status_t::connector_sm_cli_status_cancel;
 
@@ -188,11 +200,12 @@ TEST(test_ccapi_cli_finished_callback, testERROR_STATUS_CANCEL)
     svc_cli->response_string_info.length = 0;
     svc_cli->response_handled_internally = CCAPI_FALSE;
     svc_cli->cli_error = CCAPI_CLI_ERROR_NONE;
+    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
     ccapi_cli_finished_expected_output_null = CCAPI_TRUE;
     ccapi_cli_finished_expected_cli_error = CCAPI_CLI_ERROR_STATUS_CANCEL;
 
-    ccfsm_cli_status_data.transport = connector_transport_tcp;
+    ccfsm_cli_status_data.transport = connector_transport_udp;
     ccfsm_cli_status_data.user_context = svc_cli;
     ccfsm_cli_status_data.status = connector_sm_cli_status_t::connector_sm_cli_status_cancel;
 
@@ -217,11 +230,12 @@ TEST(test_ccapi_cli_finished_callback, testERROR_STATUS_ERROR)
     svc_cli->response_string_info.length = 0;
     svc_cli->response_handled_internally = CCAPI_FALSE;
     svc_cli->cli_error = CCAPI_CLI_ERROR_NONE;
+    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
     ccapi_cli_finished_expected_output_null = CCAPI_TRUE;
     ccapi_cli_finished_expected_cli_error = CCAPI_CLI_ERROR_STATUS_ERROR;
 
-    ccfsm_cli_status_data.transport = connector_transport_tcp;
+    ccfsm_cli_status_data.transport = connector_transport_udp;
     ccfsm_cli_status_data.user_context = svc_cli;
     ccfsm_cli_status_data.status = connector_sm_cli_status_t::connector_sm_cli_status_error;
 

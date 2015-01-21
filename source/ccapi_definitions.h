@@ -145,12 +145,39 @@ typedef struct
 } ccapi_fw_chunk_info;
 #endif            
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+typedef enum {
+    CCAPI_CLI_THREAD_IDLE,
+    CCAPI_CLI_THREAD_REQUEST_CB_READY,
+    CCAPI_CLI_THREAD_REQUEST_CB_QUEUED,
+    CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED,
+    CCAPI_CLI_THREAD_FREE_REQUESTED,
+    CCAPI_CLI_THREAD_FREE
+} ccapi_cli_thread_status_t;
+
+typedef struct
+{
+    connector_transport_t transport;
+    ccapi_bool_t response_required;
+    ccapi_bool_t more_data;
+    ccapi_string_info_t request_string_info;
+    ccapi_string_info_t response_string_info;
+    ccapi_bool_t response_handled_internally;
+    ccapi_string_info_t response_processing;
+    ccapi_cli_error_t cli_error;
+    ccapi_cli_thread_status_t cli_thread_status;
+} ccapi_svc_cli_t;
+#endif
+#endif
+
 typedef struct {
     void * connector_handle;
     ccapi_config_t config;
     struct {
         ccapi_thread_info_t * connector_run;
         ccapi_thread_info_t * receive;
+        ccapi_thread_info_t * cli;
         ccapi_thread_info_t * firmware;
     } thread;
     void * initiate_action_lock;
@@ -190,6 +217,7 @@ typedef struct {
 #if (defined CONNECTOR_SM_CLI)
         struct {
             ccapi_cli_service_t user_callback;
+            ccapi_svc_cli_t * svc_cli;
         } cli;
 #endif
 #endif
@@ -228,21 +256,6 @@ typedef struct
 } ccapi_svc_send_t;
 
 ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);
-#endif
-
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
-#if (defined CONNECTOR_SM_CLI)
-typedef struct
-{
-    ccapi_bool_t response_required;
-    ccapi_bool_t more_data;
-    ccapi_string_info_t request_string_info;
-    ccapi_string_info_t response_string_info;
-    ccapi_bool_t response_handled_internally;
-    ccapi_string_info_t response_processing;
-    ccapi_cli_error_t cli_error;
-} ccapi_svc_cli_t;
-#endif
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
@@ -311,6 +324,7 @@ extern ccapi_data_t * ccapi_data_single_instance;
 extern void * logging_lock;
 
 void ccapi_receive_thread(void * const argument);
+void ccapi_cli_thread(void * const argument);
 void ccapi_firmware_thread(void * const argument);
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);

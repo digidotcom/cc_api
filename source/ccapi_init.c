@@ -234,6 +234,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.device_cloud_url = NULL;
     ccapi_data->thread.connector_run = NULL;
     ccapi_data->thread.receive = NULL;
+    ccapi_data->thread.cli = NULL;
     ccapi_data->thread.firmware = NULL;
     ccapi_data->initiate_action_lock = NULL;
 
@@ -391,6 +392,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->config.cli_supported = CCAPI_TRUE;
         ccapi_data->service.cli.user_callback.request = start->service.cli->request;
         ccapi_data->service.cli.user_callback.finished = start->service.cli->finished;
+        ccapi_data->service.cli.svc_cli = NULL;
     }
 #endif
 #endif
@@ -454,6 +456,34 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             ccimp_os_yield();
         } while (ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_START);
     }
+#endif
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+    if (ccapi_data->config.cli_supported)
+    {
+        ccapi_data->thread.cli = ccapi_malloc(sizeof *ccapi_data->thread.cli);
+        error = check_malloc(ccapi_data->thread.cli);
+        if (error != CCAPI_START_ERROR_NONE)
+            goto done;
+
+        ccapi_data->thread.cli->status = CCAPI_THREAD_REQUEST_START;
+        ccapi_data->thread.cli->ccimp_info.argument = ccapi_data;
+        ccapi_data->thread.cli->ccimp_info.start = ccapi_cli_thread;
+        ccapi_data->thread.cli->ccimp_info.type = CCIMP_THREAD_CLI;
+
+        if (ccimp_os_create_thread(&ccapi_data->thread.cli->ccimp_info) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_THREAD_FAILED;
+            goto done;
+        }
+
+        do
+        {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.cli->status == CCAPI_THREAD_REQUEST_START);
+    }
+#endif
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -665,6 +695,22 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
             ccimp_os_yield();
         } while (ccapi_data->thread.receive->status != CCAPI_THREAD_NOT_STARTED);
     }
+#endif
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+    if (ccapi_data->config.cli_supported)
+    {
+        if (ccapi_data->thread.cli->status == CCAPI_THREAD_RUNNING)
+        {
+            ccapi_data->thread.cli->status = CCAPI_THREAD_REQUEST_STOP;
+        }
+
+        do {
+            ccimp_os_yield();
+        } while (ccapi_data->thread.cli->status != CCAPI_THREAD_NOT_STARTED);
+    }
+#endif
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
