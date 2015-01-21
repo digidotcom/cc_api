@@ -466,7 +466,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->transport_sms.started = CCAPI_FALSE;
 #endif
 
-    error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.connector_run, ccapi_connector_run_thread, CCIMP_THREAD_FSM);
+    error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.connector_run, ccapi_connector_run_thread, CCIMP_THREAD_MAIN);
     if (error != CCAPI_START_ERROR_NONE)
     {
         goto done;

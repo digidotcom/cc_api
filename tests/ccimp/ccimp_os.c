@@ -83,7 +83,7 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
 
     switch(create_thread_info->type)
     {
-        case CCIMP_THREAD_FSM:
+        case CCIMP_THREAD_MAIN:
             stack_size = 100 * 1024;
             break;
         case CCIMP_THREAD_AUX:
