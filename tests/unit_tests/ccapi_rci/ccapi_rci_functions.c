@@ -154,7 +154,7 @@ ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_get(ccapi_rci_inf
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_string_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -166,13 +166,13 @@ ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_get(ccapi_rci_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_multiline_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_setting_group_3_error_id_t rci_setting_group_3_el_password_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_setting_group_3_error_id_t rci_setting_group_3_el_password_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -194,7 +194,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_get(ccapi_rci_info_t * co
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_ip_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -206,7 +206,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_get(ccapi_rci_info_t 
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv4_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -218,7 +218,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_get(ccapi_rci_info_t 
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_fqdnv6_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -230,7 +230,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_get(ccapi_rci_info_t * c
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_mac_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);
@@ -242,7 +242,7 @@ ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_get(ccapi_rci_info_
     return th_rci_called_function(__FUNCTION__, info);
 }
 
-ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_set(ccapi_rci_info_t * const info, char const * const * const value)
+ccapi_state_group_2_error_id_t rci_state_group_2_el_datetime_set(ccapi_rci_info_t * const info, char const * const value)
 {
     th_set_value_ptr(value);
     return th_rci_called_function(__FUNCTION__, info);

@@ -341,7 +341,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #if defined RCI_PARSER_USES_MAC_ADDR
                         case connector_element_type_mac_addr:
 #endif
-                            error = process_callback(rci_info, &remote_config->element.value->string_value);
+                            error = process_callback(rci_info, remote_config->element.value->string_value);
                             break;
 #endif
 

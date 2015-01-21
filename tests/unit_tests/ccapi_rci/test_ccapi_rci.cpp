@@ -338,8 +338,8 @@ static void group_process_set(connector_remote_config_t * const remote_config, u
         case connector_element_type_mac_addr:
         case connector_element_type_datetime:
         {
-            char const * const * const string_ptr = (char * *)th_rci_get_value_ptr();
-            STRCMP_EQUAL(set_value.string_value, *string_ptr);
+            char const * const string_ptr = (char *)th_rci_get_value_ptr();
+            STRCMP_EQUAL(set_value.string_value, string_ptr);
             break;
         }
         case connector_element_type_int32:
