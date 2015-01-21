@@ -31,7 +31,7 @@ TEST_GROUP(test_ccapi_config_tcp_start_lan_1)
     }
 };
 
-TEST(test_ccapi_config_tcp_start_lan_1, testConfigConnectionType)
+TEST(test_ccapi_config_tcp_start_lan_1, testConfigConnectionTypeLAN)
 {
     connector_request_id_t request;
     connector_config_connection_type_t connection_type = { connector_connection_type_wan };

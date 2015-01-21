@@ -31,6 +31,18 @@ TEST_GROUP(test_ccapi_config_tcp_start_wan)
     }
 };
 
+TEST(test_ccapi_config_tcp_start_wan, testConfigConnectionTypeWAN)
+{
+    connector_request_id_t request;
+    connector_config_connection_type_t connection_type = { connector_connection_type_lan };
+    connector_callback_status_t callback_status;
+
+    request.config_request = connector_request_id_config_connection_type;
+    callback_status = ccapi_connector_callback(connector_class_id_config, request, &connection_type, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, callback_status);
+    CHECK_EQUAL(connection_type.type, connector_connection_type_wan);
+}
+
 TEST(test_ccapi_config_tcp_start_wan, testLinkSpeed)
 {
     connector_request_id_t request;
