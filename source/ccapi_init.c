@@ -116,6 +116,15 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     }
 #endif
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+#if (defined CONNECTOR_SM_CLI)
+    if (ccapi_data->config.cli_supported)
+    {
+        reset_heap_ptr(&ccapi_data->thread.cli);
+    }
+#endif
+#endif
+
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (ccapi_data->config.receive_supported)
     {
@@ -130,6 +139,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
             ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
         }
+        reset_heap_ptr(&ccapi_data->thread.receive);
     }
 #endif
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -154,6 +164,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
         ccapi_data->service.firmware_update.config.target.count = 0;
         ccapi_data->service.firmware_update.config.target.item = NULL;
+        reset_heap_ptr(&ccapi_data->thread.firmware);
     }
 #endif
 
@@ -207,7 +218,6 @@ static ccapi_start_error_t ccapi_create_and_start_thread(ccapi_data_t * const cc
 
     if (ccimp_os_create_thread(&thread_info_aux->ccimp_info) != CCIMP_STATUS_OK)
     {
-        /* TODO: ccapi_free(thread_info_aux); */
         error = CCAPI_START_ERROR_THREAD_FAILED;
         goto done;
     }
