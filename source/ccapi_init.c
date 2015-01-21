@@ -410,7 +410,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->config.rci_supported = CCAPI_TRUE;
         ccapi_data->service.rci.rci_data = start->service.rci->rci_data;
         ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
-        ccapi_data->service.rci.callback_queued = NULL;
+        ccapi_data->service.rci.queued_callback.function_cb = NULL;
     }
 #endif
 

@@ -227,9 +227,11 @@ typedef struct {
             ccapi_rci_data_t const * rci_data;
             ccapi_rci_info_t rci_info;
             ccapi_rci_thread_status_t rci_thread_status;
-            ccapi_rci_function_t callback_queued;
-            void * varg;
-            unsigned int error;
+            struct {
+                ccapi_rci_function_t function_cb;
+                void * argument;
+                unsigned int error;
+            } queued_callback;
         } rci;
 #endif
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
