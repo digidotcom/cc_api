@@ -187,6 +187,52 @@ static ccapi_start_error_t check_malloc(void const * const p)
         return CCAPI_START_ERROR_NONE;
 }
 
+
+static ccapi_start_error_t ccapi_create_and_start_thread(ccapi_data_t * const ccapi_data, ccapi_thread_info_t * * const thread_info, ccimp_os_thread_start_t thread_start, ccimp_os_thread_type_t thread_type)
+{
+    ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
+    ccapi_thread_info_t * thread_info_aux;
+
+    thread_info_aux = ccapi_malloc(sizeof *thread_info_aux);
+    error = check_malloc(thread_info_aux);
+    if (error != CCAPI_START_ERROR_NONE)
+        goto done;
+
+    thread_info_aux->status = CCAPI_THREAD_REQUEST_START;
+    thread_info_aux->ccimp_info.argument = ccapi_data;
+    thread_info_aux->ccimp_info.start = thread_start;
+    thread_info_aux->ccimp_info.type = thread_type;
+
+    *thread_info = thread_info_aux;
+
+    if (ccimp_os_create_thread(&thread_info_aux->ccimp_info) != CCIMP_STATUS_OK)
+    {
+        /* TODO: ccapi_free(thread_info_aux); */
+        error = CCAPI_START_ERROR_THREAD_FAILED;
+        goto done;
+    }
+
+    do
+    {
+        ccimp_os_yield();
+    } while (thread_info_aux->status == CCAPI_THREAD_REQUEST_START);
+
+done:
+    return error;
+}
+
+static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
+{
+    if (thread_info->status == CCAPI_THREAD_RUNNING)
+    {
+        thread_info->status = CCAPI_THREAD_REQUEST_STOP;
+    }
+
+    do {
+        ccimp_os_yield();
+    } while (thread_info->status != CCAPI_THREAD_NOT_STARTED);
+}
+
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
 ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
 {
@@ -409,52 +455,21 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     ccapi_data->transport_sms.started = CCAPI_FALSE;
 #endif
+
+    error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.connector_run, ccapi_connector_run_thread, CCIMP_THREAD_FSM);
+    if (error != CCAPI_START_ERROR_NONE)
     {
-        ccapi_data->thread.connector_run = ccapi_malloc(sizeof *ccapi_data->thread.connector_run);
-        error = check_malloc(ccapi_data->thread.connector_run);
-        if (error != CCAPI_START_ERROR_NONE)
-            goto done;
-
-        ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_START;
-        ccapi_data->thread.connector_run->ccimp_info.argument = ccapi_data;
-        ccapi_data->thread.connector_run->ccimp_info.start = ccapi_connector_run_thread;
-        ccapi_data->thread.connector_run->ccimp_info.type = CCIMP_THREAD_FSM;
-
-        if (ccimp_os_create_thread(&ccapi_data->thread.connector_run->ccimp_info) != CCIMP_STATUS_OK)
-        {
-            error = CCAPI_START_ERROR_THREAD_FAILED;
-            goto done;
-        }
-
-        do
-        {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_START);
+        goto done;
     }
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (ccapi_data->config.receive_supported)
     {
-        ccapi_data->thread.receive = ccapi_malloc(sizeof *ccapi_data->thread.receive);
-        error = check_malloc(ccapi_data->thread.receive);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.receive, ccapi_receive_thread, CCIMP_THREAD_AUX);
         if (error != CCAPI_START_ERROR_NONE)
-            goto done;
-
-        ccapi_data->thread.receive->status = CCAPI_THREAD_REQUEST_START;
-        ccapi_data->thread.receive->ccimp_info.argument = ccapi_data;
-        ccapi_data->thread.receive->ccimp_info.start = ccapi_receive_thread;
-        ccapi_data->thread.receive->ccimp_info.type = CCIMP_THREAD_AUX;
-
-        if (ccimp_os_create_thread(&ccapi_data->thread.receive->ccimp_info) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_START_ERROR_THREAD_FAILED;
             goto done;
         }
-
-        do
-        {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_START);
     }
 #endif
 
@@ -462,26 +477,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
-        ccapi_data->thread.cli = ccapi_malloc(sizeof *ccapi_data->thread.cli);
-        error = check_malloc(ccapi_data->thread.cli);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.cli, ccapi_cli_thread, CCIMP_THREAD_AUX);
         if (error != CCAPI_START_ERROR_NONE)
-            goto done;
-
-        ccapi_data->thread.cli->status = CCAPI_THREAD_REQUEST_START;
-        ccapi_data->thread.cli->ccimp_info.argument = ccapi_data;
-        ccapi_data->thread.cli->ccimp_info.start = ccapi_cli_thread;
-        ccapi_data->thread.cli->ccimp_info.type = CCIMP_THREAD_AUX;
-
-        if (ccimp_os_create_thread(&ccapi_data->thread.cli->ccimp_info) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_START_ERROR_THREAD_FAILED;
             goto done;
         }
-
-        do
-        {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.cli->status == CCAPI_THREAD_REQUEST_START);
     }
 #endif
 #endif
@@ -489,26 +489,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        ccapi_data->thread.firmware = ccapi_malloc(sizeof *ccapi_data->thread.firmware);
-        error = check_malloc(ccapi_data->thread.firmware);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.firmware, ccapi_firmware_thread, CCIMP_THREAD_AUX);
         if (error != CCAPI_START_ERROR_NONE)
-            goto done;
-
-        ccapi_data->thread.firmware->status = CCAPI_THREAD_REQUEST_START;
-        ccapi_data->thread.firmware->ccimp_info.argument = ccapi_data;
-        ccapi_data->thread.firmware->ccimp_info.start = ccapi_firmware_thread;
-        ccapi_data->thread.firmware->ccimp_info.type = CCIMP_THREAD_AUX;
-
-        if (ccimp_os_create_thread(&ccapi_data->thread.firmware->ccimp_info) != CCIMP_STATUS_OK)
         {
-            error = CCAPI_START_ERROR_THREAD_FAILED;
             goto done;
         }
-
-        do
-        {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.firmware->status == CCAPI_THREAD_REQUEST_START);
     }
 #endif
 
@@ -686,14 +671,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (ccapi_data->config.receive_supported)
     {
-        if (ccapi_data->thread.receive->status == CCAPI_THREAD_RUNNING)
-        {
-            ccapi_data->thread.receive->status = CCAPI_THREAD_REQUEST_STOP;
-        }
-
-        do {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.receive->status != CCAPI_THREAD_NOT_STARTED);
+        ccapi_stop_thread(ccapi_data->thread.receive);
     }
 #endif
 
@@ -701,14 +679,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
-        if (ccapi_data->thread.cli->status == CCAPI_THREAD_RUNNING)
-        {
-            ccapi_data->thread.cli->status = CCAPI_THREAD_REQUEST_STOP;
-        }
-
-        do {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.cli->status != CCAPI_THREAD_NOT_STARTED);
+        ccapi_stop_thread(ccapi_data->thread.cli);
     }
 #endif
 #endif
@@ -716,14 +687,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        if (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
-        {
-            ccapi_data->thread.firmware->status = CCAPI_THREAD_REQUEST_STOP;
-        }
-
-        do {
-            ccimp_os_yield();
-        } while (ccapi_data->thread.firmware->status != CCAPI_THREAD_NOT_STARTED);
+        ccapi_stop_thread(ccapi_data->thread.firmware);
     }
 #endif
 
