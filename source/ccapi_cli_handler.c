@@ -171,7 +171,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                 svc_cli->request_string_info.length += cli_request_ptr->bytes_used;
             }
 
-            if (cli_request_ptr->more_data == connector_false)
+            if (!cli_request_ptr->more_data)
             {
                 svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUESTCALLBACK_READY;
 
@@ -218,7 +218,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                 {
                     svc_cli->response_string_info.length++; /* Add the null terminator */
 
-                    memcpy(&svc_cli->response_processing, &svc_cli->response_string_info, sizeof svc_cli->response_string_info);
+                    memcpy(&svc_cli->response_processing, &svc_cli->response_string_info, sizeof svc_cli->response_processing);
                 }
             }
 
