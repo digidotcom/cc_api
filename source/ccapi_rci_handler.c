@@ -100,12 +100,6 @@ void ccapi_rci_thread(void * const argument)
             {
                 break;
             }
-            case CCAPI_RCI_THREAD_FREE_REQUESTED: /* TODO: remove this state */
-            {
-                //ccapi_data->service.rci.svc_rci = NULL;
-                ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
-                break;
-            }
         }
 
         ccimp_os_yield();
@@ -555,15 +549,9 @@ case CCAPI_RCI_THREAD_CB_PROCESSED:
     ccapi_data->service.rci.callback_queued = NULL;
     ccapi_data->service.rci.varg = NULL;
 
-    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_FREE_REQUESTED; /* TODO: go directly to idle */
+    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
 
     status = connector_callback_continue;
-
-    break;
-
-case CCAPI_RCI_THREAD_FREE_REQUESTED:
-
-    status = connector_callback_busy;
 
     break;
 }

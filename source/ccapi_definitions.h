@@ -149,8 +149,7 @@ typedef struct
 typedef enum {
     CCAPI_RCI_THREAD_IDLE,
     CCAPI_RCI_THREAD_CB_QUEUED,
-    CCAPI_RCI_THREAD_CB_PROCESSED,
-    CCAPI_RCI_THREAD_FREE_REQUESTED
+    CCAPI_RCI_THREAD_CB_PROCESSED
 } ccapi_rci_thread_status_t;
 #endif
 
