@@ -48,9 +48,10 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 
     fw_service.target.count = ARRAY_SIZE(firmware_list);
     fw_service.target.item = firmware_list;
-    fw_service.callback.data_cb = app_fw_data_cb;
-    fw_service.callback.cancel_cb = NULL;
-    fw_service.callback.request_cb = NULL;
+    fw_service.callback.request = NULL;
+    fw_service.callback.data = app_fw_data_cb;
+    fw_service.callback.reset = NULL;
+    fw_service.callback.cancel = NULL;
 
     start->vendor_id = 0x2001371; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
