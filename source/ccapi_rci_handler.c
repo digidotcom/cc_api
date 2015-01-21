@@ -89,7 +89,7 @@ void ccapi_rci_thread(void * const argument)
                     ccapi_data->service.rci.error = ccapi_data->service.rci.callback_queued(&ccapi_data->service.rci.rci_info, ccapi_data->service.rci.varg);
                    }
                    
-                /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+                /* Check if ccfsm has called cancel callback while we were waiting for the user */
                 if (ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED)
                 {
                     ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_PROCESSED;
@@ -521,8 +521,12 @@ case CCAPI_RCI_THREAD_IDLE:
             break;
         }
         case connector_request_id_remote_config_session_cancel:
-            /* TODO */
             ASSERT(connector_false);
+
+            ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
+            status = connector_callback_continue;
+            goto done;
+
             break;
     }
 
@@ -556,6 +560,7 @@ case CCAPI_RCI_THREAD_CB_PROCESSED:
     break;
 }
 
+done:
     return status;
 }
 
