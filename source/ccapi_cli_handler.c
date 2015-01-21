@@ -188,24 +188,15 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
         }
         case CCAPI_CLI_THREAD_REQUESTCALLBACK_REQUEST:
         {
-#if 0
-            ccimp_status_t ccimp_status;
-
-            ccimp_status = ccapi_syncr_acquire(ccapi_data->service.receive.receive_syncr); /* TODO: cli_syncr or nothing */
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
-#endif
             if (ccapi_data->service.cli.svc_cli == NULL)
             {
                 svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED;
 
-                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUESTCALLBACK_REQUEST->CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED");
-
                 ccapi_data->service.cli.svc_cli = svc_cli;
+
+                ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUESTCALLBACK_REQUEST->CCAPI_CLI_THREAD_REQUESTCALLBACK_QUEUED");
             }
-#if 0
-            ccimp_status = ccapi_syncr_release(ccapi_data->service.receive.receive_syncr);
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
-#endif
+
             connector_status = connector_callback_busy;
             break;
         }
