@@ -43,7 +43,7 @@ TEST(test_ccapi_init_threading, testInitErrorThreadNullPointer)
     /* corrupt the argument created by the handle */
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
-    expected_create_thread_connector_run.type = CCIMP_THREAD_MAIN;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_FSM;
     Mock_ccimp_os_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_ARGUMENT_NULL, CCIMP_STATUS_OK);
 
     th_fill_start_structure_with_good_parameters(&start);
@@ -92,7 +92,7 @@ TEST(test_ccapi_init_threading, testInitErrorRunRetConnectorInitError)
     Mock_connector_init_expectAndReturn(ccapi_connector_callback, handle, ccapi_data_single_instance);
 
     expected_create_thread_connector_run.argument = malloc_for_ccapi_data;
-    expected_create_thread_connector_run.type = CCIMP_THREAD_MAIN;
+    expected_create_thread_connector_run.type = CCIMP_THREAD_FSM;
     Mock_ccimp_os_create_thread_expectAndReturn(&expected_create_thread_connector_run, MOCK_THREAD_ENABLED_NORMAL, CCIMP_STATUS_OK);
 
     th_fill_start_structure_with_good_parameters(&start);
