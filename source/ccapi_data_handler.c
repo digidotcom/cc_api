@@ -34,11 +34,11 @@ void ccapi_receive_thread(void * const argument)
             switch (svc_receive->receive_thread_status)
             {
                 case CCAPI_RECEIVE_THREAD_IDLE:
-                case CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST:
+                case CCAPI_RECEIVE_THREAD_DATA_CB_READY:
                 {
                     break;
                 }
-                case CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED:
+                case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
                 {
                     ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
 
@@ -46,14 +46,14 @@ void ccapi_receive_thread(void * const argument)
                     svc_receive->user_callback.data(svc_receive->target, svc_receive->transport, 
                                                                        &svc_receive->request_buffer_info, 
                                                                        svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
-                    /* Check that session keeps on active */
-                    if (svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED)
+                    /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+                    if (svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED)
                     {
-                        svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED;
+                        svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED;
                     }
                     break;
                 }
-                case CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED:
+                case CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED:
                 {
                     break;
                 }
@@ -412,9 +412,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             if (data_ptr->more_data == connector_false)
             {
-                svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST;
+                svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_READY;
 
-                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST", svc_receive->target);
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_READY", svc_receive->target);
 
                 connector_status = connector_callback_busy;
             }
@@ -426,7 +426,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             break;
         }
 
-        case CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST:
+        case CCAPI_RECEIVE_THREAD_DATA_CB_READY:
         {
             ccimp_status_t ccimp_status;
 
@@ -435,9 +435,9 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             if (ccapi_data->service.receive.svc_receive == NULL)
             {
-                svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED;
+                svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED;
 
-                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_REQUEST->CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED", svc_receive->target);
+                ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_READY->CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED", svc_receive->target);
 
                 ccapi_data->service.receive.svc_receive = svc_receive;
             }
@@ -448,14 +448,14 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_RECEIVE_THREAD_DATACALLBACK_QUEUED:
+        case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
         {
             connector_status = connector_callback_busy;
             break;
         }
-        case CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED:
+        case CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED:
         {
-            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATACALLBACK_PROCESSED", svc_receive->target);
+            ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED", svc_receive->target);
             ccapi_free(svc_receive->request_buffer_info.buffer);
 
             if (svc_receive->response_required)
