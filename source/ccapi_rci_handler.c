@@ -206,11 +206,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     group = &group_table->groups[group_id];
                     start_callback = group->callbacks.start;
                     ccapi_data->service.rci.queued_callback.function_cb = start_callback;
-
-                    if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
-                    {
-                        remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
-                    }
                     break;
                 }
                 case connector_request_id_remote_config_group_process:
@@ -354,12 +349,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #endif
                             ccapi_data->service.rci.queued_callback.function_cb = process_callback;
                             ccapi_data->service.rci.queued_callback.argument = p_element;
-
-                            if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
-                            {
-                                remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
-                                rci_info->query_setting.matches = CCAPI_FALSE;
-                            }
                             break;
                         }
                         case CCAPI_RCI_ACTION_SET:
@@ -497,13 +486,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     group = &group_table->groups[group_id];
                     end_callback = group->callbacks.end;
                     ccapi_data->service.rci.queued_callback.function_cb = end_callback;
-
-#if (defined RCI_PARSER_USES_GROUP_NAMES)
-                    rci_info->group.name = NULL;
-#endif
-#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
-                    rci_info->element.name = NULL;
-#endif
                     break;
                 }
                 case connector_request_id_remote_config_action_end:
@@ -551,7 +533,57 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
         }    
         case CCAPI_RCI_THREAD_CB_PROCESSED:
         {
-            if (ccapi_data->service.rci.queued_callback.error != 0)
+
+            switch (request_id)
+            {
+                case connector_request_id_remote_config_session_start:
+                case connector_request_id_remote_config_action_start:
+                    break;
+                case connector_request_id_remote_config_group_start:
+                {
+                    if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
+                    {
+                        remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
+                    }
+                    break;
+                }
+                case connector_request_id_remote_config_group_process:
+                {
+                    switch (rci_info->action)
+                    {
+                        case CCAPI_RCI_ACTION_QUERY:
+                        {
+                            if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
+                            {
+                                remote_config->response.compare_matches = CCAPI_BOOL_TO_CONNECTOR_BOOL(rci_info->query_setting.matches);
+                                rci_info->query_setting.matches = CCAPI_FALSE;
+                            }
+                            break;
+                        }
+                        case CCAPI_RCI_ACTION_SET:
+                            break;
+                    }
+                    break;
+                }
+                case connector_request_id_remote_config_group_end:
+                {
+#if (defined RCI_PARSER_USES_GROUP_NAMES)
+                    rci_info->group.name = NULL;
+#endif
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+                    rci_info->element.name = NULL;
+#endif
+                    break;
+                }
+                case connector_request_id_remote_config_action_end:
+                case connector_request_id_remote_config_session_end:
+                    break;
+                case connector_request_id_remote_config_session_cancel:
+                    ASSERT(connector_false);
+                    break;
+            }
+
+            if (ccapi_data->service.rci.queued_callback.error != 0) /* Check */
             {
                 remote_config->error_id = ccapi_data->service.rci.queued_callback.error;
             }
