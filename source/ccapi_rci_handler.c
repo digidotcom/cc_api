@@ -111,12 +111,30 @@ done:
     return;
 }
 
+static void clear_queued_callback(ccapi_data_t * const ccapi_data)
+{
+    ccapi_data->service.rci.queued_callback.function_cb = NULL;
+    ccapi_data->service.rci.queued_callback.argument = NULL;
+    ccapi_data->service.rci.queued_callback.error = 0;
+}
+
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t status;
     connector_remote_config_t * const remote_config = data;
     ccapi_rci_data_t const * const rci_data = ccapi_data->service.rci.rci_data;
     ccapi_rci_info_t * const rci_info = &ccapi_data->service.rci.rci_info;
+
+    if (request_id == connector_request_id_remote_config_session_cancel)
+    {
+        clear_queued_callback(ccapi_data);
+
+        ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
+
+        status = connector_callback_continue;
+
+        goto done;
+    }
 
     switch (ccapi_data->service.rci.rci_thread_status)
     {
@@ -503,20 +521,9 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
                 }
                 case connector_request_id_remote_config_session_cancel:
-                {
                     ASSERT(connector_false);
 
-                    ccapi_data->service.rci.queued_callback.function_cb = NULL;
-                    ccapi_data->service.rci.queued_callback.argument = NULL;
-                    ccapi_data->service.rci.queued_callback.error = 0;
-
-                    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
-
-                    status = connector_callback_continue;
-                    goto done;
-
                     break;
-                }
             }
 
             ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_QUEUED;
@@ -586,9 +593,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             remote_config->error_id = ccapi_data->service.rci.queued_callback.error;
             remote_config->user_context = rci_info->user_context;
 
-            ccapi_data->service.rci.queued_callback.function_cb = NULL;
-            ccapi_data->service.rci.queued_callback.argument = NULL;
-            ccapi_data->service.rci.queued_callback.error = 0;
+            clear_queued_callback(ccapi_data);
 
             ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
 

@@ -828,3 +828,59 @@ TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMixBusy)
     ccapi_rci_lock_cb = CCAPI_TRUE;
     testRCIQuerySettingGroup1AttributesMix();
 }
+
+TEST(test_ccapi_rci, testRCISessionCancel)
+{
+    connector_remote_config_t remote_config;
+    connector_callback_status_t status;
+    connector_request_id_t request;
+
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+    char const * const expected_function = "rci_session_start_cb";
+    unsigned int i;
+
+    set_remote_config_defaults(&remote_config);
+    set_rci_info_defaults(&ccapi_data_single_instance->service.rci.rci_info);
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(CCAPI_GLOBAL_ERROR_NONE, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_session_start;
+
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+
+    status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_busy, status);
+
+    CHECK(ccapi_data_single_instance->service.rci.rci_thread_status > CCAPI_RCI_THREAD_IDLE);
+
+    /* Wait user locks callback */
+    for(i = 0; i < 1000; i++)
+    {
+        status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+        sched_yield();
+    }
+    CHECK_EQUAL(connector_callback_busy, status);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_CB_QUEUED);
+
+    request.remote_config_request = connector_request_id_remote_config_session_cancel;
+    status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
+
+    /* Now release the lock and check status remains idle when session_start callback finish */
+    ccapi_data_single_instance->service.rci.queued_callback.error = CCAPI_GLOBAL_ERROR_BAD_COMMAND;
+    ccapi_rci_lock_cb = CCAPI_FALSE;
+    do
+    {
+        sched_yield();
+        CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
+    } while (ccapi_data_single_instance->service.rci.queued_callback.error == CCAPI_GLOBAL_ERROR_BAD_COMMAND);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
+}
