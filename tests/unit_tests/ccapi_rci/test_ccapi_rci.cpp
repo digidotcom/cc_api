@@ -326,7 +326,7 @@ static void group_process_set(connector_remote_config_t * const remote_config, u
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
     th_rci_checkExpectations(expected_function, &expected_rci_info);
-    CHECK_EQUAL(CCAPI_FALSE, remote_config->response.compare_matches);
+    CHECK_EQUAL(connector_false, remote_config->response.compare_matches);
     switch (element_type)
     {
         case connector_element_type_string:
