@@ -100,11 +100,10 @@ typedef struct {
         ccapi_rci_function_t start_action;
         ccapi_rci_function_t end_action;
     } callbacks;
-    connector_remote_config_data_t const * rci_desc;
+    struct connector_remote_config_data const * rci_desc;
 } ccapi_rci_data_t;
 
 typedef struct {
     ccapi_rci_data_t const * rci_data;
 } ccapi_rci_service_t;
-
 #endif

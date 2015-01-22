@@ -786,6 +786,8 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             service_id->length = strlen(ccapi_data->transport_sms.info->cloud_config.service_id);
             break;
         }
+#endif
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
         case connector_request_id_config_rci_descriptor_data:
         {
             connector_config_rci_descriptor_data_t * const rci_descriptor_data = data;
