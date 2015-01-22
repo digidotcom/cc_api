@@ -70,6 +70,7 @@ static void test_receive_data_cb(char const * const target, ccapi_transport_t co
 
     while (ccapi_receive_data_lock_cb[ccapi_receive_data_lock_index])
     {
+        sched_yield();
     }
     ccapi_receive_data_lock_index++;
 

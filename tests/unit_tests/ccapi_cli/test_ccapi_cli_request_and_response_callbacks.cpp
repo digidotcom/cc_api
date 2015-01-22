@@ -38,6 +38,7 @@ static void test_cli_request_cb(ccapi_transport_t const transport, char const * 
 
     while (ccapi_cli_request_lock_cb[ccapi_cli_request_lock_index])
     {
+        sched_yield();
     }
     ccapi_cli_request_lock_index++;
 
