@@ -86,7 +86,9 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
         case CCIMP_THREAD_MAIN:
             stack_size = 100 * 1024;
             break;
-        case CCIMP_THREAD_AUX:
+        case CCIMP_THREAD_RECEIVE:
+        case CCIMP_THREAD_CLI:
+        case CCIMP_THREAD_FIRMWARE:
             stack_size = 100 * 1024;
             break;
     }

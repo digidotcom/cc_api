@@ -25,7 +25,9 @@ typedef void (* ccimp_os_thread_start_t) (void * const argument);
 
 typedef enum {
     CCIMP_THREAD_MAIN,
-    CCIMP_THREAD_AUX
+    CCIMP_THREAD_RECEIVE,
+    CCIMP_THREAD_CLI,
+    CCIMP_THREAD_FIRMWARE
 } ccimp_os_thread_type_t;
 
 typedef struct

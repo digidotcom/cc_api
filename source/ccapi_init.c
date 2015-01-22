@@ -475,7 +475,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (ccapi_data->config.receive_supported)
     {
-        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.receive, ccapi_receive_thread, CCIMP_THREAD_AUX);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.receive, ccapi_receive_thread, CCIMP_THREAD_RECEIVE);
         if (error != CCAPI_START_ERROR_NONE)
         {
             goto done;
@@ -487,7 +487,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
-        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.cli, ccapi_cli_thread, CCIMP_THREAD_AUX);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.cli, ccapi_cli_thread, CCIMP_THREAD_CLI);
         if (error != CCAPI_START_ERROR_NONE)
         {
             goto done;
@@ -499,7 +499,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.firmware, ccapi_firmware_thread, CCIMP_THREAD_AUX);
+        error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.firmware, ccapi_firmware_thread, CCIMP_THREAD_FIRMWARE);
         if (error != CCAPI_START_ERROR_NONE)
         {
             goto done;
