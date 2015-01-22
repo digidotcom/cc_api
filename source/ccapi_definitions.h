@@ -145,7 +145,6 @@ typedef struct
 } ccapi_fw_chunk_info;
 #endif            
 
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
 typedef enum {
     CCAPI_CLI_THREAD_IDLE,
@@ -168,7 +167,6 @@ typedef struct
     ccapi_cli_error_t cli_error;
     ccapi_cli_thread_status_t cli_thread_status;
 } ccapi_svc_cli_t;
-#endif
 #endif
 
 typedef struct {
@@ -219,13 +217,11 @@ typedef struct {
             ccapi_rci_info_t rci_info;
         } rci;
 #endif
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
         struct {
             ccapi_cli_service_t user_callback;
             ccapi_svc_cli_t * svc_cli;
         } cli;
-#endif
 #endif
     } service;
     struct {

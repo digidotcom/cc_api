@@ -47,7 +47,10 @@
 #undef CONNECTOR_FIRMWARE_SUPPORT
 #undef CONNECTOR_FILE_SYSTEM_SUPPORT
 
+/* We always enable CLI support if any SM transport is enabled */
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #define CONNECTOR_SM_CLI
+#endif
 
 /* Limits */
 #undef CONNECTOR_SM_UDP_MAX_SESSIONS

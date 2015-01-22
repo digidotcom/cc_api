@@ -116,13 +116,11 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     }
 #endif
 
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
         reset_heap_ptr(&ccapi_data->thread.cli);
     }
-#endif
 #endif
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
@@ -433,7 +431,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
     if (start->service.cli != NULL)
     {
@@ -450,7 +447,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->service.cli.user_callback.finished = start->service.cli->finished;
         ccapi_data->service.cli.svc_cli = NULL;
     }
-#endif
 #endif
 
 #if (defined CONNECTOR_RCI_SERVICE)
@@ -497,7 +493,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
@@ -507,7 +502,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             goto done;
         }
     }
-#endif
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -699,13 +693,11 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     }
 #endif
 
-#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #if (defined CONNECTOR_SM_CLI)
     if (ccapi_data->config.cli_supported)
     {
         ccapi_stop_thread(ccapi_data->thread.cli);
     }
-#endif
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
