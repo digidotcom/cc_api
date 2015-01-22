@@ -116,6 +116,13 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     }
 #endif
 
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+    if (ccapi_data->config.rci_supported)
+    {
+        reset_heap_ptr(&ccapi_data->thread.rci);
+    }
+#endif
+
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
     if (ccapi_data->config.receive_supported)
     {
