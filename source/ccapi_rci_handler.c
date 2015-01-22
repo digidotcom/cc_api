@@ -583,10 +583,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
             }
 
-            if (ccapi_data->service.rci.queued_callback.error != 0) /* Check */
-            {
-                remote_config->error_id = ccapi_data->service.rci.queued_callback.error;
-            }
+            remote_config->error_id = ccapi_data->service.rci.queued_callback.error;
             remote_config->user_context = rci_info->user_context;
 
             ccapi_data->service.rci.queued_callback.function_cb = NULL;
