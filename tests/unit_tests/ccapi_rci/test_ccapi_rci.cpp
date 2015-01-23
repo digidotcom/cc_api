@@ -51,6 +51,8 @@ static ccapi_fw_service_t  fw_service = {
 
 static ccapi_rci_service_t rci_service;
 
+ccapi_bool_t ccapi_rci_lock_cb = CCAPI_FALSE;
+
 TEST_GROUP(test_ccapi_rci)
 {
     void setup()
@@ -69,6 +71,8 @@ TEST_GROUP(test_ccapi_rci)
         error = ccapi_start(&start);
 
         CHECK(error == CCAPI_START_ERROR_NONE);
+
+        ccapi_rci_lock_cb = CCAPI_FALSE;
     }
 
     void teardown()
@@ -121,6 +125,32 @@ void set_rci_info_defaults(ccapi_rci_info_t * const rci_info)
     rci_info->query_setting.attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
 }
 
+static connector_callback_status_t call_ccapi_connector_callback(connector_class_id_t const class_id, connector_request_id_t const request_id, void * const data, void * const context)
+{
+#define BUSY_LOOPS 1000
+    connector_callback_status_t status;
+    ccapi_bool_t const ccapi_rci_lock_cb_config = ccapi_rci_lock_cb;
+    unsigned int i = 0;
+
+    do
+    {      
+        status = ccapi_connector_callback(class_id, request_id, data, context);
+        if (i++ == BUSY_LOOPS)
+        {
+            ccapi_rci_lock_cb = CCAPI_FALSE;
+        }
+    } while (status == connector_callback_busy);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    if (ccapi_rci_lock_cb_config)
+    {
+        CHECK(i > BUSY_LOOPS);
+        ccapi_rci_lock_cb = CCAPI_TRUE;
+    }
+
+    return status;
+}
+
 static void session_start(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
 {
     connector_callback_status_t status;
@@ -135,7 +165,8 @@ static void session_start(connector_remote_config_t * const remote_config, char 
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_session_start;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -208,7 +239,7 @@ static void action_start(connector_remote_config_t * const remote_config, ccapi_
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_action_start;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -235,7 +266,7 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_start;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -264,7 +295,7 @@ static void group_process_query(connector_remote_config_t * const remote_config,
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_process;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -328,7 +359,7 @@ static void group_process_set(connector_remote_config_t * const remote_config, u
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_process;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -404,7 +435,7 @@ static void group_end(connector_remote_config_t * const remote_config, char cons
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_end;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -424,7 +455,7 @@ static void action_end(connector_remote_config_t * const remote_config, char con
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_action_end;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
@@ -444,14 +475,14 @@ void session_end(connector_remote_config_t * const remote_config, char const * c
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_session_end;
-    status = ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
     CHECK_EQUAL(error, remote_config->error_id);
     th_rci_checkExpectations(expected_function, &expected_rci_info);
 }
 
-TEST(test_ccapi_rci, testRCIQuerySettingGroup1)
+void testRCIQuerySettingGroup1(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -494,7 +525,18 @@ TEST(test_ccapi_rci, testRCIQuerySettingGroup1)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCIQuerySettingGroup3)
+TEST(test_ccapi_rci, testRCIQuerySettingGroup1)
+{
+    testRCIQuerySettingGroup1();
+}
+
+TEST(test_ccapi_rci, testRCIQuerySettingGroup1Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCIQuerySettingGroup1();
+}
+
+void testRCIQuerySettingGroup3(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -519,7 +561,18 @@ TEST(test_ccapi_rci, testRCIQuerySettingGroup3)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCIQueryStateGroup2)
+TEST(test_ccapi_rci, testRCIQuerySettingGroup3)
+{
+    testRCIQuerySettingGroup3();
+}
+
+TEST(test_ccapi_rci, testRCIQuerySettingGroup3Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCIQuerySettingGroup3();
+}
+
+void testRCIQueryStateGroup2(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -554,7 +607,18 @@ TEST(test_ccapi_rci, testRCIQueryStateGroup2)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCISetSettingGroup3)
+TEST(test_ccapi_rci, testRCIQueryStateGroup2)
+{
+    testRCIQueryStateGroup2();
+}
+
+TEST(test_ccapi_rci, testRCIQueryStateGroup2Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCIQueryStateGroup2();
+}
+
+void testRCISetSettingGroup3(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -582,7 +646,18 @@ TEST(test_ccapi_rci, testRCISetSettingGroup3)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCISetSettingGroup1)
+TEST(test_ccapi_rci, testRCISetSettingGroup3)
+{
+    testRCISetSettingGroup3();
+}
+
+TEST(test_ccapi_rci, testRCISetSettingGroup3Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCISetSettingGroup3();
+}
+
+void testRCISetSettingGroup1(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -626,7 +701,18 @@ TEST(test_ccapi_rci, testRCISetSettingGroup1)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCISetStateGroup2)
+TEST(test_ccapi_rci, testRCISetSettingGroup1)
+{
+    testRCISetSettingGroup1();
+}
+
+TEST(test_ccapi_rci, testRCISetSettingGroup1Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCISetSettingGroup1();
+}
+
+void testRCISetStateGroup2(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -660,7 +746,18 @@ TEST(test_ccapi_rci, testRCISetStateGroup2)
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
-TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMix)
+TEST(test_ccapi_rci, testRCISetStateGroup2)
+{
+    testRCISetStateGroup2();
+}
+
+TEST(test_ccapi_rci, testRCISetStateGroup2Busy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCISetStateGroup2();
+}
+
+void testRCIQuerySettingGroup1AttributesMix(void)
 {
     connector_remote_config_t remote_config;
     ccapi_rci_query_setting_attributes_t query_setting_attributes;
@@ -719,4 +816,71 @@ TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMix)
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
+TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMix)
+{
+    testRCIQuerySettingGroup1AttributesMix();
+}
+
+TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMixBusy)
+{
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+    testRCIQuerySettingGroup1AttributesMix();
+}
+
+TEST(test_ccapi_rci, testRCISessionCancel)
+{
+    connector_remote_config_t remote_config;
+    connector_callback_status_t status;
+    connector_request_id_t request;
+
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+    char const * const expected_function = "rci_session_start_cb";
+    unsigned int i;
+
+    set_remote_config_defaults(&remote_config);
+    set_rci_info_defaults(&ccapi_data_single_instance->service.rci.rci_info);
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(CCAPI_GLOBAL_ERROR_NONE, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_session_start;
+
+    ccapi_rci_lock_cb = CCAPI_TRUE;
+
+    status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_busy, status);
+
+    CHECK(ccapi_data_single_instance->service.rci.rci_thread_status > CCAPI_RCI_THREAD_IDLE);
+
+    /* Wait user locks callback */
+    for(i = 0; i < 1000; i++)
+    {
+        status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+        sched_yield();
+    }
+    CHECK_EQUAL(connector_callback_busy, status);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_CB_QUEUED);
+
+    request.remote_config_request = connector_request_id_remote_config_session_cancel;
+    status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
+
+    /* Now release the lock and check status remains idle when session_start callback finish */
+    ccapi_data_single_instance->service.rci.queued_callback.error = CCAPI_GLOBAL_ERROR_BAD_COMMAND;
+    ccapi_rci_lock_cb = CCAPI_FALSE;
+    do
+    {
+        sched_yield();
+        CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
+    } while (ccapi_data_single_instance->service.rci.queued_callback.error == CCAPI_GLOBAL_ERROR_BAD_COMMAND);
+
+    CHECK_EQUAL(ccapi_data_single_instance->service.rci.rci_thread_status, CCAPI_RCI_THREAD_IDLE);
 }

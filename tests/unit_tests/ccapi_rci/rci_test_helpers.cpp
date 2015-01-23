@@ -15,6 +15,8 @@ static void const * p_value;
 
 extern "C" {
 
+extern ccapi_bool_t ccapi_rci_lock_cb;
+
 unsigned int th_rci_called_function(char const * const function_name, ccapi_rci_info_t * const info)
 {
     ASSERT(called_function == NULL);
@@ -22,6 +24,11 @@ unsigned int th_rci_called_function(char const * const function_name, ccapi_rci_
 
     received_ccapi_rci_info = *info;
     *info = returned_ccapi_rci_info;
+
+    while (ccapi_rci_lock_cb)
+    {
+        sched_yield();
+    }
 
     return return_value;
 }
