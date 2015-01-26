@@ -480,6 +480,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         goto done;
 
     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+    ccapi_data->transport_tcp.info = NULL;
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     ccapi_data->transport_udp.started = CCAPI_FALSE;
 #endif

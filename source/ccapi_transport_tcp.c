@@ -203,6 +203,7 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
         dest->connection.password = ccapi_malloc(strlen(source->connection.password) + 1);
         if (!valid_malloc(dest->connection.password, error))
         {
+            success = CCAPI_FALSE;
             goto done;
         }
         strcpy(dest->connection.password, source->connection.password);
@@ -250,6 +251,9 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+    ccapi_data->transport_tcp.info->connection.password = NULL;
+    ccapi_data->transport_tcp.info->connection.info.wan.phone_number = NULL;
+
     if (!valid_keepalives(tcp_start, &error))
     {
         goto done;
@@ -279,7 +283,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             case connector_invalid_data:
             case connector_service_busy:
                 error = CCAPI_TCP_START_ERROR_INIT;
-                break;
+                goto done;
             case connector_invalid_data_size:
             case connector_invalid_data_range:
             case connector_keepalive_error:
@@ -298,8 +302,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_TCP_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(connector_status != connector_success, done);
-                break;
+                ASSERT_MSG_GOTO(connector_status == connector_success, done);
         }
     }
 
@@ -334,6 +337,27 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         }
     }
 done:
+    if (error != CCAPI_TCP_START_ERROR_NONE)
+    {
+        if (ccapi_data != NULL)
+        {
+            if (ccapi_data->transport_tcp.info != NULL)
+            {
+                if (ccapi_data->transport_tcp.info->connection.password != NULL)
+                {
+                    ccapi_free(ccapi_data->transport_tcp.info->connection.password);
+                }
+
+                if (ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
+                {
+                    ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
+                }
+                ccapi_free(ccapi_data->transport_tcp.info);
+                ccapi_data->transport_tcp.info = NULL;
+            }
+        }
+    }
+
     return error;
 }
 
@@ -359,6 +383,19 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_tcp.connected);
 
+    ASSERT(ccapi_data->transport_tcp.info != NULL);
+
+    if (ccapi_data->transport_tcp.info->connection.password != NULL)
+    {
+        ccapi_free(ccapi_data->transport_tcp.info->connection.password);
+    }
+
+    if (ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
+    {
+        ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
+    }
+    ccapi_free(ccapi_data->transport_tcp.info);
+    ccapi_data->transport_tcp.info = NULL;
 done:
     return error;
 }
