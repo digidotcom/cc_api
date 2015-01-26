@@ -213,6 +213,7 @@ TEST(test_ccapi_init, testStartOk)
     CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
     CHECK(ccapi_data_single_instance->transport_tcp.info == NULL);
     CHECK(ccapi_data_single_instance->transport_udp.info == NULL);
+    CHECK(ccapi_data_single_instance->transport_sms.info == NULL);
 }
 
 TEST(test_ccapi_init, testStartThreadNoMemory)
