@@ -211,6 +211,7 @@ TEST(test_ccapi_init, testStartOk)
     STRCMP_EQUAL(start.device_type, ccapi_data_single_instance->config.device_type);
     STRCMP_EQUAL(start.device_cloud_url, ccapi_data_single_instance->config.device_cloud_url);
     CHECK(ccapi_data_single_instance->thread.connector_run->status == CCAPI_THREAD_RUNNING);
+    CHECK(ccapi_data_single_instance->transport_tcp.info == NULL);
 }
 
 TEST(test_ccapi_init, testStartThreadNoMemory)

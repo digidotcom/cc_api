@@ -70,6 +70,11 @@ TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
 
     th_fill_tcp_lan_ipv4(&tcp_start);
 
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
+
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_init_error);
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -93,7 +98,10 @@ TEST(test_ccapi_tcp_start, testConnectorInitiateActionUnknownError)
     connector_transport_t connector_transport = connector_transport_tcp;
 
     th_fill_tcp_lan_ipv4(&tcp_start);
-
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_abort);
     error = ccapi_start_transport_tcp(&tcp_start);
@@ -123,5 +131,5 @@ TEST(test_ccapi_tcp_start, testTCPConnectionTimeout)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(tcp_start.connection.start_timeout, ccapi_data_single_instance->transport_tcp.info->connection.start_timeout);
+    CHECK(ccapi_data_single_instance->transport_tcp.info == NULL);
 }

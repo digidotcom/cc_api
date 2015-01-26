@@ -48,6 +48,7 @@ TEST(test_ccapi_tcp_start_sanity_checks, testNullPointer)
 
     error = ccapi_start_transport_tcp(NULL);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NULL_POINTER, error);
+    CHECK(ccapi_data_single_instance->transport_tcp.info == NULL);
 }
 
 TEST(test_ccapi_tcp_start_sanity_checks, testBadKeepalivesRx)
@@ -152,6 +153,7 @@ TEST(test_ccapi_tcp_start_sanity_checks, testLANIpv6)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
     CHECK(memcmp(ipv6, ccapi_data_single_instance->transport_tcp.info->connection.ip.address.ipv6, sizeof ipv6) == 0);
     CHECK(memcmp(mac, ccapi_data_single_instance->transport_tcp.info->connection.info.lan.mac_address, sizeof mac) == 0);
+    CHECK(ccapi_data_single_instance->transport_tcp.info->connection.password == NULL);
 }
 
 TEST(test_ccapi_tcp_start_sanity_checks, testLANZeroMAC)
@@ -168,6 +170,7 @@ TEST(test_ccapi_tcp_start_sanity_checks, testLANZeroMAC)
 
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INVALID_MAC, error);
+    CHECK(ccapi_data_single_instance->transport_tcp.info == NULL);
 }
 
 TEST(test_ccapi_tcp_start_sanity_checks, testPassword)
@@ -325,9 +328,6 @@ TEST(test_ccapi_tcp_start_sanity_checks, testPasswordNoMemory)
     tcp_start.connection.ip.type = CCAPI_IPV4;
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
     memcpy(tcp_start.connection.info.lan.mac_address, mac, sizeof tcp_start.connection.info.lan.mac_address);
-
-    connector_transport_t connector_transport = connector_transport_tcp;
-    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
 
     Mock_ccimp_os_malloc_expectAndReturn(sizeof (ccapi_tcp_info_t), malloc_for_ccapi_tcp);
     Mock_ccimp_os_malloc_expectAndReturn(sizeof password, malloc_for_password);
