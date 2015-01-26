@@ -21,8 +21,6 @@
 
 #include "custom/custom_ccimp_types.h"
 
-int connector_snprintf(char * const str, size_t const size, char const * const format, ...);
-
 typedef ccimp_network_handle_t connector_network_handle_t;
 
 #define CONNECTOR_NETWORK_HANDLE_NOT_INITIALIZED            CCIMP_NETWORK_HANDLE_NOT_INITIALIZED
