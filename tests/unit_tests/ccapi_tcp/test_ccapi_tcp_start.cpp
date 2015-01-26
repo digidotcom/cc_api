@@ -70,6 +70,7 @@ TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
 
     th_fill_tcp_lan_ipv4(&tcp_start);
 
+    tcp_start.connection.password = (char *)"My password";
     {
         mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
         mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;

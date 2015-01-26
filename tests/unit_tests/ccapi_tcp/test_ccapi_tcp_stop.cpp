@@ -134,7 +134,6 @@ TEST(test_ccapi_tcp_stop, testStartStopTCPMemoryLeaks)
     tcp_start.connection.info.wan.phone_number = phone_number;
     tcp_start.connection.info.wan.link_speed = 115200;
     memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
-    tcp_start.connection.password = NULL;
     tcp_start.callback.close = NULL;
     tcp_start.callback.keepalive = NULL;
     tcp_start.connection.password = (char *)"My password";
