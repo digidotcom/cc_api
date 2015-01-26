@@ -18,40 +18,15 @@
 
 extern ccapi_rci_data_t const ccapi_rci_data;
 
-static ccapi_firmware_target_t firmware_list[] = {
-       /* version   description    filespec             maximum_size       chunk_size */
-        {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   128 * 1024 },  /* any *.bin files */
-        {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
-    };
-
-static ccapi_fw_data_error_t app_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
-{
-    (void)target;
-    (void)offset;
-    (void)data;
-    (void)size;
-    (void)last_chunk;
-
-    return CCAPI_FW_DATA_ERROR_NONE;
-}
-
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     static ccapi_rci_service_t rci_service;
-    static ccapi_fw_service_t  fw_service;
 
     uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x04, 0x9D, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA};
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
     
     rci_service.rci_data = &ccapi_rci_data;
-
-    fw_service.target.count = ARRAY_SIZE(firmware_list);
-    fw_service.target.item = firmware_list;
-    fw_service.callback.request = NULL;
-    fw_service.callback.data = app_fw_data_cb;
-    fw_service.callback.reset = NULL;
-    fw_service.callback.cancel = NULL;
 
     start->vendor_id = 0x2001371; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
@@ -61,7 +36,7 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->service.cli = NULL;
     start->service.receive = NULL;
     start->service.file_system = NULL;
-    start->service.firmware = &fw_service;
+    start->service.firmware = NULL;
     start->service.rci = &rci_service;
 }
 

@@ -77,8 +77,8 @@ ConfigGenerator:
 	ant -f $(CONFIG_GENERATOR_BUILD)
 
 auto_generated_files: ConfigGenerator
-	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CCFSM_PUBLIC_HEADER_DIR) -noBackup -type=global_header
-	java -jar $(CONFIG_GENERATOR_BIN) username:password "Linux Application" 1.0.0.0 -vendor=0x2001371 -noUpload -noBackup -ccapiStub config.rci
+	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CCFSM_PUBLIC_HEADER_DIR) -noBackup -type=global_header -usenames=all
+	java -jar $(CONFIG_GENERATOR_BIN) username:password "Linux Application" 1.0.0.0 -vendor=0x2001371 -noUpload -noBackup -usenames=all -ccapiStub config.rci
 
 	
 exec: $(OBJS)
