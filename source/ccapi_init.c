@@ -487,6 +487,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     ccapi_data->transport_sms.started = CCAPI_FALSE;
+    ccapi_data->transport_sms.info = NULL;
 #endif
 
     error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.connector_run, ccapi_connector_run_thread, CCIMP_THREAD_FSM);
@@ -673,6 +674,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         }
     }
 #endif
+
 
     {
         connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);

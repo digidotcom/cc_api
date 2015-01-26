@@ -164,7 +164,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
             case connector_invalid_data:
             case connector_service_busy:
                 error = CCAPI_SMS_START_ERROR_INIT;
-                break;
+                goto done;
             case connector_invalid_data_size:
             case connector_invalid_data_range:
             case connector_keepalive_error:
@@ -183,8 +183,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_SMS_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(connector_status != connector_success, done);
-                break;
+                ASSERT_MSG_GOTO(connector_status == connector_success, done);
         }
     }
     {
@@ -243,6 +242,18 @@ ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data
     do {
         ccimp_os_yield();
     } while (ccapi_data->transport_sms.started);
+
+    ASSERT(ccapi_data->transport_sms.info != NULL);
+    if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
+    {
+        ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+    }
+    if (ccapi_data->transport_sms.info->cloud_config.service_id != NULL)
+    {
+        ccapi_free(ccapi_data->transport_sms.info->cloud_config.service_id);
+    }
+    ccapi_free(ccapi_data->transport_sms.info);
+    ccapi_data->transport_sms.info = NULL;
 
 done:
     return error;
