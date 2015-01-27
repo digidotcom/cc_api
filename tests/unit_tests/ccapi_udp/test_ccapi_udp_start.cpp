@@ -56,10 +56,17 @@ TEST(test_ccapi_udp_start, testConnectorInitiateActionInitError)
     ccapi_udp_info_t udp_start = {{0}};
     connector_transport_t connector_transport = connector_transport_udp;
 
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
+
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_init_error);
     error = ccapi_start_transport_udp(&udp_start);
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_INIT, error);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_udp.started);
+    CHECK(ccapi_data_single_instance->transport_udp.info == NULL);
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_invalid_data);
@@ -77,7 +84,8 @@ TEST(test_ccapi_udp_start, testConnectorInitiateActionUnknownError)
     ccapi_udp_start_error_t error;
     ccapi_udp_info_t udp_start = {{0}};
     connector_transport_t connector_transport = connector_transport_udp;
-
+    mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+    mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_abort);
@@ -108,5 +116,5 @@ TEST(test_ccapi_udp_start, testUDPConnectionTimeout)
 
     error = ccapi_start_transport_udp(&udp_start);
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(udp_start.start_timeout, ccapi_data_single_instance->transport_udp.info->start_timeout);
+    CHECK(ccapi_data_single_instance->transport_udp.info == NULL);
 }
