@@ -162,7 +162,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
 
             if (ccapi_data->service.firmware_update.config.target.item[target_num].filespec != NULL)
             {
-                ccapi_free((void*)ccapi_data->service.firmware_update.config.target.item[target_num].filespec);
+               ccapi_free((void*)ccapi_data->service.firmware_update.config.target.item[target_num].filespec);
             }
         }
 
@@ -249,11 +249,24 @@ static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
     } while (thread_info->status != CCAPI_THREAD_NOT_STARTED);
 }
 
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+ccapi_fw_request_error_t stub_firmware_request_reject_all(unsigned int const target, char const * const filename, size_t const total_size)
+{
+    UNUSED_ARGUMENT(target);
+    UNUSED_ARGUMENT(filename);
+    UNUSED_ARGUMENT(total_size);
+    return CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT;
+}
+#endif
+
 /* This function allocates ccapi_data_t so other ccXapi_* functions can use it as a handler */
 ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_start_t const * const start)
 {
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data = NULL;
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    ccapi_bool_t stub_fw_update;
+#endif
 
     if (ccapi_handle == NULL)
     {
@@ -417,7 +430,45 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
             ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
             ccapi_data->config.firmware_supported = CCAPI_TRUE;
+            stub_fw_update = CCAPI_FALSE;
         }
+    }
+    else if (start->service.rci != NULL)
+    {
+        unsigned int const target_count = 1;
+        size_t const list_size = target_count * sizeof *ccapi_data->service.firmware_update.config.target.item;
+        unsigned char chunk_pool_index;
+        uint32_t const rci_target_zero_version = start->service.rci->rci_data->rci_desc->firmware_target_zero_version;
+
+        ccapi_data->service.firmware_update.config.target.count = target_count;
+        ccapi_data->service.firmware_update.config.target.item = ccapi_malloc(list_size);
+        error = check_malloc(ccapi_data->service.firmware_update.config.target.item);
+        if (error != CCAPI_START_ERROR_NONE)
+            goto done;
+
+        ccapi_data->service.firmware_update.config.target.item[0].description = NULL;
+        ccapi_data->service.firmware_update.config.target.item[0].filespec = NULL;
+        ccapi_data->service.firmware_update.config.target.item[0].chunk_size = 0;
+        ccapi_data->service.firmware_update.config.target.item[0].maximum_size = 0;
+
+        ccapi_data->service.firmware_update.config.target.item[0].version.major = (rci_target_zero_version & 0xFF000000) >> 24;
+        ccapi_data->service.firmware_update.config.target.item[0].version.minor = (rci_target_zero_version & 0x00FF0000) >> 16;
+        ccapi_data->service.firmware_update.config.target.item[0].version.revision = (rci_target_zero_version & 0x0000FF00) >> 8;
+        ccapi_data->service.firmware_update.config.target.item[0].version.build = (rci_target_zero_version & 0x000000FF);
+
+        ccapi_data->service.firmware_update.config.callback.request = stub_firmware_request_reject_all;
+        ccapi_data->service.firmware_update.config.callback.data = NULL;
+        ccapi_data->service.firmware_update.config.callback.cancel = NULL;
+        ccapi_data->service.firmware_update.config.callback.reset = NULL;
+
+        for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
+        {
+            ccapi_data->service.firmware_update.processing.chunk_pool[chunk_pool_index].data = NULL;
+        }
+
+        ccapi_data->service.firmware_update.processing.update_started = CCAPI_FALSE;
+        ccapi_data->config.firmware_supported = CCAPI_TRUE;
+        stub_fw_update = CCAPI_TRUE;
     }
 #endif
 
@@ -530,7 +581,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
-    if (ccapi_data->config.firmware_supported)
+    if (ccapi_data->config.firmware_supported && !stub_fw_update)
     {
         error = ccapi_create_and_start_thread(ccapi_data, &ccapi_data->thread.firmware, ccapi_firmware_thread, CCIMP_THREAD_FIRMWARE);
         if (error != CCAPI_START_ERROR_NONE)
@@ -736,7 +787,10 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        ccapi_stop_thread(ccapi_data->thread.firmware);
+        if (ccapi_data->thread.firmware != NULL)
+        {
+            ccapi_stop_thread(ccapi_data->thread.firmware);
+        }
     }
 #endif
 
