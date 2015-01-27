@@ -193,8 +193,8 @@ ccapi_fs_virtual_dir_t * * get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_
 
 ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, char const * const virtual_dir)
 {
-    ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
-    ccapi_fs_virtual_dir_t * * p_dir_entry = NULL;
+    ccapi_fs_error_t error;
+    ccapi_fs_virtual_dir_t * dir_entry_to_remove;
     ccimp_status_t ccimp_status;
 
     if (ccapi_data == NULL || ccapi_data->thread.connector_run->status == CCAPI_THREAD_NOT_STARTED)
@@ -217,13 +217,6 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         goto done;
     }
 
-    p_dir_entry = get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir, strlen(virtual_dir));
-    if (*p_dir_entry == NULL)
-    {
-        error = CCAPI_FS_ERROR_NOT_MAPPED;
-        goto done;
-    }
-
     ccimp_status = ccapi_lock_acquire(ccapi_data->file_system_lock);
     switch (ccimp_status)
     {
@@ -236,13 +229,17 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
     }
 
     {
-        ccapi_fs_virtual_dir_t * const next_dir_entry = (*p_dir_entry)->next;
-        ccapi_fs_virtual_dir_t * const dir_entry = *p_dir_entry;
+        ccapi_fs_virtual_dir_t * * const p_dir_entry = get_pointer_to_dir_entry_from_virtual_dir_name(ccapi_data, virtual_dir, strlen(virtual_dir));
 
-        ccapi_free(dir_entry->local_dir);
-        ccapi_free(dir_entry->virtual_dir);
-        ccapi_free(dir_entry);
-        *p_dir_entry = next_dir_entry;
+        dir_entry_to_remove = *p_dir_entry;
+        if (*p_dir_entry != NULL)
+        {
+            *p_dir_entry = dir_entry_to_remove->next;
+        }
+        else
+        {
+            error = CCAPI_FS_ERROR_NOT_MAPPED;
+        }
     }
 
     ccimp_status = ccapi_lock_release(ccapi_data->file_system_lock);
@@ -253,8 +250,18 @@ ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_data_t * const ccapi_data, c
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
             error = CCAPI_FS_ERROR_LOCK_FAILED;
-            goto done;
+            ccapi_logging_line("WARNING: ccapi_lock_release() failed with status %d, directory will be removed anyway", ccimp_status);
+            break;
     }
+
+    if (dir_entry_to_remove != NULL)
+    {
+        ccapi_free(dir_entry_to_remove->local_dir);
+        ccapi_free(dir_entry_to_remove->virtual_dir);
+        ccapi_free(dir_entry_to_remove);
+        error = CCAPI_FS_ERROR_NONE;
+    }
+
 done:
     return error;
 }
