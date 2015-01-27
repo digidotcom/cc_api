@@ -16,6 +16,7 @@
 
 #if (defined CCIMP_DEBUG_ENABLED)
 
+unsigned int logging_lock_users = 0;
 void * logging_lock = NULL;
 
 /* TODO:

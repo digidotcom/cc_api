@@ -22,6 +22,9 @@ TEST_GROUP(test_ccapi_logging)
 
         Mock_create_all();
 
+        logging_lock_users = 0;
+        logging_lock = NULL;
+
         th_fill_start_structure_with_good_parameters(&start);
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
@@ -29,6 +32,17 @@ TEST_GROUP(test_ccapi_logging)
 
     void teardown()
     {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+
+        CHECK_EQUAL(0, logging_lock_users);
+        CHECK(logging_lock == NULL);
+
         Mock_destroy_all();
     }
 };

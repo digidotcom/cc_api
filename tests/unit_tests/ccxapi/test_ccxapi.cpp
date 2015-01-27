@@ -22,6 +22,9 @@ TEST_GROUP(test_ccxapi)
     void setup()
     {
         Mock_create_all();
+
+        logging_lock_users = 0;
+        logging_lock = NULL;        
     }
 
     void teardown()
@@ -53,9 +56,15 @@ TEST(test_ccxapi, testStartTwiceSameHandlerFails)
 
     CHECK_EQUAL(start_error, CCAPI_START_ERROR_NONE);
 
+    CHECK_EQUAL(1, logging_lock_users);
+    CHECK(logging_lock != NULL);
+
     start_error = ccxapi_start(&ccapi_handle, &start);
 
     CHECK_EQUAL(start_error, CCAPI_START_ERROR_ALREADY_STARTED);
+
+    CHECK_EQUAL(1, logging_lock_users);
+    CHECK(logging_lock != NULL);
 }
 
 TEST(test_ccxapi, testStartOneInstance)
@@ -73,11 +82,17 @@ TEST(test_ccxapi, testStartOneInstance)
     CHECK(ccapi_handle1 != NULL);
     CHECK(ccapi_data_single_instance == NULL);
 
+    CHECK_EQUAL(1, logging_lock_users);
+    CHECK(logging_lock != NULL);
+
     Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle1)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
+
+    CHECK_EQUAL(0, logging_lock_users);
+    CHECK(logging_lock == NULL);
 }
 
 TEST(test_ccxapi, testStartTwoInstances)
@@ -113,15 +128,24 @@ TEST(test_ccxapi, testStartTwoInstances)
 
     CHECK(ccapi_handle1 != ccapi_handle2);
 
+    CHECK_EQUAL(2, logging_lock_users);
+    CHECK(logging_lock != NULL);
+
     Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle1)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop1_error = ccxapi_stop(ccapi_handle1, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop1_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
 
+    CHECK_EQUAL(1, logging_lock_users);
+    CHECK(logging_lock != NULL);
+
     Mock_connector_initiate_action_expectAndReturn(((ccapi_data_t *)ccapi_handle2)->connector_handle, connector_initiate_terminate, NULL, connector_success);
 
     stop2_error = ccxapi_stop(ccapi_handle2, CCAPI_STOP_IMMEDIATELY);
     CHECK(stop2_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
+
+    CHECK_EQUAL(0, logging_lock_users);
+    CHECK(logging_lock == NULL);
 }

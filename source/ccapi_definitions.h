@@ -338,6 +338,7 @@ typedef struct {
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;
+extern unsigned int logging_lock_users;
 extern void * logging_lock;
 
 void ccapi_rci_thread(void * const argument);
