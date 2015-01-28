@@ -196,6 +196,15 @@ static void action_start(connector_remote_config_t * const remote_config, ccapi_
         case CCAPI_RCI_ACTION_SET:
             remote_config->action = connector_remote_action_set;
             break;
+        case CCAPI_RCI_ACTION_DO_COMMAND:
+            remote_config->action = connector_remote_action_do_command;
+            break;
+        case CCAPI_RCI_ACTION_REBOOT:
+            remote_config->action = connector_remote_action_reboot;
+            break;
+        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
+            remote_config->action = connector_remote_action_set_factory_def;
+            break;
     }
 
     switch (type)
@@ -256,9 +265,9 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
     expected_rci_info.group.instance = group_index;
-    rci_info_to_return.query_setting.matches = compare_matches;
 
     rci_info_to_return = expected_rci_info;
+    rci_info_to_return.query_setting.matches = compare_matches;
 
     remote_config->group.id = group_id;
     remote_config->group.index = group_index;
@@ -435,6 +444,82 @@ static void group_end(connector_remote_config_t * const remote_config, char cons
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_end;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+}
+
+static void do_command(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+    connector_element_value_t set_value;
+    connector_element_value_t response_value;
+
+    remote_config->element.value = &set_value;
+    remote_config->response.element_value = &response_value;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = "file_system";
+    expected_rci_info.do_command.request = "<ls dir=\"/WEB/python\"/>";
+    expected_rci_info.do_command.response = &remote_config->response.element_value->string_value;
+
+    rci_info_to_return = expected_rci_info;
+    *rci_info_to_return.do_command.response = "My response";
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_do_command;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+    STRCMP_EQUAL("My response", *ccapi_data_single_instance->service.rci.rci_info.do_command.response);
+}
+
+static void reboot(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = NULL;
+    expected_rci_info.do_command.request = NULL;
+    expected_rci_info.do_command.response = NULL;
+
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_reboot;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+}
+
+static void set_factory_defaults(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = NULL;
+    expected_rci_info.do_command.request = NULL;
+    expected_rci_info.do_command.response = NULL;
+
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_set_factory_def;
     status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
 
     CHECK_EQUAL(connector_callback_continue, status);
@@ -710,6 +795,57 @@ TEST(test_ccapi_rci, testRCISetSettingGroup1Busy)
 {
     ccapi_rci_lock_cb = CCAPI_TRUE;
     testRCISetSettingGroup1();
+}
+
+TEST(test_ccapi_rci, testRCIDoCommand)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_DO_COMMAND, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    do_command(&remote_config, "rci_do_command_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
+TEST(test_ccapi_rci, testRCIReboot)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    reboot(&remote_config, "rci_reboot_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
+TEST(test_ccapi_rci, testRCISetFactoryDefaults)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    set_factory_defaults(&remote_config, "rci_set_factory_defaults_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
 void testRCISetStateGroup2(void)

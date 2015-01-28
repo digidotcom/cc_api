@@ -32,6 +32,21 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
     return th_rci_called_function(__FUNCTION__, info);
 }
 
+ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
+{
+    return th_rci_called_function(__FUNCTION__, info);
+}
+
+ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const info)
+{
+    return th_rci_called_function(__FUNCTION__, info);
+}
+
+ccapi_global_error_id_t rci_reboot_cb(ccapi_rci_info_t * const info)
+{
+    return th_rci_called_function(__FUNCTION__, info);
+}
+
 ccapi_setting_group_1_error_id_t rci_setting_group_1_start(ccapi_rci_info_t * const info)
 {
     return th_rci_called_function(__FUNCTION__, info);

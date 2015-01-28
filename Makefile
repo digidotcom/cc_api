@@ -81,8 +81,8 @@ ConfigGenerator:
 	ant -f $(CONFIG_GENERATOR_BUILD)
 
 auto_generated_files: ConfigGenerator
-	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -type=global_header
-	java -jar $(CONFIG_GENERATOR_BIN) username:password -noUpload "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noBackup -ccapi $(TEST_DIR)/ccapi_rci/config.rci
+	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -type=global_header -rci_legacy_commands
+	java -jar $(CONFIG_GENERATOR_BIN) username:password -noUpload "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noBackup -ccapi -rci_legacy_commands $(TEST_DIR)/ccapi_rci/config.rci
 
 test_binary: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(EXEC_NAME)
