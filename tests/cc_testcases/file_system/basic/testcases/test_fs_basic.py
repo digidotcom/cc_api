@@ -88,7 +88,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
         rootPath = self.tempPath
 
-        for i in range(0,10):
+        for i in range(0,9):
             folderNameLevel = ''.join( random.choice(string.ascii_letters + string.digits) for i in range(255))
             rootPath = os.path.join( rootPath , folderNameLevel)
 

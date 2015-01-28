@@ -148,12 +148,11 @@ ccapi_bool_t ccapi_device_request_accept_callback(char const * const target, cca
 
 
 /* This function is called only if the target was accepted by the previous callback */
-void ccapi_device_request_data_callback(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error)
+void ccapi_device_request_data_callback(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
 {
-    printf("ccapi_device_request_data_callback: target = '%s'. transport = %d. Error = %d\n", target, transport, receive_error);
+    printf("ccapi_device_request_data_callback: target = '%s'. transport = %d.\n", target, transport);
 
     /* Print data */
-    if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
     {
         size_t i;
         printf("Data received: '");
@@ -197,14 +196,7 @@ void ccapi_device_request_data_callback(char const * const target, ccapi_transpo
         response_buffer_info->buffer = malloc(DESIRED_MAX_RESPONSE_SIZE);
         printf("ccapi_device_request_data_callback: Providing response in buffer at %p\n", response_buffer_info->buffer);
 
-        if (receive_error != CCAPI_RECEIVE_ERROR_NONE)
-        {
-            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Error %d while handling target %s", receive_error, target);
-        }
-        else
-        {
-            response_buffer_info->length = sprintf(response_buffer_info->buffer, "Request successfully processed");
-        }
+        response_buffer_info->length = sprintf(response_buffer_info->buffer, "Request successfully processed");
     }
 
     return;
@@ -236,6 +228,7 @@ void fill_device_request_service(ccapi_start_t * start)
     receive_service.accept = ccapi_device_request_accept_callback;
     receive_service.data = ccapi_device_request_data_callback;
     receive_service.status = ccapi_device_request_status_callback;
+
 
     /* Set the Filesystem service */
     start->service.receive = &receive_service;
