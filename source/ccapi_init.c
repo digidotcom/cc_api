@@ -433,6 +433,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             stub_fw_update = CCAPI_FALSE;
         }
     }
+#if (defined CONNECTOR_RCI_SERVICE)
     else if (start->service.rci != NULL)
     {
         unsigned int const target_count = 1;
@@ -470,6 +471,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->config.firmware_supported = CCAPI_TRUE;
         stub_fw_update = CCAPI_TRUE;
     }
+#endif
 #endif
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
