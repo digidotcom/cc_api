@@ -512,6 +512,9 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                                 }
 #endif
                             }
+#if (defined RCI_PARSER_USES_ELEMENT_NAMES)
+                            rci_info->element.name = remote_config->element.name;
+#endif
                             break;
                         }
 #if (defined RCI_LEGACY_COMMANDS)
