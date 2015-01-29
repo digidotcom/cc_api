@@ -144,6 +144,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             clear_queued_callback(ccapi_data);
 
             rci_info->user_context = remote_config->user_context;
+            rci_info->error_hint = remote_config->response.error_hint;
+
             switch (request_id)
             {
                 case connector_request_id_remote_config_session_start:
@@ -652,6 +654,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 
             remote_config->error_id = ccapi_data->service.rci.queued_callback.error;
             remote_config->user_context = rci_info->user_context;
+            remote_config->response.error_hint = rci_info->error_hint;
 
             clear_queued_callback(ccapi_data);
 
