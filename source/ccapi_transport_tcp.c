@@ -252,7 +252,12 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
     }
 
     ccapi_data->transport_tcp.info->connection.password = NULL;
-    ccapi_data->transport_tcp.info->connection.info.wan.phone_number = NULL;
+
+
+    if (tcp_start->connection.type == CCAPI_CONNECTION_WAN)
+    {
+        ccapi_data->transport_tcp.info->connection.info.wan.phone_number = NULL;
+    }
 
     if (!valid_keepalives(tcp_start, &error))
     {
@@ -348,7 +353,7 @@ done:
                     ccapi_free(ccapi_data->transport_tcp.info->connection.password);
                 }
 
-                if (ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
+                if (tcp_start->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
                 {
                     ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
                 }
@@ -390,7 +395,7 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         ccapi_free(ccapi_data->transport_tcp.info->connection.password);
     }
 
-    if (ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
+    if (ccapi_data->transport_tcp.info->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
     {
         ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
     }
