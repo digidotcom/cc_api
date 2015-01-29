@@ -196,6 +196,23 @@ done:
     return; 
 }
 
+static void free_logging_resources(void)
+{
+    if (--logging_lock_users == 0)
+    {
+        if (logging_lock != NULL)
+        {
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(logging_lock);
+
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+
+            logging_lock = NULL;
+        }
+    }
+
+    return;
+}
+
 static ccapi_start_error_t check_malloc(void const * const p)
 {
     if (p == NULL)
@@ -255,6 +272,22 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data = NULL;
 
+    /* Initialize one single time for all connector instances the logging lock object */
+    if (logging_lock_users++ == 0)
+    {
+        ccimp_os_lock_create_t create_data;
+    
+        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock) != CCIMP_STATUS_OK)
+        {
+            error = CCAPI_START_ERROR_LOCK_FAILED;
+            goto done;
+        }
+
+        ASSERT(logging_lock == NULL);
+
+        logging_lock = create_data.lock;
+    }
+
     if (ccapi_handle == NULL)
     {
         error = CCAPI_START_ERROR_NULL_PARAMETER;
@@ -277,20 +310,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->initiate_action_lock = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
     ccapi_data->file_system_lock = NULL;
-
-    /* Initialize one single time for all connector instances the logging lock object */
-    if (logging_lock == NULL)
-    {
-        ccimp_os_lock_create_t create_data;
-    
-        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock) != CCIMP_STATUS_OK)
-        {
-            error = CCAPI_START_ERROR_LOCK_FAILED;
-            goto done;
-        }
-
-        logging_lock = create_data.lock;
-    }
 
     ccapi_data->config.device_type = NULL;
     ccapi_data->config.device_cloud_url = NULL;
@@ -578,6 +597,7 @@ done:
                 free_ccapi_data_internal_resources(ccapi_data);
                 ccapi_free(ccapi_data);
             }
+            free_logging_resources();
             break;
     }
 
@@ -746,6 +766,7 @@ done:
         case CCAPI_STOP_ERROR_NONE:
             free_ccapi_data_internal_resources(ccapi_data);
             ccapi_free(ccapi_data);
+            free_logging_resources();
             break;
         case CCAPI_STOP_ERROR_NOT_STARTED:
             break;
