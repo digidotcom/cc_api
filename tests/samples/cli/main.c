@@ -54,11 +54,14 @@ static void app_cli_request_cb(ccapi_transport_t const transport, char const * c
         stop = CCAPI_TRUE;
     }
 
+    /* Simulate a low processing time */
+    sleep(3);
+
     /* Provide response to the cloud */
     if (output != NULL)
     {
         response = malloc(sizeof(FIX_RESPONSE) + strlen(command) + strlen("''"));
-        printf("app_cli_request_cb: Providing response in buffer at %p\n", response);
+        printf("app_cli_request_cb: Providing response for command = '%s' in buffer at %p\n", command, response);
 
         sprintf(response, FIX_RESPONSE "'%s'", command);
 
@@ -136,7 +139,7 @@ int main (void)
         ccapi_udp_info_t udp_info = {{0}};
 
         udp_info.start_timeout = CCAPI_UDP_START_WAIT_FOREVER;
-        udp_info.limit.max_sessions = 10;
+        udp_info.limit.max_sessions = 20;
         udp_info.limit.rx_timeout = CCAPI_UDP_RX_TIMEOUT_INFINITE;
 
         udp_info.callback.close = NULL;

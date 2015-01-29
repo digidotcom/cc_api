@@ -54,18 +54,10 @@ void ccapi_cli_thread(void * const argument)
                     {
                         svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
                     }
-                    break;
-                }
-                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
-                {
-                    break;
-                }
-                case CCAPI_CLI_THREAD_FREE_REQUESTED:
-                {
-                    svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
                     ccapi_data->service.cli.svc_cli = NULL;
                     break;
                 }
+                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
                 case CCAPI_CLI_THREAD_FREE:
                 {
                     break;
@@ -92,6 +84,7 @@ static ccapi_bool_t valid_cli_malloc(void * * ptr, size_t size, ccapi_cli_error_
     
     if (!success)
     {
+        ccapi_logging_line("valid_cli_malloc: error ccimp_os_realloc for %d bytes", size);
         *error = CCAPI_CLI_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -196,12 +189,18 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
                 ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY->CCAPI_CLI_THREAD_REQUEST_CB_QUEUED");
             }
+            else
+            {
+                ccimp_os_yield();
+            }
 
             connector_status = connector_callback_busy;
             break;
         }
         case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
         {
+            ccimp_os_yield();
+
             connector_status = connector_callback_busy;
             break;
         }
@@ -222,14 +221,14 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                 }
             }
 
-            svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE_REQUESTED;
+            svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE;
 
             connector_status = connector_callback_continue;
 
             break;
         }
-        case CCAPI_CLI_THREAD_FREE_REQUESTED:
         case CCAPI_CLI_THREAD_FREE:
+            ASSERT(svc_cli->cli_thread_status != CCAPI_CLI_THREAD_FREE);
             break;
     }
 
@@ -340,15 +339,6 @@ static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_sta
                 svc_cli->cli_error = CCAPI_CLI_ERROR_STATUS_ERROR;
                 break;
         }
-    }
-
-    if (svc_cli->cli_thread_status != CCAPI_CLI_THREAD_FREE)
-    {
-        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_FREE_REQUESTED;
-        while (svc_cli->cli_thread_status != CCAPI_CLI_THREAD_FREE)
-        {
-            ccimp_os_yield();
-        } 
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */

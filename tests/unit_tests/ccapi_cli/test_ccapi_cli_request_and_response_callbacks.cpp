@@ -442,6 +442,94 @@ TEST(test_ccapi_cli_request_callback, testTwoConcurrentRequests)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
 }
 
+TEST(test_ccapi_cli_request_callback, testTwoConcurrentRequestsNotProccesedInOrder)
+{
+    connector_request_id_t request;
+    connector_sm_cli_request_t ccfsm_cli_request;
+    connector_sm_cli_request_t ccfsm_cli_request2;
+    connector_callback_status_t status;
+    
+    ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
+    ccapi_cli_request_expected_command = TEST_2_COMMAND_A;
+    ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+    ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+    ccfsm_cli_request.transport = connector_transport_udp;
+    ccfsm_cli_request.user_context = NULL;
+    ccfsm_cli_request.buffer = TEST_2_COMMAND_A;
+    ccfsm_cli_request.bytes_used = strlen(TEST_2_COMMAND_A) + 1;
+    ccfsm_cli_request.response_required = connector_false;
+    ccfsm_cli_request.more_data = connector_false;
+    ccfsm_cli_request2.transport = connector_transport_udp;
+    ccfsm_cli_request2.user_context = NULL;
+    ccfsm_cli_request2.buffer = TEST_2_COMMAND_B;
+    ccfsm_cli_request2.bytes_used = strlen(TEST_2_COMMAND_B) + 1;
+    ccfsm_cli_request2.response_required = connector_false;
+    ccfsm_cli_request2.more_data = connector_false;
+
+    ccapi_cli_request_lock_cb[0] = CCAPI_TRUE;
+    ccapi_cli_request_lock_cb[1] = CCAPI_TRUE;
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    {
+        unsigned int i = 0;
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+            sched_yield();
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
+            sched_yield();
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        CHECK_EQUAL(ccfsm_cli_request.user_context, ccapi_data_single_instance->service.cli.svc_cli);
+        CHECK_EQUAL(CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, ccapi_data_single_instance->service.cli.svc_cli->cli_thread_status);
+
+        CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
+
+        ccapi_cli_request_expected_transport = CCAPI_TRANSPORT_UDP;
+        ccapi_cli_request_expected_command = TEST_2_COMMAND_B;
+        ccapi_cli_request_expected_output_null = CCAPI_TRUE;
+        ccapi_cli_request_cb_called = CCAPI_FALSE;
+
+        ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
+
+        for (i=0 ; i < 1000 ; i++)
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
+            sched_yield();
+        }
+        CHECK_EQUAL(connector_callback_busy, status);
+
+        CHECK_EQUAL(ccfsm_cli_request2.user_context, ccapi_data_single_instance->service.cli.svc_cli);
+        CHECK_EQUAL(CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, ccapi_data_single_instance->service.cli.svc_cli->cli_thread_status);
+
+        ccapi_cli_request_lock_cb[1] = CCAPI_FALSE;
+
+        do
+        {      
+            status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
+            sched_yield();
+        } while ( status == connector_callback_busy);
+        CHECK_EQUAL(connector_callback_continue, status);
+    }
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_cli_request_cb_called);
+    CHECK(ccapi_data_single_instance->service.cli.svc_cli == NULL);
+
+    request.sm_request = connector_request_id_sm_cli_request;
+    do
+    {
+        status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
+    } while ( status == connector_callback_busy);
+    CHECK_EQUAL(connector_callback_continue, status);
+}
+
 #define TEST_OUTPUT "this is my response string"
 
 TEST(test_ccapi_cli_request_callback, testOneResponse)
