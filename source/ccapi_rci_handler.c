@@ -172,6 +172,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     connector_remote_group_type_t const group_type = remote_config->group.type;
                     ccapi_rci_function_t const action_start_cb = rci_data->callbacks.start_action;
 
+                    rci_info->group.instance = 0;
                     switch (remote_config->action)
                     {
                         case connector_remote_action_set:
@@ -284,7 +285,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             break;
                     }
 
-                    rci_info->group.instance = remote_config->group.index;
                     ASSERT(group_id < group_table->count);
                     group = &group_table->groups[group_id];
 
