@@ -340,6 +340,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
     ccapi_data->config.receive_supported = CCAPI_FALSE;
     ccapi_data->config.cli_supported = CCAPI_FALSE;
+    ccapi_data->config.rci_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -365,9 +366,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
-
-    ccapi_data->config.cli_supported = start->service.cli == NULL ? CCAPI_FALSE : CCAPI_TRUE;
-    ccapi_data->config.rci_supported = start->service.rci == NULL ? CCAPI_FALSE : CCAPI_TRUE;
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     if (start->service.file_system != NULL)
