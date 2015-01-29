@@ -119,24 +119,31 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_DENIED:
                 start_ptr->status = connector_firmware_status_download_denied;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_SIZE:
                 start_ptr->status = connector_firmware_status_download_invalid_size;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_INVALID_VERSION:
                 start_ptr->status = connector_firmware_status_download_invalid_version;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_UNAUTHENTICATED:
                 start_ptr->status = connector_firmware_status_download_unauthenticated;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_NOT_ALLOWED:
                 start_ptr->status = connector_firmware_status_download_not_allowed;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_DOWNLOAD_CONFIGURED_TO_REJECT:
                 start_ptr->status = connector_firmware_status_download_configured_to_reject;
+                goto done;
                 break;
             case CCAPI_FW_REQUEST_ERROR_ENCOUNTERED_ERROR:
                 start_ptr->status = connector_firmware_status_encountered_error;
+                goto done;
                 break;
         }
     } 

@@ -135,3 +135,48 @@ TEST(test_ccapi_init_services, testServicesSupported)
         CHECK(ccapi_data_single_instance == NULL);
     }
 }
+
+extern ccapi_rci_data_t const ccapi_rci_data;
+
+TEST(test_ccapi_init_services, testStubFwWithRci)
+{
+    ccapi_start_t start = {0};
+    ccapi_start_error_t error;
+    ccapi_rci_service_t rci_service;
+
+    th_fill_start_structure_with_good_parameters(&start);
+    rci_service.rci_data = &ccapi_rci_data;
+    start.service.firmware = NULL;
+    start.service.rci = &rci_service;
+
+    error = ccapi_start(&start);
+
+    CHECK(error == CCAPI_START_ERROR_NONE);
+
+    CHECK(ccapi_data_single_instance->config.firmware_supported == CCAPI_TRUE);
+    CHECK_EQUAL(1, ccapi_data_single_instance->service.firmware_update.config.target.count);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.target.item != NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.callback.request != NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.callback.data == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.callback.cancel == NULL);
+    CHECK_EQUAL(0, ccapi_data_single_instance->service.firmware_update.config.target.item[0].chunk_size);
+    CHECK_EQUAL(0, ccapi_data_single_instance->service.firmware_update.config.target.item[0].maximum_size);
+    CHECK_EQUAL(1, ccapi_data_single_instance->service.firmware_update.config.target.item[0].version.major);
+    CHECK_EQUAL(0, ccapi_data_single_instance->service.firmware_update.config.target.item[0].version.minor);
+    CHECK_EQUAL(0, ccapi_data_single_instance->service.firmware_update.config.target.item[0].version.revision);
+    CHECK_EQUAL(0, ccapi_data_single_instance->service.firmware_update.config.target.item[0].version.build);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.target.item[0].description == NULL);
+    CHECK(ccapi_data_single_instance->service.firmware_update.config.target.item[0].filespec == NULL);
+    CHECK(ccapi_data_single_instance->thread.firmware == NULL);
+    CHECK(ccapi_data_single_instance->config.rci_supported == CCAPI_TRUE);
+
+    {
+        ccapi_stop_error_t stop_error;
+
+        Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_terminate, NULL, connector_success);
+
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+        CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
+        CHECK(ccapi_data_single_instance == NULL);
+    }
+}
