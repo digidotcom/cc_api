@@ -59,7 +59,7 @@ CSRCS = $(CCAPI_SOURCES) $(CCIMP_SOURCES) $(RCI_TESTS_SOURCES)
 CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 
 # Libraries to Link
-LIBS = -lc -lCppUTest -lCppUTestExt -lpthread -lrt
+LIBS = -lc -lCppUTest -lCppUTestExt -lpthread -lrt -lcrypto
 
 CCFLAGS += $(CFLAGS) -std=c89
 

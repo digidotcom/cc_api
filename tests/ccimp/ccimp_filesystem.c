@@ -359,17 +359,19 @@ ccimp_status_t ccimp_fs_hash_alg(ccimp_fs_get_hash_alg_t * const hash_status_dat
     {
         case CCIMP_FS_HASH_NONE:
         case CCIMP_FS_HASH_MD5:
-        case CCIMP_FS_HASH_BEST:
-                hash_status_data->hash_alg.actual = CCIMP_FS_HASH_MD5;
-            break;
-
         case CCIMP_FS_HASH_CRC32:
-            hash_status_data->hash_alg.actual = CCIMP_FS_HASH_NONE;
+            hash_status_data->hash_alg.actual = hash_status_data->hash_alg.requested;
+            break;
+        case CCIMP_FS_HASH_BEST:
+            hash_status_data->hash_alg.actual = CCIMP_FS_HASH_MD5;
             break;
     }
 
     return status;
 }
+
+static ccimp_status_t app_calc_md5(char const * const path, uint8_t * hash_value, size_t const hash_value_len);
+static ccimp_status_t app_calc_crc32(char const * const path, uint8_t * hash_value, size_t const hash_value_len);
 
 ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const file_hash_data)
 {
@@ -377,14 +379,14 @@ ccimp_status_t ccimp_fs_hash_file(ccimp_fs_hash_file_t * const file_hash_data)
     switch (file_hash_data->hash_algorithm)
     {
          case CCIMP_FS_HASH_CRC32:
-             /*status = app_calc_crc32(file_hash_data->path, file_hash_data->hash_value);*/
+             status = app_calc_crc32(file_hash_data->path, file_hash_data->hash_value, file_hash_data->bytes_requested);
              break;
          case CCIMP_FS_HASH_MD5:
-             /*status = app_calc_md5(file_hash_data->path, file_hash_data->hash_value);*/
+             status = app_calc_md5(file_hash_data->path, file_hash_data->hash_value, file_hash_data->bytes_requested);
              break;
-         default:
-            /* This would never happen. */
-            break;
+         case CCIMP_FS_HASH_NONE:
+         case CCIMP_FS_HASH_BEST:
+             break;
     }
     return status;
 }
@@ -450,4 +452,90 @@ ccimp_status_t ccimp_fs_session_error(ccimp_fs_session_error_t * const session_e
     }
 
     return CCIMP_STATUS_OK;
+}
+
+
+#include <openssl/md5.h>
+
+#define APP_MD5_BUFFER_SIZE 1024
+
+
+static ccimp_status_t app_calc_md5(char const * const path, uint8_t * const hash_value, size_t const hash_value_len)
+{
+    ccimp_status_t status;
+    MD5_CTX md5;
+    char buf[APP_MD5_BUFFER_SIZE];
+    int ret;
+    ccapi_bool_t done;
+    int const fd = open(path, O_RDONLY);
+
+    assert(fd > 0);
+
+    MD5_Init(&md5);
+
+    done = CCAPI_FALSE;
+    do {
+        ret = read(fd, buf, sizeof buf);
+
+        if (ret > 0)
+        {
+            MD5_Update(&md5, buf, ret);
+        }
+        else if (ret == 0)
+        {
+            done = CCAPI_TRUE;
+        }
+        else if (ret == -1)
+        {
+            if (errno != EAGAIN)
+            {
+                done = CCAPI_TRUE;
+            }
+        }
+    } while (!done);
+
+    close (fd);
+
+    if (ret == 0)
+    {
+        MD5_Final(hash_value, &md5);
+        status = CCIMP_STATUS_OK;
+    }
+    else
+    {
+        memset(hash_value, 0, hash_value_len);
+        status = CCIMP_STATUS_ERROR;
+    }
+
+    return status;
+}
+
+
+extern int crc32file(char const * const name, uint32_t * const crc, long * const charcnt);
+
+static ccimp_status_t app_calc_crc32(char const * const path, uint8_t * hash_value, size_t const hash_value_len)
+{
+    ccimp_status_t status;
+    uint32_t crc32;
+    long char_count;
+    size_t i;
+    int const retval = crc32file(path, &crc32, &char_count);
+
+    if (retval < 0)
+    {
+        status = CCIMP_STATUS_ERROR;
+        goto done;
+    }
+
+    for (i = 0; i < hash_value_len; i++)
+    {
+        uint32_t const mask = 0xFF000000 >> (8 * i);
+        uint8_t const shift =  8 * (hash_value_len - (i + 1));
+
+        hash_value[i] = (crc32 & mask) >> shift;
+    }
+    status = CCIMP_STATUS_OK;
+
+done:
+    return status;
 }

@@ -53,10 +53,11 @@ APP_SRCS = main.c aux_functions.c
 CC_PRIVATE_SRCS = $(CCFSM_PRIVATE_DIR)/connector_api.c
 CCAPI_PRIVATE_SRCS = $(CCAPI_PRIVATE_DIR)/ccapi.c $(CCAPI_PRIVATE_DIR)/ccapi_data_handler.c $(CCAPI_PRIVATE_DIR)/ccapi_init.c $(CCAPI_PRIVATE_DIR)/ccapi_logging.c $(CCAPI_PRIVATE_DIR)/ccapi_transport_tcp.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem.c $(CCAPI_PRIVATE_DIR)/ccapi_filesystem_handler.c
 PLATFORM_SRCS = $(PLATFORM_DIR)/ccimp_os.c $(PLATFORM_DIR)/ccimp_logging.c $(PLATFORM_DIR)/ccimp_hal.c $(PLATFORM_DIR)/ccimp_network_tcp.c $(PLATFORM_DIR)/dns_helper.c $(PLATFORM_DIR)/ccimp_filesystem.c
+PLATFORM_SRCS += $(PLATFORM_DIR)/crc_32.c
 SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
 
 # Libraries to Link
-LIBS = -lc -lz -lpthread -lrt 
+LIBS = -lc -lz -lpthread -lrt -lcrypto
 
 # Generated Sample Executable Name.
 SAMPLE = ccapi_app
