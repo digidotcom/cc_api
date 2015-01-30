@@ -22,6 +22,11 @@
 typedef enum {
     CCAPI_RCI_ACTION_SET,
     CCAPI_RCI_ACTION_QUERY
+#if (defined RCI_LEGACY_COMMANDS)
+    ,CCAPI_RCI_ACTION_DO_COMMAND,
+    CCAPI_RCI_ACTION_REBOOT,
+    CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS
+#endif
 } ccapi_rci_action_t;
 
 typedef enum {
@@ -64,7 +69,13 @@ typedef struct {
         ccapi_rci_query_setting_attributes_t CONST attributes;
         ccapi_bool_t matches;
     } query_setting;
-
+#if (defined RCI_LEGACY_COMMANDS)
+    struct {
+        char const * CONST target;
+        char const * CONST request;
+        char const * * CONST response;
+    } do_command;
+#endif
     ccapi_rci_action_t CONST action;
     char const * error_hint;
     void * user_context;
@@ -99,6 +110,11 @@ typedef struct {
         ccapi_rci_function_t end_session;
         ccapi_rci_function_t start_action;
         ccapi_rci_function_t end_action;
+#if (defined RCI_LEGACY_COMMANDS)
+        ccapi_rci_function_t do_command;
+        ccapi_rci_function_t set_factory_defaults;
+        ccapi_rci_function_t reboot;
+#endif
     } callbacks;
     struct connector_remote_config_data const * rci_desc;
 } ccapi_rci_data_t;

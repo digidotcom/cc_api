@@ -163,6 +163,7 @@ static void session_start(connector_remote_config_t * const remote_config, char 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     rci_info_to_return = expected_rci_info;
 
+    rci_info_to_return.user_context = remote_config;
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_session_start;
 
@@ -195,6 +196,15 @@ static void action_start(connector_remote_config_t * const remote_config, ccapi_
             break;
         case CCAPI_RCI_ACTION_SET:
             remote_config->action = connector_remote_action_set;
+            break;
+        case CCAPI_RCI_ACTION_DO_COMMAND:
+            remote_config->action = connector_remote_action_do_command;
+            break;
+        case CCAPI_RCI_ACTION_REBOOT:
+            remote_config->action = connector_remote_action_reboot;
+            break;
+        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
+            remote_config->action = connector_remote_action_set_factory_def;
             break;
     }
 
@@ -256,9 +266,9 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
     expected_rci_info.group.instance = group_index;
-    rci_info_to_return.query_setting.matches = compare_matches;
 
     rci_info_to_return = expected_rci_info;
+    rci_info_to_return.query_setting.matches = compare_matches;
 
     remote_config->group.id = group_id;
     remote_config->group.index = group_index;
@@ -274,7 +284,7 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
     CHECK_EQUAL(CCAPI_BOOL_TO_CONNECTOR_BOOL(compare_matches), remote_config->response.compare_matches);
 }
 
-static void group_process_query(connector_remote_config_t * const remote_config, unsigned int const element_id, connector_element_value_type_t const element_type, connector_element_value_t const expected_value, ccapi_bool_t compare_matches, char const * const expected_function, unsigned int const error)
+static void group_process_query(connector_remote_config_t * const remote_config, unsigned int const element_id, connector_element_value_type_t const element_type, connector_element_value_t const expected_value, ccapi_bool_t compare_matches, char const * const expected_function, unsigned int const error, char const * const error_hint)
 {
     connector_callback_status_t status;
     connector_request_id_t request;
@@ -286,6 +296,7 @@ static void group_process_query(connector_remote_config_t * const remote_config,
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
     rci_info_to_return = expected_rci_info;
     rci_info_to_return.query_setting.matches = compare_matches;
+    rci_info_to_return.error_hint = error_hint;
 
     remote_config->element.id = element_id;
     remote_config->element.type = element_type;
@@ -301,6 +312,7 @@ static void group_process_query(connector_remote_config_t * const remote_config,
     CHECK_EQUAL(error, remote_config->error_id);
     th_rci_checkExpectations(expected_function, &expected_rci_info);
     CHECK_EQUAL(CCAPI_BOOL_TO_CONNECTOR_BOOL(compare_matches), remote_config->response.compare_matches);
+    STRCMP_EQUAL(remote_config->response.error_hint, error_hint);
     switch (element_type)
     {
         case connector_element_type_string:
@@ -442,6 +454,82 @@ static void group_end(connector_remote_config_t * const remote_config, char cons
     th_rci_checkExpectations(expected_function, &expected_rci_info);
 }
 
+static void do_command(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+    connector_element_value_t set_value;
+    connector_element_value_t response_value;
+
+    remote_config->element.value = &set_value;
+    remote_config->response.element_value = &response_value;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = "file_system";
+    expected_rci_info.do_command.request = "<ls dir=\"/WEB/python\"/>";
+    expected_rci_info.do_command.response = &remote_config->response.element_value->string_value;
+
+    rci_info_to_return = expected_rci_info;
+    *rci_info_to_return.do_command.response = "My response";
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_do_command;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+    STRCMP_EQUAL("My response", *ccapi_data_single_instance->service.rci.rci_info.do_command.response);
+}
+
+static void reboot(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = NULL;
+    expected_rci_info.do_command.request = NULL;
+    expected_rci_info.do_command.response = NULL;
+
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_reboot;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+}
+
+static void set_factory_defaults(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
+{
+    connector_callback_status_t status;
+    connector_request_id_t request;
+    ccapi_rci_info_t rci_info_to_return;
+    ccapi_rci_info_t expected_rci_info;
+
+    expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.do_command.target = NULL;
+    expected_rci_info.do_command.request = NULL;
+    expected_rci_info.do_command.response = NULL;
+
+    rci_info_to_return = expected_rci_info;
+
+    th_rci_returnValues(error, &rci_info_to_return);
+    request.remote_config_request = connector_request_id_remote_config_set_factory_def;
+    status = call_ccapi_connector_callback(connector_class_id_remote_config, request, remote_config, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_continue, status);
+    CHECK_EQUAL(error, remote_config->error_id);
+    th_rci_checkExpectations(expected_function, &expected_rci_info);
+}
+
 static void action_end(connector_remote_config_t * const remote_config, char const * const expected_function, unsigned int const error)
 {
     connector_callback_status_t status;
@@ -497,31 +585,31 @@ void testRCIQuerySettingGroup1(void)
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
 
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_LOAD_FAIL, "Error hint");
 
     expected_value.unsigned_integer_value = 5;
-    group_process_query(&remote_config, connector_setting_group_1_el_uint32, connector_element_type_uint32, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_uint32_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_uint32, connector_element_type_uint32, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_uint32_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.on_off_value = connector_on;
-    group_process_query(&remote_config, connector_setting_group_1_el_on_off, connector_element_type_on_off, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_on_off_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_on_off, connector_element_type_on_off, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_on_off_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.unsigned_integer_value = 0x20101010;
-    group_process_query(&remote_config, connector_setting_group_1_el_hex, connector_element_type_hex32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_hex_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_hex, connector_element_type_hex32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_hex_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.unsigned_integer_value = 0x20101010;
-    group_process_query(&remote_config, connector_setting_group_1_el_0xhex, connector_element_type_0x_hex32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_0xhex_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_0xhex, connector_element_type_0x_hex32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_0xhex_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.signed_integer_value = -100;
-    group_process_query(&remote_config, connector_setting_group_1_el_signed, connector_element_type_int32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_signed_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_signed, connector_element_type_int32, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_signed_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.boolean_value = connector_true;
-    group_process_query(&remote_config, connector_setting_group_1_el_bool, connector_element_type_boolean, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_bool_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_bool, connector_element_type_boolean, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_bool_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.float_value = 1.2;
-    group_process_query(&remote_config, connector_setting_group_1_el_float, connector_element_type_float, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_float_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_float, connector_element_type_float, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_float_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
-    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
@@ -551,10 +639,10 @@ void testRCIQuerySettingGroup3(void)
     group_start(&remote_config, connector_setting_group_3, 0, CCAPI_FALSE, "rci_setting_group_3_start", CCAPI_GLOBAL_ERROR_NONE);
 
     expected_value.string_value = "String";
-    group_process_query(&remote_config, connector_setting_group_3_el_string, connector_element_type_string, expected_value, CCAPI_FALSE, "rci_setting_group_3_el_string_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_3_el_string, connector_element_type_string, expected_value, CCAPI_FALSE, "rci_setting_group_3_el_string_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.string_value = "Multiline\nString";
-    group_process_query(&remote_config, connector_setting_group_3_el_multiline, connector_element_type_multiline_string, expected_value, CCAPI_FALSE, "rci_setting_group_3_el_multiline_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_3_el_multiline, connector_element_type_multiline_string, expected_value, CCAPI_FALSE, "rci_setting_group_3_el_multiline_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     group_end(&remote_config, "rci_setting_group_3_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
@@ -587,19 +675,19 @@ void testRCIQueryStateGroup2(void)
     group_start(&remote_config, connector_state_group_2, 0, CCAPI_FALSE, "rci_state_group_2_start", CCAPI_GLOBAL_ERROR_NONE);
 
     expected_value.string_value = "192.168.1.1";
-    group_process_query(&remote_config, connector_state_group_2_el_ip, connector_element_type_ipv4, expected_value, CCAPI_FALSE, "rci_state_group_2_el_ip_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_state_group_2_el_ip, connector_element_type_ipv4, expected_value, CCAPI_FALSE, "rci_state_group_2_el_ip_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.string_value = "www.digi.com";
-    group_process_query(&remote_config, connector_state_group_2_el_fqdnv4, connector_element_type_fqdnv4, expected_value, CCAPI_FALSE, "rci_state_group_2_el_fqdnv4_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_state_group_2_el_fqdnv4, connector_element_type_fqdnv4, expected_value, CCAPI_FALSE, "rci_state_group_2_el_fqdnv4_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.string_value = "2001:0db8:85a3:0042:1000:8a2e:0370:7334";
-    group_process_query(&remote_config, connector_state_group_2_el_fqdnv6, connector_element_type_fqdnv6, expected_value, CCAPI_FALSE, "rci_state_group_2_el_fqdnv6_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_state_group_2_el_fqdnv6, connector_element_type_fqdnv6, expected_value, CCAPI_FALSE, "rci_state_group_2_el_fqdnv6_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.string_value = "00:04:9D:AB:CD:EF";
-    group_process_query(&remote_config, connector_state_group_2_el_mac, connector_element_type_mac_addr, expected_value, CCAPI_FALSE, "rci_state_group_2_el_mac_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_state_group_2_el_mac, connector_element_type_mac_addr, expected_value, CCAPI_FALSE, "rci_state_group_2_el_mac_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     expected_value.string_value = "2002-05-30T09:30:10-0600";
-    group_process_query(&remote_config, connector_state_group_2_el_datetime, connector_element_type_datetime, expected_value, CCAPI_FALSE, "rci_state_group_2_el_datetime_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_state_group_2_el_datetime, connector_element_type_datetime, expected_value, CCAPI_FALSE, "rci_state_group_2_el_datetime_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
 
     group_end(&remote_config, "rci_state_group_2_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
@@ -712,6 +800,57 @@ TEST(test_ccapi_rci, testRCISetSettingGroup1Busy)
     testRCISetSettingGroup1();
 }
 
+TEST(test_ccapi_rci, testRCIDoCommand)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_DO_COMMAND, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    do_command(&remote_config, "rci_do_command_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
+TEST(test_ccapi_rci, testRCIReboot)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    reboot(&remote_config, "rci_reboot_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
+TEST(test_ccapi_rci, testRCISetFactoryDefaults)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    set_factory_defaults(&remote_config, "rci_set_factory_defaults_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
+
 void testRCISetStateGroup2(void)
 {
     connector_remote_config_t remote_config;
@@ -771,7 +910,7 @@ void testRCIQuerySettingGroup1AttributesMix(void)
     action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
@@ -781,7 +920,7 @@ void testRCIQuerySettingGroup1AttributesMix(void)
     action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
@@ -791,7 +930,7 @@ void testRCIQuerySettingGroup1AttributesMix(void)
     action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
@@ -801,7 +940,7 @@ void testRCIQuerySettingGroup1AttributesMix(void)
     action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
@@ -811,13 +950,64 @@ void testRCIQuerySettingGroup1AttributesMix(void)
     action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
     group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
     expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
-    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE);
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_FALSE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
     group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
     action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_BAD_COMMAND);
 
     session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
 }
 
+void testRCIMultipleCommandsSameSession(void)
+{
+    connector_remote_config_t remote_config;
+    ccapi_rci_query_setting_attributes_t query_setting_attributes;
+    connector_element_value_t expected_value;
+    connector_element_value_t set_value;
+
+    session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    query_setting_attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_DEFAULTS;
+    query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_DEFAULTS;
+
+    action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
+    expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
+    group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_start(&remote_config, CCAPI_RCI_ACTION_SET, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    group_start(&remote_config, connector_setting_group_3, 0, CCAPI_FALSE, "rci_setting_group_3_start", CCAPI_GLOBAL_ERROR_NONE);
+
+    set_value.string_value = "Some string";
+    group_process_set(&remote_config, connector_setting_group_3_el_string, connector_element_type_string, set_value, "rci_setting_group_3_el_string_set", CCAPI_GLOBAL_ERROR_NONE);
+
+    set_value.string_value = "Some\nmultiline\nstring";
+    group_process_set(&remote_config, connector_setting_group_3_el_multiline, connector_element_type_multiline_string, set_value, "rci_setting_group_3_el_multiline_set", CCAPI_GLOBAL_ERROR_NONE);
+
+    set_value.string_value = "Password***";
+    group_process_set(&remote_config, connector_setting_group_3_el_password, connector_element_type_password, set_value, "rci_setting_group_3_el_password_set", CCAPI_GLOBAL_ERROR_NONE);
+
+    group_end(&remote_config, "rci_setting_group_3_end", CCAPI_GLOBAL_ERROR_NONE);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_start(&remote_config, CCAPI_RCI_ACTION_DO_COMMAND, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    do_command(&remote_config, "rci_do_command_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_start(&remote_config, CCAPI_RCI_ACTION_QUERY, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    group_start(&remote_config, connector_setting_group_1, 0, CCAPI_FALSE, "rci_setting_group_1_start", CCAPI_GLOBAL_ERROR_NONE);
+    expected_value.enum_value = CCAPI_SETTING_GROUP_1_EL_ENUM_THREE;
+    group_process_query(&remote_config, connector_setting_group_1_el_enum, connector_element_type_enum, expected_value, CCAPI_TRUE, "rci_setting_group_1_el_enum_get", CCAPI_GLOBAL_ERROR_NONE, NULL);
+    group_end(&remote_config, "rci_setting_group_1_end", CCAPI_GLOBAL_ERROR_NONE);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    reboot(&remote_config, "rci_reboot_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_end(&remote_config, "rci_action_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+
+    session_end(&remote_config, "rci_session_end_cb", CCAPI_GLOBAL_ERROR_NONE);
+}
 TEST(test_ccapi_rci, testRCIQuerySettingGroup1AttributesMix)
 {
     testRCIQuerySettingGroup1AttributesMix();
