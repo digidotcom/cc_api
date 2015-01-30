@@ -227,6 +227,12 @@ typedef struct {
                 ccapi_rci_function_t function_cb;
                 void * argument;
                 unsigned int error;
+#if (defined RCI_ENUMS_AS_STRINGS)
+                struct {
+                    connector_element_enum_t const * array;
+                    unsigned int element_count;
+                } enum_data;
+#endif
             } queued_callback;
         } rci;
 #endif
