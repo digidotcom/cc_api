@@ -1,6 +1,9 @@
 globalerror load_fail "Load fail"
 globalerror save_fail "Save fail"
 globalerror memory_fail "Insufficient memory"
+globalerror reboot_fail "Reboot fail"
+globalerror do_command_fail "Do Command fail"
+globalerror set_factory_default_fail "Set Factory Default fail"
 
 group setting group_1 2 "Group 1"
     element el_enum "enum element" type enum access read_write

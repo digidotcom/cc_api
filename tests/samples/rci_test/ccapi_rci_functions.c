@@ -5,13 +5,16 @@
  * The command line arguments were: "username:***** "Linux Application" 1.0.0.0-vendor=0x2001371 -noUpload -noBackup -usenames=all -ccapiStub  config.rci"
  * The version of RCI Generator tool was: 2.0.0.0 */
 
-#include  <stdio.h>
-#include  "ccapi/ccapi.h"
-#include  "ccapi_rci_functions.h"
+#include <stdio.h>
+#include <unistd.h>
+#include "ccapi/ccapi.h"
+#include "ccapi_rci_functions.h"
 
 #if !(defined ASSERT)
 #define ASSERT(cond)       assert((cond))
 #endif
+
+char * buf_ptr;
 
 ccapi_global_error_id_t rci_session_start_cb(ccapi_rci_info_t * const info)
 {
@@ -56,6 +59,9 @@ ccapi_global_error_id_t rci_action_start_cb(ccapi_rci_info_t * const info)
     ASSERT(info->query_setting.matches == CCAPI_FALSE);
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
+
+    buf_ptr = NULL;
+
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -76,11 +82,19 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
     }
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
+
+    if (buf_ptr != NULL)
+    {
+        free(buf_ptr);
+    }
+
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
 {
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+
     ASSERT(info->action == CCAPI_RCI_ACTION_DO_COMMAND);
     ASSERT(info->group.instance == 0);
     ASSERT(info->group.name == NULL);
@@ -91,7 +105,72 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
     ASSERT(info->query_setting.matches == CCAPI_FALSE);
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
-    return CCAPI_GLOBAL_ERROR_NONE;
+
+    /* target can be null. Don't assert */
+    printf("%s: info->do_command.target='%s'\n", __FUNCTION__, info->do_command.target);
+
+    /* request can't be null */
+    ASSERT(info->do_command.request != NULL);
+    printf("%s: info->do_command.request='%s'\n", __FUNCTION__, info->do_command.request);
+
+    if (info->do_command.target == NULL)
+    {
+        *info->do_command.response = "no target";
+        goto done;
+    }
+
+    if (!strcmp(info->do_command.target, "echo"))
+    {
+        char * my_answer = malloc(strlen(info->do_command.request) + 1);
+        strcpy(my_answer, info->do_command.request);
+
+        /* Update buf_ptr so buffer is freed in the action_end callback */
+        buf_ptr = my_answer;
+        *info->do_command.response = my_answer;
+    }
+    else if (!strcmp(info->do_command.target, "ping"))
+    {
+        *info->do_command.response = "pong";
+    }
+    else if (!strcmp(info->do_command.target, "no answer"))
+    {
+    }
+    else if (!strcmp(info->do_command.target, "error"))
+    {
+        info->error_hint = "do command intentional failure";
+        error_id = CCAPI_GLOBAL_ERROR_DO_COMMAND_FAIL;
+    }
+    else if (!strcmp(info->do_command.target, "busy"))
+    {
+        sleep(5);
+        *info->do_command.response = "I sleep 5 seconds";
+    }
+    else if (!strcmp(info->do_command.target, "malloc"))
+    {
+        #define ALLOCATED_MEM_SIZE 5000
+
+        char * allocated_mem = malloc(ALLOCATED_MEM_SIZE + 1);
+
+        if (allocated_mem != NULL)
+        {
+            memset(allocated_mem, '-', ALLOCATED_MEM_SIZE);
+
+            allocated_mem[ALLOCATED_MEM_SIZE] = '\0';
+
+            /* Update buf_ptr so buffer is freed in the action_end callback */
+            buf_ptr = allocated_mem;
+
+            *info->do_command.response = allocated_mem;
+        }
+    }
+    else
+    {
+        *info->do_command.response = "not supported command";
+    }
+
+
+done:
+    return error_id;
 }
 
 ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const info)
