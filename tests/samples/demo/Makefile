@@ -69,6 +69,7 @@ CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_firmware_update_handler.c
 CCAPI_PRIVATE_SRCS += $(CCAPI_PRIVATE_DIR)/ccapi_cli_handler.c
 
 PLATFORM_SRCS := $(PLATFORM_DIR)/ccimp_filesystem.c
+PLATFORM_SRCS += $(PLATFORM_DIR)/crc_32.c
 PLATFORM_SRCS += $(PLATFORM_DIR)/ccimp_hal.c  
 PLATFORM_SRCS += $(PLATFORM_DIR)/ccimp_logging.c  
 PLATFORM_SRCS += $(PLATFORM_DIR)/ccimp_network_sms.c  
