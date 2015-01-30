@@ -51,18 +51,10 @@ void ccapi_receive_thread(void * const argument)
                     {
                         svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED;
                     }
-                    break;
-                }
-                case CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED:
-                {
-                    break;
-                }
-                case CCAPI_RECEIVE_THREAD_FREE_REQUESTED:
-                {
-                    svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
                     ccapi_data->service.receive.svc_receive = NULL;
                     break;
                 }
+                case CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED:
                 case CCAPI_RECEIVE_THREAD_FREE:
                 {
                     break;
@@ -437,19 +429,29 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             {
                 svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED;
 
+                ccapi_data->service.receive.svc_receive = svc_receive;
+
+                ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
+                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+
                 ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_READY->CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED", svc_receive->target);
 
-                ccapi_data->service.receive.svc_receive = svc_receive;
             }
+            else
+            {
+                ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
+                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
 
-            ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                ccimp_os_yield();
+            }
 
             connector_status = connector_callback_busy;
             break;
         }
         case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
         {
+            ccimp_os_yield();
+
             connector_status = connector_callback_busy;
             break;
         }
@@ -463,13 +465,12 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 memcpy(&svc_receive->response_processing, &svc_receive->response_buffer_info, sizeof svc_receive->response_buffer_info);
             }
 
-            svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE_REQUESTED;
+            svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
             connector_status = connector_callback_continue;
 
             break;
         }
-        case CCAPI_RECEIVE_THREAD_FREE_REQUESTED:
         case CCAPI_RECEIVE_THREAD_FREE:
             break;
     }
@@ -598,15 +599,6 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
                 ASSERT_MSG_GOTO(status_ptr->status != connector_data_service_status_COUNT, done);
                 break;
         }
-    }
-
-    if (svc_receive->receive_thread_status != CCAPI_RECEIVE_THREAD_FREE)
-    {
-        svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE_REQUESTED;
-        while (svc_receive->receive_thread_status != CCAPI_RECEIVE_THREAD_FREE)
-        {
-            ccimp_os_yield();
-        } 
     }
 
     /* Call the user so he can free allocated response memory and handle errors  */
