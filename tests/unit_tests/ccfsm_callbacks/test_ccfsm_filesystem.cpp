@@ -841,6 +841,44 @@ TEST(test_ccfsm_filesystem, testHashStatus)
     CHECK_EQUAL(ccfsm_file_stat_data.hash_algorithm.requested, ccfsm_file_stat_data.hash_algorithm.actual);
 }
 
+TEST(test_ccfsm_filesystem, testStatInexistentFile)
+{
+    connector_request_id_t request;
+    ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
+    connector_file_system_stat_t ccfsm_file_stat_data;
+    connector_callback_status_t status;
+
+    ccapi_data_single_instance->service.file_system.imp_context = &my_fs_context;
+
+    ccimp_dir_entry_status_data.errnum = CCIMP_FILESYSTEM_ERRNUM_NONE;
+    ccimp_dir_entry_status_data.imp_context = &my_fs_context;
+    ccimp_dir_entry_status_data.path = "/tmp/hello.txt";
+    ccimp_dir_entry_status_data.status.file_size = 0;
+    ccimp_dir_entry_status_data.status.last_modified = 0;
+    ccimp_dir_entry_status_data.status.type = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+
+    ccfsm_file_stat_data.errnum = CONNECTOR_FILESYSTEM_ERRNUM_NONE;
+    ccfsm_file_stat_data.user_context = NULL;
+    ccfsm_file_stat_data.path = ccimp_dir_entry_status_data.path;
+    ccfsm_file_stat_data.hash_algorithm.actual = connector_file_system_hash_none;
+    ccfsm_file_stat_data.hash_algorithm.requested = connector_file_system_hash_crc32;
+    ccfsm_file_stat_data.statbuf.file_size = 0;
+    ccfsm_file_stat_data.statbuf.last_modified = 0;
+    ccfsm_file_stat_data.statbuf.flags = connector_file_system_file_type_none;
+
+    Mock_ccimp_fs_dir_entry_status_expectAndReturn(&ccimp_dir_entry_status_data, CCIMP_STATUS_ERROR);
+
+    request.file_system_request = connector_request_id_file_system_stat;
+    status = ccapi_connector_callback(connector_class_id_file_system, request, &ccfsm_file_stat_data, ccapi_data_single_instance);
+
+    CHECK_EQUAL(connector_callback_error, status);
+    CHECK_EQUAL(8, *(my_filesystem_context_t *)ccapi_data_single_instance->service.file_system.imp_context);
+    CHECK_EQUAL(connector_file_system_file_type_none, ccfsm_file_stat_data.statbuf.flags);
+    CHECK_EQUAL(0, ccfsm_file_stat_data.statbuf.file_size);
+    CHECK_EQUAL(0, ccfsm_file_stat_data.statbuf.last_modified);
+    CHECK_EQUAL(connector_file_system_hash_none, ccfsm_file_stat_data.hash_algorithm.actual);
+}
+
 TEST(test_ccfsm_filesystem, testHashStatusFails)
 {
     connector_request_id_t request;
