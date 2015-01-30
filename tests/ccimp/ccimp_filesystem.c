@@ -304,38 +304,41 @@ ccimp_status_t ccimp_fs_dir_entry_status(ccimp_fs_dir_entry_status_t * const dir
 {
     ccimp_status_t status = CCIMP_STATUS_OK;
     struct stat statbuf;
+    int const result = stat(dir_entry_status_data->path, &statbuf);
 
-    int result = stat(dir_entry_status_data->path, &statbuf);
-    if (result == 0)
+    if (result != 0)
     {
-        dir_entry_status_data->status.last_modified = (uint32_t) statbuf.st_mtim.tv_sec;
-        if (S_ISDIR(statbuf.st_mode))
+        if (errno == EAGAIN)
         {
-           dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_DIR;
-        }
-        else if (S_ISREG(statbuf.st_mode))
-        {
-           dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
-           dir_entry_status_data->status.file_size = (ccimp_file_offset_t) statbuf.st_size;
+              status = CCIMP_STATUS_BUSY;
         }
         else
         {
             dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
+            dir_entry_status_data->status.file_size = 0;
+            dir_entry_status_data->status.last_modified = 0;
+            dir_entry_status_data->errnum = errno;
+            status = CCIMP_STATUS_ERROR;
         }
+        goto done;
+    }
+
+    dir_entry_status_data->status.last_modified = (uint32_t)statbuf.st_mtim.tv_sec;
+    if (S_ISDIR(statbuf.st_mode))
+    {
+       dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_DIR;
+    }
+    else if (S_ISREG(statbuf.st_mode))
+    {
+       dir_entry_status_data->status.type = CCIMP_FS_DIR_ENTRY_FILE;
+       dir_entry_status_data->status.file_size = (ccimp_file_offset_t) statbuf.st_size;
     }
     else
     {
-       if (errno == EAGAIN)
-       {
-             status = CCIMP_STATUS_BUSY;
-       }
-       else
-       {
-           dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
-           dir_entry_status_data->status.file_size = 0;
-           dir_entry_status_data->status.last_modified = 0;
-       }
+        dir_entry_status_data->status.type  = CCIMP_FS_DIR_ENTRY_UNKNOWN;
     }
+
+done:
     return status;
 }
 

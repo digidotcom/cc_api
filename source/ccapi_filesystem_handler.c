@@ -875,6 +875,7 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
                 break;
             case CCIMP_STATUS_ERROR:
                 ccapi_fs_set_ccimp_error(ccimp_dir_entry_status_data.errnum, &ccfsm_hash_status_data->errnum);
+                goto done;
         }
 
         ccimp_hash_algorithm_data.path = local_path;
