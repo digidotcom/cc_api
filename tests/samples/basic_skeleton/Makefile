@@ -69,7 +69,7 @@ SRCS = $(APP_SRCS) $(PLATFORM_SRCS) $(CC_PRIVATE_SRCS) $(CCAPI_PRIVATE_SRCS)
 
 
 # Libraries to Link
-LIBS = -lc -lz -lpthread -lrt 
+LIBS = -lc -lz -lpthread -lrt -lcrypto
 
 # Generated Sample Executable Name.
 SAMPLE = ccapi_app
