@@ -3,6 +3,7 @@ import cc_testcase
 import random
 import time
 import os
+import string
 
 
 MAX_TEST_FILE_SIZE = 2097152
@@ -40,7 +41,49 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_02_get_file_invalid_path(self):
+    def test_02_send_file_max_path_length(self):
+        """ Sends put_file request to upload a file in a path longer than the maximum length path allowed.
+        Verifies if the returned response is the expected and the file was not generated.
+        """
+
+        maxFileSize = 11726
+        fileData = fileContent[:maxFileSize]
+        rootPath = self.tempPath
+
+        for i in range(0,9):
+            folderNameLevel = ''.join( random.choice(string.ascii_letters + string.digits) for i in range(255))
+            rootPath = os.path.join( rootPath , folderNameLevel)
+
+
+        # Create the new directory on Device
+        os.makedirs(rootPath)
+
+        # Generate the destination path for the file
+        fileName = "test_06_send_file_max_path_length.txt"
+        filePath = os.path.join(rootPath,fileName)
+        fileSize = len(fileData)
+
+        self.log.info("Uploading file '%s' in a path with a total length of %d" % ( fileName, len(filePath) ) )
+
+
+        # Send the file to the Device
+        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, fileData)
+
+        if(status):
+            # Status 200. Checking the received response
+            self.fail("Received response from device: \"%s\" is not the expected (code %s)" % (response.content, response.status_code) )
+        else:
+            # Get response text
+            responseText = response.resource["sci_reply"]["file_system"]["device"]["commands"]["put_file"]["error"]["#text"]
+
+            if ( responseText != "Path too long" ):
+                self.fail("Incorrect response from device: %s" % response.content)
+            else:
+                self.log.info("Received expected response '%s' from device" % responseText)
+
+
+
+    def test_03_get_file_invalid_path(self):
         """ Sends get_file request to download a file from a non-existent path.
         Verifies if the returned response is the expected.
         """
@@ -66,7 +109,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_03_remove_file_invalid_path(self):
+    def test_04_remove_file_invalid_path(self):
         """ Sends remove file request from a non-existent path.
         Verifies if the returned response is the expected.
         """
@@ -89,7 +132,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_04_remove_invalid_file(self):
+    def test_05_remove_invalid_file(self):
         """ Sends remove file request for a non-existent file.
         Verifies if the returned response is the expected.
         """
@@ -112,7 +155,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_05_list_file_invalid_path(self):
+    def test_06_list_file_invalid_path(self):
         """ Sends list folder request over file system for a non-existent path.
         Verifies if the returned response is the expected.
         """
@@ -137,7 +180,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_06_send_file_folder_without_rights(self):
+    def test_07_send_file_folder_without_rights(self):
         """ Sends put_file request to upload a file in a path without write permissions.
         Verifies if the returned response is the expected and the file was not generated.
         """
@@ -168,7 +211,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_07_get_file_without_read_rights(self):
+    def test_08_get_file_without_read_rights(self):
         """ Sends get_file request to download a file from a subdirectory without read permissions.
         Verifies if the returned response is the expected.
         """
@@ -213,7 +256,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_08_send_invalid_file_with_offset(self):
+    def test_09_send_invalid_file_with_offset(self):
         """ Sends put_file request to upload data for a non-existent file with a valid offset.
         Verifies if the returned response is the expected and the file was generated empty.
         """
@@ -248,7 +291,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_09_send_file_with_invalid_offset(self):
+    def test_10_send_file_with_invalid_offset(self):
         """ Sends put_file request to upload data for an existent file with an invalid offset.
         Verifies if the returned response is the expected and the file was not modified.
         """
@@ -320,7 +363,7 @@ class FileSystemDvtTestCase(cc_testcase.TestCase):
 
 
 
-    def test_10_get_file_with_invalid_offset(self):
+    def test_11_get_file_with_invalid_offset(self):
         """ Sends get_file request to download data for an existent file with an invalid offset.
         Verifies if the returned response is the expected.
         """

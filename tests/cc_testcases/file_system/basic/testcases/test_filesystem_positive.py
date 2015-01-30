@@ -160,44 +160,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
 
 
-    def test_66_send_file_max_path_length(self):
-        """ Tests put and get a file in a long path. """
-
-        maxFileSize = 11726
-        fileData = fileContent[:maxFileSize]
-        rootPath = self.tempPath
-
-        for i in range(0,9):
-            folderNameLevel = ''.join( random.choice(string.ascii_letters + string.digits) for i in range(255))
-            rootPath = os.path.join( rootPath , folderNameLevel)
-
-
-        # Create the new directory on Device
-        os.makedirs(rootPath)
-
-        # Generate the destination path for the file
-        fileName = "test_06_send_file_max_path_length.txt"
-        filePath = os.path.join(rootPath,fileName)
-        fileSize = len(fileData)
-
-        self.log.info("Uploading file '%s' in a path with a total length of %d" % ( fileName, len(filePath) ) )
-
-        # Send and verify the file
-        self.uploadFileAndVerifyFileContent(filePath, fileData)
-
-        # Remove file from device
-        status, response = self.cloudHandler.removeFileFromDevice(self.device_id, filePath)
-        if(status):
-            self.log.info("Received the expected response for the remove request")
-        else:
-            self.log.error("Response content from device: %s" % response.content)
-            self.fail("Incorrect response code: %d" % response.status_code)
-
-
-
-
-
-    def test_07_send_data_chunks_with_valid_offset(self):
+    def test_06_send_data_chunks_with_valid_offset(self):
         """ Sends several put_file requests to upload different data chunks over the same file with a different offset.
         Verifies if the returned response is the expected and the generated file has the expected content.
         """
@@ -256,7 +219,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
 
 
-    def test_08_send_data_chunks_with_truncate_option(self):
+    def test_07_send_data_chunks_with_truncate_option(self):
         """ Sends several put_file requests to upload different data chunks over the same file with the truncate option.
         Verifies if the returned response is the expected and the generated file has the expected content.
         """
@@ -337,7 +300,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
 
 
-    def test_09_verify_filesystem_ls_command(self):
+    def test_08_verify_filesystem_ls_command(self):
         """ Sends list folder request over file system and verify that the response match with the expected files.
         """
 
@@ -422,7 +385,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
 
 
-    def test_10_verify_filesystem_ls_command_with_hash(self):
+    def test_09_verify_filesystem_ls_command_with_hash(self):
         """ Sends list folder request over file system with the hash flag enabled and verify that the response match with the expected files.
         """
 
@@ -599,6 +562,21 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             self.fail("Received file content from device: \"%s\"\n is not the expected: \"%s\"" % (obtainedFileData, fileData) )
 
 
+
+    def md5Hash(self, fileData):
+        import hashlib
+        m = hashlib.md5()
+        m.update(fileData)
+        return m.hexdigest()
+
+
+    def crc32Hash(self, fileData):
+        import binascii
+        # Obtain the CRC32 from file data
+        crc32 = (binascii.crc32(fileData) & 0xFFFFFFFF)
+        crc32_decimal = "%s" % crc32
+        crc32_hexadecimal = "%08X" % crc32
+        return crc32_decimal
 
 
 
