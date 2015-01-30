@@ -46,7 +46,7 @@ typedef struct {
         uint8_t device_id[16];
         char const * device_type;
         char const * device_cloud_url;         /* Shared for TCP and UDP transports, meaningless for SMS */
-        ccapi_status_callback_t status_callback;
+        ccapi_status_callback_t status;
         struct {
                 ccapi_receive_service_t * receive;
                 ccapi_fw_service_t * firmware; /* EDP/TCP only */

@@ -94,7 +94,7 @@ typedef struct {
     struct {
         ccapi_rci_function_t start;
         ccapi_rci_function_t end;
-    } callbacks;
+    } callback;
 } ccapi_rci_group_t;
 
 typedef struct {
@@ -115,7 +115,7 @@ typedef struct {
         ccapi_rci_function_t set_factory_defaults;
         ccapi_rci_function_t reboot;
 #endif
-    } callbacks;
+    } callback;
     struct connector_remote_config_data const * rci_desc;
 } ccapi_rci_data_t;
 

@@ -177,7 +177,7 @@ int main (void)
     start.device_type = DEVICE_TYPE;
     start.service.file_system = &filesystem_service;
     start.service.receive = &receive_service;
-    start.status_callback = NULL;
+    start.status = NULL;
     start.vendor_id = VENDOR_ID;
 
     printf("\tStarting CCAPI\n");

@@ -22,7 +22,7 @@
 #define CCAPI_DP_KEY_DATA_GEOJSON   "geojson"
 
 #define CCAPI_DP_KEY_TS_EPOCH       "ts_epoch"
-#define CCAPI_DP_KEY_TS_EPOCH_MS     "ts_epoch_ms"
+#define CCAPI_DP_KEY_TS_EPOCH_MS    "ts_epoch_ms"
 #define CCAPI_DP_KEY_TS_ISO8601     "ts_iso"
 
 #define CCAPI_DP_KEY_LOCATION       "loc"

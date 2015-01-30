@@ -150,7 +150,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             {
                 case connector_request_id_remote_config_session_start:
                 {
-                    ccapi_rci_function_t const session_start_cb = rci_data->callbacks.start_session;
+                    ccapi_rci_function_t const session_start_cb = rci_data->callback.start_session;
 
                     rci_info->action = CCAPI_RCI_ACTION_QUERY;
                     rci_info->error_hint = NULL;
@@ -170,7 +170,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 case connector_request_id_remote_config_action_start:
                 {
                     connector_remote_group_type_t const group_type = remote_config->group.type;
-                    ccapi_rci_function_t const action_start_cb = rci_data->callbacks.start_action;
+                    ccapi_rci_function_t const action_start_cb = rci_data->callback.start_action;
 
                     rci_info->group.instance = 0;
                     switch (remote_config->action)
@@ -221,19 +221,19 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 }
 #if (defined RCI_LEGACY_COMMANDS)
                 case connector_request_id_remote_config_do_command:
-                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callbacks.do_command;
+                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.do_command;
                     ccapi_data->service.rci.queued_callback.argument = NULL;
                     ccapi_data->service.rci.rci_info.do_command.target = remote_config->attribute.target;
                     ccapi_data->service.rci.rci_info.do_command.request = remote_config->element.value->string_value;
                     ccapi_data->service.rci.rci_info.do_command.response = &remote_config->response.element_value->string_value;
                     break;
                 case connector_request_id_remote_config_reboot:
-                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callbacks.reboot;
+                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.reboot;
                     ccapi_data->service.rci.queued_callback.argument = NULL;
                     break;
                     break;
                 case connector_request_id_remote_config_set_factory_def:
-                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callbacks.set_factory_defaults;
+                    ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.set_factory_defaults;
                     ccapi_data->service.rci.queued_callback.argument = NULL;
                     break;
 #endif
@@ -260,7 +260,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 #endif
                     ASSERT(group_id < group_table->count);
                     group = &group_table->groups[group_id];
-                    start_callback = group->callbacks.start;
+                    start_callback = group->callback.start;
                     ccapi_data->service.rci.queued_callback.function_cb = start_callback;
                     break;
                 }
@@ -549,20 +549,20 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     group = &group_table->groups[group_id];
                     ASSERT(group_id < group_table->count);
                     group = &group_table->groups[group_id];
-                    end_callback = group->callbacks.end;
+                    end_callback = group->callback.end;
                     ccapi_data->service.rci.queued_callback.function_cb = end_callback;
                     break;
                 }
                 case connector_request_id_remote_config_action_end:
                 {
-                    ccapi_rci_function_t const action_end_cb = rci_data->callbacks.end_action;
+                    ccapi_rci_function_t const action_end_cb = rci_data->callback.end_action;
 
                     ccapi_data->service.rci.queued_callback.function_cb = action_end_cb;
                     break;
                 }
                 case connector_request_id_remote_config_session_end:
                 {
-                    ccapi_rci_function_t const session_end_cb = rci_data->callbacks.end_session;
+                    ccapi_rci_function_t const session_end_cb = rci_data->callback.end_session;
 
                     ccapi_data->service.rci.queued_callback.function_cb = session_end_cb;
                     break;
