@@ -87,7 +87,7 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
             break;
     }
 
-    if (!*p_transport_started)
+    if (p_transport_started == NULL || !*p_transport_started)
     {
         ccapi_logging_line("checkargs_send_common: Transport not started");
 

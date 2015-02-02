@@ -73,10 +73,6 @@ static ccapi_ping_error_t checkargs_send_ping(ccapi_data_t * const ccapi_data, c
     switch (transport)
     {
         case CCAPI_TRANSPORT_TCP:
-            ccapi_logging_line("checkargs_send_ping: Transport not valid");
-
-            error = CCAPI_PING_ERROR_TRANSPORT_NOT_VALID;
-            goto done;
             break;
         case CCAPI_TRANSPORT_UDP:
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
@@ -88,6 +84,14 @@ static ccapi_ping_error_t checkargs_send_ping(ccapi_data_t * const ccapi_data, c
             p_transport_started = &ccapi_data->transport_sms.started;
 #endif
             break;
+    }
+
+    if (p_transport_started == NULL)
+    {
+        ccapi_logging_line("checkargs_send_ping: Transport not valid");
+
+        error = CCAPI_PING_ERROR_TRANSPORT_NOT_VALID;
+        goto done;
     }
 
     if (!*p_transport_started)
