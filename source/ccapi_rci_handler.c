@@ -102,6 +102,17 @@ static int string_to_enum(connector_element_enum_t const * const element_enum_in
 
     return enum_id;
 }
+
+static void queue_enum_callback(ccapi_data_t * const ccapi_data, connector_remote_config_t const * const remote_config)
+{
+    connector_remote_config_data_t const * const rci_desc = ccapi_data->service.rci.rci_data->rci_desc;
+    unsigned int const group_id = remote_config->group.id;
+    unsigned int const element_id = remote_config->element.id;
+    connector_remote_group_type_t const group_type = remote_config->group.type;
+
+    ccapi_data->service.rci.queued_callback.enum_data.array = get_ccfsm_element_enum_info(rci_desc, group_type, group_id, element_id);
+    ccapi_data->service.rci.queued_callback.enum_data.element_count = get_ccfsm_element_enum_count(rci_desc, group_type, group_id, element_id);
+}
 #endif
 
 void ccapi_rci_thread(void * const argument)
@@ -135,7 +146,6 @@ void ccapi_rci_thread(void * const argument)
                     if (ccapi_data->service.rci.queued_callback.enum_data.array != NULL)
                     {
                         ccapi_rci_info_t * const rci_info = &ccapi_data->service.rci.rci_info;
-                        connector_element_enum_t const * const enum_array = ccapi_data->service.rci.queued_callback.enum_data.array;
                         unsigned int const enum_element_count = ccapi_data->service.rci.queued_callback.enum_data.element_count;
 
                         if (rci_info->action == CCAPI_RCI_ACTION_QUERY)
@@ -460,13 +470,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                                 case connector_element_type_enum:
                                 {
 #if (defined RCI_ENUMS_AS_STRINGS)
-                                    connector_remote_config_data_t const * const rci_desc = ccapi_data->service.rci.rci_data->rci_desc;
-                                    unsigned int const group_id = remote_config->group.id;
-                                    unsigned int const element_id = remote_config->element.id;
-                                    connector_remote_group_type_t const group_type = remote_config->group.type;
-
-                                    ccapi_data->service.rci.queued_callback.enum_data.array = get_ccfsm_element_enum_info(rci_desc, group_type, group_id, element_id);
-                                    ccapi_data->service.rci.queued_callback.enum_data.element_count = get_ccfsm_element_enum_count(rci_desc, group_type, group_id, element_id);
+                                    queue_enum_callback(ccapi_data, remote_config);
 #endif
                                     p_element = &remote_config->response.element_value->enum_value;
                                     break;
@@ -579,13 +583,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                                 case connector_element_type_enum:
                                 {
 #if (defined RCI_ENUMS_AS_STRINGS)
-                                    connector_remote_config_data_t const * const rci_desc = ccapi_data->service.rci.rci_data->rci_desc;
-                                    unsigned int const group_id = remote_config->group.id;
-                                    unsigned int const element_id = remote_config->element.id;
-                                    connector_remote_group_type_t const group_type = remote_config->group.type;
-
-                                    ccapi_data->service.rci.queued_callback.enum_data.array = get_ccfsm_element_enum_info(rci_desc, group_type, group_id, element_id);
-                                    ccapi_data->service.rci.queued_callback.enum_data.element_count = get_ccfsm_element_enum_count(rci_desc, group_type, group_id, element_id);
+                                    queue_enum_callback(ccapi_data, remote_config);
 #endif
                                     ccapi_data->service.rci.queued_callback.function_cb = process_callback;
                                     ccapi_data->service.rci.queued_callback.argument = (void *)&remote_config->element.value->enum_value;
