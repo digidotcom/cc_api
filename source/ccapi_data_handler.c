@@ -77,7 +77,7 @@ static connector_callback_status_t ccapi_process_send_data_request(connector_dat
 	
     if (send_ptr != NULL)
     {
-        ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)send_ptr->user_context;
+        ccapi_svc_send_t * const svc_send = send_ptr->user_context;
         size_t bytes_expected_to_read;
 
         ASSERT_MSG_GOTO(svc_send != NULL, done);
@@ -121,7 +121,7 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_response(connector_data_service_send_response_t const * const resp_ptr)
 {
-    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)resp_ptr->user_context;
+    ccapi_svc_send_t * const svc_send = resp_ptr->user_context;
 
     ASSERT_MSG_GOTO(svc_send != NULL, done);
 
@@ -166,7 +166,7 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_status(connector_data_service_status_t const * const status_ptr)
 {
-    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)status_ptr->user_context;
+    ccapi_svc_send_t * const svc_send = status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_send != NULL, done);
@@ -212,7 +212,7 @@ done:
 
 static connector_callback_status_t ccapi_process_send_data_length(connector_data_service_length_t * const length_ptr)
 {
-    ccapi_svc_send_t * const svc_send = (ccapi_svc_send_t *)length_ptr->user_context;
+    ccapi_svc_send_t * const svc_send = length_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_send != NULL, done);
@@ -352,7 +352,7 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_data(connector_data_service_receive_data_t * const data_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)data_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = data_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -528,7 +528,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
 
 static connector_callback_status_t ccapi_process_device_request_response(connector_data_service_receive_reply_data_t * const reply_ptr)
 {
-    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)reply_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = reply_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -569,7 +569,7 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_status(connector_data_service_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_receive_t * const svc_receive = (ccapi_svc_receive_t *)status_ptr->user_context;
+    ccapi_svc_receive_t * const svc_receive = status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);
@@ -631,7 +631,7 @@ done:
 
 static connector_callback_status_t ccapi_process_device_request_length(connector_data_service_length_t * const length_ptr)
 {
-    ccapi_svc_receive_t const * const svc_receive = (ccapi_svc_receive_t *)length_ptr->user_context;
+    ccapi_svc_receive_t const * const svc_receive = length_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_receive != NULL, done);

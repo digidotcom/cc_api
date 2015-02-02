@@ -276,7 +276,7 @@ static void fill_internal_error(ccapi_svc_cli_t * svc_cli)
 
 static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_response_t * const cli_response_ptr)
 {
-    ccapi_svc_cli_t * const svc_cli = (ccapi_svc_cli_t *)cli_response_ptr->user_context;
+    ccapi_svc_cli_t * const svc_cli = cli_response_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -317,7 +317,7 @@ done:
 
 static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_cli_t * const svc_cli = (ccapi_svc_cli_t *)status_ptr->user_context;
+    ccapi_svc_cli_t * const svc_cli = status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -364,7 +364,7 @@ done:
 
 static connector_callback_status_t ccapi_process_cli_response_length(connector_sm_cli_response_length_t * const length_ptr)
 {
-    ccapi_svc_cli_t const * const svc_cli = (ccapi_svc_cli_t *)length_ptr->user_context;
+    ccapi_svc_cli_t const * const svc_cli = length_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -380,7 +380,7 @@ done:
 
 static connector_callback_status_t ccapi_process_ping_response(connector_sm_ping_response_t const * const response_ptr)
 {
-    ccapi_svc_ping_t * const svc_ping = (ccapi_svc_ping_t *)response_ptr->user_context;
+    ccapi_svc_ping_t * const svc_ping = response_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_ping != NULL, done);
