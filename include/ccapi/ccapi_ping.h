@@ -13,7 +13,7 @@
 #ifndef _CCAPI_PING_H_
 #define _CCAPI_PING_H_
 
-#define CCAPI_SEND_PING_WAIT_FOREVER ((unsigned long) 0)
+#define CCAPI_SEND_PING_WAIT_FOREVER 0UL
 
 typedef enum {
     CCAPI_PING_ERROR_NONE,

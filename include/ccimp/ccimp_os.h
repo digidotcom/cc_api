@@ -57,8 +57,8 @@ typedef struct {
     unsigned long sys_uptime;
 } ccimp_os_system_up_time_t;
 
-#define OS_LOCK_ACQUIRE_NOWAIT             ((unsigned long) 0)
-#define OS_LOCK_ACQUIRE_INFINITE           ((unsigned long)-1)
+#define OS_LOCK_ACQUIRE_NOWAIT             0UL
+#define OS_LOCK_ACQUIRE_INFINITE           -1UL
 
 typedef struct {
     void CONST * lock;

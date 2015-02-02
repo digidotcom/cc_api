@@ -13,7 +13,7 @@
 #ifndef _CCAPI_SEND_H_
 #define _CCAPI_SEND_H_
 
-#define CCAPI_SEND_WAIT_FOREVER ((unsigned long) 0)
+#define CCAPI_SEND_WAIT_FOREVER 0UL
 
 typedef enum {
     CCAPI_SEND_ERROR_NONE,
