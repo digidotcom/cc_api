@@ -20,6 +20,11 @@
 #endif
 
 typedef enum {
+    CCAPI_OFF,
+    CCAPI_ON
+} ccapi_on_off_t;
+
+typedef enum {
     CCAPI_RCI_ACTION_SET,
     CCAPI_RCI_ACTION_QUERY
 #if (defined RCI_LEGACY_COMMANDS)
