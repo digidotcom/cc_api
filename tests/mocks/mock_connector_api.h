@@ -16,6 +16,7 @@
 #define MOCK_CONNECTOR_INIT_ENABLED 1
 #define MOCK_CONNECTOR_RUN_ENABLED 1
 #define MOCK_CONNECTOR_SEND_DATA_ENABLED 1
+#define MOCK_CONNECTOR_SEND_PING_ENABLED 1
 
 #define WAIT_FOR_ASSERT()   {do ccimp_os_yield(); while (assert_buffer == NULL);}
 
@@ -49,6 +50,9 @@ typedef struct  {
             void * data;
         } out;
     } connector_initiate_send_data_info;
+    struct {
+        int response;
+    } connector_initiate_send_ping_info;
     struct {
         connector_data_point_response_t * ccfsm_response;
         connector_data_point_status_t * ccfsm_status;

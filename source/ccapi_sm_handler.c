@@ -80,7 +80,7 @@ static ccapi_bool_t valid_cli_malloc(void * * ptr, size_t size, ccapi_cli_error_
  
     *ptr = ccapi_malloc(size);
 
-    success = *ptr == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    success = CCAPI_BOOL(*ptr != NULL);
     
     if (!success)
     {
@@ -276,7 +276,7 @@ static void fill_internal_error(ccapi_svc_cli_t * svc_cli)
 
 static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_response_t * const cli_response_ptr)
 {
-    ccapi_svc_cli_t * const svc_cli = (ccapi_svc_cli_t *)cli_response_ptr->user_context;
+    ccapi_svc_cli_t * const svc_cli = cli_response_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -317,7 +317,7 @@ done:
 
 static connector_callback_status_t ccapi_process_cli_status(connector_sm_cli_status_t const * const status_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_svc_cli_t * const svc_cli = (ccapi_svc_cli_t *)status_ptr->user_context;
+    ccapi_svc_cli_t * const svc_cli = status_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -364,7 +364,7 @@ done:
 
 static connector_callback_status_t ccapi_process_cli_response_length(connector_sm_cli_response_length_t * const length_ptr)
 {
-    ccapi_svc_cli_t const * const svc_cli = (ccapi_svc_cli_t *)length_ptr->user_context;
+    ccapi_svc_cli_t const * const svc_cli = length_ptr->user_context;
     connector_callback_status_t connector_status = connector_callback_error;
 
     ASSERT_MSG_GOTO(svc_cli != NULL, done);
@@ -377,6 +377,49 @@ done:
     return connector_status;
 }
 #endif /* (defined CONNECTOR_SM_CLI) */
+
+static connector_callback_status_t ccapi_process_ping_response(connector_sm_ping_response_t const * const response_ptr)
+{
+    ccapi_svc_ping_t * const svc_ping = response_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_ping != NULL, done);
+
+    ccapi_logging_line("ccapi_process_ping_response: %d", response_ptr->status);
+   
+    switch (response_ptr->status)
+    {
+        case connector_sm_ping_status_success:
+        case connector_sm_ping_status_complete:
+            svc_ping->response_error = CCAPI_PING_ERROR_NONE;
+            break;
+        case connector_sm_ping_status_cancel:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_CANCEL;
+            break;
+        case connector_sm_ping_status_timeout:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_TIMEOUT;
+            break;
+        case connector_sm_ping_status_error:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_ERROR;
+            break;
+    }
+
+    ASSERT_MSG_GOTO(svc_ping->ping_lock != NULL, done);
+    
+    switch (ccapi_lock_release(svc_ping->ping_lock))
+    {
+        case CCIMP_STATUS_OK:
+            connector_status = connector_callback_continue;
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            connector_status = connector_callback_error;
+            break;
+    }
+
+done:
+    return connector_status;
+}
 
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
@@ -420,7 +463,22 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 #endif
 
         case connector_request_id_sm_ping_request:
+        {
+            connector_sm_receive_ping_request_t * const ping_request = data;
+
+            ccapi_logging_line("ccapi_sm_service_handler: response %s needed", ping_request->response_required ? "is" : "is not");
+
+            connector_status = connector_callback_continue;
+            break;
+        }
         case connector_request_id_sm_ping_response:
+        {
+            connector_sm_ping_response_t const * const response_ptr = data;
+
+            connector_status = ccapi_process_ping_response(response_ptr);
+
+            break;
+        }
         case connector_request_id_sm_more_data:
         case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:

@@ -274,7 +274,6 @@ ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccap
 #endif
 
 #if (defined CCIMP_DATA_POINTS_ENABLED)
-
 typedef enum {
     CCAPI_DP_ARG_DATA_INT32,
     CCAPI_DP_ARG_DATA_INT64,
@@ -317,7 +316,6 @@ typedef struct {
     ccapi_dp_error_t response_error;
     ccapi_dp_error_t status;
 } ccapi_dp_transaction_info_t;
-
 #endif
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -333,6 +331,14 @@ typedef struct {
         ccapi_fs_internal_error_t ccapi_error;
     } error;
 } ccapi_fs_error_handle_t;
+#endif
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+typedef struct
+{
+    void * ping_lock;
+    ccapi_ping_error_t response_error;
+} ccapi_svc_ping_t;
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;

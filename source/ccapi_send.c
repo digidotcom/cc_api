@@ -28,7 +28,7 @@ static ccapi_bool_t valid_malloc(void * * const ptr, size_t const size, ccapi_se
  
     *ptr = ccapi_malloc(size);
 
-    success = (*ptr == NULL) ? CCAPI_FALSE : CCAPI_TRUE;
+    success = CCAPI_BOOL(*ptr != NULL);
     
     if (!success)
     {
@@ -60,7 +60,7 @@ done:
 static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
-    ccapi_bool_t const *  p_transport_started = NULL;
+    ccapi_bool_t const * p_transport_started = NULL;
 
     if (!CCAPI_RUNNING(ccapi_data))
     {
@@ -87,7 +87,7 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
             break;
     }
 
-    if (!*p_transport_started)
+    if (p_transport_started == NULL || !*p_transport_started)
     {
         ccapi_logging_line("checkargs_send_common: Transport not started");
 
@@ -169,18 +169,15 @@ done:
 static ccapi_send_error_t setup_send_common(ccapi_data_t * const ccapi_data, ccapi_send_t * const send_info, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t const behavior)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
+    ccimp_os_lock_create_t create_data;
 
+    if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
     {
-        ccimp_os_lock_create_t create_data;
-
-        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
-        {
-            error = CCAPI_SEND_ERROR_LOCK_FAILED;
-            goto done;
-        }
-
-        send_info->svc_send.send_lock = create_data.lock;
+        error = CCAPI_SEND_ERROR_LOCK_FAILED;
+        goto done;
     }
+
+    send_info->svc_send.send_lock = create_data.lock;
 
     send_info->header.transport = ccapi_to_connector_transport(transport);
     send_info->header.request_id = NULL;
@@ -272,6 +269,7 @@ static ccapi_send_error_t perform_send(ccapi_data_t * const ccapi_data, ccapi_se
 {
     connector_status_t status;
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
+
     do
     {
         status = connector_initiate_action_secure(ccapi_data, connector_initiate_send_data, &send_info->header);

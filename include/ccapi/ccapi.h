@@ -23,6 +23,7 @@
 #include "ccapi/ccapi_datapoints.h"
 #include "ccapi/ccapi_datapoints_binary.h"
 #include "ccapi/ccapi_cli.h"
+#include "ccapi/ccapi_ping.h"
 #include "ccapi/ccapi_rci.h"
 #include "ccapi/ccapi_init.h"
 
