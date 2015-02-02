@@ -40,6 +40,7 @@ mock_connector_api_info_t * mock_connector_api_info_alloc(connector_handle_t con
             mock_info[i].connector_initiate_send_data_info.in.response = connector_data_service_send_response_t::connector_data_service_send_response_success; 
             mock_info[i].connector_initiate_send_data_info.in.hint = NULL;
             mock_info[i].connector_initiate_send_data_info.in.status = connector_data_service_status_t::connector_data_service_status_complete;
+            mock_info[i].connector_initiate_send_ping_info.response = connector_sm_ping_response_t::connector_sm_ping_status_success; 
 
             sem_post(&sem);
 
@@ -228,6 +229,7 @@ void Mock_connector_initiate_action_create(void)
     mock().installComparator("connector_transport_t", connector_transport_t_comparator);
     mock().installComparator("connector_initiate_stop_request_t", connector_initiate_stop_request_t_comparator);
     mock().installComparator("connector_request_data_service_send_t", connector_request_data_service_send_t_comparator);
+    mock().installComparator("connector_sm_send_ping_request_t", connector_sm_send_ping_request_t_comparator);
     mock().installComparator("connector_request_data_point_t", connector_request_data_point_t_comparator);
     return;
 }
@@ -266,6 +268,14 @@ void Mock_connector_initiate_action_expectAndReturn(connector_handle_t handle, c
             break;
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
+            mock("connector_initiate_action").expectOneCall("connector_initiate_action")
+                     .withParameter("handle", handle)
+                     .withParameter("request", request)
+                     .withParameterOfType("connector_sm_send_ping_request_t", "request_data", request_data)
+                     .andReturnValue(retval);
+
+            mock("connector_initiate_action").setData("connector_sm_send_ping_request_t_behavior", MOCK_CONNECTOR_SEND_PING_ENABLED);
+            break;
         case connector_initiate_session_cancel:
         case connector_initiate_session_cancel_all:
             break;
@@ -509,6 +519,48 @@ connector_status_t connector_initiate_action(connector_handle_t const handle, co
         }
 #ifdef CONNECTOR_SHORT_MESSAGE
         case connector_initiate_ping_request:
+        {
+
+            uint8_t behavior = mock("connector_initiate_action").getData("connector_sm_send_ping_request_t_behavior").getIntValue();
+            if (behavior == MOCK_CONNECTOR_SEND_PING_ENABLED)
+            {
+                mock("connector_initiate_action").actualCall("connector_initiate_action")
+                    .withParameter("handle", handle)
+                    .withParameter("request", request)
+                    .withParameterOfType("connector_sm_send_ping_request_t", "request_data", (void *)request_data);
+            }
+
+            /* Call response callback */
+            {
+                 connector_request_id_t request_id;
+                 connector_sm_send_ping_request_t * header = (connector_sm_send_ping_request_t *)request_data;
+
+
+                 request_id.sm_request = connector_request_id_sm_ping_response;
+
+
+                 #define HANDLE_PING_RESPONSE(response) \
+                         { \
+                             case (response): \
+                                 connector_sm_ping_response_t ping_response = { \
+                                                           header->transport, header->user_context, \
+                                                           (response), \
+                                                           }; \
+                                 ccapi_connector_callback(connector_class_id_short_message, request_id, &ping_response, (void *)ccapi_data); \
+                                 break; \
+                         }
+
+                 switch (mock_info->connector_initiate_send_ping_info.response)
+                 {
+                     HANDLE_PING_RESPONSE(connector_sm_ping_response_t::connector_sm_ping_status_success);
+                     HANDLE_PING_RESPONSE(connector_sm_ping_response_t::connector_sm_ping_status_complete);
+                     HANDLE_PING_RESPONSE(connector_sm_ping_response_t::connector_sm_ping_status_cancel);
+                     HANDLE_PING_RESPONSE(connector_sm_ping_response_t::connector_sm_ping_status_timeout);
+                     HANDLE_PING_RESPONSE(connector_sm_ping_response_t::connector_sm_ping_status_error);
+                 }
+            }
+            break;
+        }
         case connector_initiate_session_cancel:
         case connector_initiate_session_cancel_all:
             break;
