@@ -252,7 +252,7 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_end(ccapi_rci_info_t * cons
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_get(ccapi_rci_info_t * const info, ccapi_setting_group_1_el_enum_id_t * const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_get(ccapi_rci_info_t * const info, char const * * const value)
 {
     ASSERT(info->action == CCAPI_RCI_ACTION_QUERY);
 
@@ -266,11 +266,11 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_get(ccapi_rci_info_
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
 
-    *value = CCAPI_SETTING_GROUP_1_EL_ENUM_ONE;
+    *value = "ONE";
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_set(ccapi_rci_info_t * const info, ccapi_setting_group_1_el_enum_id_t const *const value)
+ccapi_setting_group_1_error_id_t rci_setting_group_1_el_enum_set(ccapi_rci_info_t * const info, char const * const value)
 {
     ASSERT(info->action == CCAPI_RCI_ACTION_SET);
 
