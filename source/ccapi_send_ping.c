@@ -28,7 +28,7 @@ static ccapi_bool_t valid_malloc(void * * const ptr, size_t const size, ccapi_pi
  
     *ptr = ccapi_malloc(size);
 
-    success = (*ptr == NULL) ? CCAPI_FALSE : CCAPI_TRUE;
+    success = CCAPI_BOOL(*ptr != NULL);
     
     if (!success)
     {
@@ -60,7 +60,7 @@ done:
 static ccapi_ping_error_t checkargs_send_ping(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport)
 {
     ccapi_ping_error_t error = CCAPI_PING_ERROR_NONE;
-    ccapi_bool_t const *  p_transport_started = NULL;
+    ccapi_bool_t const * p_transport_started = NULL;
 
     if (!CCAPI_RUNNING(ccapi_data))
     {
@@ -109,18 +109,15 @@ done:
 static ccapi_ping_error_t setup_send_ping(ccapi_ping_t * const ping_info, ccapi_transport_t const transport)
 {
     ccapi_ping_error_t error = CCAPI_PING_ERROR_NONE;
+    ccimp_os_lock_create_t create_data;
 
+    if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
     {
-        ccimp_os_lock_create_t create_data;
-
-        if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK)
-        {
-            error = CCAPI_PING_ERROR_LOCK_FAILED;
-            goto done;
-        }
-
-        ping_info->svc_ping.ping_lock = create_data.lock;
+        error = CCAPI_PING_ERROR_LOCK_FAILED;
+        goto done;
     }
+
+    ping_info->svc_ping.ping_lock = create_data.lock;
 
     ping_info->header.transport = ccapi_to_connector_transport(transport);
     ping_info->header.request_id = NULL;
@@ -136,6 +133,7 @@ static ccapi_ping_error_t perform_send_ping(ccapi_data_t * const ccapi_data, cca
 {
     connector_status_t status;
     ccapi_ping_error_t error = CCAPI_PING_ERROR_NONE;
+
     do
     {
         status = connector_initiate_action_secure(ccapi_data, connector_initiate_ping_request, &ping_info->header);

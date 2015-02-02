@@ -214,7 +214,7 @@ static char const * get_path_without_virtual_dir(char const * const full_path)
 
 static char const * get_local_path_from_cloud_path(ccapi_data_t * const ccapi_data, char const * const full_path, ccapi_bool_t * const must_free_path)
 {
-    ccapi_bool_t const virtual_dirs_present = ccapi_data->service.file_system.virtual_dir_list != NULL ? CCAPI_TRUE : CCAPI_FALSE;
+    ccapi_bool_t const virtual_dirs_present = CCAPI_BOOL(ccapi_data->service.file_system.virtual_dir_list != NULL);
     char const * local_path = NULL;
     ccapi_bool_t free_path = CCAPI_FALSE;
 

@@ -233,7 +233,7 @@ static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receiv
  
     *ptr = ccapi_malloc(size);
 
-    success = *ptr == NULL ? CCAPI_FALSE : CCAPI_TRUE;
+    success = CCAPI_BOOL(*ptr != NULL);
     
     if (!success)
     {
