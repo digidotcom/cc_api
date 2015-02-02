@@ -86,7 +86,7 @@ auto_generated_files: ConfigGenerator
 exec: $(OBJS)
 	$(CC) $(LDFLAGS) $^ $(LIBS) -o $(SAMPLE)
 
-$(SAMPLE): exec
+$(SAMPLE): auto_generated_files exec
 
 
 .PHONY: clean
