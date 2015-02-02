@@ -378,6 +378,49 @@ done:
 }
 #endif /* (defined CONNECTOR_SM_CLI) */
 
+static connector_callback_status_t ccapi_process_ping_response(connector_sm_ping_response_t const * const response_ptr)
+{
+    ccapi_svc_ping_t * const svc_ping = (ccapi_svc_ping_t *)response_ptr->user_context;
+    connector_callback_status_t connector_status = connector_callback_error;
+
+    ASSERT_MSG_GOTO(svc_ping != NULL, done);
+
+    ccapi_logging_line("ccapi_process_ping_response: %d", response_ptr->status);
+   
+    switch (response_ptr->status)
+    {
+        case connector_sm_ping_status_success:
+        case connector_sm_ping_status_complete:
+            svc_ping->response_error = CCAPI_PING_ERROR_NONE;
+            break;
+        case connector_sm_ping_status_cancel:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_CANCEL;
+            break;
+        case connector_sm_ping_status_timeout:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_TIMEOUT;
+            break;
+        case connector_sm_ping_status_error:
+            svc_ping->response_error = CCAPI_PING_ERROR_RESPONSE_ERROR;
+            break;
+    }
+
+    ASSERT_MSG_GOTO(svc_ping->ping_lock != NULL, done);
+    
+    switch (ccapi_lock_release(svc_ping->ping_lock))
+    {
+        case CCIMP_STATUS_OK:
+            connector_status = connector_callback_continue;
+            break;
+        case CCIMP_STATUS_BUSY:
+        case CCIMP_STATUS_ERROR:
+            connector_status = connector_callback_error;
+            break;
+    }
+
+done:
+    return connector_status;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -420,7 +463,22 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 #endif
 
         case connector_request_id_sm_ping_request:
+        {
+            connector_sm_receive_ping_request_t * const ping_request = data;
+
+            ccapi_logging_line("ccapi_sm_service_handler: response %s needed", ping_request->response_required ? "is" : "is not");
+
+            connector_status = connector_callback_continue;
+            break;
+        }
         case connector_request_id_sm_ping_response:
+        {
+            connector_sm_ping_response_t const * const response_ptr = data;
+
+            connector_status = ccapi_process_ping_response(response_ptr);
+
+            break;
+        }
         case connector_request_id_sm_more_data:
         case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:
