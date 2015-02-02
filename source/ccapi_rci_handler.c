@@ -646,8 +646,6 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     rci_info->group.instance = remote_config->group.index;
                     ASSERT(group_id < group_table->count);
                     group = &group_table->groups[group_id];
-                    ASSERT(group_id < group_table->count);
-                    group = &group_table->groups[group_id];
                     end_callback = group->callback.end;
                     ccapi_data->service.rci.queued_callback.function_cb = end_callback;
                     break;
