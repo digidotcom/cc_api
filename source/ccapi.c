@@ -437,6 +437,7 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
+            status = connector_abort;
             goto done;
     }
 
@@ -449,6 +450,7 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
+            status = connector_abort;
             goto done;
     }
 
