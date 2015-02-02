@@ -833,6 +833,8 @@ static ccimp_status_t ccapi_fs_dir_close(ccapi_data_t * const ccapi_data, connec
 static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, connector_file_system_stat_t * const ccfsm_hash_status_data)
 {
     ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+    ccapi_bool_t must_free_local_path = CCAPI_FALSE;
+    char const * local_path = NULL;
 
     if (ccapi_data->service.file_system.virtual_dir_list != NULL && strcmp(ccfsm_hash_status_data->path, CCAPI_FS_ROOT_PATH) == 0)
     {
@@ -851,9 +853,8 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
     {
         ccimp_fs_get_hash_alg_t ccimp_hash_algorithm_data;
         ccimp_fs_dir_entry_status_t ccimp_dir_entry_status_data;
-        ccapi_bool_t must_free_local_path;
-        char const * const local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_status_data->path, &must_free_local_path);
 
+        local_path = get_local_path_from_cloud_path(ccapi_data, ccfsm_hash_status_data->path, &must_free_local_path);
         if (local_path == NULL)
         {
             ccapi_fs_set_internal_error(CCAPI_FS_INTERNAL_ERROR_INVALID_PATH, &ccfsm_hash_status_data->errnum);
@@ -902,12 +903,12 @@ static ccimp_status_t ccapi_fs_hash_status(ccapi_data_t * const ccapi_data, conn
         ccfsm_hash_status_data->statbuf.last_modified = ccimp_dir_entry_status_data.status.last_modified;
         ccfsm_hash_status_data->statbuf.flags = ccfsm_file_system_file_type_from_ccimp_fs_dir_entry_type(ccimp_dir_entry_status_data.status.type);
         ccfsm_hash_status_data->hash_algorithm.actual = ccfsm_file_system_hash_algorithm_from_ccimp_fs_hash_alg(ccimp_hash_algorithm_data.hash_alg.actual);
+    }
 
 done:
-        if (must_free_local_path)
-        {
-            free_local_path(local_path);
-        }
+    if (must_free_local_path)
+    {
+        free_local_path(local_path);
     }
     return ccimp_status;
 }
