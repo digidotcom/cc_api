@@ -51,7 +51,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         Verifies if the returned response is the expected and the generated file has the expected content.
         """
 
-        filePath = os.path.join(self.tempPath, "test_01_send_file_valid_path_without_content.txt")
+        filePath = os.path.join(self.tempPath, "test_02_send_file_valid_path_without_content.txt")
         fileData = ""
 
         # Send and verify the file
@@ -81,7 +81,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
             self.log.info("*** Sending a file size of %s bytes..." % eachFileSize)
 
-            filePath = os.path.join(self.tempPath, "test_02_send_file_valid_path_with_increasing_content_size_%s.txt" % eachFileSize)
+            filePath = os.path.join(self.tempPath, "test_03_send_file_valid_path_with_increasing_content_size_%s.txt" % eachFileSize)
             fileData = fileContent[:eachFileSize]
 
             # Send and verify the file
@@ -108,7 +108,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
             self.log.info("*** Sending a file size of %s bytes..." % eachFileSize)
 
-            filePath = os.path.join(self.tempPath, "test_03_send_file_valid_path_with_big_content_size_%s.txt" % eachFileSize)
+            filePath = os.path.join(self.tempPath, "test_04_send_file_valid_path_with_big_content_size_%s.txt" % eachFileSize)
             fileData = fileContent[:eachFileSize]
 
             # Send and verify the file
@@ -165,11 +165,11 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         Verifies if the returned response is the expected and the generated file has the expected content.
         """
 
-        filePath = os.path.join(self.tempPath, "test_04_send_file_with_offset.txt")
+        filePath = os.path.join(self.tempPath, "test_06_send_data_chunks_with_valid_offset.txt")
         originalFileData = fileContent
 
         # Send the original file to the Device
-        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, originalFileData, timeout = 120)
+        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, originalFileData, timeout = 240)
 
         if(status):
             # Status 200. Checking the received response
@@ -224,11 +224,11 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         Verifies if the returned response is the expected and the generated file has the expected content.
         """
 
-        filePath = os.path.join(self.tempPath, "test_05_send_data_chunks_with_truncate_option.txt")
+        filePath = os.path.join(self.tempPath, "test_07_send_data_chunks_with_truncate_option.txt")
         originalFileData = fileContent
 
         # Send the original file to the Device
-        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, originalFileData, timeout = 120)
+        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, originalFileData, timeout = 240)
 
         if(status):
             # Status 200. Checking the received response
@@ -269,7 +269,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
             ## Verify that the truncate option was effect and the file size is the expected
             # Get file content from device
-            status, obtainedFileData, response = self.cloudHandler.downloadFileFromDevice(self.device_id, filePath, timeout = 120)
+            status, obtainedFileData, response = self.cloudHandler.downloadFileFromDevice(self.device_id, filePath, timeout = 240)
 
             if(status):
                 self.log.info("Received the expected response for the get_file request")
@@ -305,7 +305,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         """
 
         # Generate a suite of files and directories to test
-        fileList,directoryList = self.generateFilesAndDirectories("test_06_verify_filesystem_ls_command")
+        fileList,directoryList = self.generateFilesAndDirectories("test_08_verify_filesystem_ls_command")
 
 
 
@@ -390,12 +390,13 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         """
 
         # Generate a suite of files and directories to test
-        fileList,directoryList = self.generateFilesAndDirectories("test_07_verify_filesystem_ls_command_with_hash")
+        fileList,directoryList = self.generateFilesAndDirectories("test_09_verify_filesystem_ls_command_with_hash")
 
         # Send a filesystem ls query
         folderPath = self.tempPath
 
         hashAlgorithmList = [None,"none","crc32","md5","any"]
+
 
         for hashAlgorithm in hashAlgorithmList:
 
@@ -422,7 +423,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
                         if ( eachObtainedFilePath == eachFileInfo["path"] ):
                             self.log.info("Found the file '%s'" % eachObtainedFilePath)
 
-                            if ( hashAlgorithm in ["md5","any"] ):
+                            if ( hashAlgorithm in ["crc32","md5","any"] ):
                                 # Verify that the element hash match with the expected for the supported hash algorithms
                                 eachObtainedFileHash = eachFile["@hash"]
 
@@ -489,7 +490,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             fileData = eachFileInfo["data"]
 
             # Send the file to the Device
-            status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, fileData, timeout = 120)
+            status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, fileData, timeout = 240)
 
             if(status):
                 # Status 200. Checking the received response
@@ -529,7 +530,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
         # Send the file to the Device
         self.log.info("Uploading file '%s' with size %s to device..." % (filePath, fileSize) )
-        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, fileData, offset = offset, truncate = truncate, timeout = 120)
+        status, response = self.cloudHandler.uploadFileToDevice(self.device_id, filePath, fileData, offset = offset, truncate = truncate, timeout = 240)
 
         if(status):
             # Status 200. Checking the received response
@@ -545,7 +546,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
 
         # Get the file from device
         self.log.info("Downloading file '%s' with size %s from device..." % (filePath, fileSize) )
-        status, obtainedFileData, response = self.cloudHandler.downloadFileFromDevice(self.device_id, filePath, fileSize = fileSize, offset = offset, timeout = 120)
+        status, obtainedFileData, response = self.cloudHandler.downloadFileFromDevice(self.device_id, filePath, fileSize = fileSize, offset = offset, timeout = 240)
 
         if(status):
             self.log.info("Received the expected response for the get_file request")
@@ -576,7 +577,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         crc32 = (binascii.crc32(fileData) & 0xFFFFFFFF)
         crc32_decimal = "%s" % crc32
         crc32_hexadecimal = "%08X" % crc32
-        return crc32_decimal
+        return crc32_hexadecimal
 
 
 
