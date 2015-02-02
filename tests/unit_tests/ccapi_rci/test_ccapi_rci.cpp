@@ -843,7 +843,7 @@ TEST(test_ccapi_rci, testRCISetFactoryDefaults)
     query_setting_attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
 
     session_start(&remote_config, "rci_session_start_cb", CCAPI_GLOBAL_ERROR_NONE);
-    action_start(&remote_config, CCAPI_RCI_ACTION_REBOOT, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
+    action_start(&remote_config, CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS, CCAPI_RCI_GROUP_SETTING, &query_setting_attributes, "rci_action_start_cb", CCAPI_GLOBAL_ERROR_NONE);
 
     set_factory_defaults(&remote_config, "rci_set_factory_defaults_cb", CCAPI_GLOBAL_ERROR_NONE);
 
