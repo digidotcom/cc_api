@@ -5,5 +5,6 @@
 #define XML_RESPONSE_FILE_NAME "response.xml"
 
 void linux_rci_handle_set(void);
+void linux_rci_handle_query(void);
 
 #endif
