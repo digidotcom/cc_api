@@ -315,53 +315,56 @@ class DiscoveryTestCase(cc_testcase.TestCase):
         status, response = self.cloudHandler.listFilesytemFromDevice(self.device_id, folderPath)
 
         if(status):
-            # Status 200. Checking the received response
-            obtainedFileList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["file"]
-            obtainedDirectoryList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["dir"]
+            try:
+                # Status 200. Checking the received response
+                obtainedFileList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["file"]
+                obtainedDirectoryList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["dir"]
 
-            ## Verify all uploaded files are in the list
-            # Number of original files to find
-            counterFoundFiles = len(fileList)
+                ## Verify all uploaded files are in the list
+                # Number of original files to find
+                counterFoundFiles = len(fileList)
 
-            for eachFile in obtainedFileList:
+                for eachFile in obtainedFileList:
 
-                eachObtainedFilePath = eachFile["@path"]
-                eachObtainedFileSize = eachFile["@size"]
+                    eachObtainedFilePath = eachFile["@path"]
+                    eachObtainedFileSize = eachFile["@size"]
 
-                # Find the original file
-                for eachFileInfo in fileList:
-                    if ( eachObtainedFilePath == eachFileInfo["path"] ):
-                        self.log.info("Found the file '%s'" % eachObtainedFilePath)
-                        counterFoundFiles-=1
+                    # Find the original file
+                    for eachFileInfo in fileList:
+                        if ( eachObtainedFilePath == eachFileInfo["path"] ):
+                            self.log.info("Found the file '%s'" % eachObtainedFilePath)
+                            counterFoundFiles-=1
 
-            # Check if all original files were found
-            if ( counterFoundFiles != 0 ):
-                self.fail("Not found all files!!! missing files '%s'" % counterFoundFiles)
-            else:
-                self.log.info("All files (%s) were found....OK" % len(fileList))
+                # Check if all original files were found
+                if ( counterFoundFiles != 0 ):
+                    self.fail("Not found all files!!! missing files '%s'" % counterFoundFiles)
+                else:
+                    self.log.info("All files (%s) were found....OK" % len(fileList))
 
 
 
-            ## Verify all directories are in the list
-            # Number of original directories to find
-            counterFoundDirectories = len(directoryList)
+                ## Verify all directories are in the list
+                # Number of original directories to find
+                counterFoundDirectories = len(directoryList)
 
-            for eachDirectory in obtainedDirectoryList:
+                for eachDirectory in obtainedDirectoryList:
 
-                eachObtainedDirectoryPath = eachDirectory["@path"]
+                    eachObtainedDirectoryPath = eachDirectory["@path"]
 
-                # Find the original file
-                for eachDirectoryInfo in directoryList:
-                    if ( eachObtainedDirectoryPath == eachDirectoryInfo ):
-                        self.log.info("Found the directory '%s'" % eachObtainedDirectoryPath)
-                        counterFoundDirectories-=1
+                    # Find the original file
+                    for eachDirectoryInfo in directoryList:
+                        if ( eachObtainedDirectoryPath == eachDirectoryInfo ):
+                            self.log.info("Found the directory '%s'" % eachObtainedDirectoryPath)
+                            counterFoundDirectories-=1
 
-            # Check if all original directories were found
-            if ( counterFoundDirectories != 0 ):
-                self.fail("Not found all directories!!! missing directories '%s'" % counterFoundDirectories)
-            else:
-                self.log.info("All directories (%s) were found....OK" % len(directoryList))
-
+                # Check if all original directories were found
+                if ( counterFoundDirectories != 0 ):
+                    self.fail("Not found all directories!!! missing directories '%s'" % counterFoundDirectories)
+                else:
+                    self.log.info("All directories (%s) were found....OK" % len(directoryList))
+            except KeyError,e:
+                self.log.exception(e)
+                self.fail("Unexpected response: '%s'" % response.content)
 
         else:
             self.log.error("Response content from device: %s" % response.content)
@@ -406,44 +409,48 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             status, response = self.cloudHandler.listFilesytemFromDevice(self.device_id, folderPath, hashAlgorithm = hashAlgorithm)
 
             if(status):
-                # Status 200. Checking the received response
-                obtainedFileList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["file"]
+                try:
+                    # Status 200. Checking the received response
+                    obtainedFileList = response.resource["sci_reply"]["file_system"]["device"]["commands"]["ls"]["file"]
 
-                ## Verify all uploaded files are in the list
-                # Number of original files to find
-                counterFoundFiles = len(fileList)
+                    ## Verify all uploaded files are in the list
+                    # Number of original files to find
+                    counterFoundFiles = len(fileList)
 
-                for eachFile in obtainedFileList:
+                    for eachFile in obtainedFileList:
 
-                    eachObtainedFilePath = eachFile["@path"]
-                    eachObtainedFileSize = eachFile["@size"]
+                        eachObtainedFilePath = eachFile["@path"]
+                        eachObtainedFileSize = eachFile["@size"]
 
-                    # Find the original file
-                    for eachFileInfo in fileList:
-                        if ( eachObtainedFilePath == eachFileInfo["path"] ):
-                            self.log.info("Found the file '%s'" % eachObtainedFilePath)
+                        # Find the original file
+                        for eachFileInfo in fileList:
+                            if ( eachObtainedFilePath == eachFileInfo["path"] ):
+                                self.log.info("Found the file '%s'" % eachObtainedFilePath)
 
-                            if ( hashAlgorithm in ["crc32","md5","any"] ):
-                                # Verify that the element hash match with the expected for the supported hash algorithms
-                                eachObtainedFileHash = eachFile["@hash"]
+                                if ( hashAlgorithm in ["crc32","md5","any"] ):
+                                    # Verify that the element hash match with the expected for the supported hash algorithms
+                                    eachObtainedFileHash = eachFile["@hash"]
 
-                                if ( eachObtainedFileHash.upper() == eachFileInfo[hashAlgorithm].upper() ):
-                                    self.log.info("Hash '%s' match with the expected!!!" % eachObtainedFileHash)
-                                    counterFoundFiles-=1
+                                    if ( eachObtainedFileHash.upper() == eachFileInfo[hashAlgorithm].upper() ):
+                                        self.log.info("Hash '%s' match with the expected!!!" % eachObtainedFileHash)
+                                        counterFoundFiles-=1
+                                    else:
+                                        self.log.error("Hash not match '%s' with the expected '%s'!!!" % (eachObtainedFileHash,eachFileInfo[hashAlgorithm]) )
                                 else:
-                                    self.log.error("Hash not match '%s' with the expected '%s'!!!" % (eachObtainedFileHash,eachFileInfo[hashAlgorithm]) )
-                            else:
-                                # Verify that the element hash is not exist
-                                if ( "@hash" in eachFile ):
-                                    self.fail("hash element exist for an unsupported type")
-                                else:
-                                    counterFoundFiles-=1
+                                    # Verify that the element hash is not exist
+                                    if ( "@hash" in eachFile ):
+                                        self.fail("hash element exist for an unsupported type")
+                                    else:
+                                        counterFoundFiles-=1
 
-                # Check if all original files were found
-                if ( counterFoundFiles != 0 ):
-                    self.fail("Not found all files!!! missing files '%s'" % counterFoundFiles)
-                else:
-                    self.log.info("All files (%s) were found....OK" % len(fileList))
+                    # Check if all original files were found
+                    if ( counterFoundFiles != 0 ):
+                        self.fail("Not found all files!!! missing files '%s'" % counterFoundFiles)
+                    else:
+                        self.log.info("All files (%s) were found....OK" % len(fileList))
+                except KeyError,e:
+                    self.log.exception(e)
+                    self.fail("Unexpected response: '%s'" % response.content)
 
             else:
                 self.log.error("Response content from device: %s" % response.content)
