@@ -2,6 +2,7 @@ globalerror load_fail "Load fail"
 globalerror save_fail "Save fail"
 globalerror memory_fail "Insufficient memory"
 globalerror xml_request_fail "Error creating xml request file"
+globalerror xml_response_fail "Error in xml response file"
 
 group setting serial 2 "Serial Port" "Port 1 is used for printf"
     element baud "Baud rate" type enum access read_write
