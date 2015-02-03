@@ -28,6 +28,21 @@ ccapi_global_error_id_t rci_session_end_cb(ccapi_rci_info_t * const info)
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
+static void print_group(ccapi_rci_info_t * const info)
+{
+    switch (info->group.type)
+    {
+        case CCAPI_RCI_GROUP_SETTING:
+            fprintf(fp, "setting");
+            break;
+        case CCAPI_RCI_GROUP_STATE:
+            fprintf(fp, "state");
+            break;
+    }
+
+    return;
+}
+ 
 ccapi_global_error_id_t rci_action_start_cb(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
@@ -47,14 +62,26 @@ ccapi_global_error_id_t rci_action_start_cb(ccapi_rci_info_t * const info)
     {
         case CCAPI_RCI_ACTION_SET:
         {
-            fprintf(fp, "<set_setting>");
+            fprintf(fp, "<set_");
+            print_group(info);
+            fprintf(fp, ">");
 
             break;
         }
         case CCAPI_RCI_ACTION_QUERY:
         {
-            fprintf(fp, "<query_setting>");
+            fprintf(fp, "<query_");
+            print_group(info);
 
+            if (info->group.type == CCAPI_RCI_GROUP_SETTING)
+            {
+                static char const * const attribute_source[] = {"current", "stored", "defaults"};
+                static char const * const attribute_compare_to[] = {"none", "current", "stored", "defaults"};
+
+                fprintf(fp, " source=\"%s\"", attribute_source[info->query_setting.attributes.source]);
+                fprintf(fp, " compare_to=\"%s\"", attribute_compare_to[info->query_setting.attributes.compare_to]);
+            }
+            fprintf(fp, ">");
             break;
         }
 #if (defined RCI_LEGACY_COMMANDS)
@@ -62,7 +89,7 @@ ccapi_global_error_id_t rci_action_start_cb(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            fprintf(fp, "TODO");
+            /* TODO */
 
             break;
         }
@@ -78,23 +105,89 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
 
     printf("    Called '%s'\n", __FUNCTION__);
 
+    switch(info->action)
+    {
+        case CCAPI_RCI_ACTION_SET:
+        {
+            fprintf(fp, "\n</set_");
+            print_group(info);
+            fprintf(fp, ">\n");
+
+            break;
+        }
+        case CCAPI_RCI_ACTION_QUERY:
+        {
+            fprintf(fp, "\n</query_");
+            print_group(info);
+            fprintf(fp, ">\n");
+            break;
+        }
+#if (defined RCI_LEGACY_COMMANDS)
+        case CCAPI_RCI_ACTION_DO_COMMAND:
+        case CCAPI_RCI_ACTION_REBOOT:
+        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
+        {
+            /* TODO */
+
+            break;
+        }
+#endif
+    }
+
     if (fp != NULL)
         fclose(fp);
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
+#if 0
+// missing info->element.type !!
+static void handle_group_set(ccapi_rci_info_t * const info, ...)
+{
+
+    va_list args;
+
+    va_start(args, info);
+
+    switch(info->element.type)
+    {
+        case connector_element_type_int32:
+        {
+            int32_t const int_value = va_arg(arg_list, int32_t);
+
+            fprintf(fp, "<%s>%d</%s>", info->element.name, int_value, info->element.name);    
+
+            break;
+        }
+        case connector_element_type_enum:
+        case connector_element_type_string:
+        {
+            char const * const string_value = va_arg(arg_list, char const * const);
+
+            fprintf(fp, "<%s>%s</%s>", info->element.name, string_value, info->element.name);
+
+            break;
+        }
+        /* TODO: other types */
+    }
+
+    va_end(args);
+
+    return;
+}
+#endif
+
 ccapi_setting_serial_error_id_t rci_setting_serial_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_serial_error_id_t rci_setting_serial_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -108,9 +201,8 @@ ccapi_setting_serial_error_id_t rci_setting_serial_baud_get(ccapi_rci_info_t * c
 
 ccapi_setting_serial_error_id_t rci_setting_serial_baud_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -124,9 +216,8 @@ ccapi_setting_serial_error_id_t rci_setting_serial_parity_get(ccapi_rci_info_t *
 
 ccapi_setting_serial_error_id_t rci_setting_serial_parity_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -140,9 +231,8 @@ ccapi_setting_serial_error_id_t rci_setting_serial_databits_get(ccapi_rci_info_t
 
 ccapi_setting_serial_error_id_t rci_setting_serial_databits_set(ccapi_rci_info_t * const info, uint32_t const *const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%u</%s>", info->element.name, *value, info->element.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -156,9 +246,8 @@ ccapi_setting_serial_error_id_t rci_setting_serial_xbreak_get(ccapi_rci_info_t *
 
 ccapi_setting_serial_error_id_t rci_setting_serial_xbreak_set(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, *value ? "on":"off", info->element.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -172,15 +261,15 @@ ccapi_setting_serial_error_id_t rci_setting_serial_txbytes_get(ccapi_rci_info_t 
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -194,9 +283,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_ip_get(ccapi_rci_info_t *
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_ip_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -210,9 +298,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_subnet_get(ccapi_rci_info
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_subnet_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -226,9 +313,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_gateway_get(ccapi_rci_inf
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_gateway_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -242,9 +328,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dhcp_get(ccapi_rci_info_t
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dhcp_set(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, *value ? "true":"false", info->element.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -258,9 +343,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dns_get(ccapi_rci_info_t 
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dns_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -274,9 +358,8 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_mac_get(ccapi_rci_info_t 
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_mac_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -290,23 +373,22 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_duplex_get(ccapi_rci_info
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_duplex_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_device_time_error_id_t rci_setting_device_time_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_device_time_error_id_t rci_setting_device_time_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -320,23 +402,22 @@ ccapi_setting_device_time_error_id_t rci_setting_device_time_curtime_get(ccapi_r
 
 ccapi_setting_device_time_error_id_t rci_setting_device_time_curtime_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -358,9 +439,8 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_product_get(ccapi_r
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_product_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -374,9 +454,8 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_model_get(ccapi_rci
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_model_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -390,9 +469,8 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_company_get(ccapi_r
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_company_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -406,23 +484,22 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_desc_get(ccapi_rci_
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_desc_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_system_error_id_t rci_setting_system_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_system_error_id_t rci_setting_system_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -436,9 +513,8 @@ ccapi_setting_system_error_id_t rci_setting_system_description_get(ccapi_rci_inf
 
 ccapi_setting_system_error_id_t rci_setting_system_description_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -452,9 +528,8 @@ ccapi_setting_system_error_id_t rci_setting_system_contact_get(ccapi_rci_info_t 
 
 ccapi_setting_system_error_id_t rci_setting_system_contact_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -468,23 +543,22 @@ ccapi_setting_system_error_id_t rci_setting_system_location_get(ccapi_rci_info_t
 
 ccapi_setting_system_error_id_t rci_setting_system_location_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -498,31 +572,29 @@ ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_identityVerif
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_identityVerificationForm_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_password_set(ccapi_rci_info_t * const info, char const * const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_state_device_state_error_id_t rci_state_device_state_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_state_device_state_error_id_t rci_state_device_state_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -544,23 +616,22 @@ ccapi_state_device_state_error_id_t rci_state_device_state_signed_integer_get(cc
 
 ccapi_state_device_state_error_id_t rci_state_device_state_signed_integer_set(ccapi_rci_info_t * const info, int32_t const *const value)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
-    UNUSED_PARAMETER(value);
+    fprintf(fp, "<%s>%d</%s>", info->element.name, *value, info->element.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_state_gps_stats_error_id_t rci_state_gps_stats_start(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   <%s>\n      ", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
 ccapi_state_gps_stats_error_id_t rci_state_gps_stats_end(ccapi_rci_info_t * const info)
 {
-    UNUSED_PARAMETER(info);
     printf("    Called '%s'\n", __FUNCTION__);
+    fprintf(fp, "\n   </%s>", info->group.name);    
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
