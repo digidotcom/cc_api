@@ -166,7 +166,7 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
             char * xml_set_response_buffer = NULL;
             char * error_ptr = NULL;
 
-            linux_rci_handle_set();
+            linux_rci_handle();
 
             error_id = get_response_buffer(&xml_set_response_buffer);
             if (error_id != CCAPI_GLOBAL_ERROR_NONE)
@@ -192,11 +192,11 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
                     if (scanf_ret > 0)
                     {
                         /* TODO: take the linux 'desc' or 'hint' as hint */
-                        info->error_hint = "linux_rci_handle_set() returned error";
+                        info->error_hint = "linux_rci_handle() returned error";
                     }
                 }
 #else
-                info->error_hint = "linux_rci_handle_set() returned error";
+                info->error_hint = "linux_rci_handle() returned error";
 #endif
             }
 
@@ -268,7 +268,7 @@ static int handle_group_start(ccapi_rci_info_t * const info)
             {
                 char * error_ptr = NULL;
 
-                linux_rci_handle_query();
+                linux_rci_handle();
 
                 assert(xml_query_response_buffer == NULL);
 
@@ -296,11 +296,11 @@ static int handle_group_start(ccapi_rci_info_t * const info)
                         if (scanf_ret > 0)
                         {
                             /* TODO: take the linux 'desc' or 'hint' as hint */
-                            info->error_hint = "linux_rci_handle_set() returned error";
+                            info->error_hint = "linux_rci_handle() returned error";
                         }
                     }
 #else
-                    info->error_hint = "linux_rci_handle_set() returned error";
+                    info->error_hint = "linux_rci_handle() returned error";
 #endif
                 }
             }
