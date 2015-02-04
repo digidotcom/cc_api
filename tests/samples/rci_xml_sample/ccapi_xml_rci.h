@@ -16,8 +16,12 @@ int ccapi_xml_rci_handle_group_get_unsigned_integer(ccapi_rci_info_t * const inf
 int ccapi_xml_rci_handle_group_get_integer(ccapi_rci_info_t * const info, int32_t * const value);
 int ccapi_xml_rci_handle_group_get_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t * const value);
 int ccapi_xml_rci_handle_group_get_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t * const value);
+int ccapi_xml_rci_handle_group_set_string(ccapi_rci_info_t * const info, char const * const value);
+int ccapi_xml_rci_handle_group_set_unsigned_integer(ccapi_rci_info_t * const info, uint32_t const * const value);
+int ccapi_xml_rci_handle_group_set_integer(ccapi_rci_info_t * const info, int32_t const * const value);
+int ccapi_xml_rci_handle_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value);
+int ccapi_xml_rci_handle_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value);
 
-FILE * xml_request_fp;
 void linux_rci_handle(void);
 
 #endif

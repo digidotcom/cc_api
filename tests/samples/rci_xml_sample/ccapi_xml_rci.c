@@ -4,11 +4,11 @@
 
 #include  "ccapi_xml_rci.h"
 
-FILE * xml_request_fp = NULL;
+static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;
 static char * value_end_ptr = NULL;
 
-static void print_group(ccapi_rci_info_t * const info)
+static void write_group(ccapi_rci_info_t * const info)
 {
     switch (info->group.type)
     {
@@ -43,7 +43,7 @@ ccapi_global_error_id_t ccapi_xml_rci_handle_action_start(ccapi_rci_info_t * con
             }
 
             fprintf(xml_request_fp, "<set_");
-            print_group(info);
+            write_group(info);
             fprintf(xml_request_fp, ">");
 
             break;
@@ -125,7 +125,7 @@ ccapi_global_error_id_t ccapi_xml_rci_handle_action_end(ccapi_rci_info_t * const
         case CCAPI_RCI_ACTION_SET:
         {
             fprintf(xml_request_fp, "\n</set_");
-            print_group(info);
+            write_group(info);
             fprintf(xml_request_fp, ">\n");
 
             fclose(xml_request_fp);
@@ -244,7 +244,7 @@ int ccapi_xml_rci_handle_group_start(ccapi_rci_info_t * const info)
             }
 
             fprintf(xml_request_fp, "<query_");
-            print_group(info);
+            write_group(info);
 
             if (info->group.type == CCAPI_RCI_GROUP_SETTING)
             {
@@ -257,7 +257,7 @@ int ccapi_xml_rci_handle_group_start(ccapi_rci_info_t * const info)
             fprintf(xml_request_fp, ">");
             fprintf(xml_request_fp, "\n   <%s index=\"%d\"/>", info->group.name, info->group.instance);    
             fprintf(xml_request_fp, "\n</query_");
-            print_group(info);
+            write_group(info);
             fprintf(xml_request_fp, ">\n");
 
             fclose(xml_request_fp);
@@ -389,6 +389,41 @@ static void ccapi_xml_rci_handle_group_set(ccapi_rci_info_t * const info, ...)
     return;
 }
 #endif
+
+int ccapi_xml_rci_handle_group_set_string(ccapi_rci_info_t * const info, char const * const value)
+{
+    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
+
+    return CCAPI_GLOBAL_ERROR_NONE;
+}
+
+int ccapi_xml_rci_handle_group_set_unsigned_integer(ccapi_rci_info_t * const info, uint32_t const * const value)
+{
+    fprintf(xml_request_fp, "<%s>%u</%s>", info->element.name, *value, info->element.name);    
+
+    return CCAPI_GLOBAL_ERROR_NONE;
+}
+
+int ccapi_xml_rci_handle_group_set_integer(ccapi_rci_info_t * const info, int32_t const * const value)
+{
+    fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *value, info->element.name);    
+
+    return CCAPI_GLOBAL_ERROR_NONE;
+}
+
+int ccapi_xml_rci_handle_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
+{
+    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "on":"off", info->element.name);    
+
+    return CCAPI_GLOBAL_ERROR_NONE;
+}
+
+int ccapi_xml_rci_handle_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
+{
+    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "true":"false", info->element.name);    
+
+    return CCAPI_GLOBAL_ERROR_NONE;
+}
 
 #define BRACKET_SIZE 2 /* Size of '<' + '>' */
 #define NULL_TERM_SIZE 1

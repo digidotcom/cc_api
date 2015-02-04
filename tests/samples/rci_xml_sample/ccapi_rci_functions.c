@@ -52,8 +52,7 @@ ccapi_setting_serial_error_id_t rci_setting_serial_baud_get(ccapi_rci_info_t * c
 ccapi_setting_serial_error_id_t rci_setting_serial_baud_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_serial_error_id_t rci_setting_serial_parity_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -65,8 +64,7 @@ ccapi_setting_serial_error_id_t rci_setting_serial_parity_get(ccapi_rci_info_t *
 ccapi_setting_serial_error_id_t rci_setting_serial_parity_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_serial_error_id_t rci_setting_serial_databits_get(ccapi_rci_info_t * const info, uint32_t * const value)
@@ -78,8 +76,7 @@ ccapi_setting_serial_error_id_t rci_setting_serial_databits_get(ccapi_rci_info_t
 ccapi_setting_serial_error_id_t rci_setting_serial_databits_set(ccapi_rci_info_t * const info, uint32_t const *const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%u</%s>", info->element.name, *value, info->element.name);    
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_unsigned_integer(info, value);
 }
 
 ccapi_setting_serial_error_id_t rci_setting_serial_xbreak_get(ccapi_rci_info_t * const info, ccapi_on_off_t * const value)
@@ -91,8 +88,7 @@ ccapi_setting_serial_error_id_t rci_setting_serial_xbreak_get(ccapi_rci_info_t *
 ccapi_setting_serial_error_id_t rci_setting_serial_xbreak_set(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "on":"off", info->element.name);    
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_ccapi_on_off(info, value);
 }
 
 ccapi_setting_serial_error_id_t rci_setting_serial_txbytes_get(ccapi_rci_info_t * const info, uint32_t * const value)
@@ -122,8 +118,7 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_ip_get(ccapi_rci_info_t *
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_ip_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_subnet_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -135,8 +130,7 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_subnet_get(ccapi_rci_info
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_subnet_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_gateway_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -148,21 +142,19 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_gateway_get(ccapi_rci_inf
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_gateway_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dhcp_get(ccapi_rci_info_t * const info, ccapi_bool_t * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-     return ccapi_xml_rci_handle_group_get_ccapi_bool(info, value);
+    return ccapi_xml_rci_handle_group_get_ccapi_bool(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dhcp_set(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "true":"false", info->element.name);    
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_ccapi_bool(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dns_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -174,8 +166,7 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dns_get(ccapi_rci_info_t 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_dns_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_mac_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -187,8 +178,7 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_mac_get(ccapi_rci_info_t 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_mac_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_duplex_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -200,8 +190,7 @@ ccapi_setting_ethernet_error_id_t rci_setting_ethernet_duplex_get(ccapi_rci_info
 ccapi_setting_ethernet_error_id_t rci_setting_ethernet_duplex_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_device_time_error_id_t rci_setting_device_time_start(ccapi_rci_info_t * const info)
@@ -225,8 +214,7 @@ ccapi_setting_device_time_error_id_t rci_setting_device_time_curtime_get(ccapi_r
 ccapi_setting_device_time_error_id_t rci_setting_device_time_curtime_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_start(ccapi_rci_info_t * const info)
@@ -256,8 +244,7 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_product_get(ccapi_r
 ccapi_setting_device_info_error_id_t rci_setting_device_info_product_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_model_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -269,8 +256,7 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_model_get(ccapi_rci
 ccapi_setting_device_info_error_id_t rci_setting_device_info_model_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_company_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -282,8 +268,7 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_company_get(ccapi_r
 ccapi_setting_device_info_error_id_t rci_setting_device_info_company_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_device_info_error_id_t rci_setting_device_info_desc_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -295,8 +280,7 @@ ccapi_setting_device_info_error_id_t rci_setting_device_info_desc_get(ccapi_rci_
 ccapi_setting_device_info_error_id_t rci_setting_device_info_desc_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_system_error_id_t rci_setting_system_start(ccapi_rci_info_t * const info)
@@ -320,8 +304,7 @@ ccapi_setting_system_error_id_t rci_setting_system_description_get(ccapi_rci_inf
 ccapi_setting_system_error_id_t rci_setting_system_description_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_system_error_id_t rci_setting_system_contact_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -333,8 +316,7 @@ ccapi_setting_system_error_id_t rci_setting_system_contact_get(ccapi_rci_info_t 
 ccapi_setting_system_error_id_t rci_setting_system_contact_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_system_error_id_t rci_setting_system_location_get(ccapi_rci_info_t * const info, char const * * const value)
@@ -346,8 +328,7 @@ ccapi_setting_system_error_id_t rci_setting_system_location_get(ccapi_rci_info_t
 ccapi_setting_system_error_id_t rci_setting_system_location_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_start(ccapi_rci_info_t * const info)
@@ -371,15 +352,13 @@ ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_identityVerif
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_identityVerificationForm_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_setting_devicesecurity_error_id_t rci_setting_devicesecurity_password_set(ccapi_rci_info_t * const info, char const * const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_string(info, value);
 }
 
 ccapi_state_device_state_error_id_t rci_state_device_state_start(ccapi_rci_info_t * const info)
@@ -409,8 +388,7 @@ ccapi_state_device_state_error_id_t rci_state_device_state_signed_integer_get(cc
 ccapi_state_device_state_error_id_t rci_state_device_state_signed_integer_set(ccapi_rci_info_t * const info, int32_t const *const value)
 {
     printf("    Called '%s'\n", __FUNCTION__);
-    fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *value, info->element.name);    
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return ccapi_xml_rci_handle_group_set_integer(info, value);
 }
 
 ccapi_state_gps_stats_error_id_t rci_state_gps_stats_start(ccapi_rci_info_t * const info)
