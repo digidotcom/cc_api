@@ -159,10 +159,8 @@ static int get_request_buffer(char * * xml_request_buffer)
         error_id = -2;
         goto done;
     }
-    else
-    {
-       printf("request='%s'\n", *xml_request_buffer);
-    }          
+
+    /* printf("request:\n%s\n", *xml_request_buffer); */
 
     fclose(xml_request_fp);
 

@@ -27,8 +27,6 @@ ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
 
-    printf("    Called '%s'\n", __FUNCTION__);
-
     switch(info->action)
     {
         case CCAPI_RCI_ACTION_SET:
@@ -103,10 +101,8 @@ static int get_response_buffer(char * * xml_response_buffer, ccapi_rci_info_t * 
         info->error_hint = "Error reading xml response file";
         goto done;
     }
-    else
-    {
-       printf("response='%s'\n", *xml_response_buffer);
-    }          
+
+    /* printf("response:\n%s\n", *xml_response_buffer); */
 
     fclose(xml_response_fp);
 
@@ -117,8 +113,6 @@ done:
 ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
-
-    printf("    Called '%s'\n", __FUNCTION__);
 
     switch(info->action)
     {
