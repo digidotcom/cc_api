@@ -22,6 +22,6 @@ int ccapi_xml_rci_handle_group_set_integer(ccapi_rci_info_t * const info, int32_
 int ccapi_xml_rci_handle_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value);
 int ccapi_xml_rci_handle_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value);
 
-void linux_rci_handle(void);
+void xml_rci_handler(void);
 
 #endif

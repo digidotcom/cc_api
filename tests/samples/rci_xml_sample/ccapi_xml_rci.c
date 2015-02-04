@@ -154,7 +154,7 @@ ccapi_global_error_id_t ccapi_xml_rci_handle_action_end(ccapi_rci_info_t * const
             char * xml_set_response_buffer = NULL;
             char * error_ptr = NULL;
 
-            linux_rci_handle();
+            xml_rci_handler();
 
             error_id = get_response_buffer(&xml_set_response_buffer, info);
             if (error_id != CCAPI_GLOBAL_ERROR_NONE)
@@ -265,7 +265,7 @@ int ccapi_xml_rci_handle_group_start(ccapi_rci_info_t * const info)
             {
                 char * error_ptr = NULL;
 
-                linux_rci_handle();
+                xml_rci_handler();
 
                 assert(xml_query_response_buffer == NULL);
 

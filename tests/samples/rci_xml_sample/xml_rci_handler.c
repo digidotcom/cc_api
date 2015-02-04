@@ -171,7 +171,7 @@ done:
 }
 
 
-void linux_rci_handle(void)
+void xml_rci_handler(void)
 {
     char * xml_request_buffer = NULL;
     FILE * xml_response_fp = NULL;
