@@ -302,6 +302,27 @@ TEST(test_ccapi_tcp_start_sanity_checks, testMaxSessions)
     CHECK_EQUAL(tcp_start.connection.max_transactions, ccapi_data_single_instance->transport_tcp.info->connection.max_transactions);
 }
 
+TEST(test_ccapi_tcp_start_sanity_checks, testDefaultMaxSessions)
+{
+    ccapi_tcp_start_error_t error;
+    ccapi_tcp_info_t tcp_start = {{0}};
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+    char phone_number[] = "+54-3644-421921";
+
+    tcp_start.connection.type = CCAPI_CONNECTION_WAN;
+    tcp_start.connection.info.wan.phone_number = phone_number;
+    tcp_start.connection.info.wan.link_speed = 115200;
+    tcp_start.connection.max_transactions = 0;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
+
+    connector_transport_t connector_transport = connector_transport_tcp;
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    error = ccapi_start_transport_tcp(&tcp_start);
+    CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
+    CHECK_EQUAL(1, ccapi_data_single_instance->transport_tcp.info->connection.max_transactions);
+}
+
 TEST(test_ccapi_tcp_start_sanity_checks, testTcpInfoNoMemory)
 {
     ccapi_tcp_start_error_t error;
