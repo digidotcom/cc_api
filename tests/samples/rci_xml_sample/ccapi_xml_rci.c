@@ -23,7 +23,7 @@ static void write_group(ccapi_rci_info_t * const info)
     return;
 }
  
-ccapi_global_error_id_t ccapi_xml_rci_handle_action_start(ccapi_rci_info_t * const info)
+ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
 
@@ -114,7 +114,7 @@ done:
     return error_id;
 }
 
-ccapi_global_error_id_t ccapi_xml_rci_handle_action_end(ccapi_rci_info_t * const info)
+ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
 
@@ -223,7 +223,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_start(ccapi_rci_info_t * const info)
+int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
 {
     int error_id = CCAPI_GLOBAL_ERROR_NONE;
 
@@ -318,7 +318,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_end(ccapi_rci_info_t * const info)
+int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
 {
     switch(info->action)
     {
@@ -355,7 +355,7 @@ int ccapi_xml_rci_handle_group_end(ccapi_rci_info_t * const info)
 
 #if 0
 // missing info->element.type !!
-static void ccapi_xml_rci_handle_group_set(ccapi_rci_info_t * const info, ...)
+static void ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 {
 
     va_list args;
@@ -390,35 +390,35 @@ static void ccapi_xml_rci_handle_group_set(ccapi_rci_info_t * const info, ...)
 }
 #endif
 
-int ccapi_xml_rci_handle_group_set_string(ccapi_rci_info_t * const info, char const * const value)
+int ccapi_xml_rci_group_set_string(ccapi_rci_info_t * const info, char const * const value)
 {
     fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-int ccapi_xml_rci_handle_group_set_unsigned_integer(ccapi_rci_info_t * const info, uint32_t const * const value)
+int ccapi_xml_rci_group_set_unsigned_integer(ccapi_rci_info_t * const info, uint32_t const * const value)
 {
     fprintf(xml_request_fp, "<%s>%u</%s>", info->element.name, *value, info->element.name);    
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-int ccapi_xml_rci_handle_group_set_integer(ccapi_rci_info_t * const info, int32_t const * const value)
+int ccapi_xml_rci_group_set_integer(ccapi_rci_info_t * const info, int32_t const * const value)
 {
     fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *value, info->element.name);    
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-int ccapi_xml_rci_handle_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
+int ccapi_xml_rci_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
 {
     fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "on":"off", info->element.name);    
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-int ccapi_xml_rci_handle_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
+int ccapi_xml_rci_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
 {
     fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "true":"false", info->element.name);    
 
@@ -476,7 +476,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_get_string(ccapi_rci_info_t * const info, char const * * const value)
+int ccapi_xml_rci_group_get_string(ccapi_rci_info_t * const info, char const * * const value)
 {
     int error_id;
     char const * xml_value = NULL;
@@ -495,7 +495,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_get_unsigned_integer(ccapi_rci_info_t * const info, uint32_t * const value)
+int ccapi_xml_rci_group_get_unsigned_integer(ccapi_rci_info_t * const info, uint32_t * const value)
 {
     int error_id;
     char const * xml_value = NULL;
@@ -514,7 +514,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_get_integer(ccapi_rci_info_t * const info, int32_t * const value)
+int ccapi_xml_rci_group_get_integer(ccapi_rci_info_t * const info, int32_t * const value)
 {
     int error_id;
     char const * xml_value = NULL;
@@ -533,7 +533,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_get_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t * const value)
+int ccapi_xml_rci_group_get_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t * const value)
 {
     int error_id;
     char const * xml_value = NULL;
@@ -565,7 +565,7 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_handle_group_get_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t * const value)
+int ccapi_xml_rci_group_get_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t * const value)
 {
     int error_id;
     char const * xml_value = NULL;
@@ -597,5 +597,5 @@ done:
     return error_id;
 }
 
-/* TODO: add ccapi_xml_rci_handle_group_get_*() functions for types not present in this example */
+/* TODO: add ccapi_xml_rci_group_get_*() functions for types not present in this example */
 
