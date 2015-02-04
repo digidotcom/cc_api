@@ -198,6 +198,10 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
         dest->keepalives.wait_count = CCAPI_KEEPALIVES_WCNT_DEFAULT;
     }
 
+    if (dest->connection.max_transactions == 0)
+    {
+        dest->connection.max_transactions = CCAPI_MAX_TRANSACTIONS_DEFAULT;
+    }
     if (source->connection.password != NULL)
     {
         dest->connection.password = ccapi_malloc(strlen(source->connection.password) + 1);

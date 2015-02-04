@@ -26,6 +26,8 @@
 #define CCAPI_KEEPALIVES_WCNT_MAX       64
 #define CCAPI_KEEPALIVES_WCNT_DEFAULT   5
 
+#define CCAPI_MAX_TRANSACTIONS_DEFAULT  1
+
 #define CCAPI_TCP_START_WAIT_FOREVER ((uint8_t) 0)
 
 typedef enum {
