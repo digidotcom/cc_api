@@ -54,6 +54,7 @@ ccapi_global_error_id_t rci_action_start_cb(ccapi_rci_info_t * const info)
             {
                 printf("%s: Unable to create %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
                 error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
+                info->error_hint = "Unable to create xml request file";
                 goto done;
             }
 
@@ -82,7 +83,7 @@ done:
     return error_id;
 }
 
-static int get_response_buffer(char * * xml_response_buffer)
+static int get_response_buffer(char * * xml_response_buffer, ccapi_rci_info_t * const info)
 {
     int error_id = CCAPI_GLOBAL_ERROR_NONE;
     struct stat response_info;
@@ -95,6 +96,7 @@ static int get_response_buffer(char * * xml_response_buffer)
     if (*xml_response_buffer == NULL)
     {
         error_id = CCAPI_GLOBAL_ERROR_MEMORY_FAIL;
+        info->error_hint = "Couldn't malloc to proccess xml response";
         goto done;
     }
 
@@ -103,6 +105,7 @@ static int get_response_buffer(char * * xml_response_buffer)
     {
         printf("%s: Unable to open %s file\n", __FUNCTION__,  XML_RESPONSE_FILE_NAME);
         error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+        info->error_hint = "Unable to open xml response file";
         goto done;
     }          
 
@@ -113,6 +116,7 @@ static int get_response_buffer(char * * xml_response_buffer)
         printf("%s: Failed to read %s file\n", __FUNCTION__, XML_RESPONSE_FILE_NAME);
 
         error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+        info->error_hint = "Error reading xml response file";
         goto done;
     }
     else
@@ -168,9 +172,18 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
 
             linux_rci_handle();
 
-            error_id = get_response_buffer(&xml_set_response_buffer);
+            error_id = get_response_buffer(&xml_set_response_buffer, info);
             if (error_id != CCAPI_GLOBAL_ERROR_NONE)
             {
+                goto done;
+            }
+
+            if (strlen(xml_set_response_buffer) == 0)
+            {
+                error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+                info->error_hint = "empty xml response";
+
+                free(xml_set_response_buffer);
                 goto done;
             }
 
@@ -192,11 +205,11 @@ ccapi_global_error_id_t rci_action_end_cb(ccapi_rci_info_t * const info)
                     if (scanf_ret > 0)
                     {
                         /* TODO: take the linux 'desc' or 'hint' as hint */
-                        info->error_hint = "linux_rci_handle() returned error";
+                        info->error_hint = "xml response has error tag";
                     }
                 }
 #else
-                info->error_hint = "linux_rci_handle() returned error";
+                info->error_hint = "xml response has error tag";
 #endif
             }
 
@@ -272,7 +285,7 @@ static int handle_group_start(ccapi_rci_info_t * const info)
 
                 assert(xml_query_response_buffer == NULL);
 
-                error_id = get_response_buffer(&xml_query_response_buffer);
+                error_id = get_response_buffer(&xml_query_response_buffer, info);
                 if (error_id != CCAPI_GLOBAL_ERROR_NONE)
                 {
                     goto done;
@@ -296,11 +309,11 @@ static int handle_group_start(ccapi_rci_info_t * const info)
                         if (scanf_ret > 0)
                         {
                             /* TODO: take the linux 'desc' or 'hint' as hint */
-                            info->error_hint = "linux_rci_handle() returned error";
+                            info->error_hint = "xml response has error tag";
                         }
                     }
 #else
-                    info->error_hint = "linux_rci_handle() returned error";
+                    info->error_hint = "xml response has error tag";
 #endif
                 }
             }
