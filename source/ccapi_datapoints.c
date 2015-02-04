@@ -1192,7 +1192,23 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
     }
 
 done:
-    ccapi_free(transaction_info);
+    if (transaction_info != NULL)
+    {
+        if (transaction_info->lock != NULL)
+        {
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(transaction_info->lock);
+
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_BUSY:
+                case CCIMP_STATUS_ERROR:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            }
+        }
+        ccapi_free(transaction_info);
+    }
 
     if (collection_lock_acquired)
     {
