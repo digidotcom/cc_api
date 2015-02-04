@@ -75,24 +75,7 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
 {
     pthread_t pthread;
     int ccode;
-
     pthread_attr_t attr;
-    int stack_size;
-    void *sp;
-    int s;
-
-    switch(create_thread_info->type)
-    {
-        case CCIMP_THREAD_FSM:
-            stack_size = 100 * 1024;
-            break;
-        case CCIMP_THREAD_RCI:
-        case CCIMP_THREAD_RECEIVE:
-        case CCIMP_THREAD_CLI:
-        case CCIMP_THREAD_FIRMWARE:
-            stack_size = 100 * 1024;
-            break;
-    }
 
     ccode = pthread_attr_init(&attr);
     if (ccode != 0)
@@ -101,22 +84,46 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
         return (CCIMP_STATUS_ERROR);
     }
 
-    s = posix_memalign(&sp, sysconf(_SC_PAGESIZE), stack_size);
-    if (s != 0)
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+#if (defined UNIT_TEST)
     {
-        printf("error in posix_memalign\n");
-        return (CCIMP_STATUS_ERROR);
+        /* Use smaller stacks for threads so unit tests do not use too much memory.
+         * Don't do this on actual applications or the memory will be leaked.
+         */
+        int stack_size;
+        void * sp;
+        int s;
+
+        switch(create_thread_info->type)
+        {
+            case CCIMP_THREAD_FSM:
+                stack_size = 100 * 1024;
+                break;
+            case CCIMP_THREAD_RCI:
+            case CCIMP_THREAD_RECEIVE:
+            case CCIMP_THREAD_CLI:
+            case CCIMP_THREAD_FIRMWARE:
+                stack_size = 100 * 1024;
+                break;
+        }
+
+        s = posix_memalign(&sp, sysconf(_SC_PAGESIZE), stack_size);
+        if (s != 0)
+        {
+            printf("error in posix_memalign\n");
+            return (CCIMP_STATUS_ERROR);
+        }
+
+        /*printf("posix_memalign() allocated at %p\n", sp);*/
+
+        s = pthread_attr_setstack(&attr, sp, stack_size);
+        if (s != 0)
+        {
+            printf("error in pthread_attr_setstack\n");
+            return (CCIMP_STATUS_ERROR);
+        }
     }
-
-    /*printf("posix_memalign() allocated at %p\n", sp);*/
-
-    s = pthread_attr_setstack(&attr, sp, stack_size);
-    if (s != 0)
-    {
-        printf("error in pthread_attr_setstack\n");
-        return (CCIMP_STATUS_ERROR);
-    }
-
+#endif
     ccode = pthread_create(&pthread, &attr, thread_wrapper, create_thread_info);
     if (ccode != 0)
     {
