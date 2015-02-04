@@ -14,7 +14,7 @@
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Linux Application"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "test.etherios.com"
 
 extern ccapi_rci_data_t const ccapi_rci_data;
 
@@ -22,13 +22,13 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
     static ccapi_rci_service_t rci_service;
 
-    uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x9D, 0xFF, 0xFF, 0xAB, 0xCD, 0xEF};
+    uint8_t device_id[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x04, 0x9D, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA};
     char const * const device_cloud_url = DEVICE_CLOUD_URL_STRING;
     char const * const device_type = DEVICE_TYPE_STRING;
     
     rci_service.rci_data = &ccapi_rci_data;
 
-    start->vendor_id = 0x0300009F; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
+    start->vendor_id = 0x2001371; /* Set vendor_id or ccapi_init_error_invalid_vendorid will be returned instead */
     memcpy(start->device_id, device_id, sizeof start->device_id);
     start->device_cloud_url = device_cloud_url;
     start->device_type = device_type;

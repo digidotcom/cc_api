@@ -80,7 +80,7 @@ ConfigGenerator:
 
 auto_generated_files: ConfigGenerator
 	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CCFSM_PUBLIC_HEADER_DIR) -noBackup -type=global_header -usenames=all -rci_parser
-	java -jar $(CONFIG_GENERATOR_BIN) hbujanda2:idigiH75! "Linux Application" 1.0.0.0 -vendor=0x0300009F -noBackup -usenames=all -ccapi -rci_parser config.rci
+	java -jar $(CONFIG_GENERATOR_BIN) username:password "Linux Application" 1.0.0.0 -vendor=0x2001371 -noUpload -noBackup -usenames=all -ccapi -rci_parser config.rci
 
 	
 exec: $(OBJS)
