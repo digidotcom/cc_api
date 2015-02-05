@@ -3,6 +3,7 @@
 #include  <unistd.h>
 
 #include  "ccapi_xml_rci.h"
+#include  "ccapi_xml_rci_handler.h"
 
 static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;

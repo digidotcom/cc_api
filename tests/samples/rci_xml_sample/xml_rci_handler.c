@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include "ccapi_xml_rci.h"
+#include "ccapi_xml_rci_handler.h"
 
 #define SET_GOOD_RESPONSE \
        "<set_setting>     \
