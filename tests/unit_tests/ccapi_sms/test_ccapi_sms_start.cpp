@@ -85,11 +85,24 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError1)
     sms_start.cloud_config.service_id = service_id;
     sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_init_error);
+
+    th_expect_malloc(sizeof (ccapi_sms_info_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof phone_number, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof service_id, TH_MALLOC_RETURN_NORMAL, true);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_cloud_url, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->thread.connector_run, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance, CCIMP_STATUS_OK);
 }
 
 TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError2)
@@ -102,11 +115,23 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError2)
     sms_start.cloud_config.service_id = service_id;
     sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_invalid_data);
+    th_expect_malloc(sizeof (ccapi_sms_info_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof phone_number, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof service_id, TH_MALLOC_RETURN_NORMAL, true);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_cloud_url, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->thread.connector_run, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance, CCIMP_STATUS_OK);
 }
 
 TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError3)
@@ -119,11 +144,23 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError3)
     sms_start.cloud_config.service_id = service_id;
     sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
+    th_expect_malloc(sizeof (ccapi_sms_info_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof phone_number, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof service_id, TH_MALLOC_RETURN_NORMAL, true);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_type, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->config.device_cloud_url, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance->thread.connector_run, CCIMP_STATUS_OK);
+    Mock_ccimp_os_free_expectAndReturn(ccapi_data_single_instance, CCIMP_STATUS_OK);
 }
 
 TEST(test_ccapi_sms_start, testConnectorInitiateActionUnknownError)
@@ -137,11 +174,16 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionUnknownError)
     sms_start.cloud_config.phone_number = phone_number;
     connector_transport_t connector_transport = connector_transport_sms;
 
+    {
+        mock_connector_api_info_t * mock_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+        mock_info->connector_initiate_transport_start_info.init_transport = CCAPI_FALSE;
+    }
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_abort);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_data_single_instance->transport_sms.started);
 }
 
 
@@ -172,5 +214,4 @@ TEST(test_ccapi_sms_start, testSMSConnectionTimeout)
 
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_TIMEOUT, error);
-    CHECK_EQUAL(sms_start.start_timeout, ccapi_data_single_instance->transport_sms.info->start_timeout);
 }
