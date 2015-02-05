@@ -171,8 +171,15 @@ static void finish_send_ping(ccapi_ping_t * const ping_info)
         if (ping_info->svc_ping.ping_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(ping_info->svc_ping.ping_lock); 
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+             }
         }
 
         ccapi_free(ping_info);

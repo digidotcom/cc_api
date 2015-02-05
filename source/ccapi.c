@@ -1052,7 +1052,7 @@ connector_callback_status_t ccapi_network_udp_handler(connector_request_id_netwo
 
             ccimp_status = ccimp_network_udp_open(&ccimp_open_data);
 
-            if(ccimp_status == CCIMP_STATUS_OK)
+            if (ccimp_status == CCIMP_STATUS_OK)
             {
                 ccapi_data->transport_udp.started = CCAPI_TRUE;
             }
@@ -1165,7 +1165,7 @@ connector_callback_status_t ccapi_network_sms_handler(connector_request_id_netwo
 
             ccimp_status = ccimp_network_sms_open(&ccimp_open_data);
 
-            if(ccimp_status == CCIMP_STATUS_OK)
+            if (ccimp_status == CCIMP_STATUS_OK)
             {
                 ccapi_data->transport_sms.started = CCAPI_TRUE;
             }

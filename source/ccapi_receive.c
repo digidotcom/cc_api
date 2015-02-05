@@ -48,6 +48,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
         case CCIMP_STATUS_BUSY:
             error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
+            break;
     }
 
 done:

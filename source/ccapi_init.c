@@ -70,7 +70,15 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     ccapi_receive_target_t * target_entry;
 
     ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
-    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            break;
+    }
 
     target_entry = ccapi_data->service.receive.target_list;
 
@@ -84,7 +92,15 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     }
 
     ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            break;
+    }
 }
 #endif
 
@@ -96,7 +112,6 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->file_system_lock != NULL)
     {
         ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->file_system_lock);
-
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -104,6 +119,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
                 ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                break;
         }
     }
 
@@ -134,8 +150,15 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         if (ccapi_data->service.receive.receive_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->service.receive.receive_lock);
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
         }
         reset_heap_ptr(&ccapi_data->thread.receive);
     }
@@ -181,7 +204,6 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->initiate_action_lock != NULL)
     {   
         ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->initiate_action_lock);
-
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -189,6 +211,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
                 ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                break;
         }
     }
 
@@ -196,6 +219,7 @@ done:
     return; 
 }
 
+#if (defined CCIMP_DEBUG_ENABLED)
 static void free_logging_resources(void)
 {
     if (--logging_lock_users == 0)
@@ -203,8 +227,15 @@ static void free_logging_resources(void)
         if (logging_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(logging_lock);
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
 
             logging_lock = NULL;
         }
@@ -212,6 +243,7 @@ static void free_logging_resources(void)
 
     return;
 }
+#endif
 
 static ccapi_start_error_t check_malloc(void const * const p)
 {
@@ -285,6 +317,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_bool_t stub_fw_update;
 #endif
 
+#if (defined CCIMP_DEBUG_ENABLED)
     /* Initialize one single time for all connector instances the logging lock object */
     if (logging_lock_users++ == 0)
     {
@@ -300,6 +333,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
         logging_lock = create_data.lock;
     }
+#endif
 
     if (ccapi_handle == NULL)
     {
@@ -648,7 +682,9 @@ done:
                 free_ccapi_data_internal_resources(ccapi_data);
                 ccapi_free(ccapi_data);
             }
+#if (defined CCIMP_DEBUG_ENABLED)
             free_logging_resources();
+#endif
             break;
     }
 
@@ -820,7 +856,9 @@ done:
         case CCAPI_STOP_ERROR_NONE:
             free_ccapi_data_internal_resources(ccapi_data);
             ccapi_free(ccapi_data);
+#if (defined CCIMP_DEBUG_ENABLED)
             free_logging_resources();
+#endif
             break;
         case CCAPI_STOP_ERROR_NOT_STARTED:
             break;

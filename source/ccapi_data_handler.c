@@ -425,7 +425,15 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             ccimp_status_t ccimp_status;
 
             ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
 
             if (ccapi_data->service.receive.svc_receive == NULL)
             {
@@ -434,7 +442,15 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 ccapi_data->service.receive.svc_receive = svc_receive;
 
                 ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                switch (ccimp_status)
+                {
+                    case CCIMP_STATUS_OK:
+                        break;
+                    case CCIMP_STATUS_ERROR:
+                    case CCIMP_STATUS_BUSY:
+                        ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                        break;
+                }
 
                 ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_READY->CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED", svc_receive->target);
 
@@ -442,7 +458,15 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             else
             {
                 ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                switch (ccimp_status)
+                {
+                    case CCIMP_STATUS_OK:
+                        break;
+                    case CCIMP_STATUS_ERROR:
+                    case CCIMP_STATUS_BUSY:
+                        ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                        break;
+                }
 
                 ccimp_os_yield();
             }

@@ -307,15 +307,21 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
         if (send_info->svc_send.send_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(send_info->svc_send.send_lock); 
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
         }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
         if (send_info->svc_send.sending_file)
         {
             ccimp_status_t const ccimp_status = ccapi_close_file(ccapi_data, send_info->svc_send.file_handler);
-
             switch (ccimp_status)
             {
                 case CCIMP_STATUS_OK:
@@ -323,6 +329,7 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
                 case CCIMP_STATUS_BUSY:
                 case CCIMP_STATUS_ERROR:
                     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
             }
 
         }

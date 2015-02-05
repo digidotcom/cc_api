@@ -15,10 +15,10 @@
 
 #include "ccimp/ccimp_types.h"
 
-#if (defined CCIMP_DEBUG_ENABLED)
-
 #include <stdarg.h>
 #include "connector_debug.h"
+
+#if (defined CCIMP_DEBUG_ENABLED)
 
 /**
  * Logging output from Cloud Connector, Writes a formatted string to stdout, expanding the format
@@ -51,6 +51,8 @@ void ccimp_hal_logging_vprintf(debug_t const debug, char const * const format, v
 #else
 
 #define debug_t void *
+
+#define TMP_INFO_PREFIX
 
 #endif
 

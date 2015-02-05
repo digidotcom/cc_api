@@ -348,8 +348,10 @@ typedef struct
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;
+#if (defined CCIMP_DEBUG_ENABLED)
 extern unsigned int logging_lock_users;
 extern void * logging_lock;
+#endif
 
 void ccapi_rci_thread(void * const argument);
 void ccapi_receive_thread(void * const argument);

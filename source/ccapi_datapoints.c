@@ -1205,6 +1205,7 @@ done:
                 case CCIMP_STATUS_BUSY:
                 case CCIMP_STATUS_ERROR:
                     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
             }
         }
         ccapi_free(transaction_info);
