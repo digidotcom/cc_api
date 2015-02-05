@@ -340,6 +340,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
     ccapi_data->config.receive_supported = CCAPI_FALSE;
     ccapi_data->config.cli_supported = CCAPI_FALSE;
+    ccapi_data->config.sm_supported = CCAPI_FALSE;
     ccapi_data->config.rci_supported = CCAPI_FALSE;
 
     if (start == NULL)
@@ -525,6 +526,14 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->service.cli.user_callback.request = start->service.cli->request;
         ccapi_data->service.cli.user_callback.finished = start->service.cli->finished;
         ccapi_data->service.cli.svc_cli = NULL;
+    }
+#endif
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+    if (start->service.sm != NULL)
+    {
+        ccapi_data->config.sm_supported = CCAPI_TRUE;
+        ccapi_data->service.sm.user_callback = *start->service.sm;
     }
 #endif
 

@@ -62,6 +62,7 @@ typedef struct {
     uint8_t device_id[16];
     uint32_t vendor_id;
     ccapi_bool_t cli_supported;
+    ccapi_bool_t sm_supported;
     ccapi_bool_t receive_supported;
     ccapi_bool_t firmware_supported;
     ccapi_bool_t rci_supported;
@@ -241,6 +242,11 @@ typedef struct {
             ccapi_cli_service_t user_callback;
             ccapi_svc_cli_t * svc_cli;
         } cli;
+#endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+        struct {
+            ccapi_sm_service_t user_callback;
+        } sm;
 #endif
     } service;
     struct {

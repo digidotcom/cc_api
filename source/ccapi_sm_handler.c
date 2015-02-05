@@ -421,6 +421,22 @@ done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_request_connect(connector_sm_request_connect_t * const request_connect_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_bool_t allow_connect = CCAPI_FALSE;
+
+    ccapi_logging_line("ccapi_process_request_connect: transport %d", request_connect_ptr->transport);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.request_connect != NULL)
+    {
+       ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport, &allow_connect);
+    }
+
+    request_connect_ptr->allow = allow_connect;
+
+    return connector_callback_continue;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -482,9 +498,16 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         case connector_request_id_sm_more_data:
         case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:
-        case connector_request_id_sm_request_connect:
             ASSERT_MSG(0);
             break;
+        case connector_request_id_sm_request_connect:
+        {
+            connector_sm_request_connect_t * const request_connect_ptr = data;
+
+            connector_status = ccapi_process_request_connect(request_connect_ptr, ccapi_data);
+
+            break;
+         }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
