@@ -356,9 +356,9 @@ done:
     {
         case CCAPI_TCP_START_ERROR_NONE:
         case CCAPI_TCP_START_ERROR_ALREAY_STARTED:
-            break;
         case CCAPI_TCP_START_ERROR_CCAPI_STOPPED:
         case CCAPI_TCP_START_ERROR_NULL_POINTER:
+            break;
         case CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_TCP_START_ERROR_KEEPALIVES:
         case CCAPI_TCP_START_ERROR_IP:
@@ -366,22 +366,19 @@ done:
         case CCAPI_TCP_START_ERROR_PHONE:
         case CCAPI_TCP_START_ERROR_INIT:
         case CCAPI_TCP_START_ERROR_TIMEOUT:
-            if (ccapi_data != NULL)
+            if (ccapi_data->transport_tcp.info != NULL)
             {
-                if (ccapi_data->transport_tcp.info != NULL)
+                if (ccapi_data->transport_tcp.info->connection.password != NULL)
                 {
-                    if (ccapi_data->transport_tcp.info->connection.password != NULL)
-                    {
-                        ccapi_free(ccapi_data->transport_tcp.info->connection.password);
-                    }
-
-                    if (tcp_start->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
-                    {
-                        ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
-                    }
-                    ccapi_free(ccapi_data->transport_tcp.info);
-                    ccapi_data->transport_tcp.info = NULL;
+                    ccapi_free(ccapi_data->transport_tcp.info->connection.password);
                 }
+
+                if (tcp_start->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
+                {
+                    ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
+                }
+                ccapi_free(ccapi_data->transport_tcp.info);
+                ccapi_data->transport_tcp.info = NULL;
             }
             break;
     }

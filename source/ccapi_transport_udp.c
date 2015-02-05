@@ -151,20 +151,17 @@ done:
     {
         case CCAPI_UDP_START_ERROR_NONE:
         case CCAPI_UDP_START_ERROR_ALREADY_STARTED:
-            break;
         case CCAPI_UDP_START_ERROR_CCAPI_STOPPED:
         case CCAPI_UDP_START_ERROR_NULL_POINTER:
+            break;
         case CCAPI_UDP_START_ERROR_INIT:
         case CCAPI_UDP_START_ERROR_MAX_SESSIONS:
         case CCAPI_UDP_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_UDP_START_ERROR_TIMEOUT:
-            if (ccapi_data != NULL)
+            if (ccapi_data->transport_udp.info != NULL)
             {
-                if (ccapi_data->transport_udp.info != NULL)
-                {
-                    ccapi_free(ccapi_data->transport_udp.info);
-                    ccapi_data->transport_udp.info = NULL;
-                }
+                ccapi_free(ccapi_data->transport_udp.info);
+                ccapi_data->transport_udp.info = NULL;
             }
             break;
     }
