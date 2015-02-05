@@ -255,10 +255,12 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
     ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
 
     {
-        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
+        ccapi_receive_error_t receive_error;
+
+        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &receive_error))
         {
             /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
-            goto done;
+            ASSERT_MSG_GOTO(svc_receive != NULL, done);
         }
 
         target_ptr->user_context = svc_receive;

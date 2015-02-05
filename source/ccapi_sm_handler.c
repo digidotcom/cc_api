@@ -100,10 +100,12 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     if (cli_request_ptr->user_context == NULL)
     {
-        if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &svc_cli->cli_error))
+        ccapi_cli_error_t cli_error;
+
+        if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &cli_error))
         {
             /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
-            goto done;
+            ASSERT_MSG_GOTO(svc_cli != NULL, done);
         }
 
         cli_request_ptr->user_context = svc_cli;
