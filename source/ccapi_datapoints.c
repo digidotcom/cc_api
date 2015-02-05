@@ -1125,6 +1125,7 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
             goto done;
         }
 
+        transaction_info->response_error = CCAPI_DP_ERROR_INITIATE_ACTION_FAILED;
         transaction_info->hint = hint;
         transaction_info->lock =  ccapi_lock_create();
         if (transaction_info->lock == NULL)
