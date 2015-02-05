@@ -107,13 +107,17 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
 {
     ccapi_sms_start_error_t error = CCAPI_SMS_START_ERROR_NONE;
 
-    UNUSED_ARGUMENT(sms_start);
-
     if (!CCAPI_RUNNING(ccapi_data))
     {
         ccapi_logging_line("ccxapi_start_transport_sms: CCAPI not started");
 
         error = CCAPI_SMS_START_ERROR_CCAPI_STOPPED;
+        goto done;
+    }
+
+    if (ccapi_data->transport_sms.started)
+    {
+        error = CCAPI_SMS_START_ERROR_ALREADY_STARTED;
         goto done;
     }
 
