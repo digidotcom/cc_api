@@ -319,17 +319,15 @@ int main (void)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
     do
     {
-        /* TODO: send ping instead of data*/
-        ccapi_send_error_t send_error;
-        #define SEND_DATA_UDP         "ping"
-        send_error = ccapi_send_data(CCAPI_TRANSPORT_UDP, "ping.txt", "text/plain", SEND_DATA_UDP, strlen(SEND_DATA_UDP), CCAPI_SEND_BEHAVIOR_OVERWRITE);
-        if (send_error == CCAPI_SEND_ERROR_NONE)
+        ccapi_ping_error_t send_error;
+        send_error = ccapi_send_ping(CCAPI_TRANSPORT_UDP);
+        if (send_error == CCAPI_PING_ERROR_NONE)
         {
-            printf("ccapi_send_data for udp success\n");
+            printf("ccapi_send_ping for udp success\n");
         }
         else
         {
-            printf("ccapi_send_data for udp failed with error %d\n", send_error);
+            printf("ccapi_send_ping for udp failed with error %d\n", send_error);
         }
         
         sleep(5);
