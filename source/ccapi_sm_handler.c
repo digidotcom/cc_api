@@ -423,16 +423,14 @@ done:
 
 static connector_callback_status_t ccapi_process_request_connect(connector_sm_request_connect_t * const request_connect_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_bool_t allow_connect = CCAPI_FALSE;
-
     ccapi_logging_line("ccapi_process_request_connect: transport %d", request_connect_ptr->transport);
    
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.request_connect != NULL)
     {
-       ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport, &allow_connect);
+       ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport);
     }
 
-    request_connect_ptr->allow = allow_connect;
+    request_connect_ptr->allow = CCAPI_FALSE;
 
     return connector_callback_continue;
 }
