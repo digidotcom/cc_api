@@ -50,6 +50,23 @@ TEST(test_ccapi_udp_start, testConnectorInitiateActionOK)
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_NONE, error);
 }
 
+TEST(test_ccapi_udp_start, testUDPAlreadyStarted)
+{
+    ccapi_udp_start_error_t error;
+    ccapi_udp_info_t udp_start = {{0}};
+
+    udp_start.callback.close = ccapi_udp_close_cb;
+
+    connector_transport_t connector_transport = connector_transport_udp;
+
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    error = ccapi_start_transport_udp(&udp_start);
+    CHECK_EQUAL(CCAPI_UDP_START_ERROR_NONE, error);
+    error = ccapi_start_transport_udp(&udp_start);
+    CHECK_EQUAL(CCAPI_UDP_START_ERROR_ALREADY_STARTED, error);
+}
+
 TEST(test_ccapi_udp_start, testConnectorInitiateActionInitError)
 {
     ccapi_udp_start_error_t error;

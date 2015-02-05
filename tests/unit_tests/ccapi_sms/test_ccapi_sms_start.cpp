@@ -54,7 +54,28 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionOK)
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_NONE, error);
 }
 
-TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError)
+TEST(test_ccapi_sms_start, testSMSAlreadyStarted)
+{
+    ccapi_sms_start_error_t error;
+    ccapi_sms_info_t sms_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+    char service_id[] = "";
+
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
+    sms_start.callback.close = ccapi_sms_close_cb;
+
+    connector_transport_t connector_transport = connector_transport_sms;
+
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    error = ccapi_start_transport_sms(&sms_start);
+    CHECK_EQUAL(CCAPI_SMS_START_ERROR_NONE, error);
+    error = ccapi_start_transport_sms(&sms_start);
+    CHECK_EQUAL(CCAPI_SMS_START_ERROR_ALREADY_STARTED, error);
+}
+
+TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError1)
 {
     ccapi_sms_start_error_t error;
     ccapi_sms_info_t sms_start = {{0}};
@@ -69,11 +90,35 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError)
             connector_init_error);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+}
+
+TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError2)
+{
+    ccapi_sms_start_error_t error;
+    ccapi_sms_info_t sms_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+    char service_id[] = "";
+
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
+    connector_transport_t connector_transport = connector_transport_sms;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_invalid_data);
     error = ccapi_start_transport_sms(&sms_start);
     CHECK_EQUAL(CCAPI_SMS_START_ERROR_INIT, error);
+}
+
+TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError3)
+{
+    ccapi_sms_start_error_t error;
+    ccapi_sms_info_t sms_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+    char service_id[] = "";
+
+    sms_start.cloud_config.service_id = service_id;
+    sms_start.cloud_config.phone_number = phone_number;
+    connector_transport_t connector_transport = connector_transport_sms;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
