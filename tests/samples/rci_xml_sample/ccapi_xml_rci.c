@@ -5,9 +5,11 @@
 #include  "ccapi_xml_rci.h"
 #include  "ccapi_xml_rci_handler.h"
 
+#define xstr(s) str(s)
+#define str(s) #s
+
 static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;
-static char * value_end_ptr = NULL;
 
 static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char * xml_response_buffer)
 {
@@ -31,9 +33,6 @@ static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, 
         {
             goto done;
         }
-
-        #define xstr(s) str(s)
-        #define str(s) #s
 
         #define XML_MAX_ERROR_DESC_LENGTH_STR  xstr(XML_MAX_ERROR_DESC_LENGTH)
         #define XML_MAX_ERROR_HINT_LENGTH_STR  xstr(XML_MAX_ERROR_HINT_LENGTH)
@@ -331,9 +330,6 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
                 free(xml_query_response_buffer);
                 xml_query_response_buffer = NULL;
             }
-
-            value_end_ptr = NULL;
-
             break;
         }
 #if (defined RCI_LEGACY_COMMANDS)
@@ -429,16 +425,9 @@ static int get_xml_value(ccapi_rci_info_t * const info, char const * * xml_value
 {
     int error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
     char * element_ptr = NULL;
-    char * value_start_ptr = NULL;
     char element_name[RCI_ELEMENT_NAME_MAX_SIZE + BRACKET_SIZE + NULL_TERM_SIZE];
 
     assert(xml_query_response_buffer != NULL);
-
-    if (value_end_ptr != NULL)
-    {
-        /* Restore previous value_end_ptr */
-        *value_end_ptr = '<';
-    }
 
     /* Firs look for empty answer */
     sprintf(element_name, "<%s/>", info->element.name);
@@ -456,13 +445,17 @@ static int get_xml_value(ccapi_rci_info_t * const info, char const * * xml_value
     element_ptr = strstr(xml_query_response_buffer, element_name);
     if (element_ptr != NULL)
     {
-        value_start_ptr = element_ptr + strlen(info->element.name) + BRACKET_SIZE;
-        value_end_ptr = strstr(value_start_ptr, "</");
-        if (value_end_ptr != NULL)
+        int scanf_ret;
+        static char value[XML_MAX_VALUE_LENGTH + 1];
+
+        #define XML_MAX_VALUE_LENGTH_STR  xstr(XML_MAX_VALUE_LENGTH)
+
+        #define XML_VALUE_FORMAT "%*[^>]>%" XML_MAX_VALUE_LENGTH_STR "[^<]</"
+        scanf_ret = sscanf(element_ptr, XML_VALUE_FORMAT, value);
+        if (scanf_ret > 0)
         {
-            *value_end_ptr = '\0';
-            //printf("element xml_value='%s'\n", value_start_ptr);
-            *xml_value = value_start_ptr;
+            /* printf("element xml_value='%s'\n", value); */
+            *xml_value = value;
 
             error_id = CCAPI_GLOBAL_ERROR_NONE;
             goto done;
