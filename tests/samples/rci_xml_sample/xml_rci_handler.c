@@ -19,13 +19,16 @@
           </ethernet>     \
         </set_setting>"
 
+#define XML_SET_ERROR_DESC "linux error description while setting"
+#define XML_SET_ERROR_HINT "linux error hint while setting"
+
 #define SET_BAD_RESPONSE  \
        "<set_setting>     \
           <serial>        \
             <baud>        \
                <error id=\"1\"> \
-               <desc>linux_error_desc</desc> \
-               <hint>linux_error_hint</hint> \
+               <desc>%s</desc> \
+               <hint>%s</hint> \
                </error>   \
             </baud>       \
             <parity/>     \
@@ -113,12 +116,15 @@
           </gps_stats> \
         </query_state>"
 
+#define XML_QUERY_ERROR_DESC "linux error description while querying"
+#define XML_QUERY_ERROR_HINT "linux error hint while querying"
+
 #define QUERY_BAD_RESPONSE     \
        "<query_setting>        \
           <serial>             \
              <error id=\"1\">  \
-             <desc>linux_error_desc</desc> \
-             <hint>linux_error_hint</hint> \
+             <desc>%s</desc> \
+             <hint>%s</hint> \
              </error>          \
           </serial>            \
         </query_setting>"
@@ -205,7 +211,10 @@ void xml_rci_handler(void)
                 /* Just a test: every two query request for the group 'ethernet' return an error */
                 if (rnd_query_response++ % 2)
                 {
-                    fprintf(xml_response_fp, "%s", QUERY_BAD_RESPONSE);
+                    assert(sizeof(XML_QUERY_ERROR_DESC) <= XML_MAX_ERROR_DESC_LENGTH);
+                    assert(sizeof(XML_QUERY_ERROR_HINT) <= XML_MAX_ERROR_HINT_LENGTH);
+
+                    fprintf(xml_response_fp, QUERY_BAD_RESPONSE, XML_QUERY_ERROR_DESC, XML_QUERY_ERROR_HINT);
                 }
                 else
                 {
@@ -251,7 +260,12 @@ void xml_rci_handler(void)
         /* Don't mind the group set in the request... just provide a response (for 'ethernet' group for example)
            with or without 'error' tag randomly */
         if (rnd_set_response++ % 2)
-            fprintf(xml_response_fp, "%s", SET_BAD_RESPONSE);
+        {
+            assert(sizeof(XML_SET_ERROR_DESC) <= XML_MAX_ERROR_DESC_LENGTH);
+            assert(sizeof(XML_SET_ERROR_HINT) <= XML_MAX_ERROR_HINT_LENGTH);
+
+            fprintf(xml_response_fp, SET_BAD_RESPONSE, XML_SET_ERROR_DESC, XML_SET_ERROR_HINT);
+        }
         else
             fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
     }

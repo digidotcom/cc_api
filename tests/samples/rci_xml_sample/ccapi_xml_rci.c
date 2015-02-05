@@ -9,6 +9,50 @@ static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;
 static char * value_end_ptr = NULL;
 
+static char const error_prefix[] = "XML Error: id='%d', desc='%s', hint='%s'";
+static char response_error[sizeof(error_prefix) + XML_MAX_ERROR_DESC_LENGTH + 1 + XML_MAX_ERROR_HINT_LENGTH + 1];
+
+static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char * xml_response_buffer)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+
+    char * error_ptr = NULL;
+
+    /* Parse xml_response looking for an 'error' tag */
+    error_ptr = strstr(xml_response_buffer, "<error id=");
+    if (error_ptr != NULL)
+    {
+        int scanf_ret;
+        unsigned int response_error_id;
+        char * response_error_desc = malloc(XML_MAX_ERROR_DESC_LENGTH);
+        char * response_error_hint = malloc(XML_MAX_ERROR_HINT_LENGTH);
+
+        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+
+        if (response_error == NULL || response_error_desc == NULL || response_error_hint == NULL)
+        {
+            goto done;
+        }
+
+        scanf_ret = sscanf(error_ptr, "<error id=\"%u\">%*[^<]<desc>%[^<]</desc>%*[^<]<hint>%[^<]</hint>", &response_error_id, response_error_desc, response_error_hint);
+        if (scanf_ret > 0)
+        {
+            sprintf(response_error, error_prefix, response_error_id, response_error_desc, response_error_hint);
+
+            /* Take the xml error 'id' + 'desc' + 'hint' as hint */
+            info->error_hint = response_error;
+
+            printf("%s\n", response_error);
+        }
+
+        free(response_error_desc);
+        free(response_error_hint);
+    }
+
+done:
+    return error_id;
+}
+
 static void write_group(ccapi_rci_info_t * const info)
 {
     switch (info->group.type)
@@ -147,7 +191,6 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_SET:
         {
             char * xml_set_response_buffer = NULL;
-            char * error_ptr = NULL;
 
             xml_rci_handler();
 
@@ -166,31 +209,7 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
                 goto done;
             }
 
-            /* Parse xml_response looking for an 'error' tag */
-            error_ptr = strstr(xml_set_response_buffer, "<error id=");
-            if (error_ptr != NULL)
-            {
-                error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-#if 0
-                {
-                    int scanf_ret;
-                    unsigned int response_error_id;
-
-                    printf("error_ptr='%s'\n", error_ptr);
-
-                    scanf_ret = scanf(error_ptr, "<error id=\"%u\">", &response_error_id);
-                    printf("scanf_ret=%d, error_id=%d\n", scanf_ret, response_error_id);
-
-                    if (scanf_ret > 0)
-                    {
-                        /* TODO: take the linux 'desc' or 'hint' as hint */
-                        info->error_hint = "xml response has error tag";
-                    }
-                }
-#else
-                info->error_hint = "xml response has error tag";
-#endif
-            }
+            error_id = process_xml_error(info, xml_set_response_buffer);
 
             if (xml_set_response_buffer != NULL)
             {
@@ -258,8 +277,6 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
             fclose(xml_request_fp);
 
             {
-                char * error_ptr = NULL;
-
                 xml_rci_handler();
 
                 assert(xml_query_response_buffer == NULL);
@@ -270,31 +287,7 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
                     goto done;
                 }
 
-                /* Parse xml_response looking for an 'error' tag */
-                error_ptr = strstr(xml_query_response_buffer, "<error id=");
-                if (error_ptr != NULL)
-                {
-                    error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-#if 0
-                    {
-                        int scanf_ret;
-                        unsigned int response_error_id;
-
-                        printf("error_ptr='%s'\n", error_ptr);
-
-                        scanf_ret = scanf(error_ptr, "<error id=\"%u\">", &response_error_id);
-                        printf("scanf_ret=%d, error_id=%d\n", scanf_ret, response_error_id);
-
-                        if (scanf_ret > 0)
-                        {
-                            /* TODO: take the linux 'desc' or 'hint' as hint */
-                            info->error_hint = "xml response has error tag";
-                        }
-                    }
-#else
-                    info->error_hint = "xml response has error tag";
-#endif
-                }
+                error_id = process_xml_error(info, xml_query_response_buffer);
             }
             break;
         }
