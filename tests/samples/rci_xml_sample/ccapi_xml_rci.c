@@ -9,9 +9,6 @@ static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;
 static char * value_end_ptr = NULL;
 
-static char const error_prefix[] = "XML Error: id='%d', desc='%s', hint='%s'";
-static char response_error[sizeof(error_prefix) + XML_MAX_ERROR_DESC_LENGTH + 1 + XML_MAX_ERROR_HINT_LENGTH + 1];
-
 static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char * xml_response_buffer)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
@@ -24,20 +21,32 @@ static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, 
     {
         int scanf_ret;
         unsigned int response_error_id;
-        char * response_error_desc = malloc(XML_MAX_ERROR_DESC_LENGTH);
-        char * response_error_hint = malloc(XML_MAX_ERROR_HINT_LENGTH);
+
+        char * response_error_desc = malloc(XML_MAX_ERROR_DESC_LENGTH + 1);
+        char * response_error_hint = malloc(XML_MAX_ERROR_HINT_LENGTH + 1);
 
         error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
 
-        if (response_error == NULL || response_error_desc == NULL || response_error_hint == NULL)
+        if (response_error_desc == NULL || response_error_hint == NULL)
         {
             goto done;
         }
 
-        scanf_ret = sscanf(error_ptr, "<error id=\"%u\">%*[^<]<desc>%[^<]</desc>%*[^<]<hint>%[^<]</hint>", &response_error_id, response_error_desc, response_error_hint);
+        #define xstr(s) str(s)
+        #define str(s) #s
+
+        #define XML_MAX_ERROR_DESC_LENGTH_STR  xstr(XML_MAX_ERROR_DESC_LENGTH)
+        #define XML_MAX_ERROR_HINT_LENGTH_STR  xstr(XML_MAX_ERROR_HINT_LENGTH)
+
+        #define XML_ERROR_FORMAT "<error id=\"%u\">%*[^<]<desc>%" XML_MAX_ERROR_DESC_LENGTH_STR "[^<]</desc>%*[^<]<hint>%" XML_MAX_ERROR_HINT_LENGTH_STR "[^<]</hint>"
+
+        scanf_ret = sscanf(error_ptr, XML_ERROR_FORMAT, &response_error_id, response_error_desc, response_error_hint);
         if (scanf_ret > 0)
         {
-            sprintf(response_error, error_prefix, response_error_id, response_error_desc, response_error_hint);
+            static char const brci_error_prefix[] = "XML Error: id='%d', desc='%s', hint='%s'";
+            static char response_error[sizeof(brci_error_prefix) + XML_MAX_ERROR_DESC_LENGTH + 1 + XML_MAX_ERROR_HINT_LENGTH + 1];
+
+            sprintf(response_error, brci_error_prefix, response_error_id, response_error_desc, response_error_hint);
 
             /* Take the xml error 'id' + 'desc' + 'hint' as hint */
             info->error_hint = response_error;

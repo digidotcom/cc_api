@@ -19,16 +19,13 @@
           </ethernet>     \
         </set_setting>"
 
-#define XML_SET_ERROR_DESC "linux error description while setting"
-#define XML_SET_ERROR_HINT "linux error hint while setting"
-
 #define SET_BAD_RESPONSE  \
        "<set_setting>     \
           <serial>        \
             <baud>        \
                <error id=\"1\"> \
-               <desc>%s</desc> \
-               <hint>%s</hint> \
+               <desc>linux error description while setting</desc> \
+               <hint>linux error hint while setting</hint> \
                </error>   \
             </baud>       \
             <parity/>     \
@@ -116,15 +113,12 @@
           </gps_stats> \
         </query_state>"
 
-#define XML_QUERY_ERROR_DESC "linux error description while querying"
-#define XML_QUERY_ERROR_HINT "linux error hint while querying"
-
 #define QUERY_BAD_RESPONSE     \
        "<query_setting>        \
           <serial>             \
              <error id=\"1\">  \
-             <desc>%s</desc> \
-             <hint>%s</hint> \
+             <desc>linux error description while querying</desc> \
+             <hint>linux error hint while querying</hint> \
              </error>          \
           </serial>            \
         </query_setting>"
@@ -211,10 +205,7 @@ void xml_rci_handler(void)
                 /* Just a test: every two query request for the group 'ethernet' return an error */
                 if (rnd_query_response++ % 2)
                 {
-                    assert(sizeof(XML_QUERY_ERROR_DESC) <= XML_MAX_ERROR_DESC_LENGTH);
-                    assert(sizeof(XML_QUERY_ERROR_HINT) <= XML_MAX_ERROR_HINT_LENGTH);
-
-                    fprintf(xml_response_fp, QUERY_BAD_RESPONSE, XML_QUERY_ERROR_DESC, XML_QUERY_ERROR_HINT);
+                    fprintf(xml_response_fp, "%s", QUERY_BAD_RESPONSE);
                 }
                 else
                 {
@@ -260,12 +251,7 @@ void xml_rci_handler(void)
         /* Don't mind the group set in the request... just provide a response (for 'ethernet' group for example)
            with or without 'error' tag randomly */
         if (rnd_set_response++ % 2)
-        {
-            assert(sizeof(XML_SET_ERROR_DESC) <= XML_MAX_ERROR_DESC_LENGTH);
-            assert(sizeof(XML_SET_ERROR_HINT) <= XML_MAX_ERROR_HINT_LENGTH);
-
-            fprintf(xml_response_fp, SET_BAD_RESPONSE, XML_SET_ERROR_DESC, XML_SET_ERROR_HINT);
-        }
+            fprintf(xml_response_fp, "%s", SET_BAD_RESPONSE);
         else
             fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
     }
