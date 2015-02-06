@@ -38,6 +38,26 @@ static void test_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_boo
     return;
 }
 
+static ccapi_transport_t ccapi_sm_opaque_response_expected_transport;
+static uint32_t ccapi_sm_opaque_response_expected_id;
+static void const * ccapi_sm_opaque_response_expected_data;
+static size_t ccapi_sm_opaque_response_expected_bytes_used;
+static ccapi_bool_t ccapi_sm_opaque_response_expected_error;
+static ccapi_bool_t ccapi_sm_opaque_response_cb_called;
+
+static void test_sm_opaque_response_cb(ccapi_transport_t const transport, uint32_t const id, void const * const data, size_t const bytes_used, ccapi_bool_t error)
+{
+    CHECK_EQUAL(ccapi_sm_opaque_response_expected_transport, transport);
+    CHECK_EQUAL(ccapi_sm_opaque_response_expected_id, id);
+    CHECK_EQUAL(ccapi_sm_opaque_response_expected_data, data);
+    CHECK_EQUAL(ccapi_sm_opaque_response_expected_bytes_used, bytes_used);
+    CHECK_EQUAL(ccapi_sm_opaque_response_expected_error, error);
+
+    ccapi_sm_opaque_response_cb_called = CCAPI_TRUE;
+
+    return;
+}
+
 TEST_GROUP(test_ccapi_sm_callback_NoSmSupport)
 {
     void setup()
@@ -50,6 +70,7 @@ TEST_GROUP(test_ccapi_sm_callback_NoSmSupport)
 
         ccapi_sm_request_connect_cb_called = CCAPI_FALSE;
         ccapi_sm_ping_request_cb_called = CCAPI_FALSE;
+        ccapi_sm_opaque_response_cb_called = CCAPI_FALSE;
 
         error = ccapi_start(&start);
         CHECK(error == CCAPI_START_ERROR_NONE);
@@ -68,7 +89,6 @@ TEST(test_ccapi_sm_callback_NoSmSupport, testNoRequestConnectCallback)
     connector_callback_status_t status;
 
     ccfsm_sm_request_connect.transport = connector_transport_udp;
-    ccfsm_sm_request_connect.allow = connector_false;
 
     request.sm_request = connector_request_id_sm_request_connect;
     status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_request_connect, ccapi_data_single_instance);
@@ -84,10 +104,24 @@ TEST(test_ccapi_sm_callback_NoSmSupport, testNoPingRequestCallback)
     connector_callback_status_t status;
 
     ccfsm_sm_ping_request.transport = connector_transport_udp;
-    ccfsm_sm_ping_request.response_required = connector_false;
 
     request.sm_request = connector_request_id_sm_ping_request;
     status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_ping_request, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_sm_ping_request_cb_called);
+}
+
+TEST(test_ccapi_sm_callback_NoSmSupport, testNoOpaqueResponseCallback)
+{
+    connector_request_id_t request;
+    connector_sm_opaque_response_t ccfsm_sm_opaque_response;
+    connector_callback_status_t status;
+
+    ccfsm_sm_opaque_response.transport = connector_transport_udp;
+
+    request.sm_request = connector_request_id_sm_ping_request;
+    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_opaque_response, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 
     CHECK_EQUAL(CCAPI_FALSE, ccapi_sm_ping_request_cb_called);
@@ -99,7 +133,7 @@ TEST_GROUP(test_ccapi_sm_callback)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_sm_service_t sm_service = {test_sm_request_connect_cb, test_sm_ping_request_cb, NULL, NULL};
+        ccapi_sm_service_t sm_service = {test_sm_request_connect_cb, test_sm_ping_request_cb, test_sm_opaque_response_cb, NULL, NULL};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
@@ -109,6 +143,7 @@ TEST_GROUP(test_ccapi_sm_callback)
         CHECK(error == CCAPI_START_ERROR_NONE);
         CHECK_EQUAL(sm_service.request_connect, ccapi_data_single_instance->service.sm.user_callback.request_connect);
         CHECK_EQUAL(sm_service.ping_request, ccapi_data_single_instance->service.sm.user_callback.ping_request);
+        CHECK_EQUAL(sm_service.opaque_response, ccapi_data_single_instance->service.sm.user_callback.opaque_response);
     }
 
     void teardown()
@@ -184,3 +219,28 @@ TEST(test_ccapi_sm_callback, testPingRequestResponseNotRequired)
     CHECK_EQUAL(CCAPI_TRUE, ccapi_sm_ping_request_cb_called);
 }
 
+TEST(test_ccapi_sm_callback, testPingRequestOpaqueResponse)
+{
+    connector_request_id_t request;
+    connector_sm_opaque_response_t ccfsm_sm_opaque_response;
+    connector_callback_status_t status;
+
+    ccapi_sm_opaque_response_expected_transport = CCAPI_TRANSPORT_UDP;    
+    ccapi_sm_opaque_response_expected_id = 123;
+    ccapi_sm_opaque_response_expected_data = "OPAQUE_TEST_DATA";
+    ccapi_sm_opaque_response_expected_bytes_used = strlen((char *)ccapi_sm_opaque_response_expected_data);
+    ccapi_sm_opaque_response_expected_error = CCAPI_FALSE;
+    ccapi_sm_opaque_response_cb_called = CCAPI_FALSE;
+
+    ccfsm_sm_opaque_response.transport = connector_transport_udp;
+    ccfsm_sm_opaque_response.id = 123;
+    ccfsm_sm_opaque_response.data = "OPAQUE_TEST_DATA";
+    ccfsm_sm_opaque_response.bytes_used = strlen((char *)ccfsm_sm_opaque_response.data);
+    ccfsm_sm_opaque_response.error = connector_false;
+
+    request.sm_request = connector_request_id_sm_opaque_response;
+    status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_opaque_response, ccapi_data_single_instance);
+    CHECK_EQUAL(connector_callback_continue, status);
+
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_sm_opaque_response_cb_called);
+}

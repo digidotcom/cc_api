@@ -42,7 +42,7 @@ TEST(test_ccapi_sm_support, testSmSupported)
 {
     ccapi_start_t start = {0};
     ccapi_start_error_t error;
-    ccapi_sm_service_t sm_service = {NULL, NULL, NULL, NULL};
+    ccapi_sm_service_t sm_service = {NULL, NULL, NULL, NULL, NULL};
 
     th_fill_start_structure_with_good_parameters(&start);
     start.service.sm = &sm_service;

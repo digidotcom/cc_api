@@ -447,6 +447,18 @@ static connector_callback_status_t ccapi_process_ping_request(connector_sm_recei
     return connector_callback_continue;
 }
 
+static connector_callback_status_t ccapi_process_opaque_response(connector_sm_opaque_response_t const * const opaque_response_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("Received %" PRIsize " opaque bytes on id %d\n", opaque_response_ptr->bytes_used, opaque_response_ptr->id);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.opaque_response != NULL)
+    {
+        ccapi_data->service.sm.user_callback.opaque_response(opaque_response_ptr->transport, opaque_response_ptr->id, opaque_response_ptr->data, opaque_response_ptr->bytes_used, CCAPI_BOOL(opaque_response_ptr->error));
+    }
+
+    return connector_callback_continue;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -497,14 +509,21 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         }
         case connector_request_id_sm_ping_response:
         {
-            connector_sm_ping_response_t const * const response_ptr = data;
+            connector_sm_ping_response_t const * const ping_response_ptr = data;
 
-            connector_status = ccapi_process_ping_response(response_ptr);
+            connector_status = ccapi_process_ping_response(ping_response_ptr);
+
+            break;
+        }
+        case connector_request_id_sm_opaque_response:
+        {
+            connector_sm_opaque_response_t const * const opaque_response = data;
+
+            connector_status = ccapi_process_opaque_response(opaque_response, ccapi_data);
 
             break;
         }
         case connector_request_id_sm_more_data:
-        case connector_request_id_sm_opaque_response:
         case connector_request_id_sm_config_request:
             ASSERT_MSG(0);
             break;
