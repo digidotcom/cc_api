@@ -118,7 +118,7 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_data_t * const ccapi_data, char
     ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccapi_fs_virtual_dir_t * new_dir_entry;
 
-    if (virtual_dir == NULL || local_dir == NULL || virtual_dir[0] == '\0' || local_dir[0] == '\0' || strstr(virtual_dir, "/") != NULL || strstr(virtual_dir, "\\"))
+    if (virtual_dir == NULL || local_dir == NULL || virtual_dir[0] == '\0' || local_dir[0] == '\0' || strstr(virtual_dir, "/") != NULL || strstr(virtual_dir, "\\") || strlen(virtual_dir) > (CCIMP_FILE_SYSTEM_MAX_PATH_LENGTH - sizeof "//"))
     {
         error = CCAPI_FS_ERROR_INVALID_PATH;
         goto done;
