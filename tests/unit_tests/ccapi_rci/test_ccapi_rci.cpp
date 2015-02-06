@@ -90,6 +90,7 @@ TEST_GROUP(test_ccapi_rci)
 };
 
 void th_rci_checkExpectations(char const * const function_name, ccapi_rci_info_t const * const rci_info);
+char const * th_rci_last_function_called(void);
 void th_rci_returnValues(unsigned int const retval, ccapi_rci_info_t const * const rci_info);
 void const * th_rci_get_value_ptr(void);
 
@@ -1028,7 +1029,6 @@ TEST(test_ccapi_rci, testRCISessionCancel)
     ccapi_rci_info_t rci_info_to_return;
     ccapi_rci_info_t expected_rci_info;
     char const * const expected_function = "rci_session_start_cb";
-    unsigned int i;
 
     set_remote_config_defaults(&remote_config);
     set_rci_info_defaults(&ccapi_data_single_instance->service.rci.rci_info);
@@ -1047,11 +1047,11 @@ TEST(test_ccapi_rci, testRCISessionCancel)
     CHECK(ccapi_data_single_instance->service.rci.rci_thread_status > CCAPI_RCI_THREAD_IDLE);
 
     /* Wait user locks callback */
-    for(i = 0; i < 1000; i++)
+    do
     {
         status = ccapi_connector_callback(connector_class_id_remote_config, request, &remote_config, ccapi_data_single_instance);
         sched_yield();
-    }
+    } while (th_rci_last_function_called() == NULL);
     CHECK_EQUAL(connector_callback_busy, status);
     th_rci_checkExpectations(expected_function, &expected_rci_info);
 
