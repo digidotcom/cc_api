@@ -97,6 +97,7 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
     char const * const invalid_virtual_dir = "/my_data";
     char const * const invalid_virtual_dir_with_subdir = "my_data/subdir";
     char const * const invalid_virtual_dir_with_backslash = "my_data\\subdir";
+    char const * const invalid_virtual_dir_too_long = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxy0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxy0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxy0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghiklmnopqrstuvwxy0123456789_ABCDEFGH";
 
     error = ccapi_fs_add_virtual_dir("", local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
@@ -123,6 +124,9 @@ TEST(test_ccapi_fs_mapping, testInvalidPath)
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 
     error = ccapi_fs_add_virtual_dir(invalid_virtual_dir_with_backslash, local_path);
+    CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
+
+    error = ccapi_fs_add_virtual_dir(invalid_virtual_dir_too_long, local_path);
     CHECK_EQUAL(CCAPI_FS_ERROR_INVALID_PATH, error);
 }
 
