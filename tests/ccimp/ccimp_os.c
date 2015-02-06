@@ -10,6 +10,7 @@
 * =======================================================================
 */
 
+#include "ccapi/ccapi.h"
 #include "ccimp/ccimp_os.h"
 
 #include <malloc.h>
@@ -18,6 +19,7 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <signal.h>
 
 #if (defined UNIT_TEST)
 #define ccimp_os_malloc             ccimp_os_malloc_real
@@ -71,6 +73,60 @@ static void * thread_wrapper(void * argument)
     return NULL;
 }
 
+typedef struct thread_info {
+    pthread_t thread;
+    struct thread_info * next;
+} thread_info_t;
+
+static thread_info_t * thread_info_list = NULL;
+static void add_thread_info(pthread_t thread)
+{
+    thread_info_t * const new_thread_info = malloc(sizeof *new_thread_info);
+
+    new_thread_info->thread = thread;
+    new_thread_info->next = thread_info_list;
+    thread_info_list = new_thread_info;
+}
+
+static void wait_for_ccimp_threads(void)
+{
+    while (thread_info_list != NULL)
+    {
+        thread_info_t * const next = thread_info_list->next;
+
+        pthread_join(thread_info_list->thread, NULL);
+        free(thread_info_list);
+        thread_info_list = next;
+    }
+}
+
+static void graceful_shutdown(void)
+{
+    ccapi_stop(CCAPI_STOP_GRACEFULLY);
+    wait_for_ccimp_threads();
+}
+
+static void sigint_handler(int signum)
+{
+    printf("received signal %d to close CCAPI.\n", signum);
+    exit(0);
+}
+
+void add_sigkill_signal(void)
+{
+    struct sigaction new_action;
+    struct sigaction old_action;
+
+    /* setup signal hander */
+    atexit(graceful_shutdown);
+    new_action.sa_handler = sigint_handler;
+    sigemptyset(&new_action.sa_mask);
+    new_action.sa_flags = 0;
+    sigaction(SIGINT, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN)
+        sigaction (SIGINT, &new_action, NULL);
+}
+
 ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const create_thread_info)
 {
     pthread_t pthread;
@@ -84,7 +140,6 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
         return (CCIMP_STATUS_ERROR);
     }
 
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 #if (defined UNIT_TEST)
     {
         /* Use smaller stacks for threads so unit tests do not use too much memory.
@@ -130,7 +185,7 @@ ccimp_status_t ccimp_os_create_thread(ccimp_os_create_thread_info_t * const crea
         printf("pthread_create() error %d\n", ccode);
         return (CCIMP_STATUS_ERROR);
     }
-
+    add_thread_info(pthread);
     return CCIMP_STATUS_OK;
 }
 
