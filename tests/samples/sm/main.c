@@ -92,8 +92,15 @@ static void app_sm_opaque_response_cb(ccapi_transport_t const transport, uint32_
 static void app_sm_more_data_cb(ccapi_transport_t const transport)
 {
     printf("app_sm_more_data_cb: transport = %d\n", transport);
+}
 
-    start_tcp = CCAPI_TRUE;
+static void app_sm_config_request_cb(ccapi_transport_t const transport, char const * const phone_number, char const * const service_id, ccapi_bool_t const response_required)
+{
+    printf("ccapi_process_config_request: response %s needed\n", response_required ? "is" : "is not");
+    printf("phone-number=%s\n", phone_number);
+    printf("service-id=%s\n", service_id);
+
+    (void)transport;
 }
 
 static ccapi_bool_t check_start_tcp(void)
@@ -178,6 +185,7 @@ int main (void)
     sm_service.ping_request = app_sm_ping_request_cb;
     sm_service.opaque_response = app_sm_opaque_response_cb;
     sm_service.more_data = app_sm_more_data_cb;
+    sm_service.config_request = app_sm_config_request_cb;
 
     start_error = ccapi_start(&start);
 
