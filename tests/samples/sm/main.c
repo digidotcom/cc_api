@@ -75,7 +75,7 @@ static void app_sm_request_connect_cb(ccapi_transport_t const transport)
     start_tcp = CCAPI_TRUE;
 }
 
-static void app_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool_t response_required)
+static void app_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool_t const response_required)
 {
     printf("app_sm_ping_request_cb: transport = %d, response %s needed\n", transport, response_required ? "is" : "is not");
 }

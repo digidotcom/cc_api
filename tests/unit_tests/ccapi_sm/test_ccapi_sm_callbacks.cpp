@@ -28,7 +28,7 @@ static ccapi_transport_t ccapi_sm_ping_request_expected_transport;
 static ccapi_bool_t ccapi_sm_ping_request_expected_response_required;
 static ccapi_bool_t ccapi_sm_ping_request_cb_called;
 
-static void test_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool_t response_required)
+static void test_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool_t const response_required)
 {
     CHECK_EQUAL(ccapi_sm_ping_request_expected_transport, transport);
     CHECK_EQUAL(ccapi_sm_ping_request_expected_response_required, response_required);

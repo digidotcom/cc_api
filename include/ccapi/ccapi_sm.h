@@ -14,7 +14,7 @@
 #define _CCAPI_SM_H_
 
 typedef void (*ccapi_sm_request_connect_cb_t)(ccapi_transport_t const transport);
-typedef void (*ccapi_sm_ping_request_cb_t)(ccapi_transport_t const transport, ccapi_bool_t response_required);
+typedef void (*ccapi_sm_ping_request_cb_t)(ccapi_transport_t const transport, ccapi_bool_t const response_required);
 typedef void (*ccapi_sm_opaque_response_cb_t)(ccapi_transport_t const transport, uint32_t const id, void const * const data, size_t const bytes_used, ccapi_bool_t error);
 typedef void (*ccapi_sm_more_data_cb_t)(ccapi_transport_t const transport);
 typedef void (*ccapi_sm_config_request_cb_t)(ccapi_transport_t const transport, char const * const phone_number, char const * const service_id, ccapi_bool_t const response_required);
