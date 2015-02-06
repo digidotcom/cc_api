@@ -23,6 +23,7 @@ typedef struct {
     ccapi_sm_request_connect_cb_t request_connect;
     ccapi_sm_ping_request_cb_t ping_request;
     ccapi_sm_opaque_response_cb_t opaque_response;
+    ccapi_sm_more_data_cb_t more_data;
     ccapi_sm_config_request_cb_t config_request;
 } ccapi_sm_service_t;
 
