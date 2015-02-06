@@ -68,12 +68,16 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     return reconnect;
 }
 
-
 static void app_sm_request_connect_cb(ccapi_transport_t const transport)
 {
     printf("app_sm_request_connect_cb: transport = %d\n", transport);
 
     start_tcp = CCAPI_TRUE;
+}
+
+static void app_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool_t response_required)
+{
+    printf("app_sm_ping_request_cb: transport = %d, response %s needed\n", transport, response_required ? "is" : "is not");
 }
 
 static ccapi_bool_t check_start_tcp(void)
@@ -155,6 +159,7 @@ int main (void)
 
     start.service.sm = &sm_service;
     sm_service.request_connect = app_sm_request_connect_cb;
+    sm_service.ping_request = app_sm_ping_request_cb;
 
     start_error = ccapi_start(&start);
 
