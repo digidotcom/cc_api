@@ -184,7 +184,15 @@ connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data
     stop_data.user_context = NULL;
     stop_data.condition = ccapi_to_connector_stop(behavior);
 
-    connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+    do
+    {
+        connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+
+        if (connector_status == connector_service_busy)
+        {
+            ccimp_os_yield();
+        }
+    } while (connector_status == connector_service_busy);
 
     switch(connector_status)
     {
@@ -489,6 +497,7 @@ void ccapi_connector_run_thread(void * const argument)
         switch(status)
         {
             case connector_device_terminated:
+            case connector_abort:
                 ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
                 break;
             default:

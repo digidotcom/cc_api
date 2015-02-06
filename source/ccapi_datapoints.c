@@ -1154,7 +1154,16 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         ccfsm_request.user_context = transaction_info;
         ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
 
-        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point, &ccfsm_request);
+        do
+        {
+            ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point, &ccfsm_request);
+
+            if (ccfsm_status == connector_service_busy)
+            {
+                ccimp_os_yield();
+            }
+        } while (ccfsm_status == connector_service_busy);
+
         if (ccfsm_status != connector_success)
         {
             ccapi_logging_line("ccapi_dp_send_collection: failure when calling connector_initiate_action, error %d", ccfsm_status);

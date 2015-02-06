@@ -288,7 +288,17 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
     {
         connector_transport_t const transport = connector_transport_tcp;
-        connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+        connector_status_t connector_status;
+
+        do
+        {
+            connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+
+            if (connector_status == connector_service_busy)
+            {
+                ccimp_os_yield();
+            }
+        } while (connector_status == connector_service_busy);
 
         switch (connector_status)
         {
