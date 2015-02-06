@@ -81,6 +81,9 @@ static ccapi_bool_t copy_ccapi_sms_info_t_structure(ccapi_sms_info_t * const des
         dest->limit.max_sessions = CCAPI_SM_SMS_MAX_SESSIONS_DEFAULT;
     }
 
+    dest->cloud_config.phone_number = NULL;
+    dest->cloud_config.service_id = NULL;
+
     if (source->cloud_config.phone_number != NULL)
     {
         dest->cloud_config.phone_number = ccapi_strdup(source->cloud_config.phone_number);
@@ -107,13 +110,17 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
 {
     ccapi_sms_start_error_t error = CCAPI_SMS_START_ERROR_NONE;
 
-    UNUSED_ARGUMENT(sms_start);
-
     if (!CCAPI_RUNNING(ccapi_data))
     {
         ccapi_logging_line("ccxapi_start_transport_sms: CCAPI not started");
 
         error = CCAPI_SMS_START_ERROR_CCAPI_STOPPED;
+        goto done;
+    }
+
+    if (ccapi_data->transport_sms.started)
+    {
+        error = CCAPI_SMS_START_ERROR_ALREADY_STARTED;
         goto done;
     }
 
@@ -140,7 +147,6 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
     }
 
     ccapi_data->transport_sms.info = ccapi_malloc(sizeof *ccapi_data->transport_sms.info);
-
     if (!valid_malloc(ccapi_data->transport_sms.info, &error))
     {
         goto done;
@@ -184,6 +190,7 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
             case connector_open_error:
                 error = CCAPI_SMS_START_ERROR_INIT;
                 ASSERT_MSG_GOTO(connector_status == connector_success, done);
+                break;
         }
     }
     {
@@ -217,6 +224,34 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
         }
     }
 done:
+    switch (error)
+    {
+        case CCAPI_SMS_START_ERROR_NONE:
+        case CCAPI_SMS_START_ERROR_ALREADY_STARTED:
+        case CCAPI_SMS_START_ERROR_CCAPI_STOPPED:
+        case CCAPI_SMS_START_ERROR_NULL_POINTER:
+            break;
+        case CCAPI_SMS_START_ERROR_INIT:
+        case CCAPI_SMS_START_ERROR_MAX_SESSIONS:
+        case CCAPI_SMS_START_ERROR_INVALID_PHONE:
+        case CCAPI_SMS_START_ERROR_INVALID_SERVICE_ID:
+        case CCAPI_SMS_START_ERROR_INSUFFICIENT_MEMORY:
+        case CCAPI_SMS_START_ERROR_TIMEOUT:
+            if (ccapi_data->transport_sms.info != NULL)
+            {
+                if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
+                {
+                    ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+                }
+                if (ccapi_data->transport_sms.info->cloud_config.service_id != NULL)
+                {
+                    ccapi_free(ccapi_data->transport_sms.info->cloud_config.service_id);
+                }
+                ccapi_free(ccapi_data->transport_sms.info);
+                ccapi_data->transport_sms.info = NULL;
+            }
+            break;
+    }
     return error;
 }
 

@@ -62,6 +62,31 @@ TEST(test_ccapi_tcp_start, testConnectorInitiateActionOK)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
 }
 
+TEST(test_ccapi_tcp_start, testConnectorAlreadyStarted)
+{
+    ccapi_tcp_start_error_t error;
+    ccapi_tcp_info_t tcp_start = {{0}};
+    char phone_number[] = "+54-3644-421921";
+    uint8_t ipv4[] = {0xC0, 0xA8, 0x01, 0x01}; /* 192.168.1.1 */
+
+    tcp_start.connection.type = CCAPI_CONNECTION_WAN;
+    tcp_start.connection.info.wan.phone_number = phone_number;
+    tcp_start.connection.info.wan.link_speed = 115200;
+    memcpy(tcp_start.connection.ip.address.ipv4, ipv4, sizeof tcp_start.connection.ip.address.ipv4);
+
+    tcp_start.callback.close = ccapi_tcp_close_cb;
+    tcp_start.callback.keepalive = ccapi_tcp_keepalives_cb;
+
+    connector_transport_t connector_transport = connector_transport_tcp;
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport, connector_success);
+
+    error = ccapi_start_transport_tcp(&tcp_start);
+    CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
+
+    error = ccapi_start_transport_tcp(&tcp_start);
+    CHECK_EQUAL(CCAPI_TCP_START_ERROR_ALREAY_STARTED, error);
+}
+
 TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
 {
     ccapi_tcp_start_error_t error;

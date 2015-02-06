@@ -50,6 +50,12 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+    if (ccapi_data->transport_udp.started)
+    {
+        error = CCAPI_UDP_START_ERROR_ALREADY_STARTED;
+        goto done;
+    }
+
     if (udp_start == NULL)
     {
         ccapi_logging_line("ccxapi_start_transport_udp: invalid argument");
@@ -141,17 +147,25 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
     }
 
 done:
-    if (ccapi_data != NULL)
+    switch (error)
     {
-        if (error != CCAPI_UDP_START_ERROR_NONE)
-        {
+        case CCAPI_UDP_START_ERROR_NONE:
+        case CCAPI_UDP_START_ERROR_ALREADY_STARTED:
+        case CCAPI_UDP_START_ERROR_CCAPI_STOPPED:
+        case CCAPI_UDP_START_ERROR_NULL_POINTER:
+            break;
+        case CCAPI_UDP_START_ERROR_INIT:
+        case CCAPI_UDP_START_ERROR_MAX_SESSIONS:
+        case CCAPI_UDP_START_ERROR_INSUFFICIENT_MEMORY:
+        case CCAPI_UDP_START_ERROR_TIMEOUT:
             if (ccapi_data->transport_udp.info != NULL)
             {
                 ccapi_free(ccapi_data->transport_udp.info);
                 ccapi_data->transport_udp.info = NULL;
             }
-        }
+            break;
     }
+
     return error;
 }
 
