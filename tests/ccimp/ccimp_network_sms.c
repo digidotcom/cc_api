@@ -435,6 +435,7 @@ ccimp_status_t ccimp_network_sms_close(ccimp_network_close_t * const data)
     else
        printf("network_sms_close: fd %d\n", *fd);
 
+    free(fd);
     /* Let the proxy close the socket and listen for a new one.
        Consider that it has a 0 backlog (handles 1 single connection)
      */

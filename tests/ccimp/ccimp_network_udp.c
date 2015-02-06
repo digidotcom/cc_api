@@ -176,6 +176,7 @@ ccimp_status_t ccimp_network_udp_close(ccimp_network_close_t * const data)
         printf("An error occurred when closing socket. Errno: %d\n", errno);
         status = CCIMP_STATUS_ERROR;
     }
+    *fd = -1;
     return status;
 }
 
