@@ -113,6 +113,8 @@ TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
+            connector_abort);
     error = ccapi_start_transport_tcp(&tcp_start);
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_INIT, error);
 }

@@ -151,6 +151,8 @@ TEST(test_ccapi_sms_start, testConnectorInitiateActionInitError3)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
+            connector_abort);
     th_expect_malloc(sizeof (ccapi_sms_info_t), TH_MALLOC_RETURN_NORMAL, true);
     th_expect_malloc(sizeof phone_number, TH_MALLOC_RETURN_NORMAL, true);
     th_expect_malloc(sizeof service_id, TH_MALLOC_RETURN_NORMAL, true);
