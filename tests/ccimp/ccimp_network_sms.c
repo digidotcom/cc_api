@@ -200,7 +200,7 @@ static ccimp_status_t sms_connect_complete(int const fd)
     return status;
 }
 
-ccimp_status_t config_server_phone_number(int const fd, const char * device_cloud_phone)
+static ccimp_status_t config_server_phone_number(int const fd, const char * device_cloud_phone)
 {
 	ccimp_status_t status;
 	static char const phone_number_prefix[] = "phone-number=";

@@ -741,6 +741,26 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             device_cloud_phone->length = strlen(ccapi_data->transport_sms.info->cloud_config.phone_number);
             break;
         }
+        case connector_request_id_config_set_device_cloud_phone:
+        {
+            connector_config_pointer_string_t const * const device_cloud_phone = data;
+
+            ASSERT_MSG_GOTO(device_cloud_phone->string != NULL, done);
+            ASSERT_MSG_GOTO(device_cloud_phone->length == strlen(device_cloud_phone->string), done);
+
+            if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
+            {
+                ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+            }
+
+            ccapi_data->transport_sms.info->cloud_config.phone_number = ccapi_strdup(device_cloud_phone->string);
+            if (ccapi_data->transport_sms.info->cloud_config.phone_number == NULL)
+            {
+                status = connector_callback_error;
+                goto done;
+            }
+            break;
+        }
         case connector_request_id_config_device_cloud_service_id:
         {
             connector_config_pointer_string_t * const service_id = data;
