@@ -264,6 +264,18 @@ done:
     return error;
 }
 
+void free_transport_sms_info(ccapi_sms_info_t * const sms_info)
+{
+    if (sms_info->cloud_config.phone_number != NULL)
+    {
+        ccapi_free(sms_info->cloud_config.phone_number);
+    }
+    if (sms_info->cloud_config.service_id != NULL)
+    {
+        ccapi_free(sms_info->cloud_config.service_id);
+    }
+    ccapi_free(sms_info);
+}
 
 ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data, ccapi_sms_stop_t const * const sms_stop)
 {
@@ -288,15 +300,7 @@ ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data
     } while (ccapi_data->transport_sms.started);
 
     ASSERT(ccapi_data->transport_sms.info != NULL);
-    if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
-    {
-        ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
-    }
-    if (ccapi_data->transport_sms.info->cloud_config.service_id != NULL)
-    {
-        ccapi_free(ccapi_data->transport_sms.info->cloud_config.service_id);
-    }
-    ccapi_free(ccapi_data->transport_sms.info);
+    free_transport_sms_info(ccapi_data->transport_sms.info);
     ccapi_data->transport_sms.info = NULL;
 
 done:

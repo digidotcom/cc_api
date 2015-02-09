@@ -402,6 +402,14 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
+void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info);
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+void free_transport_udp_info(ccapi_udp_info_t * const sms_info);
+#endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+void free_transport_sms_info(ccapi_sms_info_t * const sms_info);
+#endif
+
 void ccapi_logging_line(char const * const format, ...);
 void ccapi_logging_print_buffer(char const * const label, void const * const buffer, size_t const length);
 
