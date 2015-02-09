@@ -43,8 +43,8 @@ static void fill_start_structure(ccapi_start_t * start, unsigned int descriptor)
         rci_service.rci_data = &desc_2_ccapi_rci_data;
     }
 
-
     start->service.cli = NULL;
+    start->service.sm = NULL;
     start->service.receive = NULL;
     start->service.file_system = NULL;
     start->service.firmware = NULL;

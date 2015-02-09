@@ -29,6 +29,7 @@ void fill_device_settings(ccapi_start_t * start)
 
     /* Configure services */
     start->service.cli = NULL;
+    start->service.sm = NULL;
     start->service.receive = NULL;
     start->service.file_system = NULL;
     start->service.firmware = NULL;

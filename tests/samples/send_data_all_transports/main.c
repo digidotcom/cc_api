@@ -28,6 +28,7 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->device_type = device_type;
 
     start->service.cli = NULL;
+    start->service.sm = NULL;
     start->service.receive = NULL;
     start->service.file_system = NULL;
     start->service.firmware = NULL;
