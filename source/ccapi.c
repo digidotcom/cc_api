@@ -13,6 +13,7 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
+#include "ccapi/ccxapi.h"
 
 ccapi_data_t * ccapi_data_single_instance = NULL;
 
@@ -494,16 +495,26 @@ void ccapi_connector_run_thread(void * const argument)
 
         ASSERT_MSG_GOTO(status != connector_init_error, done);
 
-        switch(status)
+        switch (status)
         {
             case connector_device_terminated:
-            case connector_abort:
                 ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                break;
+            case connector_abort:
+                if (ccapi_data->config.status_callback != NULL)
+                {
+                    ccapi_status_info_t status_info;
+                    status_info.error = CCAPI_STOP_CCFSM_ERROR;
+                    ccapi_data->config.status_callback(&status_info);
+                }
+                ccxapi_asynchronous_stop((ccapi_handle_t)ccapi_data);
+                goto done;
                 break;
             default:
                 break;
         }
     }
+
     ASSERT_MSG_GOTO(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
