@@ -303,7 +303,6 @@ int main (void)
          * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
          */
         receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
-        receive_error = ccapi_receive_add_target("get_system_time1", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
