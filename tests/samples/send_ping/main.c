@@ -41,7 +41,7 @@ int main (void)
     ccapi_start_t start = {0};
     ccapi_start_error_t start_error = CCAPI_START_ERROR_NONE;
 
-    ccapi_send_error_t send_error;
+    ccapi_ping_error_t send_error;
 
     fill_start_structure_with_good_parameters(&start);
 
@@ -84,7 +84,7 @@ int main (void)
     }
 
     send_error = ccapi_send_ping(CCAPI_TRANSPORT_SMS);
-    if (send_error == CCAPI_SEND_ERROR_NONE)
+    if (send_error == CCAPI_PING_ERROR_NONE)
     {
         printf("ccapi_send_ping for sms success\n");
     }
@@ -93,9 +93,9 @@ int main (void)
         printf("ccapi_send_ping for sms failed with error %d\n", send_error);
     }
 
-    #define SMS_TX_TIMEOUT 60 /* Wait 60 seconds to complete sms send operation. Optional: CCAPI_SEND_PING_WAIT_FOREVER */
+    #define SMS_TX_TIMEOUT 60 /* Wait 60 seconds to complete sms send operation. Optional: CCAPI_PING_PING_WAIT_FOREVER */
     send_error = ccapi_send_ping_with_reply(CCAPI_TRANSPORT_SMS, SMS_TX_TIMEOUT);
-    if (send_error == CCAPI_SEND_ERROR_NONE)
+    if (send_error == CCAPI_PING_ERROR_NONE)
     {
         printf("ccapi_send_ping_with_reply for sms success\n");
     }
@@ -130,7 +130,7 @@ int main (void)
     do
     {
         send_error = ccapi_send_ping(CCAPI_TRANSPORT_UDP);
-        if (send_error == CCAPI_SEND_ERROR_NONE)
+        if (send_error == CCAPI_PING_ERROR_NONE)
         {
             printf("ccapi_send_ping for udp success\n");
         }
@@ -139,9 +139,9 @@ int main (void)
             printf("ccapi_send_ping for udp failed with error %d\n", send_error);
         }
 
-        #define UDP_TX_TIMEOUT 10 /* Wait 10 seconds to complete udp send ping operation. Optional: CCAPI_SEND_PING_WAIT_FOREVER */
+        #define UDP_TX_TIMEOUT 10 /* Wait 10 seconds to complete udp send ping operation. Optional: CCAPI_PING_PING_WAIT_FOREVER */
         send_error = ccapi_send_ping_with_reply(CCAPI_TRANSPORT_UDP, UDP_TX_TIMEOUT);
-        if (send_error == CCAPI_SEND_ERROR_NONE)
+        if (send_error == CCAPI_PING_ERROR_NONE)
         {
             printf("ccapi_send_ping_with_reply for udp success\n");
         }
