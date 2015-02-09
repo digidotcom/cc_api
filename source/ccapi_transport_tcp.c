@@ -244,7 +244,7 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
     if (ccapi_data->transport_tcp.connected)
     {
-        error = CCAPI_TCP_START_ERROR_ALREAY_STARTED;
+        error = CCAPI_TCP_START_ERROR_ALREADY_STARTED;
         goto done;
     }
 
@@ -364,7 +364,7 @@ done:
     switch (error)
     {
         case CCAPI_TCP_START_ERROR_NONE:
-        case CCAPI_TCP_START_ERROR_ALREAY_STARTED:
+        case CCAPI_TCP_START_ERROR_ALREADY_STARTED:
         case CCAPI_TCP_START_ERROR_CCAPI_STOPPED:
         case CCAPI_TCP_START_ERROR_NULL_POINTER:
             break;

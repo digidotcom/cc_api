@@ -84,7 +84,7 @@ TEST(test_ccapi_tcp_start, testConnectorAlreadyStarted)
     CHECK_EQUAL(CCAPI_TCP_START_ERROR_NONE, error);
 
     error = ccapi_start_transport_tcp(&tcp_start);
-    CHECK_EQUAL(CCAPI_TCP_START_ERROR_ALREAY_STARTED, error);
+    CHECK_EQUAL(CCAPI_TCP_START_ERROR_ALREADY_STARTED, error);
 }
 
 TEST(test_ccapi_tcp_start, testConnectorInitiateActionInitError)
