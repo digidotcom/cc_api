@@ -423,6 +423,70 @@ done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_request_connect(connector_sm_request_connect_t * const request_connect_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_request_connect: transport %d", request_connect_ptr->transport);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.request_connect != NULL)
+    {
+       ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport);
+    }
+
+    request_connect_ptr->allow = CCAPI_FALSE;
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_ping_request(connector_sm_receive_ping_request_t const * const ping_request_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_ping_request: response %s needed", ping_request_ptr->response_required ? "is" : "is not");
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.ping_request != NULL)
+    {
+        ccapi_data->service.sm.user_callback.ping_request(ping_request_ptr->transport, CCAPI_BOOL(ping_request_ptr->response_required));
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_opaque_response(connector_sm_opaque_response_t const * const opaque_response_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("Received %" PRIsize " opaque bytes on id %d\n", opaque_response_ptr->bytes_used, opaque_response_ptr->id);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.opaque_response != NULL)
+    {
+        ccapi_data->service.sm.user_callback.opaque_response(opaque_response_ptr->transport, opaque_response_ptr->id, opaque_response_ptr->data, opaque_response_ptr->bytes_used, CCAPI_BOOL(opaque_response_ptr->error));
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_more_data(connector_sm_more_data_t const * const more_data_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_more_data: transport %d", more_data_ptr->transport);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.more_data != NULL)
+    {
+       ccapi_data->service.sm.user_callback.more_data(more_data_ptr->transport);
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_config_request(connector_sm_receive_config_request_t const * const config_request_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_config_request: response %s needed", config_request_ptr->response_required ? "is" : "is not");
+    ccapi_logging_line("phone-number=%s", config_request_ptr->phone_number);
+    ccapi_logging_line("service-id=%s", config_request_ptr->service_id);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.config_request != NULL)
+    {
+       ccapi_data->service.sm.user_callback.config_request(config_request_ptr->transport, config_request_ptr->phone_number, config_request_ptr->service_id, config_request_ptr->response_required);
+    }
+
+    return connector_callback_continue;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -466,27 +530,51 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
         case connector_request_id_sm_ping_request:
         {
-            connector_sm_receive_ping_request_t * const ping_request = data;
+            connector_sm_receive_ping_request_t const * const ping_request_ptr = data;
 
-            ccapi_logging_line("ccapi_sm_service_handler: response %s needed", ping_request->response_required ? "is" : "is not");
-
-            connector_status = connector_callback_continue;
+            connector_status = ccapi_process_ping_request(ping_request_ptr, ccapi_data);
             break;
         }
         case connector_request_id_sm_ping_response:
         {
-            connector_sm_ping_response_t const * const response_ptr = data;
+            connector_sm_ping_response_t const * const ping_response_ptr = data;
 
-            connector_status = ccapi_process_ping_response(response_ptr);
+            connector_status = ccapi_process_ping_response(ping_response_ptr);
+
+            break;
+        }
+        case connector_request_id_sm_opaque_response:
+        {
+            connector_sm_opaque_response_t const * const opaque_response = data;
+
+            connector_status = ccapi_process_opaque_response(opaque_response, ccapi_data);
 
             break;
         }
         case connector_request_id_sm_more_data:
-        case connector_request_id_sm_opaque_response:
-        case connector_request_id_sm_config_request:
-        case connector_request_id_sm_request_connect:
-            ASSERT_MSG(0);
+        {
+            connector_sm_more_data_t const * const more_data_ptr = data;
+
+            connector_status = ccapi_process_more_data(more_data_ptr, ccapi_data);
+
             break;
+        }
+        case connector_request_id_sm_config_request:
+        {
+            connector_sm_receive_config_request_t const * const config_request_ptr = data;
+
+            connector_status = ccapi_process_config_request(config_request_ptr, ccapi_data);
+
+            break;
+        }
+        case connector_request_id_sm_request_connect:
+        {
+            connector_sm_request_connect_t * const request_connect_ptr = data;
+
+            connector_status = ccapi_process_request_connect(request_connect_ptr, ccapi_data);
+
+            break;
+         }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
