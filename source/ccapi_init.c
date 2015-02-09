@@ -353,7 +353,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     error = check_malloc(ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
-
     ccapi_data->initiate_action_lock = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
     ccapi_data->file_system_lock = NULL;
@@ -719,6 +718,67 @@ static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t co
     }
 
     return transport_stop_behavior;
+}
+
+void ccxapi_asynchronous_stop(ccapi_handle_t const ccapi_handle)
+{
+    ccapi_data_t * const ccapi_data = (ccapi_data_t *)ccapi_handle;
+
+    if (ccapi_data->transport_tcp.info != NULL)
+    {
+        free_transport_tcp_info(ccapi_data->transport_tcp.info);
+    }
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+    if (ccapi_data->transport_udp.info != NULL)
+    {
+        free_transport_udp_info(ccapi_data->transport_udp.info);
+    }
+#endif
+
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+    if (ccapi_data->transport_sms.info != NULL)
+    {
+        free_transport_sms_info(ccapi_data->transport_sms.info);
+    }
+#endif
+
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+    if (ccapi_data->config.rci_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.rci);
+    }
+#endif
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.receive);
+    }
+#endif
+
+#if (defined CONNECTOR_SM_CLI)
+    if (ccapi_data->config.cli_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.cli);
+    }
+#endif
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->config.firmware_supported)
+    {
+        if (ccapi_data->thread.firmware != NULL)
+        {
+            ccapi_stop_thread(ccapi_data->thread.firmware);
+        }
+    }
+#endif
+
+    free_ccapi_data_internal_resources(ccapi_data);
+    ccapi_free(ccapi_data);
+#if (defined CCIMP_DEBUG_ENABLED)
+    free_logging_resources();
+#endif
 }
 
 ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
