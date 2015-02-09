@@ -132,6 +132,8 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     if (!ccapi_data->config.cli_supported)
     {
+        ccapi_logging_line("ccapi_process_cli_request. cli service not stated");
+
         svc_cli->cli_error = CCAPI_CLI_ERROR_NO_CLI_SUPPORT;
         goto done;
     }
