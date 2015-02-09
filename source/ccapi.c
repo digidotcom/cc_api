@@ -177,24 +177,24 @@ static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t
 
 connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_transport_stop_t const behavior)
 {
-    connector_status_t connector_status;
+    connector_status_t ccfsm_status;
     connector_initiate_stop_request_t stop_data;
 
     stop_data.transport = ccapi_to_connector_transport(transport);;
     stop_data.user_context = NULL;
     stop_data.condition = ccapi_to_connector_stop(behavior);
 
-    do
+    for (;;)
     {
-        connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
-
-        if (connector_status == connector_service_busy)
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+        if (ccfsm_status != connector_service_busy)
         {
-            ccimp_os_yield();
+            break;
         }
-    } while (connector_status == connector_service_busy);
+        ccimp_os_yield();
+    }
 
-    switch(connector_status)
+    switch(ccfsm_status)
     {
         case connector_success:
             break;
@@ -218,12 +218,12 @@ connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data
         case connector_exceed_timeout:
         case connector_invalid_payload_packet:
         case connector_open_error:
-            ASSERT_MSG_GOTO(connector_status != connector_success, done);
+            ASSERT_MSG_GOTO(ccfsm_status != connector_success, done);
             break;
     }
 
 done:
-    return connector_status;
+    return ccfsm_status;
 }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -435,7 +435,7 @@ done:
 
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
 {
-    connector_status_t status;
+    connector_status_t ccfsm_status;
     ccimp_status_t ccimp_status;
 
     ccimp_status = ccapi_lock_acquire(ccapi_data->initiate_action_lock);
@@ -445,11 +445,11 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            status = connector_abort;
+            ccfsm_status = connector_abort;
             goto done;
     }
 
-    status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
+    ccfsm_status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
     ccimp_status = ccapi_lock_release(ccapi_data->initiate_action_lock);
     switch (ccimp_status)
@@ -458,13 +458,13 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            status = connector_abort;
+            ccfsm_status = connector_abort;
             goto done;
     }
 
 done:
     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
-    return status;
+    return ccfsm_status;
 }
 
 char * ccapi_strdup(char const * const string)

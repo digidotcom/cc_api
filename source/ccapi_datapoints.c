@@ -1154,21 +1154,44 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         ccfsm_request.user_context = transaction_info;
         ccfsm_request.stream = dp_collection->ccapi_data_stream_list->ccfsm_data_stream;
 
-        do
+        for (;;)
         {
             ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_data_point, &ccfsm_request);
-
-            if (ccfsm_status == connector_service_busy)
+            if (ccfsm_status != connector_service_busy)
             {
-                ccimp_os_yield();
+                break;
             }
-        } while (ccfsm_status == connector_service_busy);
+            ccimp_os_yield();
+        }
 
-        if (ccfsm_status != connector_success)
+        switch(ccfsm_status)
         {
-            ccapi_logging_line("ccapi_dp_send_collection: failure when calling connector_initiate_action, error %d", ccfsm_status);
-            error = CCAPI_DP_ERROR_INITIATE_ACTION_FAILED;
-            goto done;
+            case connector_success:
+                break;
+            case connector_init_error:
+            case connector_invalid_data_size:
+            case connector_invalid_data_range:
+            case connector_invalid_data:
+            case connector_keepalive_error:
+            case connector_bad_version:
+            case connector_device_terminated:
+            case connector_service_busy:
+            case connector_invalid_response:
+            case connector_no_resource:
+            case connector_unavailable:
+            case connector_idle:
+            case connector_working:
+            case connector_pending:
+            case connector_active:
+            case connector_abort:
+            case connector_device_error:
+            case connector_exceed_timeout:
+            case connector_invalid_payload_packet:
+            case connector_open_error:
+                ccapi_logging_line("ccapi_dp_send_collection: failure when calling connector_initiate_action, error %d", ccfsm_status);
+                error = CCAPI_DP_ERROR_INITIATE_ACTION_FAILED;
+                goto done;
+                break;
         }
 
         {

@@ -267,20 +267,49 @@ static void setup_send_data(ccapi_send_t * const send_info, void const * const d
 
 static ccapi_send_error_t perform_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const send_info)
 {
-    connector_status_t status;
+    connector_status_t ccfsm_status;
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
 
-    do
+    for (;;)
     {
-        status = connector_initiate_action_secure(ccapi_data, connector_initiate_send_data, &send_info->header);
-
-        if (status == connector_service_busy)
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_send_data, &send_info->header);
+        if (ccfsm_status != connector_service_busy)
         {
-            ccimp_os_yield();
+            break;
         }
-    } while (status == connector_service_busy);
+        ccimp_os_yield();
+    }
 
-    if (status == connector_success)
+    switch(ccfsm_status)
+    {
+        case connector_success:
+            break;
+        case connector_init_error:
+        case connector_invalid_data_size:
+        case connector_invalid_data_range:
+        case connector_invalid_data:
+        case connector_keepalive_error:
+        case connector_bad_version:
+        case connector_device_terminated:
+        case connector_service_busy:
+        case connector_invalid_response:
+        case connector_no_resource:
+        case connector_unavailable:
+        case connector_idle:
+        case connector_working:
+        case connector_pending:
+        case connector_active:
+        case connector_abort:
+        case connector_device_error:
+        case connector_exceed_timeout:
+        case connector_invalid_payload_packet:
+        case connector_open_error:
+            ccapi_logging_line("perform_send: ccfsm error %d", ccfsm_status);
+            error = CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED;
+            goto done;
+            break;
+    }
+
     {
         ccimp_status_t const result = ccapi_send_lock_acquire(send_info, OS_LOCK_ACQUIRE_INFINITE);
 
@@ -290,12 +319,7 @@ static ccapi_send_error_t perform_send(ccapi_data_t * const ccapi_data, ccapi_se
             error = CCAPI_SEND_ERROR_LOCK_FAILED;
         }
     }
-    else
-    {
-        ccapi_logging_line("perform_send: ccfsm error %d", status);
-        error = CCAPI_SEND_ERROR_INITIATE_ACTION_FAILED;
-    }
-
+done:
     return error;
 }
 
