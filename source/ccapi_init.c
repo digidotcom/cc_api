@@ -791,36 +791,46 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     }
 #endif
 
-
     {
-        connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
-        switch(connector_status)
+        connector_status_t ccfsm_status;
+
+        for (;;)
         {
-        case connector_success:
-            error = CCAPI_STOP_ERROR_NONE;
-            break;
-        case connector_init_error:
-        case connector_invalid_data_size:
-        case connector_invalid_data_range:
-        case connector_invalid_data:
-        case connector_keepalive_error:
-        case connector_bad_version:
-        case connector_device_terminated:
-        case connector_service_busy:
-        case connector_invalid_response:
-        case connector_no_resource:
-        case connector_unavailable:
-        case connector_idle:
-        case connector_working:
-        case connector_pending:
-        case connector_active:
-        case connector_abort:
-        case connector_device_error:
-        case connector_exceed_timeout:
-        case connector_invalid_payload_packet:
-        case connector_open_error:
-            ASSERT_MSG(connector_status != connector_success);
-            break;
+            ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
+            if (ccfsm_status != connector_service_busy)
+            {
+                break;
+            }
+            ccimp_os_yield();
+        }
+
+        switch(ccfsm_status)
+        {
+            case connector_success:
+                error = CCAPI_STOP_ERROR_NONE;
+                break;
+            case connector_init_error:
+            case connector_invalid_data_size:
+            case connector_invalid_data_range:
+            case connector_invalid_data:
+            case connector_keepalive_error:
+            case connector_bad_version:
+            case connector_device_terminated:
+            case connector_service_busy:
+            case connector_invalid_response:
+            case connector_no_resource:
+            case connector_unavailable:
+            case connector_idle:
+            case connector_working:
+            case connector_pending:
+            case connector_active:
+            case connector_abort:
+            case connector_device_error:
+            case connector_exceed_timeout:
+            case connector_invalid_payload_packet:
+            case connector_open_error:
+                ASSERT_MSG_GOTO(ccfsm_status != connector_success, done);
+                break;
         }
     }
 

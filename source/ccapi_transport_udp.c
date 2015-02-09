@@ -82,17 +82,25 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
 
     {
         connector_transport_t const transport = connector_transport_udp;
-        connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+        connector_status_t ccfsm_status;
 
-        switch (connector_status)
+        for (;;)
+        {
+            ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+            if (ccfsm_status != connector_service_busy)
+            {
+                break;
+            }
+            ccimp_os_yield();
+        }
+
+        switch (ccfsm_status)
         {
             case connector_success:
                 break;
             case connector_init_error:
             case connector_invalid_data:
             case connector_service_busy:
-                error = CCAPI_UDP_START_ERROR_INIT;
-                goto done;
             case connector_invalid_data_size:
             case connector_invalid_data_range:
             case connector_keepalive_error:
@@ -111,7 +119,8 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_UDP_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(connector_status == connector_success, done);
+                ASSERT_MSG_GOTO(ccfsm_status == connector_success, done);
+                break;
         }
     }
 

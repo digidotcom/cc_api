@@ -92,6 +92,8 @@ TEST(test_ccapi_udp_start, testConnectorInitiateActionInitError)
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
             connector_service_busy);
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_transport_start, &connector_transport,
+            connector_invalid_data);
     error = ccapi_start_transport_udp(&udp_start);
     CHECK_EQUAL(CCAPI_UDP_START_ERROR_INIT, error);
 }
