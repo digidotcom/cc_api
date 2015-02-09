@@ -402,6 +402,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         goto done;
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
 
+    ccapi_data->config.status_callback = start->status;
+
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     if (start->service.file_system != NULL)
     {
