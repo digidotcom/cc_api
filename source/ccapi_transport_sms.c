@@ -43,7 +43,7 @@ static ccapi_bool_t valid_phone(ccapi_sms_info_t const * const sms_start, ccapi_
 
     while (sms_start->cloud_config.phone_number[i] != '\0')
     {
-        if(strchr(valid_char,sms_start->cloud_config.phone_number[i])==NULL)
+        if(strchr(valid_char, sms_start->cloud_config.phone_number[i]) == NULL)
         {
             ccapi_logging_line("ccxapi_start_transport_sms: invalid Phone number character '%c'",sms_start->cloud_config.phone_number[i]);
             *error = CCAPI_SMS_START_ERROR_INVALID_PHONE;
@@ -270,7 +270,7 @@ ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data
     ccapi_sms_stop_error_t error = CCAPI_SMS_STOP_ERROR_NONE;
     connector_status_t connector_status;
 
-    if (!CCAPI_RUNNING(ccapi_data)|| !ccapi_data->transport_sms.started)
+    if (!CCAPI_RUNNING(ccapi_data) || !ccapi_data->transport_sms.started)
     {
         error = CCAPI_SMS_STOP_ERROR_NOT_STARTED;
         goto done;

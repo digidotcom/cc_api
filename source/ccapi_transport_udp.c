@@ -183,7 +183,7 @@ ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data
     ccapi_udp_stop_error_t error = CCAPI_UDP_STOP_ERROR_NONE;
     connector_status_t connector_status;
 
-    if (!CCAPI_RUNNING(ccapi_data)|| !ccapi_data->transport_udp.started)
+    if (!CCAPI_RUNNING(ccapi_data) || !ccapi_data->transport_udp.started)
     {
         error = CCAPI_UDP_STOP_ERROR_NOT_STARTED;
         goto done;
