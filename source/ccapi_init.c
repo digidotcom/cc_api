@@ -768,8 +768,7 @@ void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data)
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        /* Firmware service might be supported but the thread is not running unless
-         * a download operation is in progress */
+        /* Do not attempt to stop the thread if firmware service is the stub version for RCI. */
         if (ccapi_data->thread.firmware != NULL)
         {
             ccapi_stop_thread(ccapi_data->thread.firmware);
@@ -927,8 +926,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
-        /* Firmware service might be supported but the thread is not running unless
-         * a download operation is in progress */
+        /* Do not attempt to stop the thread if firmware service is the stub version for RCI. */
         if (ccapi_data->thread.firmware != NULL)
         {
             ccapi_stop_thread(ccapi_data->thread.firmware);
