@@ -211,6 +211,95 @@ static void clear_queued_callback(ccapi_data_t * const ccapi_data)
 #endif
 }
 
+static ccapi_rci_element_type_t connector_rci_element_type_to_ccapi(connector_element_value_type_t const ccfsm_type)
+{
+    ccapi_rci_element_type_t ccapi_type;
+    switch (ccfsm_type)
+    {
+#if defined RCI_PARSER_USES_STRING
+        case connector_element_type_string:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_STRING;
+            break;
+#endif
+#if defined RCI_PARSER_USES_MULTILINE_STRING
+        case connector_element_type_multiline_string:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING;
+            break;
+#endif
+#if defined RCI_PARSER_USES_PASSWORD
+        case connector_element_type_password:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_PASSWORD;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FQDNV4
+        case connector_element_type_fqdnv4:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FQDNV4;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FQDNV6
+        case connector_element_type_fqdnv6:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FQDNV6;
+            break;
+#endif
+#if defined RCI_PARSER_USES_DATETIME
+        case connector_element_type_datetime:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_DATETIME;
+            break;
+#endif
+#if defined RCI_PARSER_USES_IPV4
+        case connector_element_type_ipv4:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_IPV4;
+            break;
+#endif
+#if defined RCI_PARSER_USES_MAC_ADDR
+        case connector_element_type_mac_addr:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_MAC;
+            break;
+#endif
+#if defined RCI_PARSER_USES_INT32
+        case connector_element_type_int32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_INT32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_UINT32
+        case connector_element_type_uint32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_UINT32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_HEX32
+        case connector_element_type_hex32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_HEX32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_0X_HEX32
+        case connector_element_type_0x_hex32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_0X32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FLOAT
+        case connector_element_type_float:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FLOAT;
+            break;
+#endif
+#if defined RCI_PARSER_USES_ENUM
+        case connector_element_type_enum:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_ENUM;
+            break;
+#endif
+#if defined RCI_PARSER_USES_ON_OFF
+        case connector_element_type_on_off:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_ON_OFF;
+            break;
+#endif
+#if defined RCI_PARSER_USES_BOOLEAN
+        case connector_element_type_boolean:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_BOOL;
+            break;
+#endif
+    }
+    return ccapi_type;
+}
+
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t status;
@@ -252,6 +341,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     rci_info->query_setting.matches = CCAPI_FALSE;
                     rci_info->query_setting.attributes.compare_to = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_COMPARE_TO_NONE;
                     rci_info->query_setting.attributes.source = CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT;
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 #if (defined RCI_LEGACY_COMMANDS)
                     rci_info->do_command.target = NULL;
                     rci_info->do_command.request = NULL;
@@ -266,6 +356,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     ccapi_rci_function_t const action_start_cb = rci_data->callback.start_action;
 
                     rci_info->group.instance = 0;
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
                     switch (remote_config->action)
                     {
                         case connector_remote_action_set:
@@ -348,6 +439,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             break;
                     }
                     rci_info->group.instance = remote_config->group.index;
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 #if (defined RCI_PARSER_USES_GROUP_NAMES)
                     rci_info->group.name = remote_config->group.name;
 #endif
@@ -384,6 +476,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     ASSERT(element_id < group->count);
                     element = &group->elements[element_id];
 
+                    rci_info->element.type = connector_rci_element_type_to_ccapi(remote_config->element.type);
                     switch (rci_info->action)
                     {
                         case CCAPI_RCI_ACTION_QUERY:
@@ -644,6 +737,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
 
                     rci_info->group.instance = remote_config->group.index;
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
                     ASSERT(group_id < group_table->count);
                     group = &group_table->groups[group_id];
                     end_callback = group->callback.end;
@@ -653,14 +747,14 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 case connector_request_id_remote_config_action_end:
                 {
                     ccapi_rci_function_t const action_end_cb = rci_data->callback.end_action;
-
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
                     ccapi_data->service.rci.queued_callback.function_cb = action_end_cb;
                     break;
                 }
                 case connector_request_id_remote_config_session_end:
                 {
                     ccapi_rci_function_t const session_end_cb = rci_data->callback.end_session;
-
+                    rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
                     ccapi_data->service.rci.queued_callback.function_cb = session_end_cb;
                     break;
                 }
