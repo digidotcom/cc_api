@@ -543,7 +543,7 @@ connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_st
 
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t const config_request, void * const data, ccapi_data_t const * const ccapi_data)
 {
-    connector_callback_status_t status = connector_callback_continue;
+    connector_callback_status_t status;
 
     ccapi_logging_line(TMP_INFO_PREFIX "ccapi_config_handler: config_request %d", config_request);
 
@@ -789,11 +789,21 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             break;
         }
 #endif
+        case connector_request_id_config_error_status:
+        {
+            connector_config_error_status_t * const ccfsm_error_status = data;
+            connector_class_id_t const class_id = ccfsm_error_status->class_id;
+            int const request_id = ccfsm_error_status->request_id.int_value;
+            connector_status_t const ccfsm_status = ccfsm_error_status->status;
+
+            ccapi_logging_line("connector_request_id_config_error_status: class ID %d, request ID %d, status %d", class_id, request_id, ccfsm_status);
+            break;
+        }
         default:
-            status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(CCAPI_FALSE, done);
             break;
     }
-    ASSERT_MSG_GOTO(status != connector_callback_unrecognized, done);
+    status = connector_callback_continue;
 done:
     return status;
 }
