@@ -67,6 +67,7 @@ typedef struct {
     ccapi_bool_t firmware_supported;
     ccapi_bool_t rci_supported;
     ccapi_bool_t filesystem_supported;
+    ccapi_status_callback_t status_callback;
 } ccapi_config_t;
 
 typedef enum {
@@ -400,6 +401,16 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 #endif
 #if (defined CCIMP_RCI_SERVICE_ENABLED)
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+
+void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data);
+
+void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info);
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+void free_transport_udp_info(ccapi_udp_info_t * const sms_info);
+#endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+void free_transport_sms_info(ccapi_sms_info_t * const sms_info);
 #endif
 
 void ccapi_logging_line(char const * const format, ...);

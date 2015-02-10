@@ -27,6 +27,8 @@ extern "C" {
 #include "ccapi/ccapi.h"
 #include "ccapi_definitions.h"
 
+extern void wait_for_ccimp_threads(void);
+
 typedef struct {
     ccimp_fs_file_handle_t ccimp_handle;
     char * file_path;

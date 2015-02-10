@@ -38,6 +38,11 @@ static void copy_ccapi_udp_info_t_structure(ccapi_udp_info_t * const dest, ccapi
     }
 }
 
+void free_transport_udp_info(ccapi_udp_info_t * const udp_info)
+{
+    ccapi_free(udp_info);
+}
+
 ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_data, ccapi_udp_info_t const * const udp_start)
 {
     ccapi_udp_start_error_t error = CCAPI_UDP_START_ERROR_NONE;
@@ -169,7 +174,7 @@ done:
         case CCAPI_UDP_START_ERROR_TIMEOUT:
             if (ccapi_data->transport_udp.info != NULL)
             {
-                ccapi_free(ccapi_data->transport_udp.info);
+                free_transport_udp_info(ccapi_data->transport_udp.info);
                 ccapi_data->transport_udp.info = NULL;
             }
             break;
@@ -200,13 +205,9 @@ ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_udp.started);
 
-    ASSERT(ccapi_data->transport_udp.info != NULL);
-
-    if (ccapi_data->transport_udp.info != NULL)
-    {
-        ccapi_free(ccapi_data->transport_udp.info);
-        ccapi_data->transport_udp.info = NULL;
-    }
+    ASSERT_MSG_GOTO(ccapi_data->transport_udp.info != NULL, done);
+    free_transport_udp_info(ccapi_data->transport_udp.info);
+    ccapi_data->transport_udp.info = NULL;
 done:
     return error;
 }

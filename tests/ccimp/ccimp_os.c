@@ -88,7 +88,7 @@ static void add_thread_info(pthread_t thread)
     thread_info_list = new_thread_info;
 }
 
-static void wait_for_ccimp_threads(void)
+void wait_for_ccimp_threads(void)
 {
     while (thread_info_list != NULL)
     {

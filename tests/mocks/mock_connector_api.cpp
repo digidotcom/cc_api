@@ -214,6 +214,7 @@ connector_status_t connector_run(connector_handle_t const handle)
     {
         case connector_device_terminated:
         case connector_init_error:
+        case connector_abort:
             mock_connector_api_info_free(handle);
             break;
         default:

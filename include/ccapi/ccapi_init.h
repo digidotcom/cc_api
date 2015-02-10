@@ -13,7 +13,15 @@
 #ifndef _CCAPI_INIT_H_
 #define _CCAPI_INIT_H_
 
-typedef void * ccapi_status_callback_t; /* STUB */
+typedef enum {
+     CCAPI_STOP_CCFSM_ERROR
+} ccapi_stop_cause_t;
+
+typedef struct {
+    ccapi_stop_cause_t CONST stop_cause;
+} ccapi_status_info_t;
+
+typedef void (*ccapi_status_callback_t)(ccapi_status_info_t * const info);
 
 typedef enum {
     CCAPI_START_ERROR_NONE,

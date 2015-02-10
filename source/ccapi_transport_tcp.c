@@ -230,6 +230,20 @@ done:
     return success;
 }
 
+void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info)
+{
+    if (tcp_info->connection.password != NULL)
+    {
+        ccapi_free(tcp_info->connection.password);
+    }
+
+    if (tcp_info->connection.type == CCAPI_CONNECTION_WAN && tcp_info->connection.info.wan.phone_number != NULL)
+    {
+        ccapi_free(tcp_info->connection.info.wan.phone_number);
+    }
+    ccapi_free(tcp_info);
+}
+
 ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_info_t const * const tcp_start)
 {
     ccapi_tcp_start_error_t error = CCAPI_TCP_START_ERROR_NONE;
@@ -377,16 +391,7 @@ done:
         case CCAPI_TCP_START_ERROR_TIMEOUT:
             if (ccapi_data->transport_tcp.info != NULL)
             {
-                if (ccapi_data->transport_tcp.info->connection.password != NULL)
-                {
-                    ccapi_free(ccapi_data->transport_tcp.info->connection.password);
-                }
-
-                if (tcp_start->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
-                {
-                    ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
-                }
-                ccapi_free(ccapi_data->transport_tcp.info);
+                free_transport_tcp_info(ccapi_data->transport_tcp.info);
                 ccapi_data->transport_tcp.info = NULL;
             }
             break;
@@ -417,18 +422,8 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_tcp.connected);
 
-    ASSERT(ccapi_data->transport_tcp.info != NULL);
-
-    if (ccapi_data->transport_tcp.info->connection.password != NULL)
-    {
-        ccapi_free(ccapi_data->transport_tcp.info->connection.password);
-    }
-
-    if (ccapi_data->transport_tcp.info->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
-    {
-        ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
-    }
-    ccapi_free(ccapi_data->transport_tcp.info);
+    ASSERT_MSG_GOTO(ccapi_data->transport_tcp.info != NULL, done);
+    free_transport_tcp_info(ccapi_data->transport_tcp.info);
     ccapi_data->transport_tcp.info = NULL;
 done:
     return error;
