@@ -169,18 +169,21 @@ TEST_GROUP(test_ccxapi_api)
 
 TEST(test_ccxapi_api, testStartStopApi)
 {
-    ccapi_handle_t ccapi_local_handle;
-
+    ccapi_handle_t ccapi_local_handle = NULL;
+    ccapi_data_t * ccapi_data;
     ccapi_start_error_t start_error;
     ccapi_stop_error_t stop_error;
 
     ccapi_start_t start = { 0 };
 
+    th_fill_start_structure_with_good_parameters(&start);
     start_error = ccxapi_start(&ccapi_local_handle, &start);
-    stop_error = ccxapi_stop(ccapi_local_handle, CCAPI_STOP_GRACEFULLY);
+    CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
 
-    UNUSED_ARGUMENT(start_error);
-    UNUSED_ARGUMENT(stop_error);
+    ccapi_data = (ccapi_data_t *)ccapi_local_handle;
+    Mock_connector_initiate_action_expectAndReturn(ccapi_data->connector_handle, connector_initiate_terminate, NULL, connector_success);
+    stop_error = ccxapi_stop(ccapi_local_handle, CCAPI_STOP_GRACEFULLY);
+    CHECK_EQUAL(CCAPI_STOP_ERROR_NONE, stop_error);
 }
 
 TEST(test_ccxapi_api, testTransportTcpApi)
