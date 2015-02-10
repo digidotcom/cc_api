@@ -65,6 +65,6 @@ void th_rci_checkExpectations(char const * const function_name, ccapi_rci_info_t
     CHECK_EQUAL(received_ccapi_rci_info.query_setting.attributes.compare_to, expected_received_rci_info->query_setting.attributes.compare_to);
     CHECK_EQUAL(received_ccapi_rci_info.query_setting.attributes.source, expected_received_rci_info->query_setting.attributes.source);
     CHECK_EQUAL(received_ccapi_rci_info.query_setting.matches, expected_received_rci_info->query_setting.matches);
-
+    CHECK_EQUAL(received_ccapi_rci_info.element.type, expected_received_rci_info->element.type);
     CHECK_EQUAL(received_ccapi_rci_info.user_context, expected_received_rci_info->user_context);
 }
