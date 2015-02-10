@@ -149,3 +149,150 @@ TEST(test_ccxapi, testStartTwoInstances)
     CHECK_EQUAL(0, logging_lock_users);
     CHECK(logging_lock == NULL);
 }
+
+TEST_GROUP(test_ccxapi_api)
+{
+    ccapi_handle_t ccapi_handle;
+
+    void setup()
+    {
+        ccapi_handle = NULL;
+
+        Mock_create_all();
+    }
+
+    void teardown()
+    {
+        Mock_destroy_all();
+    }
+};
+
+TEST(test_ccxapi_api, testStartStopApi)
+{
+    ccapi_handle_t ccapi_local_handle;
+
+    ccapi_start_error_t start_error;
+    ccapi_stop_error_t stop_error;
+
+    ccapi_start_t start = { 0 };
+
+    start_error = ccxapi_start(&ccapi_local_handle, &start);
+    stop_error = ccxapi_stop(ccapi_local_handle, CCAPI_STOP_GRACEFULLY);
+
+    UNUSED_ARGUMENT(start_error);
+    UNUSED_ARGUMENT(stop_error);
+}
+
+TEST(test_ccxapi_api, testTransportTcpApi)
+{
+    ccapi_tcp_start_error_t start_error;
+    ccapi_tcp_stop_error_t stop_error;
+
+    ccapi_tcp_info_t tcp_start;
+    ccapi_tcp_stop_t tcp_stop;
+
+    start_error = ccxapi_start_transport_tcp(ccapi_handle, &tcp_start);
+    stop_error = ccxapi_stop_transport_tcp(ccapi_handle, &tcp_stop);
+
+    UNUSED_ARGUMENT(start_error);
+    UNUSED_ARGUMENT(stop_error);
+}
+
+TEST(test_ccxapi_api, testTransportUdpApi)
+{
+    ccapi_udp_start_error_t start_error;
+    ccapi_udp_stop_error_t stop_error;
+
+    ccapi_udp_info_t udp_start;
+    ccapi_udp_stop_t udp_stop;
+
+    start_error = ccxapi_start_transport_udp(ccapi_handle, &udp_start);
+    stop_error = ccxapi_stop_transport_udp(ccapi_handle, &udp_stop);
+
+    UNUSED_ARGUMENT(start_error);
+    UNUSED_ARGUMENT(stop_error);
+}
+
+TEST(test_ccxapi_api, testTransportSmsApi)
+{
+    ccapi_sms_start_error_t start_error;
+    ccapi_sms_stop_error_t stop_error;
+
+    ccapi_sms_info_t sms_start;
+    ccapi_sms_stop_t sms_stop;
+
+    start_error = ccxapi_start_transport_sms(ccapi_handle, &sms_start);
+    stop_error = ccxapi_stop_transport_sms(ccapi_handle, &sms_stop);
+
+    UNUSED_ARGUMENT(start_error);
+    UNUSED_ARGUMENT(stop_error);
+}
+
+TEST(test_ccxapi_api, testSendApi)
+{
+    ccapi_send_error_t send_error;
+    ccapi_string_info_t hint;
+
+    send_error = ccxapi_send_data(ccapi_handle, CCAPI_TRANSPORT_TCP, "cloud path", "content type", "data", sizeof("data"), CCAPI_SEND_BEHAVIOR_APPEND);
+    send_error = ccxapi_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "cloud path", "content type", "data", sizeof("data"), CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint);
+    send_error = ccxapi_send_file(ccapi_handle, CCAPI_TRANSPORT_TCP, "local path", "cloud path", "content type", CCAPI_SEND_BEHAVIOR_APPEND);
+    send_error = ccxapi_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local path", "cloud path", "content type", CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint);
+
+    UNUSED_ARGUMENT(send_error);
+}
+
+TEST(test_ccxapi_api, testReceiveApi)
+{
+    ccapi_receive_error_t receive_error;
+
+    receive_error = ccxapi_receive_add_target(ccapi_handle, "target", (ccapi_receive_data_cb_t)NULL, (ccapi_receive_status_cb_t)NULL, CCAPI_RECEIVE_NO_LIMIT);
+    receive_error = ccxapi_receive_remove_target(ccapi_handle, "target");
+
+    UNUSED_ARGUMENT(receive_error);
+}
+
+TEST(test_ccxapi_api, testFilesystemApi)
+{
+    ccapi_fs_error_t fs_error;
+
+    fs_error = ccxapi_fs_add_virtual_dir(ccapi_handle, "virtual_dir", "actual_dir");
+    fs_error = ccxapi_fs_remove_virtual_dir(ccapi_handle, "virtual_dir");
+
+    UNUSED_ARGUMENT(fs_error);
+}
+
+TEST(test_ccxapi_api, testDataPointBinaryApi)
+{
+    ccapi_dp_b_error_t dp_b_error;
+    ccapi_string_info_t hint;
+
+    dp_b_error = ccxapi_dp_binary_send_data(ccapi_handle, CCAPI_TRANSPORT_TCP, "stream_id", "data", sizeof("data"));
+    dp_b_error = ccxapi_dp_binary_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "stream_id", "data", sizeof("data"), CCAPI_DP_B_WAIT_FOREVER, &hint);
+    dp_b_error = ccxapi_dp_binary_send_file(ccapi_handle, CCAPI_TRANSPORT_TCP, "local_path", "stream_id");
+    dp_b_error = ccxapi_dp_binary_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local_path", "stream_id", CCAPI_DP_B_WAIT_FOREVER, &hint);
+
+    UNUSED_ARGUMENT(dp_b_error);
+}
+
+TEST(test_ccxapi_api, testDataPointApi)
+{
+    ccapi_dp_error_t dp_error;
+    ccapi_string_info_t hint;
+    ccapi_dp_collection_t dp_collection;
+
+    dp_error = ccxapi_dp_send_collection(ccapi_handle, CCAPI_TRANSPORT_TCP, &dp_collection);
+    dp_error = ccxapi_dp_send_collection_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, &dp_collection, CCAPI_DP_WAIT_FOREVER, &hint);
+
+    UNUSED_ARGUMENT(dp_error);
+}
+
+TEST(test_ccxapi_api, testPingApi)
+{
+    ccapi_ping_error_t ping_error;
+
+    ping_error = ccxapi_send_ping(ccapi_handle, CCAPI_TRANSPORT_TCP);
+    ping_error = ccxapi_send_ping_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, CCAPI_SEND_PING_WAIT_FOREVER);
+
+    UNUSED_ARGUMENT(ping_error);
+}
+
