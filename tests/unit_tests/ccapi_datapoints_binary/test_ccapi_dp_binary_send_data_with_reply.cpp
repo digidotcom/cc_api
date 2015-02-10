@@ -70,7 +70,7 @@ TEST(test_ccapi_datapoint_binary_with_reply, testHint)
     connector_request_data_service_send_t header;
     char const data[] = DATA;
     char const hint_check[] = "hello man";
-    unsigned long timeout = CCAPI_SEND_WAIT_FOREVER;
+    unsigned long timeout = CCAPI_DP_B_WAIT_FOREVER;
 
     ccapi_string_info_t hint;
 

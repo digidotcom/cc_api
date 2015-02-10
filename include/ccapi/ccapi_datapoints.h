@@ -13,6 +13,8 @@
 #ifndef _CCAPI_DATAPOINTS_H_
 #define _CCAPI_DATAPOINTS_H_
 
+#define CCAPI_DP_WAIT_FOREVER 0UL
+
 #define CCAPI_DP_KEY_DATA_INT32     "int32"
 #define CCAPI_DP_KEY_DATA_INT64     "int64"
 #define CCAPI_DP_KEY_DATA_FLOAT     "float"
