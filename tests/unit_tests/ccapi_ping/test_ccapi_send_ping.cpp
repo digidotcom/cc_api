@@ -41,7 +41,7 @@ TEST(test_ccapi_send_ping_no_reply, testSEND_ERROR_NONE)
 
     header.transport = connector_transport_udp;
     header.response_required = connector_false;
-    header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
+    header.timeout_in_seconds = CCAPI_SEND_PING_WAIT_FOREVER;
     header.request_id = NULL;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_ping_request, &header, connector_success);
