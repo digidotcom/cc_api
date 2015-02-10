@@ -162,6 +162,7 @@ static void session_start(connector_remote_config_t * const remote_config, char 
     set_remote_config_defaults(remote_config);
     set_rci_info_defaults(&ccapi_data_single_instance->service.rci.rci_info);
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
     rci_info_to_return = expected_rci_info;
 
     rci_info_to_return.user_context = remote_config;
@@ -186,6 +187,7 @@ static void action_start(connector_remote_config_t * const remote_config, ccapi_
     expected_rci_info.action = action;
     expected_rci_info.group.type = type;
     expected_rci_info.query_setting.attributes = *query_setting_attributes;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 
     rci_info_to_return = expected_rci_info;
 
@@ -267,6 +269,7 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
     expected_rci_info.group.instance = group_index;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 
     rci_info_to_return = expected_rci_info;
     rci_info_to_return.query_setting.matches = compare_matches;
@@ -285,6 +288,95 @@ static void group_start(connector_remote_config_t * const remote_config, unsigne
     CHECK_EQUAL(CCAPI_BOOL_TO_CONNECTOR_BOOL(compare_matches), remote_config->response.compare_matches);
 }
 
+static ccapi_rci_element_type_t connector_rci_element_type_to_ccapi(connector_element_value_type_t const ccfsm_type)
+{
+    ccapi_rci_element_type_t ccapi_type;
+    switch (ccfsm_type)
+    {
+#if defined RCI_PARSER_USES_STRING
+        case connector_element_type_string:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_STRING;
+            break;
+#endif
+#if defined RCI_PARSER_USES_MULTILINE_STRING
+        case connector_element_type_multiline_string:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING;
+            break;
+#endif
+#if defined RCI_PARSER_USES_PASSWORD
+        case connector_element_type_password:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_PASSWORD;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FQDNV4
+        case connector_element_type_fqdnv4:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FQDNV4;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FQDNV6
+        case connector_element_type_fqdnv6:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FQDNV6;
+            break;
+#endif
+#if defined RCI_PARSER_USES_DATETIME
+        case connector_element_type_datetime:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_DATETIME;
+            break;
+#endif
+#if defined RCI_PARSER_USES_IPV4
+        case connector_element_type_ipv4:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_IPV4;
+            break;
+#endif
+#if defined RCI_PARSER_USES_MAC_ADDR
+        case connector_element_type_mac_addr:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_MAC;
+            break;
+#endif
+#if defined RCI_PARSER_USES_INT32
+        case connector_element_type_int32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_INT32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_UINT32
+        case connector_element_type_uint32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_UINT32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_HEX32
+        case connector_element_type_hex32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_HEX32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_0X_HEX32
+        case connector_element_type_0x_hex32:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_0X32;
+            break;
+#endif
+#if defined RCI_PARSER_USES_FLOAT
+        case connector_element_type_float:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_FLOAT;
+            break;
+#endif
+#if defined RCI_PARSER_USES_ENUM
+        case connector_element_type_enum:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_ENUM;
+            break;
+#endif
+#if defined RCI_PARSER_USES_ON_OFF
+        case connector_element_type_on_off:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_ON_OFF;
+            break;
+#endif
+#if defined RCI_PARSER_USES_BOOLEAN
+        case connector_element_type_boolean:
+            ccapi_type = CCAPI_RCI_ELEMENT_TYPE_BOOL;
+            break;
+#endif
+    }
+    return ccapi_type;
+}
+
 static void group_process_query(connector_remote_config_t * const remote_config, unsigned int const element_id, connector_element_value_type_t const element_type, connector_element_value_t const expected_value, ccapi_bool_t compare_matches, char const * const expected_function, unsigned int const error, char const * const error_hint)
 {
     connector_callback_status_t status;
@@ -295,15 +387,19 @@ static void group_process_query(connector_remote_config_t * const remote_config,
 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
+    expected_rci_info.element.type = connector_rci_element_type_to_ccapi(element_type);
+
     rci_info_to_return = expected_rci_info;
     rci_info_to_return.query_setting.matches = compare_matches;
     rci_info_to_return.error_hint = error_hint;
 
+    remote_config->element.type = element_type;
     remote_config->element.id = element_id;
     remote_config->element.type = element_type;
     remote_config->response.element_value = &response_value;
     remote_config->error_id = 0;
     remote_config->element.value = NULL;
+
 
     th_rci_returnValues(error, &rci_info_to_return);
     request.remote_config_request = connector_request_id_remote_config_group_process;
@@ -359,9 +455,12 @@ static void group_process_set(connector_remote_config_t * const remote_config, u
 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     expected_rci_info.query_setting.matches = CCAPI_FALSE;
+    expected_rci_info.element.type = connector_rci_element_type_to_ccapi(element_type);
+
     rci_info_to_return = expected_rci_info;
     rci_info_to_return.query_setting.matches = CCAPI_FALSE;
 
+    remote_config->element.type = element_type;
     remote_config->element.id = element_id;
     remote_config->element.type = element_type;
     remote_config->response.element_value = NULL;
@@ -444,6 +543,7 @@ static void group_end(connector_remote_config_t * const remote_config, char cons
 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
     rci_info_to_return = expected_rci_info;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
     remote_config->error_id = 0;
 
     th_rci_returnValues(error, &rci_info_to_return);
@@ -471,6 +571,7 @@ static void do_command(connector_remote_config_t * const remote_config, char con
     expected_rci_info.do_command.target = "file_system";
     expected_rci_info.do_command.request = "<ls dir=\"/WEB/python\"/>";
     expected_rci_info.do_command.response = &remote_config->response.element_value->string_value;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 
     rci_info_to_return = expected_rci_info;
     *rci_info_to_return.do_command.response = "My response";
@@ -496,6 +597,7 @@ static void reboot(connector_remote_config_t * const remote_config, char const *
     expected_rci_info.do_command.target = NULL;
     expected_rci_info.do_command.request = NULL;
     expected_rci_info.do_command.response = NULL;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 
     rci_info_to_return = expected_rci_info;
 
@@ -519,6 +621,7 @@ static void set_factory_defaults(connector_remote_config_t * const remote_config
     expected_rci_info.do_command.target = NULL;
     expected_rci_info.do_command.request = NULL;
     expected_rci_info.do_command.response = NULL;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
 
     rci_info_to_return = expected_rci_info;
 
@@ -539,6 +642,8 @@ static void action_end(connector_remote_config_t * const remote_config, char con
     ccapi_rci_info_t expected_rci_info;
 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
+
     rci_info_to_return = expected_rci_info;
     remote_config->error_id = 0;
 
@@ -559,6 +664,7 @@ void session_end(connector_remote_config_t * const remote_config, char const * c
     ccapi_rci_info_t expected_rci_info;
 
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
     rci_info_to_return = expected_rci_info;
     remote_config->error_id = 0;
 
@@ -1033,6 +1139,7 @@ TEST(test_ccapi_rci, testRCISessionCancel)
     set_remote_config_defaults(&remote_config);
     set_rci_info_defaults(&ccapi_data_single_instance->service.rci.rci_info);
     expected_rci_info = ccapi_data_single_instance->service.rci.rci_info;
+    expected_rci_info.element.type = CCAPI_RCI_ELEMENT_TYPE_NOT_SET;
     rci_info_to_return = expected_rci_info;
 
     th_rci_returnValues(CCAPI_GLOBAL_ERROR_NONE, &rci_info_to_return);
