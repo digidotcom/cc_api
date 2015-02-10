@@ -13,7 +13,6 @@
 #define CCAPI_CONST_PROTECTION_UNLOCK
 
 #include "ccapi_definitions.h"
-#include "ccapi/ccxapi.h"
 
 ccapi_data_t * ccapi_data_single_instance = NULL;
 
@@ -507,7 +506,7 @@ void ccapi_connector_run_thread(void * const argument)
                     status_info.error = CCAPI_STOP_CCFSM_ERROR;
                     ccapi_data->config.status_callback(&status_info);
                 }
-                ccxapi_asynchronous_stop((ccapi_handle_t)ccapi_data);
+                ccxapi_asynchronous_stop(ccapi_data);
                 goto done;
                 break;
             default:

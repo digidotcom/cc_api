@@ -57,6 +57,4 @@ ccapi_dp_b_error_t ccxapi_dp_binary_send_data_with_reply(ccapi_handle_t const cc
 ccapi_dp_b_error_t ccxapi_dp_binary_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
 ccapi_dp_b_error_t ccxapi_dp_binary_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
 
-void ccxapi_asynchronous_stop(ccapi_handle_t const ccapi_handle);
-
 #endif

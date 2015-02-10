@@ -720,10 +720,8 @@ static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t co
     return transport_stop_behavior;
 }
 
-void ccxapi_asynchronous_stop(ccapi_handle_t const ccapi_handle)
+void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data)
 {
-    ccapi_data_t * const ccapi_data = (ccapi_data_t *)ccapi_handle;
-
     if (ccapi_data->transport_tcp.info != NULL)
     {
         free_transport_tcp_info(ccapi_data->transport_tcp.info);

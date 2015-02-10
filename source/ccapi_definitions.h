@@ -403,6 +403,8 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
+void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data);
+
 void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info);
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
 void free_transport_udp_info(ccapi_udp_info_t * const sms_info);
