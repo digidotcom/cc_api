@@ -422,7 +422,7 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_tcp.connected);
 
-    ASSERT(ccapi_data->transport_tcp.info != NULL);
+    ASSERT_MSG_GOTO(ccapi_data->transport_tcp.info != NULL, done);
     free_transport_tcp_info(ccapi_data->transport_tcp.info);
     ccapi_data->transport_tcp.info = NULL;
 done:

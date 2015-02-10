@@ -299,7 +299,7 @@ ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_sms.started);
 
-    ASSERT(ccapi_data->transport_sms.info != NULL);
+    ASSERT_MSG_GOTO(ccapi_data->transport_sms.info != NULL, done);
     free_transport_sms_info(ccapi_data->transport_sms.info);
     ccapi_data->transport_sms.info = NULL;
 

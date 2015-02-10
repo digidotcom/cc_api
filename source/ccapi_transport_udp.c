@@ -205,13 +205,9 @@ ccapi_udp_stop_error_t ccxapi_stop_transport_udp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_udp.started);
 
-    ASSERT(ccapi_data->transport_udp.info != NULL);
-
-    if (ccapi_data->transport_udp.info != NULL)
-    {
-        free_transport_udp_info(ccapi_data->transport_udp.info);
-        ccapi_data->transport_udp.info = NULL;
-    }
+    ASSERT_MSG_GOTO(ccapi_data->transport_udp.info != NULL, done);
+    free_transport_udp_info(ccapi_data->transport_udp.info);
+    ccapi_data->transport_udp.info = NULL;
 done:
     return error;
 }
