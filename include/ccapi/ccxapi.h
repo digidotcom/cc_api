@@ -56,8 +56,8 @@ ccapi_dp_b_error_t ccxapi_dp_binary_send_data_with_reply(ccapi_handle_t const cc
 ccapi_dp_b_error_t ccxapi_dp_binary_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
 ccapi_dp_b_error_t ccxapi_dp_binary_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
 
-ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection);
-ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_handle_t const dp_collection);
+ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_handle_t const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint);
 
 ccapi_ping_error_t ccxapi_send_ping(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport);
 ccapi_ping_error_t ccxapi_send_ping_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, unsigned long const timeout);
