@@ -131,7 +131,7 @@ static ccapi_bool_t status_callback_called;
 
 static void status_callback(ccapi_status_info_t * const info)
 {
-    CHECK_EQUAL(CCAPI_STOP_CCFSM_ERROR, info->error);
+    CHECK_EQUAL(CCAPI_STOP_CCFSM_ERROR, info->stop_cause);
     status_callback_called = CCAPI_TRUE;
 }
 

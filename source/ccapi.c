@@ -503,7 +503,7 @@ void ccapi_connector_run_thread(void * const argument)
                 if (ccapi_data->config.status_callback != NULL)
                 {
                     ccapi_status_info_t status_info;
-                    status_info.error = CCAPI_STOP_CCFSM_ERROR;
+                    status_info.stop_cause = CCAPI_STOP_CCFSM_ERROR;
                     ccapi_data->config.status_callback(&status_info);
                 }
                 ccxapi_asynchronous_stop(ccapi_data);

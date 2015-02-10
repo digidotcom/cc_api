@@ -18,7 +18,7 @@ typedef enum {
 } ccapi_stop_cause_t;
 
 typedef struct {
-    ccapi_stop_cause_t CONST error;
+    ccapi_stop_cause_t CONST stop_cause;
 } ccapi_status_info_t;
 
 typedef void (*ccapi_status_callback_t)(ccapi_status_info_t * const info);
