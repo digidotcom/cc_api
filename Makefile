@@ -38,7 +38,6 @@ CFLAGS += -Wformat-y2k -Wcast-align -Wformat-nonliteral
 CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
 CFLAGS += -Wall -Werror -Wextra -pedantic
 CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
-CFLAGS += -Wno-error=long-long
 CFLAGS += --coverage
 
 # Include POSIX and GNU features.
@@ -61,7 +60,9 @@ CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt -lpthread -lrt -lcrypto
 
-CCFLAGS += $(CFLAGS) -std=c89
+CCFLAGS := $(CFLAGS) -std=c89
+
+CFLAGS += -std=c++0x
 
 # Generated Sample Executable Name.
 EXEC_NAME = test
