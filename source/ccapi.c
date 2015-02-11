@@ -791,7 +791,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
 #endif
         case connector_request_id_config_error_status:
         {
-            connector_config_error_status_t * const ccfsm_error_status = data;
+            connector_config_error_status_t const * const ccfsm_error_status = data;
             connector_class_id_t const class_id = ccfsm_error_status->class_id;
             int const request_id = ccfsm_error_status->request_id.int_value;
             connector_status_t const ccfsm_status = ccfsm_error_status->status;
