@@ -423,8 +423,15 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 #endif
 #if (defined RCI_PARSER_USES_FLOAT)
         case CCAPI_RCI_ELEMENT_TYPE_FLOAT:
-            /* TODO */
+        {
+            float const * const p_float = va_arg(arg_list, float const * const);
+
+            fprintf(xml_request_fp, "<%s>%f</%s>", info->element.name, *p_float, info->element.name);    
+
+            /* TODO: Not tested because of CCAPI-130 */
+
             break;
+        }
 #endif
 #if (defined RCI_PARSER_USES_ON_OFF)
         case CCAPI_RCI_ELEMENT_TYPE_ON_OFF:
@@ -434,7 +441,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
             fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *p_ccapi_on_off_t ? "on":"off", info->element.name);    
 
             break;
-        }    
+        }
 #endif
 #if (defined RCI_PARSER_USES_BOOLEAN)
         case CCAPI_RCI_ELEMENT_TYPE_BOOL:
@@ -591,8 +598,15 @@ int ccapi_xml_rci_group_get(ccapi_rci_info_t * const info, ...)
 #endif
 #if (defined RCI_PARSER_USES_FLOAT)
         case CCAPI_RCI_ELEMENT_TYPE_FLOAT:
-            /* TODO */
+        {
+            float * const p_float = va_arg(arg_list, float * const);
+
+            *p_float = (float)atof(xml_value);
+
+            printf("float_value='%f'\n", *p_float);
+
             break;
+        }
 #endif
 #if (defined RCI_PARSER_USES_ON_OFF)
         case CCAPI_RCI_ELEMENT_TYPE_ON_OFF:
