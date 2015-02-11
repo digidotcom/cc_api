@@ -349,7 +349,6 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
 
 int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 {
-
     va_list arg_list;
 
     va_start(arg_list, info);
@@ -387,9 +386,9 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         case CCAPI_RCI_ELEMENT_TYPE_ENUM:
 #endif
         {
-            char const * const string_value = va_arg(arg_list, char const * const);
+            char const * const p_string = va_arg(arg_list, char const * const);
 
-            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, string_value, info->element.name);
+            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, p_string, info->element.name);
 
             break;
         }
@@ -502,10 +501,13 @@ done:
     return error_id;
 }
 
-int ccapi_xml_rci_group_get_string(ccapi_rci_info_t * const info, char const * * const value)
+int ccapi_xml_rci_group_get(ccapi_rci_info_t * const info, ...)
 {
+    va_list arg_list;
     int error_id;
     char const * xml_value = NULL;
+
+    va_start(arg_list, info);
 
     error_id = get_xml_value(info, &xml_value);
     if (error_id != CCAPI_GLOBAL_ERROR_NONE)
@@ -513,115 +515,140 @@ int ccapi_xml_rci_group_get_string(ccapi_rci_info_t * const info, char const * *
         goto done;
     }
 
-    *value = xml_value;
+    switch(info->element.type)
+    {
+        case CCAPI_RCI_ELEMENT_TYPE_NOT_SET:
+            break;
+#if (defined RCI_PARSER_USES_STRINGS)
+#if (defined RCI_PARSER_USES_STRING)
+        case CCAPI_RCI_ELEMENT_TYPE_STRING:
+#endif
+#if (defined RCI_PARSER_USES_MULTILINE_STRING)
+        case CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING:
+#endif
+#if (defined RCI_PARSER_USES_PASSWORD)
+        case CCAPI_RCI_ELEMENT_TYPE_PASSWORD:
+#endif
+#if (defined RCI_PARSER_USES_FQDNV4)
+        case CCAPI_RCI_ELEMENT_TYPE_FQDNV4:
+#endif
+#if (defined RCI_PARSER_USES_FQDNV6)
+        case CCAPI_RCI_ELEMENT_TYPE_FQDNV6:
+#endif
+#if (defined RCI_PARSER_USES_DATETIME)
+        case CCAPI_RCI_ELEMENT_TYPE_DATETIME:
+#endif
+#if (defined RCI_PARSER_USES_IPV4)
+        case CCAPI_RCI_ELEMENT_TYPE_IPV4:
+#endif
+#if (defined RCI_PARSER_USES_MAC_ADDR)
+        case CCAPI_RCI_ELEMENT_TYPE_MAC:
+#endif
+#if (defined RCI_PARSER_USES_ENUM)
+        case CCAPI_RCI_ELEMENT_TYPE_ENUM:
+#endif
+        {
+            char const * * const p_string = va_arg(arg_list, char const * * const);
 
-    printf("string_value='%s'\n", *value);
+            *p_string = xml_value;
+
+            printf("string_value='%s'\n", *p_string);
+
+            break;
+        }
+#endif
+#if (defined RCI_PARSER_USES_INT32)
+        case CCAPI_RCI_ELEMENT_TYPE_INT32:
+        {
+            int32_t * const p_int32_t = va_arg(arg_list, int32_t * const);
+
+            *p_int32_t = (int32_t)atoi(xml_value);
+
+            printf("integer_value='%d'\n", *p_int32_t);
+
+            break;
+        }
+#endif
+#if (defined RCI_PARSER_USES_UNSIGNED_INTEGER)
+#if (defined RCI_PARSER_USES_UINT32)
+        case CCAPI_RCI_ELEMENT_TYPE_UINT32:
+#endif
+#if (defined RCI_PARSER_USES_HEX32)
+        case CCAPI_RCI_ELEMENT_TYPE_HEX32:
+#endif
+#if (defined RCI_PARSER_USES_0X_HEX32)
+        case CCAPI_RCI_ELEMENT_TYPE_0X32:
+#endif
+        {
+            uint32_t * const p_uint32_t = va_arg(arg_list, uint32_t * const);
+
+            *p_uint32_t = (uint32_t)atoi(xml_value);
+
+            printf("unsigned_integer_value='%u'\n", *p_uint32_t);
+
+            break;
+        }
+#endif
+#if (defined RCI_PARSER_USES_FLOAT)
+        case CCAPI_RCI_ELEMENT_TYPE_FLOAT:
+            /* TODO */
+            break;
+#endif
+#if (defined RCI_PARSER_USES_ON_OFF)
+        case CCAPI_RCI_ELEMENT_TYPE_ON_OFF:
+        {
+            ccapi_on_off_t * const p_ccapi_on_off_t = va_arg(arg_list, ccapi_on_off_t * const);
+
+            /* boolean value should be 0, 1, on, off, true or false */
+            if (!strcmp(xml_value, "0") || !strcmp(xml_value, "off") || !strcmp(xml_value, "false"))
+            {
+                *p_ccapi_on_off_t = CCAPI_OFF;
+            }
+            else if (!strcmp(xml_value, "1") || !strcasecmp(xml_value, "on") || !strcasecmp(xml_value, "true"))
+            {
+                *p_ccapi_on_off_t = CCAPI_ON;
+            }
+            else
+            {
+                error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+                goto done;
+            }
+
+            printf("ccapi_on_off_value='%u'\n", *p_ccapi_on_off_t);
+
+            break;
+        }    
+#endif
+#if (defined RCI_PARSER_USES_BOOLEAN)
+        case CCAPI_RCI_ELEMENT_TYPE_BOOL:
+        {
+            ccapi_bool_t * const p_ccapi_bool_t = va_arg(arg_list, ccapi_bool_t * const);
+
+            /* boolean value should be 0, 1, on, off, true or false */
+            if (!strcmp(xml_value, "0") || !strcmp(xml_value, "off") || !strcmp(xml_value, "false"))
+            {
+                *p_ccapi_bool_t = CCAPI_FALSE;
+            }
+            else if (!strcmp(xml_value, "1") || !strcasecmp(xml_value, "on") || !strcasecmp(xml_value, "true"))
+            {
+                *p_ccapi_bool_t = CCAPI_TRUE;
+            }
+            else
+            {
+                error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+                goto done;
+            }
+
+            printf("ccapi_bool_value='%u'\n", *p_ccapi_bool_t);
+
+            break;
+        }        
+#endif
+    }
 
 done:
-    return error_id;
+    va_end(arg_list);
+
+    return CCAPI_GLOBAL_ERROR_NONE;
 }
-
-int ccapi_xml_rci_group_get_unsigned_integer(ccapi_rci_info_t * const info, uint32_t * const value)
-{
-    int error_id;
-    char const * xml_value = NULL;
-
-    error_id = get_xml_value(info, &xml_value);
-    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    *value = (uint32_t)atoi(xml_value);
-
-    printf("unsigned_integer_value='%u'\n", *value);
-
-done:
-    return error_id;
-}
-
-int ccapi_xml_rci_group_get_integer(ccapi_rci_info_t * const info, int32_t * const value)
-{
-    int error_id;
-    char const * xml_value = NULL;
-
-    error_id = get_xml_value(info, &xml_value);
-    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    *value = (int32_t)atoi(xml_value);
-
-    printf("integer_value='%d'\n", *value);
-
-done:
-    return error_id;
-}
-
-int ccapi_xml_rci_group_get_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t * const value)
-{
-    int error_id;
-    char const * xml_value = NULL;
-
-    error_id = get_xml_value(info, &xml_value);
-    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    /* boolean value should be 0, 1, on, off, true or false */
-    if (!strcmp(xml_value, "0") || !strcmp(xml_value, "off") || !strcmp(xml_value, "false"))
-    {
-        *value = CCAPI_OFF;
-    }
-    else if (!strcmp(xml_value, "1") || !strcasecmp(xml_value, "on") || !strcasecmp(xml_value, "true"))
-    {
-        *value = CCAPI_ON;
-    }
-    else
-    {
-        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-        goto done;
-    }
-
-    printf("ccapi_on_off_value='%u'\n", *value);
-
-done:
-    return error_id;
-}
-
-int ccapi_xml_rci_group_get_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t * const value)
-{
-    int error_id;
-    char const * xml_value = NULL;
-
-    error_id = get_xml_value(info, &xml_value);
-    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    /* boolean value should be 0, 1, on, off, true or false */
-    if (!strcmp(xml_value, "0") || !strcmp(xml_value, "off") || !strcmp(xml_value, "false"))
-    {
-        *value = CCAPI_FALSE;
-    }
-    else if (!strcmp(xml_value, "1") || !strcasecmp(xml_value, "on") || !strcasecmp(xml_value, "true"))
-    {
-        *value = CCAPI_TRUE;
-    }
-    else
-    {
-        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-        goto done;
-    }
-
-    printf("ccapi_bool_value='%u'\n", *value);
-
-done:
-    return error_id;
-}
-
-/* TODO: add ccapi_xml_rci_group_get_*() functions for types not present in this example */
 
