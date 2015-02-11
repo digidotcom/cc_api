@@ -1,6 +1,7 @@
 #include  <stdio.h>
 #include  <sys/stat.h>
 #include  <unistd.h>
+#include  <stdarg.h>
 
 #include  "ccapi_xml_rci.h"
 #include  "ccapi_xml_rci_handler.h"
@@ -346,27 +347,45 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
-#if 0
-// missing info->element.type !!
-static void ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
+int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 {
 
-    va_list args;
+    va_list arg_list;
 
-    va_start(args, info);
+    va_start(arg_list, info);
 
     switch(info->element.type)
     {
-        case connector_element_type_int32:
-        {
-            int32_t const int_value = va_arg(arg_list, int32_t);
-
-            fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, int_value, info->element.name);    
-
+        case CCAPI_RCI_ELEMENT_TYPE_NOT_SET:
             break;
-        }
-        case connector_element_type_enum:
-        case connector_element_type_string:
+#if (defined RCI_PARSER_USES_STRINGS)
+#if (defined RCI_PARSER_USES_STRING)
+        case CCAPI_RCI_ELEMENT_TYPE_STRING:
+#endif
+#if (defined RCI_PARSER_USES_MULTILINE_STRING)
+        case CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING:
+#endif
+#if (defined RCI_PARSER_USES_PASSWORD)
+        case CCAPI_RCI_ELEMENT_TYPE_PASSWORD:
+#endif
+#if (defined RCI_PARSER_USES_FQDNV4)
+        case CCAPI_RCI_ELEMENT_TYPE_FQDNV4:
+#endif
+#if (defined RCI_PARSER_USES_FQDNV6)
+        case CCAPI_RCI_ELEMENT_TYPE_FQDNV6:
+#endif
+#if (defined RCI_PARSER_USES_DATETIME)
+        case CCAPI_RCI_ELEMENT_TYPE_DATETIME:
+#endif
+#if (defined RCI_PARSER_USES_IPV4)
+        case CCAPI_RCI_ELEMENT_TYPE_IPV4:
+#endif
+#if (defined RCI_PARSER_USES_MAC_ADDR)
+        case CCAPI_RCI_ELEMENT_TYPE_MAC:
+#endif
+#if (defined RCI_PARSER_USES_ENUM)
+        case CCAPI_RCI_ELEMENT_TYPE_ENUM:
+#endif
         {
             char const * const string_value = va_arg(arg_list, char const * const);
 
@@ -374,46 +393,63 @@ static void ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 
             break;
         }
-        /* TODO: other types */
+#endif
+#if (defined RCI_PARSER_USES_INT32)
+        case CCAPI_RCI_ELEMENT_TYPE_INT32:
+        {
+            int32_t const * const p_int32_t = va_arg(arg_list, int32_t const * const);
+
+            fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *p_int32_t, info->element.name);    
+
+            break;
+        }
+#endif
+#if (defined RCI_PARSER_USES_UNSIGNED_INTEGER)
+#if (defined RCI_PARSER_USES_UINT32)
+        case CCAPI_RCI_ELEMENT_TYPE_UINT32:
+#endif
+#if (defined RCI_PARSER_USES_HEX32)
+        case CCAPI_RCI_ELEMENT_TYPE_HEX32:
+#endif
+#if (defined RCI_PARSER_USES_0X_HEX32)
+        case CCAPI_RCI_ELEMENT_TYPE_0X32:
+#endif
+        {
+            uint32_t const * const p_uint32_t = va_arg(arg_list, uint32_t const * const);
+
+            fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *p_uint32_t, info->element.name);    
+
+            break;
+        }
+#endif
+#if (defined RCI_PARSER_USES_FLOAT)
+        case CCAPI_RCI_ELEMENT_TYPE_FLOAT:
+            /* TODO */
+            break;
+#endif
+#if (defined RCI_PARSER_USES_ON_OFF)
+        case CCAPI_RCI_ELEMENT_TYPE_ON_OFF:
+        {
+            ccapi_on_off_t const * const p_ccapi_on_off_t = va_arg(arg_list, ccapi_on_off_t const * const);
+
+            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *p_ccapi_on_off_t ? "on":"off", info->element.name);    
+
+            break;
+        }    
+#endif
+#if (defined RCI_PARSER_USES_BOOLEAN)
+        case CCAPI_RCI_ELEMENT_TYPE_BOOL:
+        {
+            ccapi_bool_t const * const p_ccapi_bool_t = va_arg(arg_list, ccapi_bool_t const * const);
+
+            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *p_ccapi_bool_t ? "true":"false", info->element.name);    
+
+            break;
+        }        
+#endif
     }
 
-    va_end(args);
-
-    return;
-}
-#endif
-
-int ccapi_xml_rci_group_set_string(ccapi_rci_info_t * const info, char const * const value)
-{
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, value, info->element.name);
-
-    return CCAPI_GLOBAL_ERROR_NONE;
-}
-
-int ccapi_xml_rci_group_set_unsigned_integer(ccapi_rci_info_t * const info, uint32_t const * const value)
-{
-    fprintf(xml_request_fp, "<%s>%u</%s>", info->element.name, *value, info->element.name);    
-
-    return CCAPI_GLOBAL_ERROR_NONE;
-}
-
-int ccapi_xml_rci_group_set_integer(ccapi_rci_info_t * const info, int32_t const * const value)
-{
-    fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *value, info->element.name);    
-
-    return CCAPI_GLOBAL_ERROR_NONE;
-}
-
-int ccapi_xml_rci_group_set_ccapi_on_off(ccapi_rci_info_t * const info, ccapi_on_off_t const *const value)
-{
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "on":"off", info->element.name);    
-
-    return CCAPI_GLOBAL_ERROR_NONE;
-}
-
-int ccapi_xml_rci_group_set_ccapi_bool(ccapi_rci_info_t * const info, ccapi_bool_t const *const value)
-{
-    fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *value ? "true":"false", info->element.name);    
+    va_end(arg_list);
 
     return CCAPI_GLOBAL_ERROR_NONE;
 }
