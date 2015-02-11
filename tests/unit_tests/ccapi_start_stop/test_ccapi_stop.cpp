@@ -152,7 +152,7 @@ TEST(test_ccapi_stop, testCcapiStopAsynchronously)
 
     start_error = ccapi_start(&start);
     CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
-    CHECK_EQUAL(status_callback, ccapi_data_single_instance->config.status_callback);
+    CHECK(status_callback == ccapi_data_single_instance->config.status_callback);
 
     th_expect_malloc(sizeof *ccapi_data_single_instance->transport_tcp.info, TH_MALLOC_RETURN_NORMAL, true);
     th_start_tcp_lan_ipv4();
