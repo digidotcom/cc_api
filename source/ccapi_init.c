@@ -296,6 +296,9 @@ done:
 static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
 {
     ASSERT_MSG_GOTO(thread_info != NULL, done);
+
+    ccapi_logging_line("ccapi_stop_thread: type=%d", thread_info->ccimp_info.type);
+
     if (thread_info->status == CCAPI_THREAD_RUNNING)
     {
         thread_info->status = CCAPI_THREAD_REQUEST_STOP;
@@ -303,11 +306,12 @@ static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
 
     ASSERT_MSG_GOTO(thread_info->lock != NULL, done);
     ccapi_lock_release(thread_info->lock);
-    ccapi_lock_destroy(thread_info->lock);
 
     do {
         ccimp_os_yield();
     } while (thread_info->status != CCAPI_THREAD_NOT_STARTED);
+
+    ccapi_lock_destroy(thread_info->lock);
 done:
     return;
 }
