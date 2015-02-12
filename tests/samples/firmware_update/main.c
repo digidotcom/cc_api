@@ -231,7 +231,10 @@ int main (void)
     }
 
     printf("Waiting for ever\n");
-    for(;;);
+    for(;;)
+    {
+        sleep(100);
+    }
 
 done:
     return 0;
