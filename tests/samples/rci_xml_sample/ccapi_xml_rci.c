@@ -1,3 +1,22 @@
+/*
+* Copyright (c) 2015 Etherios, a Division of Digi International, Inc.
+* All rights not expressly granted are reserved.
+*
+* This Source Code Form is subject to the terms of the Mozilla Public
+* License, v. 2.0. If a copy of the MPL was not distributed with this file,
+* You can obtain one at http://mozilla.org/MPL/2.0/.
+*
+* Etherios 11001 Bren Road East, Minnetonka, MN 55343
+* =======================================================================
+*/
+
+/* TODO:
+*         - Legacy commands support
+*         - Pass and receive data to/from xml_rci_handler() function as arguments instead of through files.
+*         - Split set requests to xml_rci_handler() in groups intead of a complete request (as it's done for queries)
+*           to improve the error location.
+*/
+
 #include  <stdio.h>
 #include  <sys/stat.h>
 #include  <unistd.h>
