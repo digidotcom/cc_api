@@ -367,7 +367,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->thread.receive = NULL;
     ccapi_data->thread.cli = NULL;
     ccapi_data->thread.firmware = NULL;
-    ccapi_data->initiate_action_lock = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
