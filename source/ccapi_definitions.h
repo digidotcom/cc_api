@@ -80,6 +80,7 @@ typedef enum {
 typedef struct {
     ccimp_os_create_thread_info_t ccimp_info;
     ccapi_thread_status_t status;
+    void * lock;
 } ccapi_thread_info_t;
 
 typedef struct ccapi_fs_virtual_dir {
