@@ -11,6 +11,7 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
@@ -94,7 +95,10 @@ int main (void)
     {
         printf("ccapi_start_transport_tcp success\n");
         printf("Waiting for ever\n");
-        for(;;);
+        for(;;)
+        {
+            sleep(10);
+        }
     }
     else
     {

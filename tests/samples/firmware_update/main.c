@@ -28,6 +28,8 @@ static ccapi_firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = (sizeof(firmware_list)/sizeof(firmware_list[0]));
 
+static ccapi_bool_t stop = CCAPI_FALSE;
+
 static void get_device_id_from_mac(uint8_t * const device_id, uint8_t const * const mac_addr)
 {
     memset(device_id, 0x00, 16);
@@ -141,6 +143,8 @@ static void app_fw_reset_cb(unsigned int const target, ccapi_bool_t * system_res
 
             *system_reset = CCAPI_FALSE;
 
+            stop = CCAPI_TRUE;
+
             break;
         }
         case 1:
@@ -217,6 +221,26 @@ done:
     return tcp_start_error;
 }
 
+static ccapi_bool_t check_stop(void)
+{
+    ccapi_stop_error_t stop_error = CCAPI_STOP_ERROR_NONE;
+
+    if (stop == CCAPI_TRUE)
+    {
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+
+        if (stop_error == CCAPI_STOP_ERROR_NONE)
+        {
+            printf("ccapi_stop success\n");
+        }
+        else
+        {
+            printf("ccapi_stop error %d\n", stop_error);
+        }
+    }
+
+    return stop;
+}
 
 int main (void)
 {
@@ -231,10 +255,10 @@ int main (void)
     }
 
     printf("Waiting for ever\n");
-    for(;;)
+    do
     {
-        sleep(100);
-    }
+        sleep(1);
+    } while (check_stop() != CCAPI_TRUE);
 
 done:
     return 0;
