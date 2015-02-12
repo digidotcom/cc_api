@@ -16,6 +16,8 @@
 
 #if (defined CCIMP_RCI_SERVICE_ENABLED)
 
+#define connector_rci_error_none 0
+
 static ccapi_rci_query_setting_attribute_compare_to_t connector_to_ccapi_compare_to_attribute(rci_query_setting_attribute_compare_to_t const compare_to)
 {
     ccapi_rci_query_setting_attribute_compare_to_t retval;
@@ -157,9 +159,15 @@ void ccapi_rci_thread(void * const argument)
                             int * const actual_value = ccapi_data->service.rci.queued_callback.argument;
 
                             ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, &enum_string);
-                            enum_id = string_to_enum(enum_array, enum_element_count, enum_string);
-                            ASSERT(enum_id != -1);
-                            *actual_value = enum_id;
+                            if (ccapi_data->service.rci.queued_callback.error == connector_rci_error_none)
+                            {
+                                enum_id = string_to_enum(enum_array, enum_element_count, enum_string);
+                                if (enum_id == -1)
+                                {
+                                    ccapi_data->service.rci.queued_callback.error = connector_rci_error_bad_value;
+                                }
+                                *actual_value = enum_id;
+                            }
                         }
                         else
                         {
@@ -204,7 +212,7 @@ static void clear_queued_callback(ccapi_data_t * const ccapi_data)
 {
     ccapi_data->service.rci.queued_callback.function_cb = NULL;
     ccapi_data->service.rci.queued_callback.argument = NULL;
-    ccapi_data->service.rci.queued_callback.error = 0;
+    ccapi_data->service.rci.queued_callback.error = connector_rci_error_none;
 #if (defined RCI_ENUMS_AS_STRINGS)
     ccapi_data->service.rci.queued_callback.enum_data.array = NULL;
     ccapi_data->service.rci.queued_callback.enum_data.element_count = 0;
