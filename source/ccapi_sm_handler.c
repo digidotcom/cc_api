@@ -30,47 +30,35 @@ void ccapi_cli_thread(void * const argument)
     ccapi_data->thread.cli->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.cli->status == CCAPI_THREAD_RUNNING)
     {
-        ccapi_svc_cli_t * const svc_cli = ccapi_data->service.cli.svc_cli;
-        if (svc_cli != NULL)
-        {
-            switch (svc_cli->cli_thread_status)
-            {
-                case CCAPI_CLI_THREAD_IDLE:
-                case CCAPI_CLI_THREAD_REQUEST_CB_READY:
-                {
-                    break;
-                }
-                case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
-                {
-                    ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
+        ccapi_lock_acquire(ccapi_data->thread.cli->lock);
 
-                    /* Pass data to the user and get possible response from user */ 
-                    ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
-                                                                       svc_cli->request_string_info.string,
-                                                                       svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
+        if (ccapi_data->thread.cli->status != CCAPI_THREAD_REQUEST_STOP)
+        {
+            ccapi_svc_cli_t * const svc_cli = ccapi_data->service.cli.svc_cli;
+
+            ASSERT_MSG_GOTO(svc_cli != NULL, done);
+
+            ASSERT_MSG_GOTO(svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, done);
+            ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request, done);
+
+            /* Pass data to the user and get possible response from user */ 
+            ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
+                                                               svc_cli->request_string_info.string,
+                                                               svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
    
-                    /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
-                    if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
-                    {
-                        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
-                    }
-                    ccapi_data->service.cli.svc_cli = NULL;
-                    break;
-                }
-                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
-                case CCAPI_CLI_THREAD_FREE:
-                {
-                    break;
-                }
+            /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+            if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
+            {
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
             }
+            ccapi_data->service.cli.svc_cli = NULL;
         }
 
-        ccimp_os_yield();
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.cli->status == CCAPI_THREAD_REQUEST_STOP, done);
 
-    ccapi_data->thread.cli->status = CCAPI_THREAD_NOT_STARTED;
 done:
+    ccapi_data->thread.cli->status = CCAPI_THREAD_NOT_STARTED;
     return;
 }
 
@@ -192,6 +180,8 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                 ccapi_data->service.cli.svc_cli = svc_cli;
 
                 ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY->CCAPI_CLI_THREAD_REQUEST_CB_QUEUED");
+
+                ccapi_lock_release(ccapi_data->thread.cli->lock);
             }
             else
             {
