@@ -69,5 +69,4 @@ Execute script `./build_release.sh`, it will generate `ccapi.tgz` with all the n
 
 More Information
 ----------------
-- [CCAPI information on Google Docs](https://docs.google.com/a/digi.com/document/d/16hXzes7ILJSIjQko7E37eL76ZaM9cJfKfiWFdkJn6_s/edit)
-- [CCIMP information on Google Docs](https://docs.google.com/a/digi.com/document/d/1Av_BiT-2072W2RPuet0Q2Psf2aul8UFkoPy9XM2jbRA/edit)
+- [CCAPI documentation in Confluence](https://confluence.digi.com/display/CCAPI)
