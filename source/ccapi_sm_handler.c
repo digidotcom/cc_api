@@ -183,18 +183,12 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
                 ccapi_lock_release(ccapi_data->thread.cli->lock);
             }
-            else
-            {
-                ccimp_os_yield();
-            }
 
             connector_status = connector_callback_busy;
             break;
         }
         case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
         {
-            ccimp_os_yield();
-
             connector_status = connector_callback_busy;
             break;
         }

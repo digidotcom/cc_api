@@ -455,8 +455,6 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                         ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
                         break;
                 }
-
-                ccimp_os_yield();
             }
 
             connector_status = connector_callback_busy;
@@ -464,8 +462,6 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         }
         case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
         {
-            ccimp_os_yield();
-
             connector_status = connector_callback_busy;
             break;
         }
