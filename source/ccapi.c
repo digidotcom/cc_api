@@ -462,6 +462,8 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             goto done;
     }
 
+    ccapi_lock_release(ccapi_data->thread.connector_run->lock);
+
 done:
     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
     return ccfsm_status;
@@ -852,6 +854,7 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
                 acquire_data.lock = ccapi_data->thread.connector_run->lock;
                 acquire_data.timeout_ms = 100;
 
+                /* ccapi_logging_line("+connector_run->lock"); */
                 ccimp_status = ccimp_os_lock_acquire(&acquire_data);
                 switch (ccimp_status)
                 {
@@ -862,8 +865,7 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
                         ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
                         break;
                 }
-
-                ASSERT_MSG(acquire_data.acquired == CCAPI_FALSE);
+                /* ccapi_logging_line("-connector_run->lock: acquired=%d", acquire_data.acquired); */
             }
 
             ccimp_status = ccimp_os_yield();
