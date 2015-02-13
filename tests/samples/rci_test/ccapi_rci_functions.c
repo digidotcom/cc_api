@@ -16,6 +16,8 @@
 
 char * buf_ptr;
 
+extern ccapi_bool_t stop;
+
 ccapi_global_error_id_t rci_session_start_cb(ccapi_rci_info_t * const info)
 {
     ASSERT(info->action == CCAPI_RCI_ACTION_QUERY);
@@ -144,6 +146,10 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
     {
         sleep(5);
         *info->do_command.response = "I sleep 5 seconds";
+    }
+    else if (!strcmp(info->do_command.target, "stop"))
+    {
+        stop = CCAPI_TRUE;
     }
     else if (!strcmp(info->do_command.target, "malloc"))
     {
