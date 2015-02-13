@@ -39,6 +39,8 @@ void ccapi_firmware_thread(void * const argument)
     /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
+    ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.config.callback.data != NULL, done);
+
     ASSERT_MSG_GOTO(ccapi_data->thread.firmware->lock != NULL, done);
 
     ccapi_data->thread.firmware->status = CCAPI_THREAD_RUNNING;

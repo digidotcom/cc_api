@@ -39,7 +39,7 @@ void ccapi_cli_thread(void * const argument)
             ASSERT_MSG_GOTO(svc_cli != NULL, done);
 
             ASSERT_MSG_GOTO(svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, done);
-            ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request, done);
+            ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
 
             /* Pass data to the user and get possible response from user */ 
             ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
