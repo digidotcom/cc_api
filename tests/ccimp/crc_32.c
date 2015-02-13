@@ -111,11 +111,6 @@ static uint32_t const crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 };
 
-static uint32_t updateCRC32(unsigned char const ch, uint32_t const crc)
-{
-    return UPDC32(ch, crc);
-}
-
 int crc32file(char const * const name, uint32_t * const crc)
 {
     int retval;
