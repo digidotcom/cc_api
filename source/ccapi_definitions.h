@@ -56,6 +56,10 @@
 #define CCAPI_FS_DIR_SEPARATOR      '/'
 #define CCAPI_FS_ROOT_PATH          "/"
 
+#if !(defined CCIMP_IDLE_SLEEP_TIME_MS)
+#define CCIMP_IDLE_SLEEP_TIME_MS 100
+#endif
+
 typedef struct {
     char * device_type;
     char * device_cloud_url;

@@ -852,8 +852,8 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
 
                 ASSERT_MSG(ccapi_data->thread.connector_run->lock != NULL);
                 acquire_data.lock = ccapi_data->thread.connector_run->lock;
-                acquire_data.timeout_ms = 100; /* TODO: will be increased (hopefully until next keep alive must be delivered)
-                                                        when transports have a thread to handle connector_request_id_network_receive */
+                acquire_data.timeout_ms = CCIMP_IDLE_SLEEP_TIME_MS; /* TODO: could be increased (hopefully until next keep alive must be delivered)
+                                                        if transports had a thread to handle connector_request_id_network_receive */
 
                 /* ccapi_logging_line("+connector_run->lock"); */
                 ccimp_status = ccimp_os_lock_acquire(&acquire_data);
