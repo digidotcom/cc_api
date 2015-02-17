@@ -759,7 +759,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     break;
             }
 
-            ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_QUEUED;
+            ccapi_data->service.rci.rci_thread_status = ccapi_data->service.rci.queued_callback.function_cb != NULL ? CCAPI_RCI_THREAD_CB_QUEUED : CCAPI_RCI_THREAD_CB_PROCESSED;
 
             ccapi_lock_release(ccapi_data->thread.rci->lock);
 
