@@ -58,14 +58,14 @@ static void test_sm_unsequenced_response_cb(ccapi_transport_t const transport, u
     return;
 }
 
-static ccapi_transport_t ccapi_sm_more_data_expected_transport;
-static ccapi_bool_t ccapi_sm_more_data_cb_called;
+static ccapi_transport_t ccapi_sm_pending_data_expected_transport;
+static ccapi_bool_t ccapi_sm_pending_data_cb_called;
 
-static void test_sm_more_data_cb(ccapi_transport_t const transport)
+static void test_sm_pending_data_cb(ccapi_transport_t const transport)
 {
-    CHECK_EQUAL(ccapi_sm_more_data_expected_transport, transport);
+    CHECK_EQUAL(ccapi_sm_pending_data_expected_transport, transport);
 
-    ccapi_sm_more_data_cb_called = CCAPI_TRUE;
+    ccapi_sm_pending_data_cb_called = CCAPI_TRUE;
 
     return;
 }
@@ -101,7 +101,7 @@ TEST_GROUP(test_ccapi_sm_callback_NoSmSupport)
         ccapi_sm_request_connect_cb_called = CCAPI_FALSE;
         ccapi_sm_ping_request_cb_called = CCAPI_FALSE;
         ccapi_sm_unsequenced_response_cb_called = CCAPI_FALSE;
-        ccapi_sm_more_data_cb_called = CCAPI_FALSE;
+        ccapi_sm_pending_data_cb_called = CCAPI_FALSE;
         ccapi_sm_config_request_cb_called = CCAPI_FALSE;
 
         error = ccapi_start(&start);
@@ -171,7 +171,7 @@ TEST(test_ccapi_sm_callback_NoSmSupport, testNoMoreDataCallback)
     status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_more_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 
-    CHECK_EQUAL(CCAPI_FALSE, ccapi_sm_more_data_cb_called);
+    CHECK_EQUAL(CCAPI_FALSE, ccapi_sm_pending_data_cb_called);
 }
 
 TEST(test_ccapi_sm_callback_NoSmSupport, testNoConfigRequest)
@@ -195,7 +195,7 @@ TEST_GROUP(test_ccapi_sm_callback)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_sm_service_t sm_service = {test_sm_request_connect_cb, test_sm_ping_request_cb, test_sm_unsequenced_response_cb, test_sm_more_data_cb, test_sm_config_request_cb};
+        ccapi_sm_service_t sm_service = {test_sm_request_connect_cb, test_sm_ping_request_cb, test_sm_unsequenced_response_cb, test_sm_pending_data_cb, test_sm_config_request_cb};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
@@ -206,7 +206,7 @@ TEST_GROUP(test_ccapi_sm_callback)
         CHECK_EQUAL(sm_service.request_connect, ccapi_data_single_instance->service.sm.user_callback.request_connect);
         CHECK_EQUAL(sm_service.ping_request, ccapi_data_single_instance->service.sm.user_callback.ping_request);
         CHECK_EQUAL(sm_service.unsequenced_response, ccapi_data_single_instance->service.sm.user_callback.unsequenced_response);
-        CHECK_EQUAL(sm_service.more_data, ccapi_data_single_instance->service.sm.user_callback.more_data);
+        CHECK_EQUAL(sm_service.pending_data, ccapi_data_single_instance->service.sm.user_callback.pending_data);
         CHECK_EQUAL(sm_service.config_request, ccapi_data_single_instance->service.sm.user_callback.config_request);
     }
 
@@ -315,8 +315,8 @@ TEST(test_ccapi_sm_callback, testMoreData)
     connector_sm_more_data_t ccfsm_sm_more_data;
     connector_callback_status_t status;
 
-    ccapi_sm_more_data_expected_transport = CCAPI_TRANSPORT_UDP;    
-    ccapi_sm_more_data_cb_called = CCAPI_FALSE;
+    ccapi_sm_pending_data_expected_transport = CCAPI_TRANSPORT_UDP;    
+    ccapi_sm_pending_data_cb_called = CCAPI_FALSE;
 
     ccfsm_sm_more_data.transport = connector_transport_udp;
 
@@ -324,7 +324,7 @@ TEST(test_ccapi_sm_callback, testMoreData)
     status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_sm_more_data, ccapi_data_single_instance);
     CHECK_EQUAL(connector_callback_continue, status);
 
-    CHECK_EQUAL(CCAPI_TRUE, ccapi_sm_more_data_cb_called);
+    CHECK_EQUAL(CCAPI_TRUE, ccapi_sm_pending_data_cb_called);
 }
 
 TEST(test_ccapi_sm_callback, testConfigrequest)

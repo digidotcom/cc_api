@@ -90,9 +90,9 @@ static void app_sm_unsequenced_response_cb(ccapi_transport_t const transport, ui
     (void)error;
 }
 
-static void app_sm_more_data_cb(ccapi_transport_t const transport)
+static void app_sm_pending_data_cb(ccapi_transport_t const transport)
 {
-    printf("app_sm_more_data_cb: transport = %d\n", transport);
+    printf("app_sm_pending_data_cb: transport = %d\n", transport);
 }
 
 static void app_sm_config_request_cb(ccapi_transport_t const transport, char const * const phone_number, char const * const service_id, ccapi_bool_t const response_required)
@@ -185,7 +185,7 @@ int main (void)
     sm_service.request_connect = app_sm_request_connect_cb;
     sm_service.ping_request = app_sm_ping_request_cb;
     sm_service.unsequenced_response = app_sm_unsequenced_response_cb;
-    sm_service.more_data = app_sm_more_data_cb;
+    sm_service.pending_data = app_sm_pending_data_cb;
     sm_service.config_request = app_sm_config_request_cb;
 
     start_error = ccapi_start(&start);

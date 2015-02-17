@@ -447,13 +447,13 @@ static connector_callback_status_t ccapi_process_unsequenced_response(connector_
     return connector_callback_continue;
 }
 
-static connector_callback_status_t ccapi_process_more_data(connector_sm_more_data_t const * const more_data_ptr, ccapi_data_t * const ccapi_data)
+static connector_callback_status_t ccapi_process_pending_data(connector_sm_more_data_t const * const pending_data_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_logging_line("ccapi_process_more_data: transport %d", more_data_ptr->transport);
+    ccapi_logging_line("ccapi_process_pending_data: transport %d", pending_data_ptr->transport);
    
-    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.more_data != NULL)
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.pending_data != NULL)
     {
-       ccapi_data->service.sm.user_callback.more_data(more_data_ptr->transport);
+       ccapi_data->service.sm.user_callback.pending_data(pending_data_ptr->transport);
     }
 
     return connector_callback_continue;
@@ -539,9 +539,9 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         }
         case connector_request_id_sm_more_data:
         {
-            connector_sm_more_data_t const * const more_data_ptr = data;
+            connector_sm_more_data_t const * const pending_data_ptr = data;
 
-            connector_status = ccapi_process_more_data(more_data_ptr, ccapi_data);
+            connector_status = ccapi_process_pending_data(pending_data_ptr, ccapi_data);
 
             break;
         }
