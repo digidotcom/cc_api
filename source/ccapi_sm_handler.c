@@ -459,15 +459,15 @@ static connector_callback_status_t ccapi_process_pending_data(connector_sm_more_
     return connector_callback_continue;
 }
 
-static connector_callback_status_t ccapi_process_config_request(connector_sm_receive_config_request_t const * const config_request_ptr, ccapi_data_t * const ccapi_data)
+static connector_callback_status_t ccapi_process_phone_provisioning(connector_sm_receive_config_request_t const * const phone_provisioning_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_logging_line("ccapi_process_config_request: response %s needed", config_request_ptr->response_required ? "is" : "is not");
-    ccapi_logging_line("phone-number=%s", config_request_ptr->phone_number);
-    ccapi_logging_line("service-id=%s", config_request_ptr->service_id);
+    ccapi_logging_line("ccapi_process_phone_provisioning: response %s needed", phone_provisioning_ptr->response_required ? "is" : "is not");
+    ccapi_logging_line("phone-number=%s", phone_provisioning_ptr->phone_number);
+    ccapi_logging_line("service-id=%s", phone_provisioning_ptr->service_id);
    
-    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.config_request != NULL)
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.phone_provisioning != NULL)
     {
-       ccapi_data->service.sm.user_callback.config_request(config_request_ptr->transport, config_request_ptr->phone_number, config_request_ptr->service_id, config_request_ptr->response_required);
+       ccapi_data->service.sm.user_callback.phone_provisioning(phone_provisioning_ptr->transport, phone_provisioning_ptr->phone_number, phone_provisioning_ptr->service_id, phone_provisioning_ptr->response_required);
     }
 
     return connector_callback_continue;
@@ -547,9 +547,9 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         }
         case connector_request_id_sm_config_request:
         {
-            connector_sm_receive_config_request_t const * const config_request_ptr = data;
+            connector_sm_receive_config_request_t const * const phone_provisioning_ptr = data;
 
-            connector_status = ccapi_process_config_request(config_request_ptr, ccapi_data);
+            connector_status = ccapi_process_phone_provisioning(phone_provisioning_ptr, ccapi_data);
 
             break;
         }

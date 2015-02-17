@@ -95,9 +95,9 @@ static void app_sm_pending_data_cb(ccapi_transport_t const transport)
     printf("app_sm_pending_data_cb: transport = %d\n", transport);
 }
 
-static void app_sm_config_request_cb(ccapi_transport_t const transport, char const * const phone_number, char const * const service_id, ccapi_bool_t const response_required)
+static void app_sm_phone_provisioning_cb(ccapi_transport_t const transport, char const * const phone_number, char const * const service_id, ccapi_bool_t const response_required)
 {
-    printf("ccapi_process_config_request: response %s needed\n", response_required ? "is" : "is not");
+    printf("ccapi_process_phone_provisioning: response %s needed\n", response_required ? "is" : "is not");
     printf("phone-number=%s\n", phone_number);
     printf("service-id=%s\n", service_id);
 
@@ -186,7 +186,7 @@ int main (void)
     sm_service.ping_request = app_sm_ping_request_cb;
     sm_service.unsequenced_response = app_sm_unsequenced_response_cb;
     sm_service.pending_data = app_sm_pending_data_cb;
-    sm_service.config_request = app_sm_config_request_cb;
+    sm_service.phone_provisioning = app_sm_phone_provisioning_cb;
 
     start_error = ccapi_start(&start);
 
