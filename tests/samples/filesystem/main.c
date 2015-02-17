@@ -11,6 +11,7 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE             "Device type"
@@ -189,7 +190,8 @@ int main (void)
     }
 
     printf("Waiting for ever\n");
-    for(;;);
+    for(;;)
+        sleep(10);
 
 done:
     return 0;
