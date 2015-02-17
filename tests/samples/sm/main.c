@@ -81,9 +81,9 @@ static void app_sm_ping_request_cb(ccapi_transport_t const transport, ccapi_bool
     printf("app_sm_ping_request_cb: transport = %d, response %s needed\n", transport, response_required ? "is" : "is not");
 }
 
-static void app_sm_opaque_response_cb(ccapi_transport_t const transport, uint32_t const id, void const * const data, size_t const bytes_used, ccapi_bool_t error)
+static void app_sm_unsequenced_response_cb(ccapi_transport_t const transport, uint32_t const id, void const * const data, size_t const bytes_used, ccapi_bool_t error)
 {
-    printf("Received %" PRIsize " opaque bytes on id %d\n", bytes_used, id);
+    printf("Received %" PRIsize " unsequenced bytes on id %d\n", bytes_used, id);
 
     (void)transport;
     (void)data;
@@ -184,7 +184,7 @@ int main (void)
     start.service.sm = &sm_service;
     sm_service.request_connect = app_sm_request_connect_cb;
     sm_service.ping_request = app_sm_ping_request_cb;
-    sm_service.opaque_response = app_sm_opaque_response_cb;
+    sm_service.unsequenced_response = app_sm_unsequenced_response_cb;
     sm_service.more_data = app_sm_more_data_cb;
     sm_service.config_request = app_sm_config_request_cb;
 

@@ -435,13 +435,13 @@ static connector_callback_status_t ccapi_process_ping_request(connector_sm_recei
     return connector_callback_continue;
 }
 
-static connector_callback_status_t ccapi_process_opaque_response(connector_sm_opaque_response_t const * const opaque_response_ptr, ccapi_data_t * const ccapi_data)
+static connector_callback_status_t ccapi_process_unsequenced_response(connector_sm_opaque_response_t const * const unsequenced_response_ptr, ccapi_data_t * const ccapi_data)
 {
-    ccapi_logging_line("Received %" PRIsize " opaque bytes on id %d\n", opaque_response_ptr->bytes_used, opaque_response_ptr->id);
+    ccapi_logging_line("Received %" PRIsize " unsequenced bytes on id %d\n", unsequenced_response_ptr->bytes_used, unsequenced_response_ptr->id);
    
-    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.opaque_response != NULL)
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.unsequenced_response != NULL)
     {
-        ccapi_data->service.sm.user_callback.opaque_response(opaque_response_ptr->transport, opaque_response_ptr->id, opaque_response_ptr->data, opaque_response_ptr->bytes_used, CCAPI_BOOL(opaque_response_ptr->error));
+        ccapi_data->service.sm.user_callback.unsequenced_response(unsequenced_response_ptr->transport, unsequenced_response_ptr->id, unsequenced_response_ptr->data, unsequenced_response_ptr->bytes_used, CCAPI_BOOL(unsequenced_response_ptr->error));
     }
 
     return connector_callback_continue;
@@ -531,9 +531,9 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         }
         case connector_request_id_sm_opaque_response:
         {
-            connector_sm_opaque_response_t const * const opaque_response = data;
+            connector_sm_opaque_response_t const * const unsequenced_response = data;
 
-            connector_status = ccapi_process_opaque_response(opaque_response, ccapi_data);
+            connector_status = ccapi_process_unsequenced_response(unsequenced_response, ccapi_data);
 
             break;
         }
