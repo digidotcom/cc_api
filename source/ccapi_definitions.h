@@ -56,6 +56,10 @@
 #define CCAPI_FS_DIR_SEPARATOR      '/'
 #define CCAPI_FS_ROOT_PATH          "/"
 
+#if !(defined CCIMP_IDLE_SLEEP_TIME_MS)
+#define CCIMP_IDLE_SLEEP_TIME_MS 100
+#endif
+
 typedef struct {
     char * device_type;
     char * device_cloud_url;
@@ -80,6 +84,7 @@ typedef enum {
 typedef struct {
     ccimp_os_create_thread_info_t ccimp_info;
     ccapi_thread_status_t status;
+    void * lock;
 } ccapi_thread_info_t;
 
 typedef struct ccapi_fs_virtual_dir {

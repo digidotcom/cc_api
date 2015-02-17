@@ -70,15 +70,33 @@ TEST(test_ccapi_os, testFreeAbort)
     CHECK(status == connector_callback_error);
 }
 
-TEST(test_ccapi_os, testYield)
+TEST(test_ccapi_os, testYieldSuccess)
 {
     /* Trying to mock ccimp_os_yield() was a complete failure, the function is being called from connector_thread()
      * making it quite difficult to check expectations */
     connector_request_id_t request;
     connector_callback_status_t status;
+    connector_os_yield_t connector_yield;
+
+    connector_yield.status = connector_success;
 
     request.os_request = connector_request_id_os_yield;
-    status = ccapi_connector_callback(connector_class_id_operating_system, request, NULL, ccapi_data_single_instance);
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &connector_yield, ccapi_data_single_instance);
+    CHECK(status == connector_callback_continue);
+}
+
+TEST(test_ccapi_os, testYieldIdle)
+{
+    /* Trying to mock ccimp_os_yield() was a complete failure, the function is being called from connector_thread()
+     * making it quite difficult to check expectations */
+    connector_request_id_t request;
+    connector_callback_status_t status;
+    connector_os_yield_t connector_yield;
+
+    connector_yield.status = connector_idle;
+
+    request.os_request = connector_request_id_os_yield;
+    status = ccapi_connector_callback(connector_class_id_operating_system, request, &connector_yield, ccapi_data_single_instance);
     CHECK(status == connector_callback_continue);
 }
 

@@ -264,6 +264,13 @@ static ccapi_start_error_t ccapi_create_and_start_thread(ccapi_data_t * const cc
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
 
+    thread_info_aux->lock = ccapi_lock_create();
+    if (thread_info_aux->lock == NULL)
+    {
+        error = CCAPI_START_ERROR_LOCK_FAILED;
+        goto done;
+    }
+
     thread_info_aux->status = CCAPI_THREAD_REQUEST_START;
     thread_info_aux->ccimp_info.argument = ccapi_data;
     thread_info_aux->ccimp_info.start = thread_start;
@@ -289,14 +296,22 @@ done:
 static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
 {
     ASSERT_MSG_GOTO(thread_info != NULL, done);
+
+    ccapi_logging_line("ccapi_stop_thread: type=%d", thread_info->ccimp_info.type);
+
     if (thread_info->status == CCAPI_THREAD_RUNNING)
     {
         thread_info->status = CCAPI_THREAD_REQUEST_STOP;
     }
 
+    ASSERT_MSG_GOTO(thread_info->lock != NULL, done);
+    ccapi_lock_release(thread_info->lock);
+
     do {
         ccimp_os_yield();
     } while (thread_info->status != CCAPI_THREAD_NOT_STARTED);
+
+    ccapi_lock_destroy(thread_info->lock);
 done:
     return;
 }

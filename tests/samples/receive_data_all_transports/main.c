@@ -337,7 +337,7 @@ int main (void)
     do
     {
         sleep(1);
-    } while (check_stop() != CCAPI_TRUE);   
+    } while (check_stop() != CCAPI_TRUE);
 #endif
 
 done:

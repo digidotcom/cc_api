@@ -127,84 +127,72 @@ void ccapi_rci_thread(void * const argument)
     ccapi_data->thread.rci->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.rci->status == CCAPI_THREAD_RUNNING)
     {
-        switch (ccapi_data->service.rci.rci_thread_status)
+        ccapi_lock_acquire(ccapi_data->thread.rci->lock);
+
+        if (ccapi_data->thread.rci->status != CCAPI_THREAD_REQUEST_STOP)
         {
-            case CCAPI_RCI_THREAD_IDLE:
+            ASSERT_MSG_GOTO(ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED, done);
+            ASSERT_MSG_GOTO(ccapi_data->service.rci.queued_callback.function_cb != NULL, done);
+
+            /* Pass data to the user */ 
+            if (ccapi_data->service.rci.queued_callback.argument == NULL)
             {
-                break;
+                ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(&ccapi_data->service.rci.rci_info);
             }
-            case CCAPI_RCI_THREAD_CB_QUEUED:
+            else
             {
-                ASSERT_MSG_GOTO(ccapi_data->service.rci.queued_callback.function_cb != NULL, done);
-
-                /* Pass data to the user */ 
-                if (ccapi_data->service.rci.queued_callback.argument == NULL)
-                {
-                    ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(&ccapi_data->service.rci.rci_info);
-                }
-                else
-                {
 #if (defined RCI_ENUMS_AS_STRINGS)
-                    connector_element_enum_t const * const enum_array = ccapi_data->service.rci.queued_callback.enum_data.array;
+                connector_element_enum_t const * const enum_array = ccapi_data->service.rci.queued_callback.enum_data.array;
 
-                    if (enum_array != NULL)
+                if (enum_array != NULL)
+                {
+                    ccapi_rci_info_t * const rci_info = &ccapi_data->service.rci.rci_info;
+                    unsigned int const enum_element_count = ccapi_data->service.rci.queued_callback.enum_data.element_count;
+
+                    if (rci_info->action == CCAPI_RCI_ACTION_QUERY)
                     {
-                        ccapi_rci_info_t * const rci_info = &ccapi_data->service.rci.rci_info;
-                        unsigned int const enum_element_count = ccapi_data->service.rci.queued_callback.enum_data.element_count;
-
-                        if (rci_info->action == CCAPI_RCI_ACTION_QUERY)
+                        char * enum_string = NULL;
+                        int enum_id;
+                        int * const actual_value = ccapi_data->service.rci.queued_callback.argument;
+                        ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, &enum_string);
+                        if (ccapi_data->service.rci.queued_callback.error == connector_rci_error_none)
                         {
-                            char * enum_string = NULL;
-                            int enum_id;
-                            int * const actual_value = ccapi_data->service.rci.queued_callback.argument;
-
-                            ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, &enum_string);
-                            if (ccapi_data->service.rci.queued_callback.error == connector_rci_error_none)
+                            enum_id = string_to_enum(enum_array, enum_element_count, enum_string);
+                            if (enum_id == -1)
                             {
-                                enum_id = string_to_enum(enum_array, enum_element_count, enum_string);
-                                if (enum_id == -1)
-                                {
-                                    ccapi_data->service.rci.queued_callback.error = connector_rci_error_bad_value;
-                                }
-                                *actual_value = enum_id;
+                                ccapi_data->service.rci.queued_callback.error = connector_rci_error_bad_value;
                             }
-                        }
-                        else
-                        {
-                            char const * enum_string;
-                            unsigned int const * const actual_value = ccapi_data->service.rci.queued_callback.argument;
-
-                            ASSERT(*actual_value < enum_element_count);
-                            enum_string = enum_to_string(enum_array, *actual_value);
-                            ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, enum_string);
+                            *actual_value = enum_id;
                         }
                     }
                     else
-#endif
                     {
-                        ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(&ccapi_data->service.rci.rci_info, ccapi_data->service.rci.queued_callback.argument);
+                        char const * enum_string;
+                        unsigned int const * const actual_value = ccapi_data->service.rci.queued_callback.argument;
+
+                        ASSERT(*actual_value < enum_element_count);
+                        enum_string = enum_to_string(enum_array, *actual_value);
+                        ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, enum_string);
                     }
                 }
-                   
-                /* Check if ccfsm has called cancel callback while we were waiting for the user */
-                if (ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED)
+                else
+#endif
                 {
-                    ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_PROCESSED;
+                    ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(&ccapi_data->service.rci.rci_info, ccapi_data->service.rci.queued_callback.argument);
                 }
-                break;
             }
-            case CCAPI_RCI_THREAD_CB_PROCESSED:
+                   
+            /* Check if ccfsm has called cancel callback while we were waiting for the user */
+            if (ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED)
             {
-                break;
+                ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_PROCESSED;
             }
         }
-
-        ccimp_os_yield();
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.rci->status == CCAPI_THREAD_REQUEST_STOP, done);
 
-    ccapi_data->thread.rci->status = CCAPI_THREAD_NOT_STARTED;
 done:
+    ccapi_data->thread.rci->status = CCAPI_THREAD_NOT_STARTED;
     return;
 }
 
@@ -772,6 +760,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             }
 
             ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_CB_QUEUED;
+
+            ccapi_lock_release(ccapi_data->thread.rci->lock);
 
             status = connector_callback_busy;
 

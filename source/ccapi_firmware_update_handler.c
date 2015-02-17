@@ -39,18 +39,26 @@ void ccapi_firmware_thread(void * const argument)
     /* ccapi_data is corrupted, it's likely the implementer made it wrong passing argument to the new thread */
     ASSERT_MSG_GOTO(ccapi_data != NULL, done);
 
+    ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.config.callback.data != NULL, done);
+
+    ASSERT_MSG_GOTO(ccapi_data->thread.firmware->lock != NULL, done);
+
     ccapi_data->thread.firmware->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.firmware->status == CCAPI_THREAD_RUNNING)
     {
-        ccapi_fw_data_error_t ccapi_fw_data_error;
-        ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
-        ccapi_fw_chunk_info * const chunk_pool_tail = &chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_tail];
+        ccapi_lock_acquire(ccapi_data->thread.firmware->lock);
 
-        if (chunk_pool_tail->in_use == CCAPI_TRUE)
+        if (ccapi_data->thread.firmware->status != CCAPI_THREAD_REQUEST_STOP)
         {
+            ccapi_fw_data_error_t ccapi_fw_data_error;
+            ccapi_fw_chunk_info * const chunk_pool = ccapi_data->service.firmware_update.processing.chunk_pool;
+            ccapi_fw_chunk_info * const chunk_pool_tail = &chunk_pool[ccapi_data->service.firmware_update.processing.chunk_pool_tail];
+
+            ASSERT_MSG(chunk_pool_tail->in_use == CCAPI_TRUE);
+
             ccapi_logging_line("+ccapi_firmware_thread: processing pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_tail, chunk_pool_tail->offset, chunk_pool_tail->size, chunk_pool_tail->last);
             ccapi_fw_data_error = ccapi_data->service.firmware_update.config.callback.data(ccapi_data->service.firmware_update.processing.target,
-                                                                                                     chunk_pool_tail->offset, chunk_pool_tail->data, chunk_pool_tail->size, chunk_pool_tail->last);
+                                                                                                         chunk_pool_tail->offset, chunk_pool_tail->data, chunk_pool_tail->size, chunk_pool_tail->last);
             switch (ccapi_fw_data_error)
             {
                 case CCAPI_FW_DATA_ERROR_NONE:
@@ -69,13 +77,11 @@ void ccapi_firmware_thread(void * const argument)
 
             ccapi_logging_line("-ccapi_firmware_thread");
         }
-
-        ccimp_os_yield();
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.firmware->status == CCAPI_THREAD_REQUEST_STOP, done);
 
-    ccapi_data->thread.firmware->status = CCAPI_THREAD_NOT_STARTED;
 done:
+    ccapi_data->thread.firmware->status = CCAPI_THREAD_NOT_STARTED;
     return;
 }
 
@@ -245,6 +251,7 @@ static connector_callback_status_t ccapi_process_firmware_update_data(connector_
                 chunk_pool_head->last = last_chunk;
                 ccapi_logging_line("ccapi_process_fw_data queued: pool=%d, offset=0x%x, size=%d, last=%d", ccapi_data->service.firmware_update.processing.chunk_pool_head, chunk_pool_head->offset, chunk_pool_head->size, chunk_pool_head->last);
                 chunk_pool_head->in_use = CCAPI_TRUE;
+                ccapi_lock_release(ccapi_data->thread.firmware->lock);
                 ccapi_data->service.firmware_update.processing.chunk_pool_head++;
                 if (ccapi_data->service.firmware_update.processing.chunk_pool_head == CCAPI_CHUNK_POOL_SIZE)
                 {

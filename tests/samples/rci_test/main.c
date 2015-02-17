@@ -11,12 +11,15 @@
 */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Linux Application"
 #define DEVICE_CLOUD_URL_STRING "test.etherios.com"
 
 extern ccapi_rci_data_t const ccapi_rci_data;
+
+ccapi_bool_t stop = CCAPI_FALSE;
 
 void fill_start_structure_with_good_parameters(ccapi_start_t * start)
 {
@@ -66,6 +69,27 @@ static ccapi_bool_t ccapi_tcp_close_cb(ccapi_tcp_close_cause_t cause)
     return reconnect;
 }
 
+static ccapi_bool_t check_stop(void)
+{
+    ccapi_stop_error_t stop_error = CCAPI_STOP_ERROR_NONE;
+
+    if (stop == CCAPI_TRUE)
+    {
+        stop_error = ccapi_stop(CCAPI_STOP_IMMEDIATELY);
+
+        if (stop_error == CCAPI_STOP_ERROR_NONE)
+        {
+            printf("ccapi_stop success\n");
+        }
+        else
+        {
+            printf("ccapi_stop error %d\n", stop_error);
+        }
+    }
+
+    return stop;
+}
+
 int main (void)
 {
     ccapi_start_t start = {0};
@@ -101,7 +125,10 @@ int main (void)
     {
         printf("ccapi_start_transport_tcp success\n");
         printf("Waiting for ever\n");
-        for(;;);
+        do
+        {
+            sleep(1);
+        } while (check_stop() != CCAPI_TRUE);
     }
     else
     {
