@@ -102,6 +102,7 @@
           <device_state> \
             <system_up_time>9</system_up_time> \
             <signed_integer>-10</signed_integer> \
+            <float_value>3.56</float_value> \
           </device_state> \
         </query_state>"
 

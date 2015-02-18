@@ -391,6 +391,18 @@ ccapi_state_device_state_error_id_t rci_state_device_state_signed_integer_set(cc
     return ccapi_xml_rci_group_set(info, value);
 }
 
+ccapi_state_device_state_error_id_t rci_state_device_state_float_value_get(ccapi_rci_info_t * const info, float * const value)
+{
+    printf("    Called '%s'\n", __FUNCTION__);
+    return ccapi_xml_rci_group_get(info, value);
+}
+
+ccapi_state_device_state_error_id_t rci_state_device_state_float_value_set(ccapi_rci_info_t * const info, float const *const value)
+{
+    printf("    Called '%s'\n", __FUNCTION__);
+    return ccapi_xml_rci_group_set(info, value);
+}
+
 ccapi_state_gps_stats_error_id_t rci_state_gps_stats_start(ccapi_rci_info_t * const info)
 {
     printf("    Called '%s'\n", __FUNCTION__);

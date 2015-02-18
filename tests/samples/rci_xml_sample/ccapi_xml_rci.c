@@ -447,8 +447,6 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 
             fprintf(xml_request_fp, "<%s>%f</%s>", info->element.name, *p_float, info->element.name);    
 
-            /* TODO: Not tested because of CCAPI-130 */
-
             break;
         }
 #endif
