@@ -680,6 +680,6 @@ int ccapi_xml_rci_group_get(ccapi_rci_info_t * const info, ...)
 done:
     va_end(arg_list);
 
-    return CCAPI_GLOBAL_ERROR_NONE;
+    return error_id;
 }
 
