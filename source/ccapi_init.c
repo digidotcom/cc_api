@@ -70,7 +70,15 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     ccapi_receive_target_t * target_entry;
 
     ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
-    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            break;
+    }
 
     target_entry = ccapi_data->service.receive.target_list;
 
@@ -84,7 +92,15 @@ static void free_receive_target_list(ccapi_data_t * const ccapi_data)
     }
 
     ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+    switch (ccimp_status)
+    {
+        case CCIMP_STATUS_OK:
+            break;
+        case CCIMP_STATUS_ERROR:
+        case CCIMP_STATUS_BUSY:
+            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            break;
+    }
 }
 #endif
 
@@ -96,7 +112,6 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->file_system_lock != NULL)
     {
         ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->file_system_lock);
-
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -104,6 +119,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
                 ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                break;
         }
     }
 
@@ -134,8 +150,15 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         if (ccapi_data->service.receive.receive_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->service.receive.receive_lock);
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
         }
         reset_heap_ptr(&ccapi_data->thread.receive);
     }
@@ -181,7 +204,6 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     if (ccapi_data->initiate_action_lock != NULL)
     {   
         ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->initiate_action_lock);
-
         switch (ccimp_status)
         {
             case CCIMP_STATUS_OK:
@@ -189,6 +211,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
             case CCIMP_STATUS_BUSY:
             case CCIMP_STATUS_ERROR:
                 ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                break;
         }
     }
 
@@ -196,6 +219,7 @@ done:
     return; 
 }
 
+#if (defined CCIMP_DEBUG_ENABLED)
 static void free_logging_resources(void)
 {
     if (--logging_lock_users == 0)
@@ -203,8 +227,15 @@ static void free_logging_resources(void)
         if (logging_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(logging_lock);
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
 
             logging_lock = NULL;
         }
@@ -212,6 +243,7 @@ static void free_logging_resources(void)
 
     return;
 }
+#endif
 
 static ccapi_start_error_t check_malloc(void const * const p)
 {
@@ -231,6 +263,13 @@ static ccapi_start_error_t ccapi_create_and_start_thread(ccapi_data_t * const cc
     error = check_malloc(thread_info_aux);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
+
+    thread_info_aux->lock = ccapi_lock_create();
+    if (thread_info_aux->lock == NULL)
+    {
+        error = CCAPI_START_ERROR_LOCK_FAILED;
+        goto done;
+    }
 
     thread_info_aux->status = CCAPI_THREAD_REQUEST_START;
     thread_info_aux->ccimp_info.argument = ccapi_data;
@@ -256,14 +295,25 @@ done:
 
 static void ccapi_stop_thread(ccapi_thread_info_t * thread_info)
 {
+    ASSERT_MSG_GOTO(thread_info != NULL, done);
+
+    ccapi_logging_line("ccapi_stop_thread: type=%d", thread_info->ccimp_info.type);
+
     if (thread_info->status == CCAPI_THREAD_RUNNING)
     {
         thread_info->status = CCAPI_THREAD_REQUEST_STOP;
     }
 
+    ASSERT_MSG_GOTO(thread_info->lock != NULL, done);
+    ccapi_lock_release(thread_info->lock);
+
     do {
         ccimp_os_yield();
     } while (thread_info->status != CCAPI_THREAD_NOT_STARTED);
+
+    ccapi_lock_destroy(thread_info->lock);
+done:
+    return;
 }
 
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -285,6 +335,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_bool_t stub_fw_update;
 #endif
 
+#if (defined CCIMP_DEBUG_ENABLED)
     /* Initialize one single time for all connector instances the logging lock object */
     if (logging_lock_users++ == 0)
     {
@@ -300,6 +351,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 
         logging_lock = create_data.lock;
     }
+#endif
 
     if (ccapi_handle == NULL)
     {
@@ -319,7 +371,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     error = check_malloc(ccapi_data);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
-
     ccapi_data->initiate_action_lock = NULL;
     ccapi_data->service.file_system.virtual_dir_list = NULL;
     ccapi_data->file_system_lock = NULL;
@@ -331,7 +382,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->thread.receive = NULL;
     ccapi_data->thread.cli = NULL;
     ccapi_data->thread.firmware = NULL;
-    ccapi_data->initiate_action_lock = NULL;
 
     ccapi_data->config.firmware_supported = CCAPI_FALSE;
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
@@ -340,6 +390,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
     ccapi_data->config.receive_supported = CCAPI_FALSE;
     ccapi_data->config.cli_supported = CCAPI_FALSE;
+    ccapi_data->config.sm_supported = CCAPI_FALSE;
     ccapi_data->config.rci_supported = CCAPI_FALSE;
 
     if (start == NULL)
@@ -366,6 +417,8 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
     strcpy(ccapi_data->config.device_cloud_url, start->device_cloud_url);
+
+    ccapi_data->config.status_callback = start->status;
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
     if (start->service.file_system != NULL)
@@ -528,6 +581,14 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+    if (start->service.sm != NULL)
+    {
+        ccapi_data->config.sm_supported = CCAPI_TRUE;
+        ccapi_data->service.sm.user_callback = *start->service.sm;
+    }
+#endif
+
 #if (defined CONNECTOR_RCI_SERVICE)
     if (start->service.rci != NULL)
     {
@@ -648,7 +709,9 @@ done:
                 free_ccapi_data_internal_resources(ccapi_data);
                 ccapi_free(ccapi_data);
             }
+#if (defined CCIMP_DEBUG_ENABLED)
             free_logging_resources();
+#endif
             break;
     }
 
@@ -672,6 +735,66 @@ static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t co
     }
 
     return transport_stop_behavior;
+}
+
+void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data)
+{
+    if (ccapi_data->transport_tcp.info != NULL)
+    {
+        free_transport_tcp_info(ccapi_data->transport_tcp.info);
+    }
+
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+    if (ccapi_data->transport_udp.info != NULL)
+    {
+        free_transport_udp_info(ccapi_data->transport_udp.info);
+    }
+#endif
+
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+    if (ccapi_data->transport_sms.info != NULL)
+    {
+        free_transport_sms_info(ccapi_data->transport_sms.info);
+    }
+#endif
+
+#if (defined CCIMP_RCI_SERVICE_ENABLED)
+    if (ccapi_data->config.rci_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.rci);
+    }
+#endif
+
+#if (defined CCIMP_DATA_SERVICE_ENABLED)
+    if (ccapi_data->config.receive_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.receive);
+    }
+#endif
+
+#if (defined CONNECTOR_SM_CLI)
+    if (ccapi_data->config.cli_supported)
+    {
+        ccapi_stop_thread(ccapi_data->thread.cli);
+    }
+#endif
+
+#if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
+    if (ccapi_data->config.firmware_supported)
+    {
+        /* Do not attempt to stop the thread if firmware service is the stub version for RCI. */
+        if (ccapi_data->thread.firmware != NULL)
+        {
+            ccapi_stop_thread(ccapi_data->thread.firmware);
+        }
+    }
+#endif
+
+    free_ccapi_data_internal_resources(ccapi_data);
+    ccapi_free(ccapi_data);
+#if (defined CCIMP_DEBUG_ENABLED)
+    free_logging_resources();
+#endif
 }
 
 ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t const behavior)
@@ -746,36 +869,46 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
     }
 #endif
 
-
     {
-        connector_status_t connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
-        switch(connector_status)
+        connector_status_t ccfsm_status;
+
+        for (;;)
         {
-        case connector_success:
-            error = CCAPI_STOP_ERROR_NONE;
-            break;
-        case connector_init_error:
-        case connector_invalid_data_size:
-        case connector_invalid_data_range:
-        case connector_invalid_data:
-        case connector_keepalive_error:
-        case connector_bad_version:
-        case connector_device_terminated:
-        case connector_service_busy:
-        case connector_invalid_response:
-        case connector_no_resource:
-        case connector_unavailable:
-        case connector_idle:
-        case connector_working:
-        case connector_pending:
-        case connector_active:
-        case connector_abort:
-        case connector_device_error:
-        case connector_exceed_timeout:
-        case connector_invalid_payload_packet:
-        case connector_open_error:
-            ASSERT_MSG(connector_status != connector_success);
-            break;
+            ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_terminate, NULL);
+            if (ccfsm_status != connector_service_busy)
+            {
+                break;
+            }
+            ccimp_os_yield();
+        }
+
+        switch(ccfsm_status)
+        {
+            case connector_success:
+                error = CCAPI_STOP_ERROR_NONE;
+                break;
+            case connector_init_error:
+            case connector_invalid_data_size:
+            case connector_invalid_data_range:
+            case connector_invalid_data:
+            case connector_keepalive_error:
+            case connector_bad_version:
+            case connector_device_terminated:
+            case connector_service_busy:
+            case connector_invalid_response:
+            case connector_no_resource:
+            case connector_unavailable:
+            case connector_idle:
+            case connector_working:
+            case connector_pending:
+            case connector_active:
+            case connector_abort:
+            case connector_device_error:
+            case connector_exceed_timeout:
+            case connector_invalid_payload_packet:
+            case connector_open_error:
+                ASSERT_MSG_GOTO(ccfsm_status != connector_success, done);
+                break;
         }
     }
 
@@ -807,6 +940,7 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
     if (ccapi_data->config.firmware_supported)
     {
+        /* Do not attempt to stop the thread if firmware service is the stub version for RCI. */
         if (ccapi_data->thread.firmware != NULL)
         {
             ccapi_stop_thread(ccapi_data->thread.firmware);
@@ -820,7 +954,9 @@ done:
         case CCAPI_STOP_ERROR_NONE:
             free_ccapi_data_internal_resources(ccapi_data);
             ccapi_free(ccapi_data);
+#if (defined CCIMP_DEBUG_ENABLED)
             free_logging_resources();
+#endif
             break;
         case CCAPI_STOP_ERROR_NOT_STARTED:
             break;

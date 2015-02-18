@@ -177,16 +177,24 @@ static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t
 
 connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_transport_stop_t const behavior)
 {
-    connector_status_t connector_status;
+    connector_status_t ccfsm_status;
     connector_initiate_stop_request_t stop_data;
 
     stop_data.transport = ccapi_to_connector_transport(transport);;
     stop_data.user_context = NULL;
     stop_data.condition = ccapi_to_connector_stop(behavior);
 
-    connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+    for (;;)
+    {
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_stop, &stop_data);
+        if (ccfsm_status != connector_service_busy)
+        {
+            break;
+        }
+        ccimp_os_yield();
+    }
 
-    switch(connector_status)
+    switch(ccfsm_status)
     {
         case connector_success:
             break;
@@ -210,12 +218,12 @@ connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data
         case connector_exceed_timeout:
         case connector_invalid_payload_packet:
         case connector_open_error:
-            ASSERT_MSG_GOTO(connector_status != connector_success, done);
+            ASSERT_MSG_GOTO(ccfsm_status != connector_success, done);
             break;
     }
 
 done:
-    return connector_status;
+    return ccfsm_status;
 }
 
 #if (defined CCIMP_FILE_SYSTEM_SERVICE_ENABLED)
@@ -427,7 +435,7 @@ done:
 
 connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_data, connector_initiate_request_t const request, void const * const request_data)
 {
-    connector_status_t status;
+    connector_status_t ccfsm_status;
     ccimp_status_t ccimp_status;
 
     ccimp_status = ccapi_lock_acquire(ccapi_data->initiate_action_lock);
@@ -437,11 +445,11 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            status = connector_abort;
+            ccfsm_status = connector_abort;
             goto done;
     }
 
-    status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
+    ccfsm_status = connector_initiate_action(ccapi_data->connector_handle, request, request_data);
 
     ccimp_status = ccapi_lock_release(ccapi_data->initiate_action_lock);
     switch (ccimp_status)
@@ -450,13 +458,15 @@ connector_status_t connector_initiate_action_secure(ccapi_data_t * const ccapi_d
             break;
         case CCIMP_STATUS_BUSY:
         case CCIMP_STATUS_ERROR:
-            status = connector_abort;
+            ccfsm_status = connector_abort;
             goto done;
     }
 
+    ccapi_lock_release(ccapi_data->thread.connector_run->lock);
+
 done:
     ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
-    return status;
+    return ccfsm_status;
 }
 
 char * ccapi_strdup(char const * const string)
@@ -486,15 +496,26 @@ void ccapi_connector_run_thread(void * const argument)
 
         ASSERT_MSG_GOTO(status != connector_init_error, done);
 
-        switch(status)
+        switch (status)
         {
             case connector_device_terminated:
                 ccapi_data->thread.connector_run->status = CCAPI_THREAD_REQUEST_STOP;
+                break;
+            case connector_abort:
+                if (ccapi_data->config.status_callback != NULL)
+                {
+                    ccapi_status_info_t status_info;
+                    status_info.stop_cause = CCAPI_STOP_CCFSM_ERROR;
+                    ccapi_data->config.status_callback(&status_info);
+                }
+                ccxapi_asynchronous_stop(ccapi_data);
+                goto done;
                 break;
             default:
                 break;
         }
     }
+
     ASSERT_MSG_GOTO(ccapi_data->thread.connector_run->status == CCAPI_THREAD_REQUEST_STOP, done);
 
     ccapi_data->thread.connector_run->status = CCAPI_THREAD_NOT_STARTED;
@@ -524,7 +545,7 @@ connector_callback_status_t connector_callback_status_from_ccimp_status(ccimp_st
 
 connector_callback_status_t ccapi_config_handler(connector_request_id_config_t const config_request, void * const data, ccapi_data_t const * const ccapi_data)
 {
-    connector_callback_status_t status = connector_callback_continue;
+    connector_callback_status_t status;
 
     ccapi_logging_line(TMP_INFO_PREFIX "ccapi_config_handler: config_request %d", config_request);
 
@@ -732,6 +753,26 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             device_cloud_phone->length = strlen(ccapi_data->transport_sms.info->cloud_config.phone_number);
             break;
         }
+        case connector_request_id_config_set_device_cloud_phone:
+        {
+            connector_config_pointer_string_t const * const device_cloud_phone = data;
+
+            ASSERT_MSG_GOTO(device_cloud_phone->string != NULL, done);
+            ASSERT_MSG_GOTO(device_cloud_phone->length == strlen(device_cloud_phone->string), done);
+
+            if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
+            {
+                ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+            }
+
+            ccapi_data->transport_sms.info->cloud_config.phone_number = ccapi_strdup(device_cloud_phone->string);
+            if (ccapi_data->transport_sms.info->cloud_config.phone_number == NULL)
+            {
+                status = connector_callback_error;
+                goto done;
+            }
+            break;
+        }
         case connector_request_id_config_device_cloud_service_id:
         {
             connector_config_pointer_string_t * const service_id = data;
@@ -750,11 +791,21 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             break;
         }
 #endif
+        case connector_request_id_config_error_status:
+        {
+            connector_config_error_status_t const * const ccfsm_error_status = data;
+            connector_class_id_t const class_id = ccfsm_error_status->class_id;
+            int const request_id = ccfsm_error_status->request_id.int_value;
+            connector_status_t const ccfsm_status = ccfsm_error_status->status;
+
+            ccapi_logging_line("connector_request_id_config_error_status: class ID %d, request ID %d, status %d", class_id, request_id, ccfsm_status);
+            break;
+        }
         default:
-            status = connector_callback_unrecognized;
+            ASSERT_MSG_GOTO(CCAPI_FALSE, done);
             break;
     }
-    ASSERT_MSG_GOTO(status != connector_callback_unrecognized, done);
+    status = connector_callback_continue;
 done:
     return status;
 }
@@ -792,6 +843,32 @@ connector_callback_status_t ccapi_os_handler(connector_request_id_os_t os_reques
 
         case connector_request_id_os_yield:
         {
+            connector_os_yield_t * connector_yield_data = data;
+
+            if (connector_yield_data->status == connector_idle)
+            {
+                ccimp_os_lock_acquire_t acquire_data;
+                ccimp_status_t ccimp_status = CCIMP_STATUS_ERROR;
+
+                ASSERT_MSG(ccapi_data->thread.connector_run->lock != NULL);
+                acquire_data.lock = ccapi_data->thread.connector_run->lock;
+                acquire_data.timeout_ms = CCIMP_IDLE_SLEEP_TIME_MS; /* TODO: could be increased (hopefully until next keep alive must be delivered)
+                                                        if transports had a thread to handle connector_request_id_network_receive */
+
+                /* ccapi_logging_line("+connector_run->lock"); */
+                ccimp_status = ccimp_os_lock_acquire(&acquire_data);
+                switch (ccimp_status)
+                {
+                    case CCIMP_STATUS_OK:
+                        break;
+                    case CCIMP_STATUS_BUSY:
+                    case CCIMP_STATUS_ERROR:
+                        ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                        break;
+                }
+                /* ccapi_logging_line("-connector_run->lock: acquired=%d", acquire_data.acquired); */
+            }
+
             ccimp_status = ccimp_os_yield();
             break;
         }
@@ -1052,7 +1129,7 @@ connector_callback_status_t ccapi_network_udp_handler(connector_request_id_netwo
 
             ccimp_status = ccimp_network_udp_open(&ccimp_open_data);
 
-            if(ccimp_status == CCIMP_STATUS_OK)
+            if (ccimp_status == CCIMP_STATUS_OK)
             {
                 ccapi_data->transport_udp.started = CCAPI_TRUE;
             }
@@ -1165,7 +1242,7 @@ connector_callback_status_t ccapi_network_sms_handler(connector_request_id_netwo
 
             ccimp_status = ccimp_network_sms_open(&ccimp_open_data);
 
-            if(ccimp_status == CCIMP_STATUS_OK)
+            if (ccimp_status == CCIMP_STATUS_OK)
             {
                 ccapi_data->transport_sms.started = CCAPI_TRUE;
             }

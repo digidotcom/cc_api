@@ -131,20 +131,47 @@ done:
 
 static ccapi_ping_error_t perform_send_ping(ccapi_data_t * const ccapi_data, ccapi_ping_t * const ping_info)
 {
-    connector_status_t status;
+    connector_status_t ccfsm_status;
     ccapi_ping_error_t error = CCAPI_PING_ERROR_NONE;
 
-    do
+    for (;;)
     {
-        status = connector_initiate_action_secure(ccapi_data, connector_initiate_ping_request, &ping_info->header);
-
-        if (status == connector_service_busy)
+        ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_ping_request, &ping_info->header);
+        if (ccfsm_status != connector_service_busy)
         {
-            ccimp_os_yield();
+            break;
         }
-    } while (status == connector_service_busy);
+        ccimp_os_yield();
+    }
 
-    if (status == connector_success)
+    switch(ccfsm_status)
+    {
+        case connector_success:
+            break;
+        case connector_init_error:
+        case connector_invalid_data_size:
+        case connector_invalid_data_range:
+        case connector_invalid_data:
+        case connector_keepalive_error:
+        case connector_bad_version:
+        case connector_device_terminated:
+        case connector_service_busy:
+        case connector_invalid_response:
+        case connector_no_resource:
+        case connector_unavailable:
+        case connector_idle:
+        case connector_working:
+        case connector_pending:
+        case connector_active:
+        case connector_abort:
+        case connector_device_error:
+        case connector_exceed_timeout:
+        case connector_invalid_payload_packet:
+        case connector_open_error:
+            ccapi_logging_line("perform_send_ping: ccfsm error %d", ccfsm_status);
+            error = CCAPI_PING_ERROR_INITIATE_ACTION_FAILED;
+            goto done;
+    }
     {
         ccimp_status_t const result = ccapi_send_ping_lock_acquire(ping_info, OS_LOCK_ACQUIRE_INFINITE);
 
@@ -154,12 +181,7 @@ static ccapi_ping_error_t perform_send_ping(ccapi_data_t * const ccapi_data, cca
             error = CCAPI_PING_ERROR_LOCK_FAILED;
         }
     }
-    else
-    {
-        ccapi_logging_line("perform_send_ping: ccfsm error %d", status);
-        error = CCAPI_PING_ERROR_INITIATE_ACTION_FAILED;
-    }
-
+done:
     return error;
 }
 
@@ -171,8 +193,15 @@ static void finish_send_ping(ccapi_ping_t * const ping_info)
         if (ping_info->svc_ping.ping_lock != NULL)
         {
             ccimp_status_t const ccimp_status = ccapi_lock_destroy(ping_info->svc_ping.ping_lock); 
-
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+             }
         }
 
         ccapi_free(ping_info);

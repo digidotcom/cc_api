@@ -15,7 +15,7 @@
 #include "helper/helper_library.h"
 
 
-
+extern void add_sigkill_signal(void);
 
 #define DATA         "CCAPI send data sample\n"
 
@@ -45,8 +45,7 @@ int main (void)
     ccapi_tcp_start_error_t tcp_start_error;
 
 
-
-
+    add_sigkill_signal();
 
 
 

@@ -16,6 +16,8 @@
 
 #define DATA         "CCAPI send data sample\n"
 
+extern void add_sigkill_signal(void);
+
 void start_send_data_action(void)
 {
     /* Send Data ----------------------- */
@@ -78,6 +80,7 @@ int main (void)
     /* Initialize error structure for TCP transport */
     ccapi_tcp_start_error_t tcp_start_error;
 
+    add_sigkill_signal();
 
 
 

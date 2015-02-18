@@ -472,19 +472,18 @@ TEST(test_ccapi_cli_request_callback, testTwoConcurrentRequestsNotProccesedInOrd
 
     request.sm_request = connector_request_id_sm_cli_request;
     {
-        unsigned int i = 0;
-        for (i=0 ; i < 1000 ; i++)
+        do
         {      
             status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request, ccapi_data_single_instance);
             sched_yield();
-        }
+        } while (!ccapi_cli_request_cb_called);
         CHECK_EQUAL(connector_callback_busy, status);
 
-        for (i=0 ; i < 1000 ; i++)
+        do
         {      
             status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
             sched_yield();
-        }
+        } while (!ccapi_cli_request_cb_called);
         CHECK_EQUAL(connector_callback_busy, status);
 
         CHECK_EQUAL(ccfsm_cli_request.user_context, ccapi_data_single_instance->service.cli.svc_cli);
@@ -499,11 +498,11 @@ TEST(test_ccapi_cli_request_callback, testTwoConcurrentRequestsNotProccesedInOrd
 
         ccapi_cli_request_lock_cb[0] = CCAPI_FALSE;
 
-        for (i=0 ; i < 1000 ; i++)
+        do
         {      
             status = ccapi_connector_callback(connector_class_id_short_message, request, &ccfsm_cli_request2, ccapi_data_single_instance);
             sched_yield();
-        }
+        } while (!ccapi_cli_request_cb_called);
         CHECK_EQUAL(connector_callback_busy, status);
 
         CHECK_EQUAL(ccfsm_cli_request2.user_context, ccapi_data_single_instance->service.cli.svc_cli);

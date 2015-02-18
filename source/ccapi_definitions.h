@@ -56,16 +56,22 @@
 #define CCAPI_FS_DIR_SEPARATOR      '/'
 #define CCAPI_FS_ROOT_PATH          "/"
 
+#if !(defined CCIMP_IDLE_SLEEP_TIME_MS)
+#define CCIMP_IDLE_SLEEP_TIME_MS 100
+#endif
+
 typedef struct {
     char * device_type;
     char * device_cloud_url;
     uint8_t device_id[16];
     uint32_t vendor_id;
     ccapi_bool_t cli_supported;
+    ccapi_bool_t sm_supported;
     ccapi_bool_t receive_supported;
     ccapi_bool_t firmware_supported;
     ccapi_bool_t rci_supported;
     ccapi_bool_t filesystem_supported;
+    ccapi_status_callback_t status_callback;
 } ccapi_config_t;
 
 typedef enum {
@@ -78,6 +84,7 @@ typedef enum {
 typedef struct {
     ccimp_os_create_thread_info_t ccimp_info;
     ccapi_thread_status_t status;
+    void * lock;
 } ccapi_thread_info_t;
 
 typedef struct ccapi_fs_virtual_dir {
@@ -242,6 +249,11 @@ typedef struct {
             ccapi_svc_cli_t * svc_cli;
         } cli;
 #endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+        struct {
+            ccapi_sm_service_t user_callback;
+        } sm;
+#endif
     } service;
     struct {
         ccapi_tcp_info_t * info;
@@ -348,8 +360,10 @@ typedef struct
 #endif
 
 extern ccapi_data_t * ccapi_data_single_instance;
+#if (defined CCIMP_DEBUG_ENABLED)
 extern unsigned int logging_lock_users;
 extern void * logging_lock;
+#endif
 
 void ccapi_rci_thread(void * const argument);
 void ccapi_receive_thread(void * const argument);
@@ -392,6 +406,16 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 #endif
 #if (defined CCIMP_RCI_SERVICE_ENABLED)
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
+#endif
+
+void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data);
+
+void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info);
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+void free_transport_udp_info(ccapi_udp_info_t * const sms_info);
+#endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+void free_transport_sms_info(ccapi_sms_info_t * const sms_info);
 #endif
 
 void ccapi_logging_line(char const * const format, ...);

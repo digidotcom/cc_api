@@ -507,10 +507,11 @@ static ccimp_status_t ccapi_fs_file_close(ccapi_data_t * const ccapi_data, conne
 
     switch(ccimp_status)
     {
-        case CCIMP_STATUS_OK:
         case CCIMP_STATUS_ERROR:
-        {
             ccapi_fs_set_ccimp_error(ccimp_close_data.errnum, &ccfsm_close_data->errnum);
+            /* intentional fall-through */
+        case CCIMP_STATUS_OK:
+        {
             ccapi_free(ccapi_fs_handle->file_path);
             ccapi_free((void*)ccapi_fs_handle);
             break;
@@ -539,6 +540,7 @@ static ccimp_status_t ccapi_fs_file_truncate(ccapi_data_t * const ccapi_data, co
     switch(ccimp_status)
     {
         case CCIMP_STATUS_OK:
+            break;
         case CCIMP_STATUS_ERROR:
         {
             ccapi_fs_set_ccimp_error(ccimp_truncate_data.errnum, &ccfsm_truncate_data->errnum);
@@ -726,6 +728,7 @@ static ccimp_status_t ccapi_fs_dir_read_entry(ccapi_data_t * const ccapi_data, c
         switch(ccimp_status)
         {
             case CCIMP_STATUS_OK:
+                break;
             case CCIMP_STATUS_ERROR:
             {
                 ccapi_fs_set_ccimp_error(ccimp_dir_read_entry_data.errnum, &ccfsm_dir_read_entry_data->errnum);
@@ -816,6 +819,7 @@ static ccimp_status_t ccapi_fs_dir_close(ccapi_data_t * const ccapi_data, connec
         switch(ccimp_status)
         {
             case CCIMP_STATUS_OK:
+                break;
             case CCIMP_STATUS_ERROR:
             {
                 ccapi_fs_set_ccimp_error(ccimp_dir_close_data.errnum, &ccfsm_dir_close_data->errnum);

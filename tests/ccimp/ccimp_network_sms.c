@@ -200,7 +200,7 @@ static ccimp_status_t sms_connect_complete(int const fd)
     return status;
 }
 
-ccimp_status_t config_server_phone_number(int const fd, const char * device_cloud_phone)
+static ccimp_status_t config_server_phone_number(int const fd, const char * device_cloud_phone)
 {
 	ccimp_status_t status;
 	static char const phone_number_prefix[] = "phone-number=";
@@ -435,6 +435,7 @@ ccimp_status_t ccimp_network_sms_close(ccimp_network_close_t * const data)
     else
        printf("network_sms_close: fd %d\n", *fd);
 
+    free(fd);
     /* Let the proxy close the socket and listen for a new one.
        Consider that it has a 0 backlog (handles 1 single connection)
      */

@@ -198,6 +198,10 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
         dest->keepalives.wait_count = CCAPI_KEEPALIVES_WCNT_DEFAULT;
     }
 
+    if (dest->connection.max_transactions == 0)
+    {
+        dest->connection.max_transactions = CCAPI_MAX_TRANSACTIONS_DEFAULT;
+    }
     if (source->connection.password != NULL)
     {
         dest->connection.password = ccapi_malloc(strlen(source->connection.password) + 1);
@@ -226,6 +230,20 @@ done:
     return success;
 }
 
+void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info)
+{
+    if (tcp_info->connection.password != NULL)
+    {
+        ccapi_free(tcp_info->connection.password);
+    }
+
+    if (tcp_info->connection.type == CCAPI_CONNECTION_WAN && tcp_info->connection.info.wan.phone_number != NULL)
+    {
+        ccapi_free(tcp_info->connection.info.wan.phone_number);
+    }
+    ccapi_free(tcp_info);
+}
+
 ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_info_t const * const tcp_start)
 {
     ccapi_tcp_start_error_t error = CCAPI_TCP_START_ERROR_NONE;
@@ -235,6 +253,12 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         ccapi_logging_line("ccxapi_start_transport_tcp: CCAPI not started");
 
         error = CCAPI_TCP_START_ERROR_CCAPI_STOPPED;
+        goto done;
+    }
+
+    if (ccapi_data->transport_tcp.connected)
+    {
+        error = CCAPI_TCP_START_ERROR_ALREADY_STARTED;
         goto done;
     }
 
@@ -278,17 +302,25 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
     {
         connector_transport_t const transport = connector_transport_tcp;
-        connector_status_t const connector_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+        connector_status_t ccfsm_status;
 
-        switch (connector_status)
+        for (;;)
+        {
+            ccfsm_status = connector_initiate_action_secure(ccapi_data, connector_initiate_transport_start, &transport);
+            if (ccfsm_status != connector_service_busy)
+            {
+                break;
+            }
+            ccimp_os_yield();
+        }
+
+        switch (ccfsm_status)
         {
             case connector_success:
                 break;
             case connector_init_error:
             case connector_invalid_data:
             case connector_service_busy:
-                error = CCAPI_TCP_START_ERROR_INIT;
-                goto done;
             case connector_invalid_data_size:
             case connector_invalid_data_range:
             case connector_keepalive_error:
@@ -307,7 +339,8 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
             case connector_invalid_payload_packet:
             case connector_open_error:
                 error = CCAPI_TCP_START_ERROR_INIT;
-                ASSERT_MSG_GOTO(connector_status == connector_success, done);
+                ASSERT_MSG_GOTO(ccfsm_status == connector_success, done);
+                break;
         }
     }
 
@@ -342,25 +375,26 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         }
     }
 done:
-    if (error != CCAPI_TCP_START_ERROR_NONE)
+    switch (error)
     {
-        if (ccapi_data != NULL)
-        {
+        case CCAPI_TCP_START_ERROR_NONE:
+        case CCAPI_TCP_START_ERROR_ALREADY_STARTED:
+        case CCAPI_TCP_START_ERROR_CCAPI_STOPPED:
+        case CCAPI_TCP_START_ERROR_NULL_POINTER:
+            break;
+        case CCAPI_TCP_START_ERROR_INSUFFICIENT_MEMORY:
+        case CCAPI_TCP_START_ERROR_KEEPALIVES:
+        case CCAPI_TCP_START_ERROR_IP:
+        case CCAPI_TCP_START_ERROR_INVALID_MAC:
+        case CCAPI_TCP_START_ERROR_PHONE:
+        case CCAPI_TCP_START_ERROR_INIT:
+        case CCAPI_TCP_START_ERROR_TIMEOUT:
             if (ccapi_data->transport_tcp.info != NULL)
             {
-                if (ccapi_data->transport_tcp.info->connection.password != NULL)
-                {
-                    ccapi_free(ccapi_data->transport_tcp.info->connection.password);
-                }
-
-                if (tcp_start->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
-                {
-                    ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
-                }
-                ccapi_free(ccapi_data->transport_tcp.info);
+                free_transport_tcp_info(ccapi_data->transport_tcp.info);
                 ccapi_data->transport_tcp.info = NULL;
             }
-        }
+            break;
     }
 
     return error;
@@ -388,18 +422,8 @@ ccapi_tcp_stop_error_t ccxapi_stop_transport_tcp(ccapi_data_t * const ccapi_data
         ccimp_os_yield();
     } while (ccapi_data->transport_tcp.connected);
 
-    ASSERT(ccapi_data->transport_tcp.info != NULL);
-
-    if (ccapi_data->transport_tcp.info->connection.password != NULL)
-    {
-        ccapi_free(ccapi_data->transport_tcp.info->connection.password);
-    }
-
-    if (ccapi_data->transport_tcp.info->connection.type == CCAPI_CONNECTION_WAN && ccapi_data->transport_tcp.info->connection.info.wan.phone_number != NULL)
-    {
-        ccapi_free(ccapi_data->transport_tcp.info->connection.info.wan.phone_number);
-    }
-    ccapi_free(ccapi_data->transport_tcp.info);
+    ASSERT_MSG_GOTO(ccapi_data->transport_tcp.info != NULL, done);
+    free_transport_tcp_info(ccapi_data->transport_tcp.info);
     ccapi_data->transport_tcp.info = NULL;
 done:
     return error;

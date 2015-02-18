@@ -16,6 +16,8 @@
 
 char * buf_ptr;
 
+extern ccapi_bool_t stop;
+
 ccapi_global_error_id_t rci_session_start_cb(ccapi_rci_info_t * const info)
 {
     ASSERT(info->action == CCAPI_RCI_ACTION_QUERY);
@@ -144,6 +146,10 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
     {
         sleep(5);
         *info->do_command.response = "I sleep 5 seconds";
+    }
+    else if (!strcmp(info->do_command.target, "stop"))
+    {
+        stop = CCAPI_TRUE;
     }
     else if (!strcmp(info->do_command.target, "malloc"))
     {
@@ -502,6 +508,8 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_bool_set(ccapi_rci_info_
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
+float float_value = 6.69;
+
 ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_get(ccapi_rci_info_t * const info, float * const value)
 {
     ASSERT(info->action == CCAPI_RCI_ACTION_QUERY);
@@ -517,7 +525,7 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_get(ccapi_rci_info
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
 
-    *value = 1.2;
+    *value = float_value;
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 
@@ -534,7 +542,8 @@ ccapi_setting_group_1_error_id_t rci_setting_group_1_el_float_set(ccapi_rci_info
     ASSERT(info->error_hint == NULL);
     ASSERT(info->user_context == NULL);
 
-    UNUSED_PARAMETER(value);
+    float_value = *value;
+
     return CCAPI_GLOBAL_ERROR_NONE;
 }
 

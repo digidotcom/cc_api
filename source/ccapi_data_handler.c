@@ -28,46 +28,32 @@ void ccapi_receive_thread(void * const argument)
     ccapi_data->thread.receive->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.receive->status == CCAPI_THREAD_RUNNING)
     {
-        ccapi_svc_receive_t * const svc_receive = ccapi_data->service.receive.svc_receive;
-        if (svc_receive != NULL)
+        ccapi_lock_acquire(ccapi_data->thread.receive->lock);
+
+        if (ccapi_data->thread.receive->status != CCAPI_THREAD_REQUEST_STOP)
         {
-            switch (svc_receive->receive_thread_status)
+            ccapi_svc_receive_t * const svc_receive = ccapi_data->service.receive.svc_receive;
+
+            ASSERT_MSG_GOTO(svc_receive != NULL, done);
+            ASSERT_MSG_GOTO(svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED, done);
+            ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
+
+            /* Pass data to the user and get possible response from user */ 
+            svc_receive->user_callback.data(svc_receive->target, svc_receive->transport, 
+                                                                   &svc_receive->request_buffer_info, 
+                                                                   svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
+            /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+            if (svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED)
             {
-                case CCAPI_RECEIVE_THREAD_IDLE:
-                case CCAPI_RECEIVE_THREAD_DATA_CB_READY:
-                {
-                    break;
-                }
-                case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
-                {
-                    ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
-
-                    /* Pass data to the user and get possible response from user */ 
-                    svc_receive->user_callback.data(svc_receive->target, svc_receive->transport, 
-                                                                       &svc_receive->request_buffer_info, 
-                                                                       svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
-                    /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
-                    if (svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED)
-                    {
-                        svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED;
-                    }
-                    ccapi_data->service.receive.svc_receive = NULL;
-                    break;
-                }
-                case CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED:
-                case CCAPI_RECEIVE_THREAD_FREE:
-                {
-                    break;
-                }
+                svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_DATA_CB_PROCESSED;
             }
+            ccapi_data->service.receive.svc_receive = NULL;
         }
-
-        ccimp_os_yield();
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.receive->status == CCAPI_THREAD_REQUEST_STOP, done);
 
-    ccapi_data->thread.receive->status = CCAPI_THREAD_NOT_STARTED;
 done:
+    ccapi_data->thread.receive->status = CCAPI_THREAD_NOT_STARTED;
     return;
 }
 
@@ -255,10 +241,12 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
     ASSERT_MSG_GOTO(target_ptr->user_context == NULL, done);
 
     {
-        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &svc_receive->receive_error))
+        ccapi_receive_error_t receive_error;
+
+        if (!valid_receive_malloc((void**)&svc_receive, sizeof *svc_receive, &receive_error))
         {
             /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
-            goto done;
+            ASSERT_MSG_GOTO(svc_receive != NULL, done);
         }
 
         target_ptr->user_context = svc_receive;
@@ -423,7 +411,15 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
             ccimp_status_t ccimp_status;
 
             ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
-            ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+            switch (ccimp_status)
+            {
+                case CCIMP_STATUS_OK:
+                    break;
+                case CCIMP_STATUS_ERROR:
+                case CCIMP_STATUS_BUSY:
+                    ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                    break;
+            }
 
             if (ccapi_data->service.receive.svc_receive == NULL)
             {
@@ -432,17 +428,33 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                 ccapi_data->service.receive.svc_receive = svc_receive;
 
                 ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                switch (ccimp_status)
+                {
+                    case CCIMP_STATUS_OK:
+                        break;
+                    case CCIMP_STATUS_ERROR:
+                    case CCIMP_STATUS_BUSY:
+                        ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                        break;
+                }
 
                 ccapi_logging_line("ccapi_process_device_request_data for target = '%s'. receive_thread_status=CCAPI_RECEIVE_THREAD_DATA_CB_READY->CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED", svc_receive->target);
+
+                ccapi_lock_release(ccapi_data->thread.receive->lock);
 
             }
             else
             {
                 ccimp_status = ccapi_lock_release(ccapi_data->service.receive.receive_lock);
-                ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
-
-                ccimp_os_yield();
+                switch (ccimp_status)
+                {
+                    case CCIMP_STATUS_OK:
+                        break;
+                    case CCIMP_STATUS_ERROR:
+                    case CCIMP_STATUS_BUSY:
+                        ASSERT_MSG(ccimp_status == CCIMP_STATUS_OK);
+                        break;
+                }
             }
 
             connector_status = connector_callback_busy;
@@ -450,8 +462,6 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
         }
         case CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED:
         {
-            ccimp_os_yield();
-
             connector_status = connector_callback_busy;
             break;
         }

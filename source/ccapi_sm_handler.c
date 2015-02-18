@@ -30,47 +30,35 @@ void ccapi_cli_thread(void * const argument)
     ccapi_data->thread.cli->status = CCAPI_THREAD_RUNNING;
     while (ccapi_data->thread.cli->status == CCAPI_THREAD_RUNNING)
     {
-        ccapi_svc_cli_t * const svc_cli = ccapi_data->service.cli.svc_cli;
-        if (svc_cli != NULL)
-        {
-            switch (svc_cli->cli_thread_status)
-            {
-                case CCAPI_CLI_THREAD_IDLE:
-                case CCAPI_CLI_THREAD_REQUEST_CB_READY:
-                {
-                    break;
-                }
-                case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
-                {
-                    ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
+        ccapi_lock_acquire(ccapi_data->thread.cli->lock);
 
-                    /* Pass data to the user and get possible response from user */ 
-                    ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
-                                                                       svc_cli->request_string_info.string,
-                                                                       svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
+        if (ccapi_data->thread.cli->status != CCAPI_THREAD_REQUEST_STOP)
+        {
+            ccapi_svc_cli_t * const svc_cli = ccapi_data->service.cli.svc_cli;
+
+            ASSERT_MSG_GOTO(svc_cli != NULL, done);
+
+            ASSERT_MSG_GOTO(svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, done);
+            ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
+
+            /* Pass data to the user and get possible response from user */ 
+            ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
+                                                               svc_cli->request_string_info.string,
+                                                               svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
    
-                    /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
-                    if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
-                    {
-                        svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
-                    }
-                    ccapi_data->service.cli.svc_cli = NULL;
-                    break;
-                }
-                case CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED:
-                case CCAPI_CLI_THREAD_FREE:
-                {
-                    break;
-                }
+            /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
+            if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
+            {
+                svc_cli->cli_thread_status = CCAPI_CLI_THREAD_REQUEST_CB_PROCESSED;
             }
+            ccapi_data->service.cli.svc_cli = NULL;
         }
 
-        ccimp_os_yield();
     }
     ASSERT_MSG_GOTO(ccapi_data->thread.cli->status == CCAPI_THREAD_REQUEST_STOP, done);
 
-    ccapi_data->thread.cli->status = CCAPI_THREAD_NOT_STARTED;
 done:
+    ccapi_data->thread.cli->status = CCAPI_THREAD_NOT_STARTED;
     return;
 }
 
@@ -100,10 +88,12 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     if (cli_request_ptr->user_context == NULL)
     {
-        if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &svc_cli->cli_error))
+        ccapi_cli_error_t cli_error;
+
+        if (!valid_cli_malloc((void**)&svc_cli, sizeof *svc_cli, &cli_error))
         {
             /* We didn't manage to create a user_context. ccfsm will call response and status callbacks without it */
-            goto done;
+            ASSERT_MSG_GOTO(svc_cli != NULL, done);
         }
 
         cli_request_ptr->user_context = svc_cli;
@@ -130,6 +120,8 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
 
     if (!ccapi_data->config.cli_supported)
     {
+        ccapi_logging_line("ccapi_process_cli_request. cli service not stated");
+
         svc_cli->cli_error = CCAPI_CLI_ERROR_NO_CLI_SUPPORT;
         goto done;
     }
@@ -188,10 +180,8 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                 ccapi_data->service.cli.svc_cli = svc_cli;
 
                 ccapi_logging_line("ccapi_process_cli_request. cli_thread_status=CCAPI_CLI_THREAD_REQUEST_CB_READY->CCAPI_CLI_THREAD_REQUEST_CB_QUEUED");
-            }
-            else
-            {
-                ccimp_os_yield();
+
+                ccapi_lock_release(ccapi_data->thread.cli->lock);
             }
 
             connector_status = connector_callback_busy;
@@ -199,8 +189,6 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
         }
         case CCAPI_CLI_THREAD_REQUEST_CB_QUEUED:
         {
-            ccimp_os_yield();
-
             connector_status = connector_callback_busy;
             break;
         }
@@ -421,6 +409,70 @@ done:
     return connector_status;
 }
 
+static connector_callback_status_t ccapi_process_request_connect(connector_sm_request_connect_t * const request_connect_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_request_connect: transport %d", request_connect_ptr->transport);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.request_connect != NULL)
+    {
+       ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport);
+    }
+
+    request_connect_ptr->allow = CCAPI_FALSE;
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_ping_request(connector_sm_receive_ping_request_t const * const ping_request_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_ping_request: response %s needed", ping_request_ptr->response_required ? "is" : "is not");
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.ping_request != NULL)
+    {
+        ccapi_data->service.sm.user_callback.ping_request(ping_request_ptr->transport, CCAPI_BOOL(ping_request_ptr->response_required));
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_unsequenced_response(connector_sm_opaque_response_t const * const unsequenced_response_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("Received %" PRIsize " unsequenced bytes on id %d\n", unsequenced_response_ptr->bytes_used, unsequenced_response_ptr->id);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.unsequenced_response != NULL)
+    {
+        ccapi_data->service.sm.user_callback.unsequenced_response(unsequenced_response_ptr->transport, unsequenced_response_ptr->id, unsequenced_response_ptr->data, unsequenced_response_ptr->bytes_used, CCAPI_BOOL(unsequenced_response_ptr->error));
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_pending_data(connector_sm_more_data_t const * const pending_data_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_pending_data: transport %d", pending_data_ptr->transport);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.pending_data != NULL)
+    {
+       ccapi_data->service.sm.user_callback.pending_data(pending_data_ptr->transport);
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_phone_provisioning(connector_sm_receive_config_request_t const * const phone_provisioning_ptr, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_phone_provisioning: response %s needed", phone_provisioning_ptr->response_required ? "is" : "is not");
+    ccapi_logging_line("phone-number=%s", phone_provisioning_ptr->phone_number);
+    ccapi_logging_line("service-id=%s", phone_provisioning_ptr->service_id);
+   
+    if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.phone_provisioning != NULL)
+    {
+       ccapi_data->service.sm.user_callback.phone_provisioning(phone_provisioning_ptr->transport, phone_provisioning_ptr->phone_number, phone_provisioning_ptr->service_id, phone_provisioning_ptr->response_required);
+    }
+
+    return connector_callback_continue;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -464,27 +516,51 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
         case connector_request_id_sm_ping_request:
         {
-            connector_sm_receive_ping_request_t * const ping_request = data;
+            connector_sm_receive_ping_request_t const * const ping_request_ptr = data;
 
-            ccapi_logging_line("ccapi_sm_service_handler: response %s needed", ping_request->response_required ? "is" : "is not");
-
-            connector_status = connector_callback_continue;
+            connector_status = ccapi_process_ping_request(ping_request_ptr, ccapi_data);
             break;
         }
         case connector_request_id_sm_ping_response:
         {
-            connector_sm_ping_response_t const * const response_ptr = data;
+            connector_sm_ping_response_t const * const ping_response_ptr = data;
 
-            connector_status = ccapi_process_ping_response(response_ptr);
+            connector_status = ccapi_process_ping_response(ping_response_ptr);
+
+            break;
+        }
+        case connector_request_id_sm_opaque_response:
+        {
+            connector_sm_opaque_response_t const * const unsequenced_response = data;
+
+            connector_status = ccapi_process_unsequenced_response(unsequenced_response, ccapi_data);
 
             break;
         }
         case connector_request_id_sm_more_data:
-        case connector_request_id_sm_opaque_response:
-        case connector_request_id_sm_config_request:
-        case connector_request_id_sm_request_connect:
-            ASSERT_MSG(0);
+        {
+            connector_sm_more_data_t const * const pending_data_ptr = data;
+
+            connector_status = ccapi_process_pending_data(pending_data_ptr, ccapi_data);
+
             break;
+        }
+        case connector_request_id_sm_config_request:
+        {
+            connector_sm_receive_config_request_t const * const phone_provisioning_ptr = data;
+
+            connector_status = ccapi_process_phone_provisioning(phone_provisioning_ptr, ccapi_data);
+
+            break;
+        }
+        case connector_request_id_sm_request_connect:
+        {
+            connector_sm_request_connect_t * const request_connect_ptr = data;
+
+            connector_status = ccapi_process_request_connect(request_connect_ptr, ccapi_data);
+
+            break;
+         }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);

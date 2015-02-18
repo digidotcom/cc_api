@@ -126,3 +126,58 @@ TEST(test_ccapi_stop, testCcapiStopTCPFail)
     CHECK(stop_error == CCAPI_STOP_ERROR_NONE);
     CHECK(ccapi_data_single_instance == NULL);
 }
+
+static ccapi_bool_t status_callback_called;
+
+static void status_callback(ccapi_status_info_t * const info)
+{
+    CHECK_EQUAL(CCAPI_STOP_CCFSM_ERROR, info->stop_cause);
+    status_callback_called = CCAPI_TRUE;
+}
+
+TEST(test_ccapi_stop, testCcapiStopAsynchronously)
+{
+    ccapi_start_t start;
+    ccapi_start_error_t start_error;
+
+    th_expect_malloc(sizeof (ccapi_data_t), TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof TH_DEVICE_TYPE_STRING, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof TH_DEVICE_CLOUD_URL_STRING, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof (ccapi_thread_info_t), TH_MALLOC_RETURN_NORMAL, true);
+
+
+    th_fill_start_structure_with_good_parameters(&start);
+    status_callback_called = CCAPI_FALSE;
+    start.status = status_callback;
+
+    start_error = ccapi_start(&start);
+    CHECK_EQUAL(CCAPI_START_ERROR_NONE, start_error);
+    CHECK(status_callback == ccapi_data_single_instance->config.status_callback);
+
+    th_expect_malloc(sizeof *ccapi_data_single_instance->transport_tcp.info, TH_MALLOC_RETURN_NORMAL, true);
+    th_start_tcp_lan_ipv4();
+
+    th_expect_malloc(sizeof *ccapi_data_single_instance->transport_udp.info, TH_MALLOC_RETURN_NORMAL, true);
+    th_start_udp();
+
+    th_expect_malloc(sizeof *ccapi_data_single_instance->transport_sms.info, TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "+54-3644-421921", TH_MALLOC_RETURN_NORMAL, true);
+    th_expect_malloc(sizeof "", TH_MALLOC_RETURN_NORMAL, true);
+    th_start_sms();
+
+    mock_connector_api_info_t * const mock_connector_api_info = mock_connector_api_info_get(ccapi_data_single_instance->connector_handle);
+    mock_connector_api_info->connector_run_retval = connector_abort;
+
+    for (;;)
+    {
+        if (!status_callback_called)
+        {
+            ccimp_os_yield();
+        }
+        else
+        {
+            break;
+        }
+    }
+    wait_for_ccimp_threads();
+}

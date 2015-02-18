@@ -51,7 +51,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testDP_B_ERROR_NONE)
     header.content_type = NULL;
     header.path  = CLOUD_PATH;
     header.response_required = connector_false;
-    header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
+    header.timeout_in_seconds = CCAPI_DP_B_WAIT_FOREVER;
     header.request_id = NULL;
 
     Mock_connector_initiate_action_expectAndReturn(ccapi_data_single_instance->connector_handle, connector_initiate_send_data, &header, connector_success);
@@ -76,7 +76,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeEqual)
     header.path  = CLOUD_PATH;
     header.content_type = NULL;
     header.response_required = connector_false;
-    header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
+    header.timeout_in_seconds = CCAPI_DP_B_WAIT_FOREVER;
     header.request_id = NULL;
 
     mock_info->connector_initiate_send_data_info.in.chunk_size = sizeof data;
@@ -103,7 +103,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeSmall)
     header.path  = CLOUD_PATH;
     header.content_type = NULL;
     header.response_required = connector_false;
-    header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
+    header.timeout_in_seconds = CCAPI_DP_B_WAIT_FOREVER;
     header.request_id = NULL;
 
     mock_info->connector_initiate_send_data_info.in.chunk_size = sizeof data / 4 - 1; /* Don't allocate enough space so data callback is called several times */
@@ -135,7 +135,7 @@ TEST(test_ccapi_datapoint_binary_no_reply, testChunkSizeSmallBinary)
     header.path  = CLOUD_PATH;
     header.content_type = NULL;
     header.response_required = connector_false;
-    header.timeout_in_seconds = CCAPI_SEND_WAIT_FOREVER;
+    header.timeout_in_seconds = CCAPI_DP_B_WAIT_FOREVER;
     header.request_id = NULL;
 
     mock_info->connector_initiate_send_data_info.in.chunk_size = TEST_SIZE / 10 - 3; /* Don't allocate enough space so data callback is called several times */

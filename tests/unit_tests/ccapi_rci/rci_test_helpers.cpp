@@ -51,6 +51,11 @@ void const * th_rci_get_value_ptr(void)
     return p_value;
 }
 
+char const * th_rci_last_function_called(void)
+{
+    return called_function;
+}
+
 void th_rci_checkExpectations(char const * const function_name, ccapi_rci_info_t const * const expected_received_rci_info)
 {
     STRCMP_EQUAL(function_name, called_function);

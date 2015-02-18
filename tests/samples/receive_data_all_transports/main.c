@@ -39,6 +39,7 @@ void fill_start_structure_with_good_parameters(ccapi_start_t * start)
     start->device_type = device_type;
 
     start->service.cli = NULL;
+    start->service.sm = NULL;
     start->service.receive = NULL;
     start->service.file_system = NULL;
     start->service.firmware = NULL;
@@ -302,7 +303,6 @@ int main (void)
          * A request over DESIRED_MAX_REQUEST_SIZE will make app_get_time_cb() be called with error CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG 
          */
         receive_error = ccapi_receive_add_target("get_system_time", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
-        receive_error = ccapi_receive_add_target("get_system_time1", app_get_time_cb, app_receive_default_status_cb, DESIRED_MAX_REQUEST_SIZE);
         if (receive_error == CCAPI_RECEIVE_ERROR_NONE)
         {
             printf("ccapi_receive_add_target success\n");
@@ -319,17 +319,15 @@ int main (void)
     printf("Send UDP traffic periodically to the cloud so it send us queued requests\n");
     do
     {
-        /* TODO: send ping instead of data*/
-        ccapi_send_error_t send_error;
-        #define SEND_DATA_UDP         "ping"
-        send_error = ccapi_send_data(CCAPI_TRANSPORT_UDP, "ping.txt", "text/plain", SEND_DATA_UDP, strlen(SEND_DATA_UDP), CCAPI_SEND_BEHAVIOR_OVERWRITE);
-        if (send_error == CCAPI_SEND_ERROR_NONE)
+        ccapi_ping_error_t send_error;
+        send_error = ccapi_send_ping(CCAPI_TRANSPORT_UDP);
+        if (send_error == CCAPI_PING_ERROR_NONE)
         {
-            printf("ccapi_send_data for udp success\n");
+            printf("ccapi_send_ping for udp success\n");
         }
         else
         {
-            printf("ccapi_send_data for udp failed with error %d\n", send_error);
+            printf("ccapi_send_ping for udp failed with error %d\n", send_error);
         }
         
         sleep(5);
@@ -339,7 +337,7 @@ int main (void)
     do
     {
         sleep(1);
-    } while (check_stop() != CCAPI_TRUE);   
+    } while (check_stop() != CCAPI_TRUE);
 #endif
 
 done:
