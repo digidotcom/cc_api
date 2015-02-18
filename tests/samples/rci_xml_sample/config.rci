@@ -1,6 +1,9 @@
 globalerror load_fail "Load fail"
 globalerror save_fail "Save fail"
 globalerror memory_fail "Insufficient memory"
+globalerror reboot_fail "Reboot fail"
+globalerror do_command_fail "Do Command fail"
+globalerror set_factory_default_fail "Set Factory Default fail"
 globalerror xml_request_fail "Error creating xml request file"
 globalerror xml_response_fail "Error in xml response file"
 

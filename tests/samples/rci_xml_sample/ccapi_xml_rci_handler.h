@@ -10,6 +10,7 @@
 #define XML_MAX_ERROR_HINT_LENGTH 100
 
 #define XML_MAX_VALUE_LENGTH 100
+#define XML_MAX_DO_COMMAND_RESPONSE_LENGTH 250
 
 void xml_rci_handler(void);
 

@@ -5,6 +5,8 @@
 #include <string.h>
 #include "ccapi_xml_rci_handler.h"
 
+//#define TEST_ERRORS
+
 #define SET_GOOD_RESPONSE \
        "<set_setting>     \
           <serial>        \
@@ -19,6 +21,7 @@
           </ethernet>     \
         </set_setting>"
 
+#if (defined TEST_ERRORS)
 #define SET_BAD_RESPONSE  \
        "<set_setting>     \
           <serial>        \
@@ -37,6 +40,7 @@
             <dhcp/>       \
           </ethernet>     \
         </set_setting>"
+#endif
 
 #define QUERY_SETTING_SERIAL_RESPONSE \
        "<query_setting>            \
@@ -114,6 +118,7 @@
           </gps_stats> \
         </query_state>"
 
+#if (defined TEST_ERRORS)
 #define QUERY_BAD_RESPONSE     \
        "<query_setting>        \
           <serial>             \
@@ -123,9 +128,43 @@
              </error>          \
           </serial>            \
         </query_setting>"
+#endif
 
+#if (defined RCI_LEGACY_COMMANDS)
+#define REBOOT_GOOD_RESPONSE "<reboot/>"
+#define SET_FACTORY_DEFAULTS_GOOD_RESPONSE "<set_factory_default/>"
+
+#if (defined TEST_ERRORS)
+#define REBOOT_BAD_RESPONSE \
+       "<reboot>        \
+             <error id=\"1\">  \
+             <desc>linux error description while executing reboot</desc> \
+             <hint>linux error hint while executing reboot</hint> \
+             </error>          \
+        </reboot>"
+
+#define SET_FACTORY_DEFAULTS_BAD_RESPONSE \
+       "<set_factory_default>        \
+             <error id=\"1\">  \
+             <desc>linux error description while executing set_factory_default</desc> \
+             <hint>linux error hint while executing set_factory_default</hint> \
+             </error>          \
+        </set_factory_default>"
+#endif
+#endif
+
+#define xstr(s) str(s)
+#define str(s) #s
+ 
+#if (defined TEST_ERRORS)
 static unsigned int rnd_set_response = 0;
 static unsigned int rnd_query_response = 0;
+#if (defined RCI_LEGACY_COMMANDS)
+static unsigned int rnd_do_command_response = 0;
+static unsigned int rnd_reboot_response = 0;
+static unsigned int rnd_set_factory_default_response = 0;
+#endif
+#endif
 
 static int get_request_buffer(char * * xml_request_buffer)
 {
@@ -204,14 +243,12 @@ void xml_rci_handler(void)
             else if (strncmp(group_ptr, "<ethernet", sizeof("<ethernet") -1 ) == 0)
             {
                 /* Just a test: every two query request for the group 'ethernet' return an error */
+#if (defined TEST_ERRORS)
                 if (rnd_query_response++ % 2)
-                {
                     fprintf(xml_response_fp, "%s", QUERY_BAD_RESPONSE);
-                }
                 else
-                {
+#endif
                     fprintf(xml_response_fp, "%s", QUERY_SETTING_ETHERNET_RESPONSE);
-                }
             }
             else if (strncmp(group_ptr, "<device_time", sizeof("<device_time") -1 ) == 0)
             {
@@ -251,9 +288,11 @@ void xml_rci_handler(void)
     {
         /* Don't mind the group set in the request... just provide a response (for 'ethernet' group for example)
            with or without 'error' tag randomly */
+#if (defined TEST_ERRORS)
         if (rnd_set_response++ % 2)
             fprintf(xml_response_fp, "%s", SET_BAD_RESPONSE);
         else
+#endif
             fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
     }
     else if (strncmp(xml_request_buffer, "<set_state", sizeof("<set_state") - 1) == 0)
@@ -261,8 +300,106 @@ void xml_rci_handler(void)
         /* Don't mind the group set in the request... just provide a response (for 'ethernet' group for example) */
         fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
     }
+#if (defined RCI_LEGACY_COMMANDS)
+    /* do_command without target */
+    #define DO_COMMAND_NO_TARGET "<do_command>"
+    else if (strncmp(xml_request_buffer, DO_COMMAND_NO_TARGET, sizeof(DO_COMMAND_NO_TARGET) - 1) == 0)
+    {
+#if (defined TEST_ERRORS)
+        if (rnd_do_command_response % 3 == 2)
+        {
+
+            fprintf(xml_response_fp, "<do_command> \
+                                         <error id=\"1\">  \
+                                            <desc>linux error description while executing do_command</desc> \
+                                            <hint>linux error hint while executing do_command without target</hint> \
+                                         </error>          \
+                                      </do_command>");
+        }
+        else
+#endif
+        {
+            if (rnd_do_command_response % 3 == 1)
+            {
+                /* Empty response */
+                fprintf(xml_response_fp, "<do_command/>");
+            }
+            else
+            {
+                fprintf(xml_response_fp, "<do_command>do command without target good response</do_command>");
+            }
+        }
+        rnd_do_command_response++;
+    }
+    /* do_command with target */
+    #define DO_COMMAND_TARGET "<do_command target=\""
+    else if (strncmp(xml_request_buffer, DO_COMMAND_TARGET, sizeof(DO_COMMAND_TARGET) - 1) == 0)
+    {
+        char const * const target_ptr = &xml_request_buffer[sizeof(DO_COMMAND_TARGET) - 1];
+        int scanf_ret;
+        char target[RCI_COMMANDS_ATTRIBUTE_MAX_LEN + 1];
+
+        #define RCI_COMMANDS_ATTRIBUTE_MAX_LEN_STR  xstr(RCI_COMMANDS_ATTRIBUTE_MAX_LEN)
+
+        #define TARGET_FORMAT "%" RCI_COMMANDS_ATTRIBUTE_MAX_LEN_STR "[^\"]>"
+        scanf_ret = sscanf(target_ptr, TARGET_FORMAT, target);
+        if (scanf_ret == 0)
+        {
+            goto done;
+        }
+
+        /* printf("target='%s'\n", target); */
+
+#if (defined TEST_ERRORS)
+        if (rnd_do_command_response % 3 == 2)
+        {
+            fprintf(xml_response_fp, "<do_command target=\"%s\"> \
+                                         <error id=\"1\">  \
+                                            <desc>linux error description while executing do_command</desc> \
+                                            <hint>linux error hint while executing do_command with target</hint> \
+                                         </error>          \
+                                      </do_command>", target);
+        }
+        else
+#endif
+        {
+            if (rnd_do_command_response % 3 == 1)
+            {
+                /* Empty response */
+                fprintf(xml_response_fp, "<do_command target=\"%s\"/>", target);
+            }
+            else
+            {
+                fprintf(xml_response_fp, "<do_command target=\"%s\">do command with target good response</do_command>", target);
+            }
+        }
+        rnd_do_command_response++;
+    }
+    else if (strncmp(xml_request_buffer, "<set_factory_default", sizeof("<set_factory_default") - 1) == 0)
+    {
+        /* Just provide a response with or without 'error' tag randomly */
+#if (defined TEST_ERRORS)
+        if (rnd_set_factory_default_response++ % 2)
+            fprintf(xml_response_fp, "%s", SET_FACTORY_DEFAULTS_BAD_RESPONSE);
+        else
+#endif
+            fprintf(xml_response_fp, "%s", SET_FACTORY_DEFAULTS_GOOD_RESPONSE);
+    }
+    else if (strncmp(xml_request_buffer, "<reboot", sizeof("<reboot") - 1) == 0)
+    {
+        /* Just provide a response with or without 'error' tag randomly */
+#if (defined TEST_ERRORS)
+        if (rnd_reboot_response++ % 2)
+            fprintf(xml_response_fp, "%s", REBOOT_BAD_RESPONSE);
+        else
+#endif
+            fprintf(xml_response_fp, "%s", REBOOT_GOOD_RESPONSE);
+    }
+#endif
     else
     {
+        printf("Unsupported command!!!!!\n");
+        assert(0);
     }
 
 done:

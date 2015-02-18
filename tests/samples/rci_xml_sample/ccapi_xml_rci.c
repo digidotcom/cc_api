@@ -11,7 +11,6 @@
 */
 
 /* TODO:
-*         - Legacy commands support
 *         - Pass and receive data to/from xml_rci_handler() function as arguments instead of through files.
 *         - Split set requests to xml_rci_handler() in groups intead of a complete request (as it's done for queries)
 *           to improve the error location.
@@ -30,6 +29,9 @@
 
 static FILE * xml_request_fp = NULL;
 static char * xml_query_response_buffer = NULL;
+#if (defined RCI_LEGACY_COMMANDS)
+static char * do_command_response = NULL;
+#endif
 
 static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char * xml_response_buffer)
 {
@@ -128,7 +130,23 @@ ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            /* TODO */
+            xml_request_fp = fopen(XML_REQUEST_FILE_NAME, "w+");
+            if (xml_request_fp == NULL)
+            {
+                printf("%s: Unable to create %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
+                error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
+                info->error_hint = "Unable to create xml request file";
+                goto done;
+            }
+
+            do_command_response = malloc(XML_MAX_DO_COMMAND_RESPONSE_LENGTH + 1);
+            if (do_command_response == NULL)
+            {
+                printf("%s: Unable alloc memory to parse do_command response\n", __FUNCTION__);
+                error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
+                info->error_hint = "Unable alloc memory to parse do_command response";
+                goto done;
+            }
             break;
         }
 #endif
@@ -183,6 +201,34 @@ done:
     return error_id;
 }
 
+static ccapi_global_error_id_t call_xml_rci_handler(ccapi_rci_info_t * const info, char * * const xml_response_buffer)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+
+    xml_rci_handler();
+
+    assert(*xml_response_buffer == NULL);
+
+    error_id = get_response_buffer(xml_response_buffer, info);
+    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
+    {
+        goto done;
+    }
+
+    if (strlen(*xml_response_buffer) == 0)
+    {
+        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+        info->error_hint = "empty xml response";
+
+        goto done;
+    }
+
+    error_id = process_xml_error(info, *xml_response_buffer);
+
+done:
+    return error_id;
+}
+
 ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
@@ -208,7 +254,8 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            /* TODO */
+            if (do_command_response != NULL)
+                free(do_command_response);
             break;
         }
 #endif
@@ -220,30 +267,12 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         {
             char * xml_set_response_buffer = NULL;
 
-            xml_rci_handler();
-
-            error_id = get_response_buffer(&xml_set_response_buffer, info);
-            if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-            {
-                goto done;
-            }
-
-            if (strlen(xml_set_response_buffer) == 0)
-            {
-                error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-                info->error_hint = "empty xml response";
-
-                free(xml_set_response_buffer);
-                goto done;
-            }
-
-            error_id = process_xml_error(info, xml_set_response_buffer);
+            error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
 
             if (xml_set_response_buffer != NULL)
             {
                 free(xml_set_response_buffer);
             }
-
             break;
         }
         case CCAPI_RCI_ACTION_QUERY:
@@ -255,13 +284,11 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            /* TODO */
             break;
         }
 #endif
     }
 
-done:
     return error_id;
 }
 
@@ -304,19 +331,8 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
 
             fclose(xml_request_fp);
 
-            {
-                xml_rci_handler();
+            error_id = call_xml_rci_handler(info, &xml_query_response_buffer);
 
-                assert(xml_query_response_buffer == NULL);
-
-                error_id = get_response_buffer(&xml_query_response_buffer, info);
-                if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-                {
-                    goto done;
-                }
-
-                error_id = process_xml_error(info, xml_query_response_buffer);
-            }
             break;
         }
 #if (defined RCI_LEGACY_COMMANDS)
@@ -324,13 +340,11 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            /* TODO */
             break;
         }
 #endif
     }
 
-done:
     return error_id;
 }
 
@@ -357,7 +371,6 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            /* TODO */
             break;
         }
 #endif
@@ -480,17 +493,17 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
 #define BRACKET_SIZE 2 /* Size of '<' + '>' */
 #define NULL_TERM_SIZE 1
 
-static int get_xml_value(ccapi_rci_info_t * const info, char const * * xml_value)
+static int get_xml_value(ccapi_rci_info_t * const info, char const * const xml_response_buffer, char const * * xml_value)
 {
     int error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
     char * element_ptr = NULL;
     char element_name[RCI_ELEMENT_NAME_MAX_SIZE + BRACKET_SIZE + NULL_TERM_SIZE];
 
-    assert(xml_query_response_buffer != NULL);
+    assert(xml_response_buffer != NULL);
 
     /* Firs look for empty answer */
     sprintf(element_name, "<%s/>", info->element.name);
-    element_ptr = strstr(xml_query_response_buffer, element_name);
+    element_ptr = strstr(xml_response_buffer, element_name);
     if (element_ptr != NULL)
     {
         *xml_value = "";
@@ -501,7 +514,7 @@ static int get_xml_value(ccapi_rci_info_t * const info, char const * * xml_value
 
     sprintf(element_name, "<%s>", info->element.name);
 
-    element_ptr = strstr(xml_query_response_buffer, element_name);
+    element_ptr = strstr(xml_response_buffer, element_name);
     if (element_ptr != NULL)
     {
         int scanf_ret;
@@ -533,7 +546,7 @@ int ccapi_xml_rci_group_get(ccapi_rci_info_t * const info, ...)
 
     va_start(arg_list, info);
 
-    error_id = get_xml_value(info, &xml_value);
+    error_id = get_xml_value(info, xml_query_response_buffer, &xml_value);
     if (error_id != CCAPI_GLOBAL_ERROR_NONE)
     {
         goto done;
@@ -683,3 +696,145 @@ done:
     return error_id;
 }
 
+#if (defined RCI_LEGACY_COMMANDS)
+#define XML_MAX_DO_COMMAND_RESPONSE_LENGTH_STR  xstr(XML_MAX_DO_COMMAND_RESPONSE_LENGTH)
+#define XML_DO_COMMAND_RESPONSE_FORMAT "%*[^>]>%" XML_MAX_DO_COMMAND_RESPONSE_LENGTH_STR "[^<]</"
+static int get_xml_do_command_response(ccapi_rci_info_t * const info, char const * const xml_response_buffer, char const * * xml_do_command_response)
+{
+    int error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+    char * do_command_ptr = NULL;
+    char do_command_tag[sizeof("do_command target=\"\"") + RCI_COMMANDS_ATTRIBUTE_MAX_LEN + BRACKET_SIZE + NULL_TERM_SIZE];
+
+    assert(xml_response_buffer != NULL);
+
+    /* 1: look for empty answer without target */
+    sprintf(do_command_tag, "<do_command/>");
+    do_command_ptr = strstr(xml_response_buffer, do_command_tag);
+    if (do_command_ptr != NULL)
+    {
+        *xml_do_command_response = "";
+
+        error_id = CCAPI_GLOBAL_ERROR_NONE;
+        goto done;
+    }
+
+    /* 2: look for filled answer without target */
+    sprintf(do_command_tag, "<do_command>");
+    do_command_ptr = strstr(xml_response_buffer, do_command_tag);
+    if (do_command_ptr != NULL)
+    {
+        if (sscanf(do_command_ptr, XML_DO_COMMAND_RESPONSE_FORMAT, do_command_response) > 0)
+        {
+            printf("xml_do_command_response='%s'\n", do_command_response);
+            *xml_do_command_response = do_command_response;
+
+            error_id = CCAPI_GLOBAL_ERROR_NONE;
+            goto done;
+        }
+    }
+
+    /* 3: look for empty answer with target */
+    sprintf(do_command_tag, "<do_command target=\"%s\"/>", info->do_command.target);
+    do_command_ptr = strstr(xml_response_buffer, do_command_tag);
+    if (do_command_ptr != NULL)
+    {
+        *xml_do_command_response = "";
+
+        error_id = CCAPI_GLOBAL_ERROR_NONE;
+        goto done;
+    }
+
+    /* 4: look for filled answer with target */
+    sprintf(do_command_tag, "<do_command target=\"%s\">", info->do_command.target);
+    do_command_ptr = strstr(xml_response_buffer, do_command_tag);
+    if (do_command_ptr != NULL)
+    {
+        if (sscanf(do_command_ptr, XML_DO_COMMAND_RESPONSE_FORMAT, do_command_response) > 0)
+        {
+            printf("xml_do_command_response='%s'\n", do_command_response);
+            *xml_do_command_response = do_command_response;
+
+            error_id = CCAPI_GLOBAL_ERROR_NONE;
+            goto done;
+        }
+    }
+
+done:
+    return error_id;
+}
+
+ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+    char * xml_set_response_buffer = NULL;
+
+    printf("    Called '%s'\n", __FUNCTION__);
+
+    fprintf(xml_request_fp, "<do_command");
+    if (info->do_command.target != NULL)
+    {
+        fprintf(xml_request_fp, " target=\"%s\"", info->do_command.target);
+    }
+    fprintf(xml_request_fp, ">%s</do_command>", info->do_command.request);
+    fclose(xml_request_fp);
+
+    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+    if (error_id == CCAPI_GLOBAL_ERROR_NONE)
+    {
+        char const * xml_do_command_response = NULL;
+
+        error_id = get_xml_do_command_response(info, xml_set_response_buffer, &xml_do_command_response);
+        if (error_id == CCAPI_GLOBAL_ERROR_NONE)
+        {
+            *info->do_command.response = xml_do_command_response;
+        }
+    }
+
+    if (xml_set_response_buffer != NULL)
+    {
+        free(xml_set_response_buffer);
+    }
+
+    return error_id;
+}
+
+ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const info)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+    char * xml_set_response_buffer = NULL;
+
+    printf("    Called '%s'\n", __FUNCTION__);
+
+    fprintf(xml_request_fp, "<set_factory_default/>");
+    fclose(xml_request_fp);
+
+    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+
+    if (xml_set_response_buffer != NULL)
+    {
+        free(xml_set_response_buffer);
+    }
+
+    return error_id;
+}
+
+ccapi_global_error_id_t rci_reboot_cb(ccapi_rci_info_t * const info)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+    char * xml_set_response_buffer = NULL;
+
+    printf("    Called '%s'\n", __FUNCTION__);
+
+    fprintf(xml_request_fp, "<reboot/>");
+    fclose(xml_request_fp);
+
+    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+
+    if (xml_set_response_buffer != NULL)
+    {
+        free(xml_set_response_buffer);
+    }
+
+    return error_id;
+}
+#endif
