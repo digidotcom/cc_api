@@ -3,7 +3,6 @@
 
 #include  "ccapi/ccapi.h"
 
-#define XML_REQUEST_FILE_NAME "request.xml"
 #define XML_RESPONSE_FILE_NAME "response.xml"
 
 #define XML_MAX_ERROR_DESC_LENGTH 100
@@ -12,6 +11,6 @@
 #define XML_MAX_VALUE_LENGTH 100
 #define XML_MAX_DO_COMMAND_RESPONSE_LENGTH 250
 
-void xml_rci_handler(void);
+void xml_rci_handler(char const * const xml_request);
 
 #endif

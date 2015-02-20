@@ -11,7 +11,6 @@
 */
 
 /* TODO:
-*         - Pass and receive data to/from xml_rci_handler() function as arguments instead of through files.
 *         - Split set requests to xml_rci_handler() in groups intead of a complete request (as it's done for queries)
 *           to improve the error location.
 */
@@ -27,7 +26,9 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-static FILE * xml_request_fp = NULL;
+static char * xml_request_buffer = NULL;
+static size_t xml_request_buffer_size = 0;
+
 static char * xml_query_response_buffer = NULL;
 #if (defined RCI_LEGACY_COMMANDS)
 static char * do_command_response = NULL;
@@ -83,15 +84,63 @@ done:
     return error_id;
 }
 
+static ccapi_global_error_id_t append_data_to_xml_request_buffer(char const * const data, ...)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+    va_list arg_list_test;
+    va_list arg_list_done;
+    size_t new_buffer_len;
+    int print_ret_test;
+
+    va_start(arg_list_test, data);
+    va_copy(arg_list_done, arg_list_test);
+
+    print_ret_test = vsnprintf(NULL, 0, data, arg_list_test);
+
+    if (xml_request_buffer == NULL)
+    {
+        new_buffer_len = print_ret_test;
+
+        xml_request_buffer = malloc(new_buffer_len + 1);
+    }
+    else
+    {
+        new_buffer_len = xml_request_buffer_size + print_ret_test;
+
+        xml_request_buffer = realloc(xml_request_buffer, new_buffer_len + 1);
+    }
+
+    if (xml_request_buffer == NULL)
+    {
+        assert(0);
+        error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
+    }
+    else
+    {
+        int print_ret_done;
+
+        print_ret_done = vsprintf(&xml_request_buffer[xml_request_buffer_size], data, arg_list_done);
+
+        assert(print_ret_test == print_ret_done);
+
+        xml_request_buffer_size = new_buffer_len;
+    }
+
+    va_end(arg_list_test);
+    va_end(arg_list_done);
+
+    return error_id;
+}
+
 static void write_group(ccapi_rci_info_t * const info)
 {
     switch (info->group.type)
     {
         case CCAPI_RCI_GROUP_SETTING:
-            fprintf(xml_request_fp, "setting");
+            append_data_to_xml_request_buffer("setting");
             break;
         case CCAPI_RCI_GROUP_STATE:
-            fprintf(xml_request_fp, "state");
+            append_data_to_xml_request_buffer("state");
             break;
     }
 
@@ -106,18 +155,12 @@ ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info
     {
         case CCAPI_RCI_ACTION_SET:
         {
-            xml_request_fp = fopen(XML_REQUEST_FILE_NAME, "w+");
-            if (xml_request_fp == NULL)
-            {
-                printf("%s: Unable to create %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
-                error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
-                info->error_hint = "Unable to create xml request file";
-                goto done;
-            }
+            assert(xml_request_buffer == NULL);
+            assert(xml_request_buffer_size == 0);
 
-            fprintf(xml_request_fp, "<set_");
+            append_data_to_xml_request_buffer("<set_");
             write_group(info);
-            fprintf(xml_request_fp, ">");
+            append_data_to_xml_request_buffer(">");
 
             break;
         }
@@ -127,18 +170,6 @@ ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info
         }
 #if (defined RCI_LEGACY_COMMANDS)
         case CCAPI_RCI_ACTION_DO_COMMAND:
-        case CCAPI_RCI_ACTION_REBOOT:
-        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
-        {
-            xml_request_fp = fopen(XML_REQUEST_FILE_NAME, "w+");
-            if (xml_request_fp == NULL)
-            {
-                printf("%s: Unable to create %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
-                error_id = CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
-                info->error_hint = "Unable to create xml request file";
-                goto done;
-            }
-
             do_command_response = malloc(XML_MAX_DO_COMMAND_RESPONSE_LENGTH + 1);
             if (do_command_response == NULL)
             {
@@ -147,8 +178,13 @@ ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info
                 info->error_hint = "Unable alloc memory to parse do_command response";
                 goto done;
             }
+            /* Fall through */
+        case CCAPI_RCI_ACTION_REBOOT:
+        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
+            assert(xml_request_buffer == NULL);
+            assert(xml_request_buffer_size == 0);
+
             break;
-        }
 #endif
     }
 
@@ -205,7 +241,14 @@ static ccapi_global_error_id_t call_xml_rci_handler(ccapi_rci_info_t * const inf
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
 
-    xml_rci_handler();
+    xml_rci_handler(xml_request_buffer);
+
+    if (xml_request_buffer != NULL)
+    {
+        free(xml_request_buffer);
+        xml_request_buffer = NULL;
+        xml_request_buffer_size = 0;
+    }
 
     assert(*xml_response_buffer == NULL);
 
@@ -237,11 +280,9 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
     {
         case CCAPI_RCI_ACTION_SET:
         {
-            fprintf(xml_request_fp, "\n</set_");
+            append_data_to_xml_request_buffer("\n</set_");
             write_group(info);
-            fprintf(xml_request_fp, ">\n");
-
-            fclose(xml_request_fp);
+            append_data_to_xml_request_buffer(">\n");
 
             break;
         }
@@ -254,8 +295,6 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
-            if (do_command_response != NULL)
-                free(do_command_response);
             break;
         }
 #endif
@@ -281,6 +320,11 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
         }
 #if (defined RCI_LEGACY_COMMANDS)
         case CCAPI_RCI_ACTION_DO_COMMAND:
+        {
+            if (do_command_response != NULL)
+                free(do_command_response);
+            break;
+        }
         case CCAPI_RCI_ACTION_REBOOT:
         case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
         {
@@ -300,19 +344,14 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
     {
         case CCAPI_RCI_ACTION_SET:
         {
-            fprintf(xml_request_fp, "\n   <%s index=\"%d\">\n      ", info->group.name, info->group.instance);    
+            append_data_to_xml_request_buffer("\n   <%s index=\"%d\">\n      ", info->group.name, info->group.instance);    
             break;
         }
         case CCAPI_RCI_ACTION_QUERY:
         {
-            xml_request_fp = fopen(XML_REQUEST_FILE_NAME, "w+");
-            if (xml_request_fp == NULL)
-            {
-                printf("%s: Unable to create %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
-                return CCAPI_GLOBAL_ERROR_XML_REQUEST_FAIL;
-            }
-
-            fprintf(xml_request_fp, "<query_");
+            assert(xml_request_buffer == NULL);
+            assert(xml_request_buffer_size == 0);
+            append_data_to_xml_request_buffer("<query_");
             write_group(info);
 
             if (info->group.type == CCAPI_RCI_GROUP_SETTING)
@@ -320,16 +359,14 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
                 static char const * const attribute_source[] = {"current", "stored", "defaults"};
                 static char const * const attribute_compare_to[] = {"none", "current", "stored", "defaults"};
 
-                fprintf(xml_request_fp, " source=\"%s\"", attribute_source[info->query_setting.attributes.source]);
-                fprintf(xml_request_fp, " compare_to=\"%s\"", attribute_compare_to[info->query_setting.attributes.compare_to]);
+                append_data_to_xml_request_buffer(" source=\"%s\"", attribute_source[info->query_setting.attributes.source]);
+                append_data_to_xml_request_buffer(" compare_to=\"%s\"", attribute_compare_to[info->query_setting.attributes.compare_to]);
             }
-            fprintf(xml_request_fp, ">");
-            fprintf(xml_request_fp, "\n   <%s index=\"%d\"/>", info->group.name, info->group.instance);    
-            fprintf(xml_request_fp, "\n</query_");
+            append_data_to_xml_request_buffer(">");
+            append_data_to_xml_request_buffer("\n   <%s index=\"%d\"/>", info->group.name, info->group.instance);    
+            append_data_to_xml_request_buffer("\n</query_");
             write_group(info);
-            fprintf(xml_request_fp, ">\n");
-
-            fclose(xml_request_fp);
+            append_data_to_xml_request_buffer(">\n");
 
             error_id = call_xml_rci_handler(info, &xml_query_response_buffer);
 
@@ -354,7 +391,7 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
     {
         case CCAPI_RCI_ACTION_SET:
         {
-            fprintf(xml_request_fp, "\n   </%s>", info->group.name);    
+            append_data_to_xml_request_buffer("\n   </%s>", info->group.name);    
             break;
         }
         case CCAPI_RCI_ACTION_QUERY:
@@ -364,6 +401,7 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
                 free(xml_query_response_buffer);
                 xml_query_response_buffer = NULL;
             }
+
             break;
         }
 #if (defined RCI_LEGACY_COMMANDS)
@@ -420,7 +458,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             char const * const p_string = va_arg(arg_list, char const * const);
 
-            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, p_string, info->element.name);
+            append_data_to_xml_request_buffer("<%s>%s</%s>", info->element.name, p_string, info->element.name);
 
             break;
         }
@@ -430,7 +468,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             int32_t const * const p_int32_t = va_arg(arg_list, int32_t const * const);
 
-            fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *p_int32_t, info->element.name);    
+            append_data_to_xml_request_buffer("<%s>%d</%s>", info->element.name, *p_int32_t, info->element.name);    
 
             break;
         }
@@ -448,7 +486,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             uint32_t const * const p_uint32_t = va_arg(arg_list, uint32_t const * const);
 
-            fprintf(xml_request_fp, "<%s>%d</%s>", info->element.name, *p_uint32_t, info->element.name);    
+            append_data_to_xml_request_buffer("<%s>%d</%s>", info->element.name, *p_uint32_t, info->element.name);    
 
             break;
         }
@@ -458,7 +496,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             float const * const p_float = va_arg(arg_list, float const * const);
 
-            fprintf(xml_request_fp, "<%s>%f</%s>", info->element.name, *p_float, info->element.name);    
+            append_data_to_xml_request_buffer("<%s>%f</%s>", info->element.name, *p_float, info->element.name);    
 
             break;
         }
@@ -468,7 +506,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             ccapi_on_off_t const * const p_ccapi_on_off_t = va_arg(arg_list, ccapi_on_off_t const * const);
 
-            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *p_ccapi_on_off_t ? "on":"off", info->element.name);    
+            append_data_to_xml_request_buffer("<%s>%s</%s>", info->element.name, *p_ccapi_on_off_t ? "on":"off", info->element.name);    
 
             break;
         }
@@ -478,7 +516,7 @@ int ccapi_xml_rci_group_set(ccapi_rci_info_t * const info, ...)
         {
             ccapi_bool_t const * const p_ccapi_bool_t = va_arg(arg_list, ccapi_bool_t const * const);
 
-            fprintf(xml_request_fp, "<%s>%s</%s>", info->element.name, *p_ccapi_bool_t ? "true":"false", info->element.name);    
+            append_data_to_xml_request_buffer("<%s>%s</%s>", info->element.name, *p_ccapi_bool_t ? "true":"false", info->element.name);    
 
             break;
         }        
@@ -770,13 +808,12 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
 
     printf("    Called '%s'\n", __FUNCTION__);
 
-    fprintf(xml_request_fp, "<do_command");
+    append_data_to_xml_request_buffer("<do_command");
     if (info->do_command.target != NULL)
     {
-        fprintf(xml_request_fp, " target=\"%s\"", info->do_command.target);
+        append_data_to_xml_request_buffer(" target=\"%s\"", info->do_command.target);
     }
-    fprintf(xml_request_fp, ">%s</do_command>", info->do_command.request);
-    fclose(xml_request_fp);
+    append_data_to_xml_request_buffer(">%s</do_command>", info->do_command.request);
 
     error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
     if (error_id == CCAPI_GLOBAL_ERROR_NONE)
@@ -805,8 +842,7 @@ ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const inf
 
     printf("    Called '%s'\n", __FUNCTION__);
 
-    fprintf(xml_request_fp, "<set_factory_default/>");
-    fclose(xml_request_fp);
+    append_data_to_xml_request_buffer("<set_factory_default/>");
 
     error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
 
@@ -825,8 +861,7 @@ ccapi_global_error_id_t rci_reboot_cb(ccapi_rci_info_t * const info)
 
     printf("    Called '%s'\n", __FUNCTION__);
 
-    fprintf(xml_request_fp, "<reboot/>");
-    fclose(xml_request_fp);
+    append_data_to_xml_request_buffer("<reboot/>");
 
     error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
 

@@ -166,61 +166,12 @@ static unsigned int rnd_set_factory_default_response = 0;
 #endif
 #endif
 
-static int get_request_buffer(char * * xml_request_buffer)
+void xml_rci_handler(char const * const xml_request_buffer)
 {
-    int error_id = 0;
-    struct stat request_info;
-    FILE * xml_request_fp = NULL;
-
-    stat(XML_REQUEST_FILE_NAME, &request_info);
-
-    *xml_request_buffer = malloc(request_info.st_size + 1);
-
-    if (*xml_request_buffer == NULL)
-    {
-        error_id = -1;
-        goto done;
-    }
-
-    xml_request_fp = fopen(XML_REQUEST_FILE_NAME, "r");
-    if (xml_request_fp == NULL)
-    {
-        printf("%s: Unable to open %s file\n", __FUNCTION__,  XML_REQUEST_FILE_NAME);
-        error_id = -1;
-        goto done;
-    }          
-
-    fread(*xml_request_buffer, 1, request_info.st_size, xml_request_fp);
-    (*xml_request_buffer)[request_info.st_size] = '\0';
-    if (ferror(xml_request_fp) != 0)
-    {
-        printf("%s: Failed to read %s file\n", __FUNCTION__, XML_REQUEST_FILE_NAME);
-
-        error_id = -2;
-        goto done;
-    }
-
-    /* printf("request:\n%s\n", *xml_request_buffer); */
-
-    fclose(xml_request_fp);
-
-done:
-    return error_id;
-}
-
-
-void xml_rci_handler(void)
-{
-    char * xml_request_buffer = NULL;
     FILE * xml_response_fp = NULL;
     char * group_ptr = NULL;
 
     printf("    Called '%s'\n", __FUNCTION__);
-
-    if (get_request_buffer(&xml_request_buffer) != 0)
-    {
-        goto done;
-    }
 
     xml_response_fp = fopen(XML_RESPONSE_FILE_NAME, "w+");
     if (xml_response_fp == NULL)
@@ -229,7 +180,7 @@ void xml_rci_handler(void)
         goto done;
     }
 
-    /* process the XML_REQUEST_FILE_NAME file and provide a response at XML_RESPONSE_FILE_NAME */
+    /* process the xml_request_buffer and provide a response at XML_RESPONSE_FILE_NAME */
     if (strncmp(xml_request_buffer, "<query_setting", sizeof("<query_setting") - 1) == 0)
     {
         group_ptr = strstr(xml_request_buffer, "   <");
@@ -405,9 +356,6 @@ void xml_rci_handler(void)
 done:
     if (xml_response_fp != NULL)
         fclose(xml_response_fp);
-
-    if (xml_request_buffer != NULL)
-        free(xml_request_buffer);
 
     return;
 }
