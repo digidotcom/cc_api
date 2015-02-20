@@ -1,8 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <string.h>
+#include <stdarg.h>
 #include "ccapi_xml_rci_handler.h"
 
 //#define TEST_ERRORS
@@ -160,27 +157,75 @@
 static unsigned int rnd_set_response = 0;
 static unsigned int rnd_query_response = 0;
 #if (defined RCI_LEGACY_COMMANDS)
-static unsigned int rnd_do_command_response = 0;
 static unsigned int rnd_reboot_response = 0;
 static unsigned int rnd_set_factory_default_response = 0;
 #endif
 #endif
+#if (defined RCI_LEGACY_COMMANDS)
+static unsigned int rnd_do_command_response = 0;
+#endif
 
-void xml_rci_handler(char const * const xml_request_buffer)
+static char * local_xml_response_buffer = NULL;
+static size_t local_xml_response_buffer_size = 0;
+
+static int append_data_to_xml_response_buffer(char const * const data, ...)
 {
-    FILE * xml_response_fp = NULL;
+    int error_id = 0;
+    va_list arg_list_test;
+    va_list arg_list_done;
+    size_t new_buffer_len;
+    int print_ret_test;
+
+    va_start(arg_list_test, data);
+    va_copy(arg_list_done, arg_list_test);
+
+    print_ret_test = vsnprintf(NULL, 0, data, arg_list_test);
+
+    if (local_xml_response_buffer == NULL)
+    {
+        new_buffer_len = print_ret_test;
+
+        local_xml_response_buffer = malloc(new_buffer_len + 1);
+    }
+    else
+    {
+        new_buffer_len = local_xml_response_buffer_size + print_ret_test;
+
+        local_xml_response_buffer = realloc(local_xml_response_buffer, new_buffer_len + 1);
+    }
+
+    if (local_xml_response_buffer == NULL)
+    {
+        assert(0);
+        error_id = -1;
+    }
+    else
+    {
+        int print_ret_done;
+
+        print_ret_done = vsprintf(&local_xml_response_buffer[local_xml_response_buffer_size], data, arg_list_done);
+
+        assert(print_ret_test == print_ret_done);
+
+        local_xml_response_buffer_size = new_buffer_len;
+    }
+
+    va_end(arg_list_test);
+    va_end(arg_list_done);
+
+    return error_id;
+}
+
+void xml_rci_request(char const * const xml_request_buffer, char const * * const xml_response_buffer)
+{
     char * group_ptr = NULL;
 
     printf("    Called '%s'\n", __FUNCTION__);
 
-    xml_response_fp = fopen(XML_RESPONSE_FILE_NAME, "w+");
-    if (xml_response_fp == NULL)
-    {
-        printf("%s: Unable to open %s file\n", __FUNCTION__,  XML_RESPONSE_FILE_NAME);
-        goto done;
-    }
+    assert(local_xml_response_buffer == NULL);
+    assert(local_xml_response_buffer_size == 0);
 
-    /* process the xml_request_buffer and provide a response at XML_RESPONSE_FILE_NAME */
+    /* process the xml_request_buffer and provide a response at xml_response_buffer */
     if (strncmp(xml_request_buffer, "<query_setting", sizeof("<query_setting") - 1) == 0)
     {
         group_ptr = strstr(xml_request_buffer, "   <");
@@ -189,33 +234,33 @@ void xml_rci_handler(char const * const xml_request_buffer)
             group_ptr += sizeof("   ") - 1;
             if (strncmp(group_ptr, "<serial", sizeof("<serial") - 1) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_SETTING_SERIAL_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_SETTING_SERIAL_RESPONSE);
             }
             else if (strncmp(group_ptr, "<ethernet", sizeof("<ethernet") -1 ) == 0)
             {
                 /* Just a test: every two query request for the group 'ethernet' return an error */
 #if (defined TEST_ERRORS)
                 if (rnd_query_response++ % 2)
-                    fprintf(xml_response_fp, "%s", QUERY_BAD_RESPONSE);
+                    append_data_to_xml_response_buffer("%s", QUERY_BAD_RESPONSE);
                 else
 #endif
-                    fprintf(xml_response_fp, "%s", QUERY_SETTING_ETHERNET_RESPONSE);
+                    append_data_to_xml_response_buffer("%s", QUERY_SETTING_ETHERNET_RESPONSE);
             }
             else if (strncmp(group_ptr, "<device_time", sizeof("<device_time") -1 ) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_SETTING_DEVICE_TIME_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_SETTING_DEVICE_TIME_RESPONSE);
             }
             else if (strncmp(group_ptr, "<device_info", sizeof("<device_info") -1 ) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_SETTING_DEVICE_INFO_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_SETTING_DEVICE_INFO_RESPONSE);
             }
             else if (strncmp(group_ptr, "<system", sizeof("<system") -1 ) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_SETTING_SYSTEM_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_SETTING_SYSTEM_RESPONSE);
             }
             else if (strncmp(group_ptr, "<devicesecurity", sizeof("<devicesecurity") -1 ) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_SETTING_DEVICESECURITY_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_SETTING_DEVICESECURITY_RESPONSE);
             }
         }
     }
@@ -227,11 +272,11 @@ void xml_rci_handler(char const * const xml_request_buffer)
             group_ptr += sizeof("   ") - 1;
             if (strncmp(group_ptr, "<device_state", sizeof("<device_state") - 1) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_STATE_DEVICE_STATE_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_STATE_DEVICE_STATE_RESPONSE);
             }
             else if (strncmp(group_ptr, "<gps_stats", sizeof("<gps_stats") -1 ) == 0)
             {
-                fprintf(xml_response_fp, "%s", QUERY_STATE_GPS_STATS_RESPONSE);
+                append_data_to_xml_response_buffer("%s", QUERY_STATE_GPS_STATS_RESPONSE);
             }
         }
     }
@@ -241,15 +286,15 @@ void xml_rci_handler(char const * const xml_request_buffer)
            with or without 'error' tag randomly */
 #if (defined TEST_ERRORS)
         if (rnd_set_response++ % 2)
-            fprintf(xml_response_fp, "%s", SET_BAD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", SET_BAD_RESPONSE);
         else
 #endif
-            fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", SET_GOOD_RESPONSE);
     }
     else if (strncmp(xml_request_buffer, "<set_state", sizeof("<set_state") - 1) == 0)
     {
         /* Don't mind the group set in the request... just provide a response (for 'ethernet' group for example) */
-        fprintf(xml_response_fp, "%s", SET_GOOD_RESPONSE);
+        append_data_to_xml_response_buffer("%s", SET_GOOD_RESPONSE);
     }
 #if (defined RCI_LEGACY_COMMANDS)
     /* do_command without target */
@@ -260,7 +305,7 @@ void xml_rci_handler(char const * const xml_request_buffer)
         if (rnd_do_command_response % 3 == 2)
         {
 
-            fprintf(xml_response_fp, "<do_command> \
+            append_data_to_xml_response_buffer("<do_command> \
                                          <error id=\"1\">  \
                                             <desc>linux error description while executing do_command</desc> \
                                             <hint>linux error hint while executing do_command without target</hint> \
@@ -273,11 +318,11 @@ void xml_rci_handler(char const * const xml_request_buffer)
             if (rnd_do_command_response % 3 == 1)
             {
                 /* Empty response */
-                fprintf(xml_response_fp, "<do_command/>");
+                append_data_to_xml_response_buffer("<do_command/>");
             }
             else
             {
-                fprintf(xml_response_fp, "<do_command>do command without target good response</do_command>");
+                append_data_to_xml_response_buffer("<do_command>do command without target good response</do_command>");
             }
         }
         rnd_do_command_response++;
@@ -304,7 +349,7 @@ void xml_rci_handler(char const * const xml_request_buffer)
 #if (defined TEST_ERRORS)
         if (rnd_do_command_response % 3 == 2)
         {
-            fprintf(xml_response_fp, "<do_command target=\"%s\"> \
+            append_data_to_xml_response_buffer("<do_command target=\"%s\"> \
                                          <error id=\"1\">  \
                                             <desc>linux error description while executing do_command</desc> \
                                             <hint>linux error hint while executing do_command with target</hint> \
@@ -317,11 +362,11 @@ void xml_rci_handler(char const * const xml_request_buffer)
             if (rnd_do_command_response % 3 == 1)
             {
                 /* Empty response */
-                fprintf(xml_response_fp, "<do_command target=\"%s\"/>", target);
+                append_data_to_xml_response_buffer("<do_command target=\"%s\"/>", target);
             }
             else
             {
-                fprintf(xml_response_fp, "<do_command target=\"%s\">do command with target good response</do_command>", target);
+                append_data_to_xml_response_buffer("<do_command target=\"%s\">do command with target good response</do_command>", target);
             }
         }
         rnd_do_command_response++;
@@ -331,20 +376,20 @@ void xml_rci_handler(char const * const xml_request_buffer)
         /* Just provide a response with or without 'error' tag randomly */
 #if (defined TEST_ERRORS)
         if (rnd_set_factory_default_response++ % 2)
-            fprintf(xml_response_fp, "%s", SET_FACTORY_DEFAULTS_BAD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", SET_FACTORY_DEFAULTS_BAD_RESPONSE);
         else
 #endif
-            fprintf(xml_response_fp, "%s", SET_FACTORY_DEFAULTS_GOOD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", SET_FACTORY_DEFAULTS_GOOD_RESPONSE);
     }
     else if (strncmp(xml_request_buffer, "<reboot", sizeof("<reboot") - 1) == 0)
     {
         /* Just provide a response with or without 'error' tag randomly */
 #if (defined TEST_ERRORS)
         if (rnd_reboot_response++ % 2)
-            fprintf(xml_response_fp, "%s", REBOOT_BAD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", REBOOT_BAD_RESPONSE);
         else
 #endif
-            fprintf(xml_response_fp, "%s", REBOOT_GOOD_RESPONSE);
+            append_data_to_xml_response_buffer("%s", REBOOT_GOOD_RESPONSE);
     }
 #endif
     else
@@ -353,9 +398,22 @@ void xml_rci_handler(char const * const xml_request_buffer)
         assert(0);
     }
 
+    *xml_response_buffer = local_xml_response_buffer;
+
 done:
-    if (xml_response_fp != NULL)
-        fclose(xml_response_fp);
+    return;
+}
+
+void xml_rci_finished(char * const xml_response_buffer)
+{
+    assert(local_xml_response_buffer == xml_response_buffer);
+
+    if (local_xml_response_buffer != NULL)
+    {
+        free(local_xml_response_buffer);
+        local_xml_response_buffer = NULL;
+        local_xml_response_buffer_size = 0;
+    }
 
     return;
 }

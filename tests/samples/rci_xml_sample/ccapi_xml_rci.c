@@ -16,8 +16,6 @@
 */
 
 #include  <stdio.h>
-#include  <sys/stat.h>
-#include  <unistd.h>
 #include  <stdarg.h>
 
 #include  "ccapi_xml_rci.h"
@@ -29,12 +27,12 @@
 static char * xml_request_buffer = NULL;
 static size_t xml_request_buffer_size = 0;
 
-static char * xml_query_response_buffer = NULL;
+static char const * xml_query_response_buffer = NULL;
 #if (defined RCI_LEGACY_COMMANDS)
 static char * do_command_response = NULL;
 #endif
 
-static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char * xml_response_buffer)
+static ccapi_global_error_id_t process_xml_error(ccapi_rci_info_t * const info, char const * xml_response_buffer)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
 
@@ -146,6 +144,35 @@ static void write_group(ccapi_rci_info_t * const info)
 
     return;
 }
+
+static ccapi_global_error_id_t call_xml_rci_request(ccapi_rci_info_t * const info, char const * * const xml_response_buffer)
+{
+    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
+
+    xml_rci_request(xml_request_buffer, xml_response_buffer);
+
+    if (xml_request_buffer != NULL)
+    {
+        free(xml_request_buffer);
+        xml_request_buffer = NULL;
+        xml_request_buffer_size = 0;
+    }
+
+    assert(*xml_response_buffer != NULL);
+
+    if (strlen(*xml_response_buffer) == 0)
+    {
+        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
+        info->error_hint = "empty xml response";
+
+        goto done;
+    }
+
+    error_id = process_xml_error(info, *xml_response_buffer);
+
+done:
+    return error_id;
+}
  
 ccapi_global_error_id_t ccapi_xml_rci_action_start(ccapi_rci_info_t * const info)
 {
@@ -192,86 +219,6 @@ done:
     return error_id;
 }
 
-static int get_response_buffer(char * * xml_response_buffer, ccapi_rci_info_t * const info)
-{
-    int error_id = CCAPI_GLOBAL_ERROR_NONE;
-    struct stat response_info;
-    FILE * xml_response_fp = NULL;
-
-    stat(XML_RESPONSE_FILE_NAME, &response_info);
-
-    *xml_response_buffer = malloc(response_info.st_size + 1);
-
-    if (*xml_response_buffer == NULL)
-    {
-        error_id = CCAPI_GLOBAL_ERROR_MEMORY_FAIL;
-        info->error_hint = "Couldn't malloc to proccess xml response";
-        goto done;
-    }
-
-    xml_response_fp = fopen(XML_RESPONSE_FILE_NAME, "r");
-    if (xml_response_fp == NULL)
-    {
-        printf("%s: Unable to open %s file\n", __FUNCTION__,  XML_RESPONSE_FILE_NAME);
-        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-        info->error_hint = "Unable to open xml response file";
-        goto done;
-    }          
-
-    fread(*xml_response_buffer, 1, response_info.st_size, xml_response_fp);
-    (*xml_response_buffer)[response_info.st_size] = '\0';
-    if (ferror(xml_response_fp) != 0)
-    {
-        printf("%s: Failed to read %s file\n", __FUNCTION__, XML_RESPONSE_FILE_NAME);
-
-        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-        info->error_hint = "Error reading xml response file";
-        goto done;
-    }
-
-    /* printf("response:\n%s\n", *xml_response_buffer); */
-
-    fclose(xml_response_fp);
-
-done:
-    return error_id;
-}
-
-static ccapi_global_error_id_t call_xml_rci_handler(ccapi_rci_info_t * const info, char * * const xml_response_buffer)
-{
-    ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
-
-    xml_rci_handler(xml_request_buffer);
-
-    if (xml_request_buffer != NULL)
-    {
-        free(xml_request_buffer);
-        xml_request_buffer = NULL;
-        xml_request_buffer_size = 0;
-    }
-
-    assert(*xml_response_buffer == NULL);
-
-    error_id = get_response_buffer(xml_response_buffer, info);
-    if (error_id != CCAPI_GLOBAL_ERROR_NONE)
-    {
-        goto done;
-    }
-
-    if (strlen(*xml_response_buffer) == 0)
-    {
-        error_id = CCAPI_GLOBAL_ERROR_XML_RESPONSE_FAIL;
-        info->error_hint = "empty xml response";
-
-        goto done;
-    }
-
-    error_id = process_xml_error(info, *xml_response_buffer);
-
-done:
-    return error_id;
-}
-
 ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
@@ -280,38 +227,15 @@ ccapi_global_error_id_t ccapi_xml_rci_action_end(ccapi_rci_info_t * const info)
     {
         case CCAPI_RCI_ACTION_SET:
         {
+            char const * xml_set_response_buffer = NULL;
+
             append_data_to_xml_request_buffer("\n</set_");
             write_group(info);
             append_data_to_xml_request_buffer(">\n");
 
-            break;
-        }
-        case CCAPI_RCI_ACTION_QUERY:
-        {
-            break;
-        }
-#if (defined RCI_LEGACY_COMMANDS)
-        case CCAPI_RCI_ACTION_DO_COMMAND:
-        case CCAPI_RCI_ACTION_REBOOT:
-        case CCAPI_RCI_ACTION_SET_FACTORY_DEFAULTS:
-        {
-            break;
-        }
-#endif
-    }
+            error_id = call_xml_rci_request(info, &xml_set_response_buffer);
 
-    switch(info->action)
-    {
-        case CCAPI_RCI_ACTION_SET:
-        {
-            char * xml_set_response_buffer = NULL;
-
-            error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
-
-            if (xml_set_response_buffer != NULL)
-            {
-                free(xml_set_response_buffer);
-            }
+            xml_rci_finished((char *)xml_set_response_buffer);
             break;
         }
         case CCAPI_RCI_ACTION_QUERY:
@@ -368,7 +292,7 @@ int ccapi_xml_rci_group_start(ccapi_rci_info_t * const info)
             write_group(info);
             append_data_to_xml_request_buffer(">\n");
 
-            error_id = call_xml_rci_handler(info, &xml_query_response_buffer);
+            error_id = call_xml_rci_request(info, &xml_query_response_buffer);
 
             break;
         }
@@ -396,11 +320,7 @@ int ccapi_xml_rci_group_end(ccapi_rci_info_t * const info)
         }
         case CCAPI_RCI_ACTION_QUERY:
         {
-            if (xml_query_response_buffer != NULL)
-            {
-                free(xml_query_response_buffer);
-                xml_query_response_buffer = NULL;
-            }
+            xml_rci_finished((char *)xml_query_response_buffer);
 
             break;
         }
@@ -804,7 +724,7 @@ done:
 ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
-    char * xml_set_response_buffer = NULL;
+    char const * xml_set_response_buffer = NULL;
 
     printf("    Called '%s'\n", __FUNCTION__);
 
@@ -815,7 +735,7 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
     }
     append_data_to_xml_request_buffer(">%s</do_command>", info->do_command.request);
 
-    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+    error_id = call_xml_rci_request(info, &xml_set_response_buffer);
     if (error_id == CCAPI_GLOBAL_ERROR_NONE)
     {
         char const * xml_do_command_response = NULL;
@@ -827,10 +747,7 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
         }
     }
 
-    if (xml_set_response_buffer != NULL)
-    {
-        free(xml_set_response_buffer);
-    }
+    xml_rci_finished((char *)xml_set_response_buffer);
 
     return error_id;
 }
@@ -838,18 +755,15 @@ ccapi_global_error_id_t rci_do_command_cb(ccapi_rci_info_t * const info)
 ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
-    char * xml_set_response_buffer = NULL;
+    char const * xml_set_response_buffer = NULL;
 
     printf("    Called '%s'\n", __FUNCTION__);
 
     append_data_to_xml_request_buffer("<set_factory_default/>");
 
-    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+    error_id = call_xml_rci_request(info, &xml_set_response_buffer);
 
-    if (xml_set_response_buffer != NULL)
-    {
-        free(xml_set_response_buffer);
-    }
+    xml_rci_finished((char *)xml_set_response_buffer);
 
     return error_id;
 }
@@ -857,18 +771,15 @@ ccapi_global_error_id_t rci_set_factory_defaults_cb(ccapi_rci_info_t * const inf
 ccapi_global_error_id_t rci_reboot_cb(ccapi_rci_info_t * const info)
 {
     ccapi_global_error_id_t error_id = CCAPI_GLOBAL_ERROR_NONE;
-    char * xml_set_response_buffer = NULL;
+    char const * xml_set_response_buffer = NULL;
 
     printf("    Called '%s'\n", __FUNCTION__);
 
     append_data_to_xml_request_buffer("<reboot/>");
 
-    error_id = call_xml_rci_handler(info, &xml_set_response_buffer);
+    error_id = call_xml_rci_request(info, &xml_set_response_buffer);
 
-    if (xml_set_response_buffer != NULL)
-    {
-        free(xml_set_response_buffer);
-    }
+    xml_rci_finished((char *)xml_set_response_buffer);
 
     return error_id;
 }
