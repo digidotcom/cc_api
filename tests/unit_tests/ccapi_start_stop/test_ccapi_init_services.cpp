@@ -19,14 +19,6 @@ static ccapi_firmware_target_t firmware_list[] = {
     };
 static uint8_t firmware_count = ARRAY_SIZE(firmware_list);
 
-static void test_receive_data_cb(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info)
-{
-    (void)target;
-    (void)transport;
-    (void)request_buffer_info;
-    (void)response_buffer_info;
-}
-
 static ccapi_fw_data_error_t test_fw_data_cb(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
 {
     (void)target;
@@ -77,7 +69,7 @@ TEST(test_ccapi_init_services, testServicesSupported)
     ccapi_start_error_t error;
     ccapi_filesystem_service_t fs_service = {NULL, NULL};
     ccapi_fw_service_t fw_service = {{firmware_count, firmware_list}, {NULL, test_fw_data_cb, NULL}};
-    ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, NULL};
+    ccapi_receive_service_t receive_service = {NULL, NULL, NULL};
     ccapi_cli_service_t cli_service = {test_cli_request_cb, NULL};
     ccapi_rci_service_t rci_service = {(ccapi_rci_data_t const *)pointer};
 

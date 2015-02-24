@@ -66,7 +66,7 @@ TEST_GROUP(test_ccapi_receive_status_callback)
     {
         ccapi_start_t start = {0};
         ccapi_start_error_t error;
-        ccapi_receive_service_t receive_service = {NULL, test_receive_data_cb, test_receive_status_cb};
+        ccapi_receive_service_t receive_service = {NULL, NULL, test_receive_status_cb};
         Mock_create_all();
 
         th_fill_start_structure_with_good_parameters(&start);
