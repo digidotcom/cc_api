@@ -71,7 +71,7 @@ void show_virtual_dir_error_and_stop(ccapi_fs_error_t error)
 }
 
 // void test_fs_virtual_dirs_1( ccapi_buffer_info_t const * const request_buffer_info )
-void test_fs_virtual_dirs_1( char * sentence )
+void test_01_add_virtual_directory_nonexistent_path( char * sentence )
 {
     printf("TEST CASE: Add virtual directory for a nonexistent path '%s'\n",sentence);
 
@@ -81,7 +81,7 @@ void test_fs_virtual_dirs_1( char * sentence )
 
     if ( error == CCAPI_FS_ERROR_NOT_A_DIR )
     {
-        printf("test_fs_virtual_dirs_1: Error caught CCAPI_FS_ERROR_NOT_A_DIR\n");
+        printf("test_01_add_virtual_directory_nonexistent_path: Error caught CCAPI_FS_ERROR_NOT_A_DIR\n");
     }
     else
     {
@@ -93,7 +93,7 @@ void test_fs_virtual_dirs_1( char * sentence )
 
 
 
-void test_fs_virtual_dirs_2( char * sentence )
+void test_02_add_virtual_directory_existent_path( char * sentence )
 {
     printf("TEST CASE: Add virtual directory in a valid path '%s'\n",sentence);
 
@@ -103,7 +103,7 @@ void test_fs_virtual_dirs_2( char * sentence )
 
     if ( error == CCAPI_FS_ERROR_NONE )
     {
-        printf("test_fs_virtual_dirs_2: Error caught CCAPI_FS_ERROR_NONE\n");
+        printf("test_02_add_virtual_directory_existent_path: Error caught CCAPI_FS_ERROR_NONE\n");
     }
     else
     {
@@ -114,8 +114,84 @@ void test_fs_virtual_dirs_2( char * sentence )
 
 
 
+void test_03_add_virtual_directory_already_mapped( char * sentence )
+{
+    printf("TEST CASE: Add virtual directory in an already mapped path '%s'\n",sentence);
+
+    /* Add virtual directory with a real path passed by device request */
+    ccapi_fs_error_t error = ccapi_fs_add_virtual_dir("Test path1", sentence);
 
 
+    if ( error == CCAPI_FS_ERROR_ALREADY_MAPPED )
+    {
+        printf("test_03_add_virtual_directory_already_mapped: Error caught CCAPI_FS_ERROR_ALREADY_MAPPED\n");
+    }
+    else
+    {
+        /* This is an unexpected error */
+        show_virtual_dir_error_and_stop(error);
+    }
+}
+
+
+void test_04_remove_existent_virtual_directory( char * sentence )
+{
+    printf("TEST CASE: remove virtual directory that has been added before '%s'\n",sentence);
+
+    /* Add virtual directory with a real path passed by device request */
+    ccapi_fs_error_t error = ccapi_fs_remove_virtual_dir("Test path1");
+
+
+    if ( error == CCAPI_FS_ERROR_NONE )
+    {
+        printf("test_04_remove_existent_virtual_directory: Error caught CCAPI_FS_ERROR_NONE\n");
+    }
+    else
+    {
+        /* This is an unexpected error */
+        show_virtual_dir_error_and_stop(error);
+    }
+}
+
+
+void test_05_remove_nonexistent_virtual_directory( char * sentence )
+{
+    printf("TEST CASE: remove virtual directory that has not been added before '%s'\n",sentence);
+
+    /* Add virtual directory with a real path passed by device request */
+    ccapi_fs_error_t error = ccapi_fs_remove_virtual_dir("Test path1");
+
+
+    if ( error == CCAPI_FS_ERROR_NOT_MAPPED )
+    {
+        printf("test_05_remove_nonexistent_virtual_directory: Error caught CCAPI_FS_ERROR_NOT_MAPPED\n");
+    }
+    else
+    {
+        /* This is an unexpected error */
+        show_virtual_dir_error_and_stop(error);
+    }
+}
+
+
+void test_06_send_file_to_virtual_directory( char * sentence )
+{
+    printf("TEST CASE: send file to virtual directory '%s'\n",sentence);
+
+    /* Add virtual directory with a real path passed by device request */
+    ccapi_fs_error_t error = ccapi_fs_add_virtual_dir("Test_06_virtual_path", sentence);
+
+
+    if ( error == CCAPI_FS_ERROR_NONE )
+    {
+        printf("test_06_send_file_to_virtual_directory: Error caught CCAPI_FS_ERROR_NONE\n");
+    }
+    else
+    {
+        /* This is an unexpected error */
+        show_virtual_dir_error_and_stop(error);
+    }
+}
 
 
 
@@ -172,14 +248,30 @@ void ccapi_device_request_data_callback(char const * const target, ccapi_transpo
 
 
     /* Execute the selected action for this target */
-    if (  strncmp(target, "test_fs_virtual_dirs_1", strlen(target)) == 0 )
+    if (  strncmp(target, "test_01_add_virtual_directory_nonexistent_path", strlen(target)) == 0 )
     {
 //         test_fs_virtual_dirs_1( request_buffer_info );
-        test_fs_virtual_dirs_1( sentence );
+        test_01_add_virtual_directory_nonexistent_path( sentence );
     }
-    else if (  strncmp(target, "test_fs_virtual_dirs_2", strlen(target)) == 0 )
+    else if (  strncmp(target, "test_02_add_virtual_directory_existent_path", strlen(target)) == 0 )
     {
-        test_fs_virtual_dirs_2( sentence );
+        test_02_add_virtual_directory_existent_path( sentence );
+    }
+    else if (  strncmp(target, "test_03_add_virtual_directory_already_mapped", strlen(target)) == 0 )
+    {
+        test_03_add_virtual_directory_already_mapped( sentence );
+    }
+    else if (  strncmp(target, "test_04_remove_existent_virtual_directory", strlen(target)) == 0 )
+    {
+        test_04_remove_existent_virtual_directory( sentence );
+    }
+    else if (  strncmp(target, "test_05_remove_nonexistent_virtual_directory", strlen(target)) == 0 )
+    {
+        test_05_remove_nonexistent_virtual_directory( sentence );
+    }
+    else if (  strncmp(target, "test_06_send_file_to_virtual_directory", strlen(target)) == 0 )
+    {
+        test_06_send_file_to_virtual_directory( sentence );
     }
     else
     {
