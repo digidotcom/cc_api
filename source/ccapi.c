@@ -1351,6 +1351,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
             {
                 case connector_tcp_communication_started:
                 {
+                    ccapi_logging_line("TCP communication started");
                     ccapi_data->transport_tcp.connected = CCAPI_TRUE;
                     break;
                 }
