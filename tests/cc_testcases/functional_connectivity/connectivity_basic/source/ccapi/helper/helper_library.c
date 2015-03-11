@@ -15,6 +15,7 @@
 #include "helper_library.h"
 
 
+
 /* Basic Initialization functions ------------------------ */
 void fill_device_settings(ccapi_start_t * start)
 {
@@ -36,6 +37,57 @@ void fill_device_settings(ccapi_start_t * start)
     start->service.rci = NULL;
 }
 
+
+void print_ccapi_start_error(ccapi_start_error_t error)
+{
+    
+    printf("ccapi_start error: ");
+    switch (error)
+    {
+        case CCAPI_START_ERROR_NONE:
+            printf("CCAPI_START_ERROR_NONE");
+            break;
+        case CCAPI_START_ERROR_NULL_PARAMETER:
+            printf("CCAPI_START_ERROR_NULL_PARAMETER");
+            break;
+        case CCAPI_START_ERROR_INVALID_VENDORID:
+            printf("CCAPI_START_ERROR_INVALID_VENDORID");
+            break;
+        case CCAPI_START_ERROR_INVALID_DEVICEID:
+            printf("CCAPI_START_ERROR_INVALID_DEVICEID");
+            break;
+        case CCAPI_START_ERROR_INVALID_URL:
+            printf("CCAPI_START_ERROR_INVALID_URL");
+            break;
+        case CCAPI_START_ERROR_INVALID_DEVICETYPE:
+            printf("CCAPI_START_ERROR_INVALID_DEVICETYPE");
+            break;
+        case CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK:
+            printf("CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK");
+            break;
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
+            printf("CCAPI_START_ERROR_INVALID_FIRMWARE_INFO");
+            break;
+        case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
+            printf("CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK");
+            break;
+        case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
+            printf("CCAPI_START_ERROR_INSUFFICIENT_MEMORY");
+            break;
+        case CCAPI_START_ERROR_THREAD_FAILED:
+            printf("CCAPI_START_ERROR_THREAD_FAILED");
+            break;
+        case CCAPI_START_ERROR_LOCK_FAILED:
+            printf("CCAPI_START_ERROR_LOCK_FAILED");
+            break;
+        case CCAPI_START_ERROR_ALREADY_STARTED:
+            printf("CCAPI_START_ERROR_ALREADY_STARTED");
+            break;
+    }
+
+    printf("!!!!!\n");
+
+}
 
 
 
@@ -101,7 +153,7 @@ void ccapi_filesystem_changed_callback(char const * const local_path, ccapi_fs_c
 
 void fill_filesystem_service(ccapi_start_t * start)
 {
-    ccapi_filesystem_service_t filesystem_service;
+    static ccapi_filesystem_service_t filesystem_service;
 
     /* Fill the connection callbacks for the transport */
     filesystem_service.access = ccapi_filesystem_access_callback;
@@ -111,6 +163,75 @@ void fill_filesystem_service(ccapi_start_t * start)
     start->service.file_system = &filesystem_service;
 }
 
+
+
+
+/* Firmware functions -----------------------------*/
+ccapi_fw_data_error_t ccapi_firmware_data_callback(unsigned int const target, uint32_t offset, void const * const data, size_t size, ccapi_bool_t last_chunk)
+{
+    size_t const max_bytes_to_print = 4;
+    size_t const bytes_to_print = (size > max_bytes_to_print) ? max_bytes_to_print : size;
+    size_t i;
+
+    printf("ccapi_firmware_data_callback: offset = 0x%" PRIx32 "\n", offset);
+
+    printf("target=%d ,data = ", target);
+    for (i=0; i < bytes_to_print; i++)
+    {
+        printf("0x%02X ", ((uint8_t*)data)[i]);
+    }
+    printf("...\n");
+
+    printf("length = %" PRIsize " last_chunk=%d\n", size, last_chunk);
+
+    printf("done\n");
+    return CCAPI_FW_DATA_ERROR_NONE;
+}
+
+void ccapi_firmware_cancel_callback(unsigned int const target, ccapi_fw_cancel_error_t cancel_reason)
+{
+
+    printf("app_fw_cancel_cb for target='%d'. cancel_reason='%d'\n", target, cancel_reason);
+    return;
+}
+
+
+void ccapi_firmware_reset_callback(unsigned int const target, ccapi_bool_t * system_reset, ccapi_firmware_target_version_t * version)
+{
+    printf("app_fw_reset_cb for target='%d'. Current version='%d.%d.%d.%d'\n", target, version->major, version->minor, version->revision, version->build);
+
+    *system_reset = CCAPI_FALSE;
+
+}
+
+
+
+void fill_firmwareupdate_service(ccapi_start_t * start)
+{
+    static ccapi_firmware_target_t firmware_list[] = {
+       /* version   description    filespec             maximum_size       chunk_size */
+        {{1,0,0,0}, "Bootloader",  ".*\\.[bB][iI][nN]", 1 * 1024 * 1024,   1 * 1024 },  /* any *.bin files */
+        {{0,0,1,0}, "Kernel",      ".*\\.a",            128 * 1024 * 1024, 128 * 1024 }   /* any *.a files */
+    };
+
+    static uint8_t firmware_count = (sizeof(firmware_list)/sizeof(firmware_list[0]));
+
+
+    static ccapi_fw_service_t firmware_service;
+
+    firmware_service.target.item = firmware_list;
+    firmware_service.target.count = firmware_count;
+
+    firmware_service.callback.request = NULL;
+    firmware_service.callback.data = ccapi_firmware_data_callback;
+    firmware_service.callback.cancel = ccapi_firmware_cancel_callback;
+    firmware_service.callback.reset = ccapi_firmware_reset_callback;
+
+
+    /* Set the Filesystem service */
+    start->service.firmware = &firmware_service;
+
+}
 
 
 

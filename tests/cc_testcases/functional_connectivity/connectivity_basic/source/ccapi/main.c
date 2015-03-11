@@ -94,6 +94,9 @@ int main (void)
     /* Fill File system */
     fill_filesystem_service(&start);
 
+    /* Fill Firmware update */
+    fill_firmwareupdate_service(&start);
+
     /* Launch the connector instance */
     start_error = ccapi_start(&start);
 
@@ -104,6 +107,7 @@ int main (void)
     else
     {
         printf("ccapi_start error %d\n", start_error);
+        print_ccapi_start_error(start_error);
         goto error;
     }
 

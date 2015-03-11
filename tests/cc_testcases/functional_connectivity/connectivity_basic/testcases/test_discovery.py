@@ -2,7 +2,7 @@ import cc_testcase
 
 class DiscoveryTestCase(cc_testcase.TestCase):
 
-    def test_verify_1_device_type_matches(self):
+    def test_01_verify_device_type_matches(self):
         # Make sure that device is connected
         if (not self.cloudHandler.isDeviceConnected(self.device_id)):
             self.log.info("Waiting for Device to reconnect.")
@@ -21,7 +21,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             self.fail("Could not get device type")
 
 
-    def test_verify_2_vendor_id_matches(self):
+    def test_02_verify_vendor_id_matches(self):
         self.log.info("Beginning Test to Verify Vendor ID.")
         self.log.info("Retrieving Vendor ID for %s." % self.device_id)
         result, deviceVendorID = self.cloudHandler.getDeviceVendorID(self.device_id)
@@ -34,7 +34,7 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             self.fail("Could not get Vendor ID")
 
 
-    def test_verify_3_mac_address_matches(self):
+    def test_03_verify_mac_address_matches(self):
         self.log.info("Beginning Test to Verify MAC Address.")
         self.log.info("Retrieving MAC Address for %s." % self.device_id)
         result, deviceMAC = self.cloudHandler.getDeviceMAC(self.device_id)
@@ -48,19 +48,21 @@ class DiscoveryTestCase(cc_testcase.TestCase):
             self.fail("Could not get MAC Address")
 
 
-    # TODO: Test is ready, firmware is not supported yet
-    #def test_verify_4_firmware_level_matches(self):
-        #self.log.info("Beginning Test to Verify Firmware level.")
-        #self.log.info("Retrieving Firmware level for %s." % self.device_id)
-        #result, deviceFirmwareLevel = self.cloudHandler.getDeviceFirmwareLevel(self.device_id)
 
-        #if (result):
-            #self.log.info("Checking if Device Firmware level matches %s" % self.device_firmware)
-            #self.assertEqual(deviceFirmwareLevel, self.device_firmware,
-                #"Firmware Level (%s) does not match Firmware Level in configuration (%s)."
-                #% (deviceFirmwareLevel, self.device_firmware))
-        #else:
-            #self.fail("Could not get Firmware level")
+    def test_04_verify_firmware_level_matches(self):
+        self.log.info("Beginning Test to Verify Firmware level.")
+        self.log.info("Retrieving Firmware level for %s." % self.device_id)
+        result, deviceFirmwareLevel = self.cloudHandler.getDeviceFirmwareLevel(self.device_id)
+
+        if (result):
+            self.log.info("Checking if Device Firmware level matches %s" % self.device_firmware)
+            self.assertEqual(deviceFirmwareLevel, self.device_firmware,
+                "Firmware Level (%s) does not match Firmware Level in configuration (%s)."
+                % (deviceFirmwareLevel, self.device_firmware))
+
+            self.log.info("Device Firmware level obtained '%s' match with the expected '%s'!!" % (deviceFirmwareLevel, self.device_firmware) )
+        else:
+            self.fail("Could not get Firmware level")
 
 
 if __name__ == '__main__':
