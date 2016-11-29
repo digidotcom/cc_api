@@ -40,5 +40,4 @@ connector_api_remote.h
 *rci_usenames_defines.h
 *ccapi_rci_data.c
 *ccapi_rci_functions.h
-*ccapi_rci_functions.c
 *_bkp_*
