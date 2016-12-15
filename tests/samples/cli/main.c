@@ -23,7 +23,7 @@
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "devicecloud.digi.com"
 
 #define TEST_UDP 1
 #define TEST_SMS 0

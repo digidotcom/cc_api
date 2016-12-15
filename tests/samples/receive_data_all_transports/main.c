@@ -23,7 +23,7 @@
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "devicecloud.digi.com"
 
 #if !(defined UNUSED_ARGUMENT)
 #define UNUSED_ARGUMENT(a)  (void)(a)

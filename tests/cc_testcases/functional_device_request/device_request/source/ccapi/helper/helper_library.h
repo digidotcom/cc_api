@@ -20,7 +20,7 @@
 
 
 #define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "devicecloud.digi.com"
 #define DEVICE_CLOUD_VENDOR_ID  0x03000026
 #define DEVICE_IP               {0xC0, 0xA8, 0x01, 0x01}
 #define DEVICE_MAC_ADDRESS      {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF}

@@ -25,7 +25,7 @@
 #define DESCRIPTOR_1            "RCI SAMPLE Descriptor 1"
 #define DESCRIPTOR_2            "RCI SAMPLE Descriptor 2"
 
-#define DEVICE_CLOUD_URL_STRING "test.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "test.idigi.com"
 
 
 static void fill_start_structure(ccapi_start_t * start, unsigned int descriptor)

@@ -22,7 +22,7 @@
 #include "ccapi/ccxapi.h"
 
 #define DEVICE_TYPE_STRING      "Device type"
-#define DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "devicecloud.digi.com"
 
 static ccapi_firmware_target_t firmware_list_devA[] = {
        /* version   description    filespec             maximum_size       chunk_size */

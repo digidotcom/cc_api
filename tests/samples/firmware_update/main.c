@@ -22,7 +22,7 @@
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE             "Device type"
-#define DEVICE_CLOUD_URL        "login.etherios.com"
+#define DEVICE_CLOUD_URL        "devicecloud.digi.com"
 #define VENDOR_ID               0x030000DB
 
 const uint8_t mac[] = {0x00, 0x04, 0x9D, 0xAB, 0xCD, 0xEF};

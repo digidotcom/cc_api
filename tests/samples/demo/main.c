@@ -29,7 +29,7 @@
 #endif
 
 #define DEVICE_TYPE             "Simulated Tank (CCAPI)"
-#define DEVICE_CLOUD_URL        "login.etherios.com"
+#define DEVICE_CLOUD_URL        "devicecloud.digi.com"
 #define IPV4_ADDRESS_STRING     "192.168.1.2"
 
 //#error "Define your Device MAC Address and your account's Vendor ID and comment this error line"

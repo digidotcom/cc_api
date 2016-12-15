@@ -22,7 +22,7 @@
 #include "ccapi/ccapi.h"
 
 #define DEVICE_TYPE_STRING      "Linux Application"
-#define DEVICE_CLOUD_URL_STRING "test.etherios.com"
+#define DEVICE_CLOUD_URL_STRING "test.idigi.com"
 
 extern ccapi_rci_data_t const ccapi_rci_data;
 

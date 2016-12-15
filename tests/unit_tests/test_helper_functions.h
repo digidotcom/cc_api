@@ -24,7 +24,7 @@
 #define CONNECTOR_CONST_PROTECTION
 
 #define TH_DEVICE_TYPE_STRING      "Device type"
-#define TH_DEVICE_CLOUD_URL_STRING "login.etherios.com"
+#define TH_DEVICE_CLOUD_URL_STRING "devicecloud.digi.com"
 
 #include "CppUTest/CommandLineTestRunner.h"
 #include "mocks.h"
