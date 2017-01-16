@@ -296,7 +296,6 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
 
     ASSERT_MSG_GOTO(ccapi_data->service.firmware_update.processing.update_started, done);
 
-    connector_status = connector_callback_continue;
     complete_ptr->status = connector_firmware_download_success;
 
     for (chunk_pool_index = 0; chunk_pool_index < ARRAY_SIZE(ccapi_data->service.firmware_update.processing.chunk_pool); chunk_pool_index++)
@@ -315,6 +314,15 @@ static connector_callback_status_t ccapi_process_firmware_update_complete(connec
         ccapi_logging_line("update_complete arrived before all firmware data arrived!");
 
         complete_ptr->status = connector_firmware_download_not_complete;
+    }
+
+    if (ccapi_data->service.firmware_update.processing.data_error == CCAPI_FW_DATA_ERROR_INVALID_DATA)
+    {
+        ccapi_logging_line("Invalid data!");
+    }
+    else
+    {
+        connector_status = connector_callback_continue;
     }
 
     free_and_stop_service(ccapi_data);
