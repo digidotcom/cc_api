@@ -923,6 +923,8 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
         ccimp_os_yield();
     } while (ccapi_data->thread.connector_run->status != CCAPI_THREAD_NOT_STARTED);
 
+    ccapi_stop_thread(ccapi_data->thread.connector_run);
+
 #if (defined CCIMP_RCI_SERVICE_ENABLED)
     if (ccapi_data->config.rci_supported)
     {
