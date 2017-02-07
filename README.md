@@ -63,10 +63,18 @@ To build and run unit tests, execute:
 To get the coverage information, execute:
 - `$ make coverage`: This will build, link and run the test binary and run gcov and gcovr to output the coverage information for all files in "source/" subdirectory
 
-Building a Release
-------------------
-Execute script `./build_release.sh`, it will generate `ccapi.tgz` with all the necesary files for a release.
+License
+-------
+Copyright 2017, Digi International Inc.
 
-More Information
-----------------
-- [CCAPI documentation in Confluence](https://confluence.digi.com/display/CCAPI)
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, you can obtain one at http://mozilla.org/MPL/2.0/.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
