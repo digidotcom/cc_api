@@ -93,6 +93,7 @@ typedef struct {
 #endif
     } group;
 
+#ifdef RCI_LIST_MAX_DEPTH
 	struct {
 		unsigned int CONST current;
 		struct {
@@ -103,6 +104,7 @@ typedef struct {
 #endif
 		} data[RCI_LIST_MAX_DEPTH];
 	} list;
+#endif
 
     struct {
 		unsigned int CONST id;
