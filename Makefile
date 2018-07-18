@@ -44,6 +44,7 @@ CFLAGS += -Wformat-y2k -Wcast-align -Wformat-nonliteral
 CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
 CFLAGS += -Wall -Werror -Wextra -pedantic
 CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
+CFLAGS += -Wno-error=deprecated-declarations -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wno-error=discarded-qualifiers
 CFLAGS += --coverage
 
 # Include POSIX and GNU features.
@@ -88,9 +89,15 @@ ConfigGenerator:
 	ant -f $(CONFIG_GENERATOR_BUILD)
 
 auto_generated_files: ConfigGenerator
-	java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -type=global_header -rci_legacy_commands
-	java -jar $(CONFIG_GENERATOR_BIN) username:password -noUpload "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noBackup -ccapi -rci_legacy_commands $(TEST_DIR)/ccapi_rci/config.rci
-
+	# java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -ccapi -rci_legacy_commands
+	java -jar $(CONFIG_GENERATOR_BIN) username:password "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noUpload -noBackup -ccapi -usenames=all -rci_legacy_commands $(TEST_DIR)/ccapi_rci/config.rci
+	{ \
+		set -e; \
+		for file in connector_api_remote.h; do \
+			cp $(TEST_DIR)/ccapi_rci/$$file $(CUSTOM_CONNECTOR_INCLUDE); \
+		done; \
+	}
+	
 test_binary: $(COBJS) $(CPPOBJS)
 	$(CPP) -DUNIT_TEST $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(EXEC_NAME)
 	
