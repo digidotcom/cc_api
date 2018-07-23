@@ -95,17 +95,26 @@ typedef struct {
     char const * const * keys;
 } ccapi_rci_dictionary_t;
 
+typedef union {
+	unsigned int index;
+	char const * key;
+	unsigned int count;
+	ccapi_rci_dictionary_t dictionary;
+} ccapi_group_item_t;
+
+typedef union {
+    unsigned int index;
+    char const * key;
+    unsigned int count;
+    ccapi_rci_dictionary_t dictionary;
+} ccapi_list_item_t;
+
 typedef struct {
     struct {
 		ccapi_rci_group_type_t CONST type;
 		unsigned int CONST id;
 		ccapi_rci_collection_type_t CONST collection_type;
-		union {
-			unsigned int index;
-			char const * key;
-			unsigned int count;
-			ccapi_rci_dictionary_t dictionary;
-		} CONST item;
+		ccapi_group_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
         char const * CONST name;
 #endif
@@ -117,12 +126,7 @@ typedef struct {
 		struct {
 			unsigned int CONST id;
 		    ccapi_rci_collection_type_t CONST collection_type;
-		    union {
-		        unsigned int index;
-		        char const * key;
-		        unsigned int count;
-		        ccapi_rci_dictionary_t dictionary;
-		    } CONST item;
+		    ccapi_list_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
 			char const * CONST name;
 #endif
@@ -163,6 +167,11 @@ typedef union {
     ccapi_on_off_t  on_off_value;
     ccapi_bool_t  boolean_value;
 } ccapi_element_value_t;
+
+typedef union {
+    unsigned int count;
+    ccapi_rci_dictionary_t dictionary;
+} ccapi_response_item_t;
 
 typedef unsigned int (*ccapi_rci_function_t)(ccapi_rci_info_t * const info, ...);
 

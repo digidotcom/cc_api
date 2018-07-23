@@ -248,7 +248,7 @@ void ccapi_rci_thread(void * const argument)
                             enum_id = string_to_enum(enum_array, enum_element_count, element_value.string_value);
                             if (enum_id == -1)
                             {
-                                ccapi_data->service.rci.queued_callback.error = connector_rci_error_bad_value;
+                                ccapi_data->service.rci.queued_callback.error = connector_protocol_error_bad_value;
                             }
                             *actual_value = enum_id;
                         }
@@ -453,10 +453,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     	ASSERT(0);
                     	break;
                     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item.count;
-                    	break;
                     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item.dictionary;
+                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item;
                     	break;
                     }
                     break;
@@ -535,10 +533,8 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     	ASSERT(0);
                     	break;
                     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item.count;
-                    	break;
                     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item.dictionary;
+                        ccapi_data->service.rci.queued_callback.argument = &remote_config->response.item;
                     	break;
                     }
                     break;
