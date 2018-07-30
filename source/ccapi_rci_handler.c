@@ -150,24 +150,29 @@ static ccapi_rci_query_setting_attribute_source_t connector_to_ccapi_source_attr
 }
 
 #if (defined RCI_ENUMS_AS_STRINGS)
-static unsigned int get_ccfsm_element_enum_count(connector_remote_config_data_t const * const rci_internal_data, connector_remote_group_type_t const ccfsm_group_type, unsigned int const group_id, unsigned int const element_id)
+
+static connector_element_t const * get_ccfsm_element_enum_element(connector_remote_config_data_t const * const rci_internal_data, 
+    connector_remote_group_type_t const ccfsm_group_type, unsigned int const group_id, unsigned int const element_id, connector_remote_list_t const list)
 {
-    unsigned int const enum_count = rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.data[element_id].data.element->enums.count;
+    connector_group_t const group = rci_internal_data->group_table[ccfsm_group_type].groups[group_id];
+    connector_collection_t * c_collection =  &group.collection;
 
+#if (defined RCI_PARSER_USES_LIST)
+    if (list.depth > 0)
+    {
+        //c_collection = &group.collection.item.data[list.level[list.depth - 1].id].data.collection;
+         for (int i = 0; i < list.depth; i++) {
+            connector_item_t const * c_item = &c_collection->item.data[list.level[i].id];
+            c_collection = c_item->data.collection;
+         }
+    }
+#endif
+    connector_element_t const * const element = c_collection->item.data[element_id].data.element;
+
+    connector_element_enum_t const * const element_enum = element->enums.data;
     ASSERT(group_id < rci_internal_data->group_table[ccfsm_group_type].count);
-    ASSERT(element_id < rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.count);
-    ASSERT(rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.data[element_id].type == connector_element_type_enum);
-    return enum_count;
-}
-
-static connector_element_enum_t const * get_ccfsm_element_enum_info(connector_remote_config_data_t const * const rci_internal_data, connector_remote_group_type_t const ccfsm_group_type, unsigned int const group_id, unsigned int const element_id)
-{
-    connector_element_enum_t const * const element_enum = rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.data[element_id].data.element->enums.data;
-
-    ASSERT(group_id < rci_internal_data->group_table[ccfsm_group_type].count);
-    ASSERT(element_id < rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.count);
-    ASSERT(rci_internal_data->group_table[ccfsm_group_type].groups[group_id].collection.item.data[element_id].type == connector_element_type_enum);
-    return element_enum;
+    
+    return element;
 }
 
 static char const * enum_to_string(connector_element_enum_t const * const element_enum_info, unsigned int enum_id)
@@ -200,8 +205,10 @@ static void queue_enum_callback(ccapi_data_t * const ccapi_data, connector_remot
     unsigned int const element_id = remote_config->element.id;
     connector_remote_group_type_t const group_type = remote_config->group.type;
 
-    ccapi_data->service.rci.queued_callback.enum_data.array = get_ccfsm_element_enum_info(rci_desc, group_type, group_id, element_id);
-    ccapi_data->service.rci.queued_callback.enum_data.element_count = get_ccfsm_element_enum_count(rci_desc, group_type, group_id, element_id);
+    connector_element_t const * enum_element = get_ccfsm_element_enum_element(rci_desc, group_type, group_id, element_id, remote_config->list);
+
+    ccapi_data->service.rci.queued_callback.enum_data.array = enum_element->enums.data;
+    ccapi_data->service.rci.queued_callback.enum_data.element_count = enum_element->enums.count;
 }
 #endif
 
