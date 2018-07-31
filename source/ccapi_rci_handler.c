@@ -158,18 +158,13 @@ static connector_element_t const * get_ccfsm_element_enum_element(connector_remo
     connector_collection_t * c_collection =  &group.collection;
 
 #if (defined RCI_PARSER_USES_LIST)
-    if (list.depth > 0)
+    for (int i = 0; i < list.depth; i++)
     {
-        //c_collection = &group.collection.item.data[list.level[list.depth - 1].id].data.collection;
-         for (int i = 0; i < list.depth; i++) {
-            connector_item_t const * c_item = &c_collection->item.data[list.level[i].id];
-            c_collection = c_item->data.collection;
-         }
+        connector_item_t const * c_item = &c_collection->item.data[list.level[i].id];
+        c_collection = c_item->data.collection;
     }
 #endif
     connector_element_t const * const element = c_collection->item.data[element_id].data.element;
-
-    connector_element_enum_t const * const element_enum = element->enums.data;
     ASSERT(group_id < rci_internal_data->group_table[ccfsm_group_type].count);
     
     return element;
@@ -262,11 +257,10 @@ void ccapi_rci_thread(void * const argument)
                     }
                     else
                     {
-						ccapi_element_value_t element_value;
-                        unsigned int const * const actual_value = ((ccapi_element_value_t *) ccapi_data->service.rci.queued_callback.argument)->enum_value;
-
-                        ASSERT(*actual_value < enum_element_count);
-                        element_value.string_value = enum_to_string(enum_array, *actual_value);
+                        ccapi_element_value_t element_value;
+                        unsigned int const actual_value = ((ccapi_element_value_t *) ccapi_data->service.rci.queued_callback.argument)->enum_value;
+                        ASSERT(actual_value < enum_element_count);
+                        element_value.string_value = enum_to_string(enum_array, actual_value);
                         ccapi_data->service.rci.queued_callback.error = ccapi_data->service.rci.queued_callback.function_cb(rci_info, &element_value);
                     }
                 }
@@ -623,7 +617,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 							break;
 						case CCAPI_RCI_ACTION_SET:
                             ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.set_element;
-							ccapi_data->service.rci.queued_callback.argument = &remote_config->element.value;
+							ccapi_data->service.rci.queued_callback.argument = remote_config->element.value;
 							break;
                         case CCAPI_RCI_ACTION_DO_COMMAND:
                         case CCAPI_RCI_ACTION_REBOOT:
