@@ -157,13 +157,12 @@ static connector_element_t const * get_ccfsm_element_enum_element(connector_remo
     connector_group_t const group = rci_internal_data->group_table[ccfsm_group_type].groups[group_id];
     connector_collection_t * c_collection =  &group.collection;
 
-#if (defined RCI_PARSER_USES_LIST)
     for (int i = 0; i < list.depth; i++)
     {
         connector_item_t const * c_item = &c_collection->item.data[list.level[i].id];
         c_collection = c_item->data.collection;
     }
-#endif
+
     connector_element_t const * const element = c_collection->item.data[element_id].data.element;
     ASSERT(group_id < rci_internal_data->group_table[ccfsm_group_type].count);
     
