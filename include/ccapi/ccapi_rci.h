@@ -66,6 +66,13 @@ typedef enum {
 } ccapi_rci_group_type_t;
 
 typedef enum {
+    CCAPI_RCI_COLLECTION_TYPE_FIXED_ARRAY,
+    CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY,
+    CCAPI_RCI_COLLECTION_TYPE_FIXED_DICTIONARY,
+    CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY
+} ccapi_rci_collection_type_t;
+
+typedef enum {
     CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_CURRENT,
     CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_STORED,
     CCAPI_RCI_QUERY_SETTING_ATTRIBUTE_SOURCE_DEFAULTS
@@ -84,10 +91,30 @@ typedef struct {
 } ccapi_rci_query_setting_attributes_t;
 
 typedef struct {
+    unsigned int entries;
+    char const * const * keys;
+} ccapi_rci_dictionary_t;
+
+typedef union {
+	unsigned int index;
+	char const * key;
+	unsigned int count;
+	ccapi_rci_dictionary_t dictionary;
+} ccapi_group_item_t;
+
+typedef union {
+    unsigned int index;
+    char const * key;
+    unsigned int count;
+    ccapi_rci_dictionary_t dictionary;
+} ccapi_list_item_t;
+
+typedef struct {
     struct {
+		ccapi_rci_group_type_t CONST type;
 		unsigned int CONST id;
-        unsigned int CONST instance;
-        ccapi_rci_group_type_t CONST type;
+		ccapi_rci_collection_type_t CONST collection_type;
+		ccapi_group_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
         char const * CONST name;
 #endif
@@ -95,10 +122,11 @@ typedef struct {
 
 #ifdef RCI_LIST_MAX_DEPTH
 	struct {
-		unsigned int CONST current;
+		unsigned int CONST depth;
 		struct {
 			unsigned int CONST id;
-			unsigned int CONST instance;
+		    ccapi_rci_collection_type_t CONST collection_type;
+		    ccapi_list_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
 			char const * CONST name;
 #endif
@@ -134,10 +162,16 @@ typedef union {
     char const * string_value;
     int32_t signed_integer_value;
     uint32_t unsigned_integer_value;
+    float float_value;
     unsigned int enum_value;
     ccapi_on_off_t  on_off_value;
     ccapi_bool_t  boolean_value;
 } ccapi_element_value_t;
+
+typedef union {
+    unsigned int count;
+    ccapi_rci_dictionary_t dictionary;
+} ccapi_response_item_t;
 
 typedef unsigned int (*ccapi_rci_function_t)(ccapi_rci_info_t * const info, ...);
 
@@ -149,8 +183,16 @@ typedef struct {
         ccapi_rci_function_t end_action;
         ccapi_rci_function_t start_group;
         ccapi_rci_function_t end_group;
+        ccapi_rci_function_t lock_group_instances;
+		ccapi_rci_function_t set_group_instances;
+		ccapi_rci_function_t remove_group_instance;
+        ccapi_rci_function_t unlock_group_instances;
         ccapi_rci_function_t start_list;
         ccapi_rci_function_t end_list;
+        ccapi_rci_function_t lock_list_instances;
+		ccapi_rci_function_t set_list_instances;
+		ccapi_rci_function_t remove_list_instance;
+        ccapi_rci_function_t unlock_list_instances;
 		ccapi_rci_function_t get_element;
         ccapi_rci_function_t set_element;
         ccapi_rci_function_t do_command;
