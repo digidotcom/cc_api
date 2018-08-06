@@ -480,6 +480,12 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 }
                 case connector_request_id_remote_config_group_instance_remove:
                 {
+                    rci_info->group.id = remote_config->group.id;
+                    rci_info->group.collection_type = remote_config->group.collection_type;
+                    copy_group_item(rci_info, remote_config);
+                    COPY_GROUP_NAME(rci_info, remote_config);
+					clear_all_list_info(rci_info);
+					clear_element_info(rci_info);
                     ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.remove_group_instance;
                 	switch (rci_info->group.collection_type)
                 	{
@@ -564,6 +570,11 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 {
 					unsigned int const index = remote_config->list.depth - 1;
 
+					rci_info->list.depth = remote_config->list.depth;
+                    rci_info->list.data[index].collection_type = remote_config->list.level[index].collection_type;
+                    copy_list_item(rci_info, remote_config, index);
+                    COPY_LIST_NAME(rci_info, remote_config, index);
+					clear_element_info(rci_info);
                     ccapi_data->service.rci.queued_callback.function_cb = rci_data->callback.remove_list_instance;
                 	switch (rci_info->list.data[index].collection_type)
                 	{
