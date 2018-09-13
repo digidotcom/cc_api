@@ -688,6 +688,9 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 						case connector_element_type_boolean:
 							rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_BOOL;
 							break;
+						case connector_element_type_ref_enum:
+							rci_info->element.type = CCAPI_RCI_ELEMENT_TYPE_REF_ENUM;
+							break;
 						case connector_element_type_list:
 							ASSERT(0);
 							break;
