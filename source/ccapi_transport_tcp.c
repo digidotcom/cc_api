@@ -202,6 +202,8 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
     {
         success = copy_wan_info(dest, source, error);
     }
+	/* No buffers to copy if CCAPI_CONNECTION_LAN */
+
 done:
     return success;
 }
@@ -245,6 +247,10 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+	if (ccapi_data->transport_tcp.info)
+	{
+		free_transport_tcp_info(ccapi_data->transport_tcp.info);
+	}
     ccapi_data->transport_tcp.info = ccapi_malloc(sizeof *ccapi_data->transport_tcp.info);
     if (!valid_malloc(ccapi_data->transport_tcp.info, &error))
     {
