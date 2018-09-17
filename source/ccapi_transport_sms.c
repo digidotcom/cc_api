@@ -153,6 +153,10 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+	if (ccapi_data->transport_sms.info)
+	{
+        free_transport_sms_info(ccapi_data->transport_sms.info);
+	}
     ccapi_data->transport_sms.info = ccapi_malloc(sizeof *ccapi_data->transport_sms.info);
     if (!valid_malloc(ccapi_data->transport_sms.info, &error))
     {

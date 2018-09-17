@@ -82,6 +82,10 @@ ccapi_udp_start_error_t ccxapi_start_transport_udp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+	if (ccapi_data->transport_udp.info != NULL)
+	{
+		free_transport_udp_info(ccapi_data->transport_udp.info);
+	}
     ccapi_data->transport_udp.info = ccapi_malloc(sizeof *ccapi_data->transport_udp.info);
     if (!valid_malloc(ccapi_data->transport_udp.info, &error))
     {

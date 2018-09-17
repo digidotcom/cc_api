@@ -833,6 +833,10 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
                 break;
         }
     }
+    if (ccapi_data->transport_tcp.info != NULL)
+    {
+        free_transport_tcp_info(ccapi_data->transport_tcp.info);
+    }
 
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     if (ccapi_data->transport_udp.started)
@@ -852,6 +856,10 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
             case CCAPI_UDP_STOP_ERROR_NOT_STARTED:
                 ASSERT_MSG(udp_stop_error != CCAPI_UDP_STOP_ERROR_NONE);
         }
+    }
+    if (ccapi_data->transport_udp.info != NULL)
+    {
+        free_transport_udp_info(ccapi_data->transport_udp.info);
     }
 #endif
 
@@ -873,6 +881,10 @@ ccapi_stop_error_t ccxapi_stop(ccapi_handle_t const ccapi_handle, ccapi_stop_t c
             case CCAPI_SMS_STOP_ERROR_NOT_STARTED:
                 ASSERT_MSG(sms_stop_error != CCAPI_SMS_STOP_ERROR_NONE);
         }
+    }
+    if (ccapi_data->transport_sms.info != NULL)
+    {
+        free_transport_sms_info(ccapi_data->transport_sms.info);
     }
 #endif
 
