@@ -146,28 +146,6 @@ static ccapi_bool_t valid_malloc(void * ptr, ccapi_tcp_start_error_t * const err
     }
 }
 
-static ccapi_bool_t copy_lan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
-{
-    ccapi_bool_t success = CCAPI_TRUE;
-
-    UNUSED_ARGUMENT(error);
-    switch (source->connection.ip.type)
-    {
-        case CCAPI_IPV4:
-        {
-            memcpy(dest->connection.ip.address.ipv4, dest->connection.ip.address.ipv4, sizeof dest->connection.ip.address.ipv4);
-            break;
-        }
-        case CCAPI_IPV6:
-        {
-            memcpy(dest->connection.ip.address.ipv6, dest->connection.ip.address.ipv6, sizeof dest->connection.ip.address.ipv6);
-            break;
-        }
-    }
-
-    return success;
-}
-
 static ccapi_bool_t copy_wan_info(ccapi_tcp_info_t * const dest, ccapi_tcp_info_t const * const source, ccapi_tcp_start_error_t * const error)
 {
     ccapi_bool_t success = CCAPI_TRUE;
@@ -220,19 +198,12 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
         strcpy(dest->connection.password, source->connection.password);
     }
 
-    switch (source->connection.type)
+    if (source->connection.type == CCAPI_CONNECTION_WAN)
     {
-        case CCAPI_CONNECTION_LAN:
-        {
-            success = copy_lan_info(dest, source, error);
-            break;
-        }
-        case CCAPI_CONNECTION_WAN:
-        {
-            success = copy_wan_info(dest, source, error);
-            break;
-        }
+        success = copy_wan_info(dest, source, error);
     }
+	/* No buffers to copy if CCAPI_CONNECTION_LAN */
+
 done:
     return success;
 }
@@ -276,6 +247,10 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
         goto done;
     }
 
+	if (ccapi_data->transport_tcp.info)
+	{
+		free_transport_tcp_info(ccapi_data->transport_tcp.info);
+	}
     ccapi_data->transport_tcp.info = ccapi_malloc(sizeof *ccapi_data->transport_tcp.info);
     if (!valid_malloc(ccapi_data->transport_tcp.info, &error))
     {
