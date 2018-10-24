@@ -69,6 +69,7 @@ typedef struct {
                 ccapi_filesystem_service_t * file_system;
                 ccapi_cli_service_t * cli; /* SM only */
                 ccapi_sm_service_t * sm;
+				ccapi_streaming_msg_service_t * streaming_msg;
         } service;
 } ccapi_start_t;
 

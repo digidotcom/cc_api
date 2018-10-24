@@ -33,6 +33,7 @@
 #include "ccapi/ccapi_ping.h"
 #include "ccapi/ccapi_sm.h"
 #include "ccapi/ccapi_rci.h"
+#include "ccapi/ccapi_streaming_msg.h"
 #include "ccapi/ccapi_init.h"
 
 
