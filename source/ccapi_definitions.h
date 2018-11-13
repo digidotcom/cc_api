@@ -78,7 +78,7 @@ typedef struct {
     ccapi_bool_t firmware_supported;
     ccapi_bool_t rci_supported;
     ccapi_bool_t filesystem_supported;
-	ccapi_bool_t streaming_msg_supported;
+	ccapi_bool_t streaming_cli_supported;
     ccapi_status_callback_t status_callback;
 } ccapi_config_t;
 
@@ -262,10 +262,10 @@ typedef struct {
             ccapi_sm_service_t user_callback;
         } sm;
 #endif
-#if (defined CCIMP_STREAMING_MSG_SERVICE_ENABLED)
+#if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
 		struct {
-			ccapi_streaming_msg_service_t user_callback;
-		} streaming_msg;
+			ccapi_streaming_cli_service_t user_callback;
+		} streaming_cli;
 #endif
     } service;
     struct {
@@ -420,8 +420,8 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 #if (defined CCIMP_RCI_SERVICE_ENABLED)
 connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config_t const request_id, void * const data, ccapi_data_t * const ccapi_data);
 #endif
-#if (defined CCIMP_STREAMING_MSG_SERVICE_ENABLED)
-connector_callback_status_t ccapi_streaming_msg_handler(connector_request_id_streaming_msg_service_t const request, void * const data, ccapi_data_t * const ccapi_data);
+#if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
+connector_callback_status_t ccapi_streaming_cli_handler(connector_request_id_streaming_cli_service_t const request, void * const data, ccapi_data_t * const ccapi_data);
 #endif
 
 void ccxapi_asynchronous_stop(ccapi_data_t * const ccapi_data);

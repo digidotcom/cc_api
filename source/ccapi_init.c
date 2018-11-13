@@ -399,7 +399,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.cli_supported = CCAPI_FALSE;
     ccapi_data->config.sm_supported = CCAPI_FALSE;
     ccapi_data->config.rci_supported = CCAPI_FALSE;
-	ccapi_data->config.streaming_msg_supported = CCAPI_FALSE;
+	ccapi_data->config.streaming_cli_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -613,11 +613,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     }
 #endif
 
-#if (defined CCIMP_STREAMING_MSG_SERVICE_ENABLED)
-	if (start->service.streaming_msg != NULL)
+#if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
+	if (start->service.streaming_cli != NULL)
 	{
-        ccapi_data->config.streaming_msg_supported = CCAPI_TRUE;
-        ccapi_data->service.streaming_msg.user_callback = *start->service.streaming_msg;
+        ccapi_data->config.streaming_cli_supported = CCAPI_TRUE;
+        ccapi_data->service.streaming_cli.user_callback = *start->service.streaming_cli;
 	}
 #endif
 
