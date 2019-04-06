@@ -399,6 +399,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.cli_supported = CCAPI_FALSE;
     ccapi_data->config.sm_supported = CCAPI_FALSE;
     ccapi_data->config.rci_supported = CCAPI_FALSE;
+	ccapi_data->config.streaming_cli_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -610,6 +611,14 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
         ccapi_data->service.rci.queued_callback.function_cb = NULL;
     }
+#endif
+
+#if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
+	if (start->service.streaming_cli != NULL)
+	{
+        ccapi_data->config.streaming_cli_supported = CCAPI_TRUE;
+        ccapi_data->service.streaming_cli.user_callback = *start->service.streaming_cli;
+	}
 #endif
 
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);

@@ -619,6 +619,13 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             data_service_supported->supported = connector_true;
             break;
         }
+		case connector_request_id_config_streaming_cli:
+		{
+            connector_config_supported_t * const streaming_message_service_supported = data;
+
+            streaming_message_service_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.streaming_cli_supported);
+			break;
+		}
         case connector_request_id_config_connection_type:
         {
             connector_config_connection_type_t * const connection_type = data;
@@ -1582,6 +1589,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
         case connector_class_id_remote_config:
             status = ccapi_rci_handler(request_id.remote_config_request, data, ccapi_data);
             break;
+#endif
+#if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
+		case connector_class_id_streaming_cli:
+			status = ccapi_streaming_cli_handler(request_id.streaming_cli_service_request, data, ccapi_data);
+			break;
 #endif
         default:
             status = connector_callback_unrecognized;
