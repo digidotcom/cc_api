@@ -27,7 +27,7 @@
 
 connector_callback_status_t ccapi_streaming_cli_handler(connector_request_id_streaming_cli_service_t const request, void * const data, ccapi_data_t * const ccapi_data)
 {
-	connector_callback_status_t status;
+	connector_callback_status_t status = connector_callback_error;
 	ccapi_streaming_cli_service_t * callbacks = &ccapi_data->service.streaming_cli.user_callback;
 
 	switch (request)

@@ -98,7 +98,7 @@ static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_f
 
 static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorithm(connector_file_system_hash_algorithm_t const ccimp_hash_alg)
 {
-    ccimp_fs_hash_alg_t ccimp_hash_algorithm;
+    ccimp_fs_hash_alg_t ccimp_hash_algorithm = INVALID_ENUM(ccimp_fs_hash_alg_t);
 
     switch (ccimp_hash_alg)
     {
@@ -115,7 +115,7 @@ static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorit
             ccimp_hash_algorithm = CCIMP_FS_HASH_MD5;
             break;
     }
-
+    
     return ccimp_hash_algorithm;
 }
 
@@ -152,7 +152,7 @@ static connector_file_system_error_t ccfsm_file_system_error_status_from_ccimp_f
 
 static ccimp_session_error_status_t ccimp_session_error_from_ccfsm_session_error(connector_session_error_t const ccfsm_session_error)
 {
-    ccimp_session_error_status_t cccimp_session_error;
+    ccimp_session_error_status_t cccimp_session_error = INVALID_ENUM(ccimp_session_error_status_t);
 
     switch(ccfsm_session_error)
     {

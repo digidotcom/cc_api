@@ -32,6 +32,7 @@
 #include "connector_api.h"
 
 #define UNUSED_ARGUMENT(a)  (void)(a)
+#define INVALID_ENUM(type)  ((type) -1)
 
 #define ON_FALSE_DO_(cond, code)        do { if (!(cond)) {code;} } while (0)
 
@@ -239,8 +240,25 @@ typedef struct {
             ccapi_rci_info_t rci_info;
             ccapi_rci_thread_status_t rci_thread_status;
             struct {
-                ccapi_rci_function_t function_cb;
-                void * argument;
+                enum {
+                    ccapi_callback_type_none,
+                    ccapi_callback_type_base,
+                    ccapi_callback_type_lock,
+                    ccapi_callback_type_element
+                } type;
+                union {
+                    struct {
+                        ccapi_rci_function_base_t function;
+                    } base;
+                    struct {
+                        ccapi_rci_function_lock_t function;
+                        ccapi_response_item_t * item;
+                    } lock;
+                    struct {
+                        ccapi_rci_function_element_t function;
+                        ccapi_element_value_t * value;
+                    } element;
+                } as;
                 unsigned int error;
 #if (defined RCI_ENUMS_AS_STRINGS)
                 struct {
@@ -248,7 +266,7 @@ typedef struct {
                     unsigned int element_count;
                 } enum_data;
 #endif
-            } queued_callback;
+            } callback;
         } rci;
 #endif
 #if (defined CONNECTOR_SM_CLI)

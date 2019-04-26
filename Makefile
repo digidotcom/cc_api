@@ -41,9 +41,9 @@ CFLAGS += $(DFLAGS)
 CFLAGS += -Winit-self -Wpointer-arith
 CFLAGS += -Wformat-security
 CFLAGS += -Wformat-y2k -Wcast-align -Wformat-nonliteral
-CFLAGS += -Wpadded -Wredundant-decls -Wvariadic-macros
+CFLAGS += -Wredundant-decls -Wvariadic-macros
 CFLAGS += -Wall -Werror -Wextra -pedantic
-CFLAGS += -Wno-error=padded -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
+CFLAGS += -Wno-error=format-nonliteral -Wno-unused-function -Wno-missing-field-initializers
 CFLAGS += -Wno-error=deprecated-declarations -Wno-error=incompatible-pointer-types -Wno-error=int-conversion -Wno-error=discarded-qualifiers
 CFLAGS += --coverage
 
@@ -67,7 +67,7 @@ CPPSRCS = $(wildcard ./*.cpp) $(TESTS_SOURCES) $(MOCKS_SOURCES)
 # Libraries to Link
 LIBS = -lc -lCppUTest -lCppUTestExt -lpthread -lrt -lcrypto
 
-CCFLAGS := $(CFLAGS) -std=c89
+CCFLAGS := $(CFLAGS) -std=c99
 
 CFLAGS += -std=c++0x
 
@@ -90,7 +90,7 @@ ConfigGenerator:
 
 auto_generated_files: ConfigGenerator
 	# java -jar $(CONFIG_GENERATOR_BIN) -path=$(CUSTOM_CONNECTOR_INCLUDE) -noBackup -ccapi -rci_legacy_commands
-	java -jar $(CONFIG_GENERATOR_BIN) username:password "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noUpload -noBackup -ccapi -usenames=all -rci_legacy_commands $(TEST_DIR)/ccapi_rci/config.rci
+	java -jar $(CONFIG_GENERATOR_BIN) username:password "Device type" 1.0.0.0 -vendor=0x12345678 -path=$(TEST_DIR)/ccapi_rci -noUpload -noBackup -ccapi -c99 -usenames=all -rci_legacy_commands $(TEST_DIR)/ccapi_rci/config.rci
 	{ \
 		set -e; \
 		for file in connector_api_remote.h; do \

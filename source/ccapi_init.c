@@ -339,7 +339,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_start_error_t error = CCAPI_START_ERROR_NONE;
     ccapi_data_t * ccapi_data = NULL;
 #if (defined CCIMP_FIRMWARE_SERVICE_ENABLED)
-    ccapi_bool_t stub_fw_update;
+    ccapi_bool_t stub_fw_update = CCAPI_TRUE;
 #endif
 
 #if (defined CCIMP_DEBUG_ENABLED)
@@ -609,7 +609,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
         ccapi_data->config.rci_supported = CCAPI_TRUE;
         ccapi_data->service.rci.rci_data = start->service.rci->rci_data;
         ccapi_data->service.rci.rci_thread_status = CCAPI_RCI_THREAD_IDLE;
-        ccapi_data->service.rci.queued_callback.function_cb = NULL;
+        ccapi_data->service.rci.callback.type = ccapi_callback_type_none;
     }
 #endif
 
@@ -738,9 +738,9 @@ done:
 
 static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t const stop_behavior)
 {
-    ccapi_transport_stop_t transport_stop_behavior;
+    ccapi_transport_stop_t transport_stop_behavior = INVALID_ENUM(ccapi_transport_stop_t);
 
-    switch(stop_behavior)
+    switch (stop_behavior)
     {
         case CCAPI_STOP_GRACEFULLY:
             transport_stop_behavior = CCAPI_TRANSPORT_STOP_GRACEFULLY;
@@ -749,7 +749,6 @@ static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t co
             transport_stop_behavior = CCAPI_TRANSPORT_STOP_IMMEDIATELY;
             break;  
     }
-
     return transport_stop_behavior;
 }
 

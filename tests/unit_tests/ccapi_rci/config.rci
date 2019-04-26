@@ -25,7 +25,7 @@ group setting group_3 "Group 3"
 group state group_2 "Group 2"
     element el_ip "IP element" type ipv4  
     element el_fqdnv4 "FQDNV4 element" type fqdnv4 max 127
-    element el_fqdnv6 "FQDNV6 element" type fqdnv6
+    element el_fqdnv6 "FQDNV6 element" type fqdnv6 max 127
     element el_mac "mac address" type mac_addr
     element el_datetime "Current time" type datetime access  read_write
     error group_2_error_1 "Group 2 Error 1"

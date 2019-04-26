@@ -663,7 +663,7 @@ done:
 
 connector_callback_status_t ccapi_data_service_handler(connector_request_id_data_service_t const data_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
-    connector_callback_status_t connector_status;
+    connector_callback_status_t connector_status = connector_callback_unrecognized;
 
     switch (data_service_request)
     {
@@ -741,9 +741,8 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         }
     }
 
-    ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);
+    ASSERT_MSG(connector_status != connector_callback_unrecognized);
 
-done:
     return connector_status;
 }
 #endif

@@ -355,7 +355,7 @@ static connector_callback_status_t ccapi_process_firmware_update_abort(connector
 
     if (ccapi_data->service.firmware_update.config.callback.cancel != NULL)
     {
-        ccapi_fw_cancel_error_t cancel_reason;
+        ccapi_fw_cancel_error_t cancel_reason = INVALID_ENUM(ccapi_fw_cancel_error_t);
 
         switch (abort_ptr->status)
         {

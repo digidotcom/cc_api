@@ -63,7 +63,7 @@ done:
 
 static ccapi_dp_b_error_t send_data_error_to_dp_binary_error(ccapi_send_error_t send_data_error)
 {
-    ccapi_dp_b_error_t dp_b_error;
+    ccapi_dp_b_error_t dp_b_error = INVALID_ENUM(ccapi_dp_b_error_t);
 
     switch (send_data_error)
     {

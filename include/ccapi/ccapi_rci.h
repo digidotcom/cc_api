@@ -20,6 +20,10 @@
 #ifndef _CCAPI_RCI_H_
 #define _CCAPI_RCI_H_
 
+#if (defined CONST)
+#undef CONST
+#endif
+
 #if (defined CCAPI_CONST_PROTECTION_UNLOCK)
 #define CONST
 #else
@@ -174,31 +178,33 @@ typedef union {
     ccapi_rci_dictionary_t dictionary;
 } ccapi_response_item_t;
 
-typedef unsigned int (*ccapi_rci_function_t)(ccapi_rci_info_t * const info, ...);
+typedef unsigned int (*ccapi_rci_function_base_t)(ccapi_rci_info_t * const info);
+typedef unsigned int (*ccapi_rci_function_lock_t)(ccapi_rci_info_t * const info, ccapi_response_item_t * const item);
+typedef unsigned int (*ccapi_rci_function_element_t)(ccapi_rci_info_t * const info, ccapi_element_value_t * const element);
 
 typedef struct {
     struct {
-        ccapi_rci_function_t start_session;
-        ccapi_rci_function_t end_session;
-        ccapi_rci_function_t start_action;
-        ccapi_rci_function_t end_action;
-        ccapi_rci_function_t start_group;
-        ccapi_rci_function_t end_group;
-        ccapi_rci_function_t lock_group_instances;
-		ccapi_rci_function_t set_group_instances;
-		ccapi_rci_function_t remove_group_instance;
-        ccapi_rci_function_t unlock_group_instances;
-        ccapi_rci_function_t start_list;
-        ccapi_rci_function_t end_list;
-        ccapi_rci_function_t lock_list_instances;
-		ccapi_rci_function_t set_list_instances;
-		ccapi_rci_function_t remove_list_instance;
-        ccapi_rci_function_t unlock_list_instances;
-		ccapi_rci_function_t get_element;
-        ccapi_rci_function_t set_element;
-        ccapi_rci_function_t do_command;
-        ccapi_rci_function_t set_factory_defaults;
-        ccapi_rci_function_t reboot;
+        ccapi_rci_function_base_t start_session;
+        ccapi_rci_function_base_t end_session;
+        ccapi_rci_function_base_t start_action;
+        ccapi_rci_function_base_t end_action;
+        ccapi_rci_function_base_t start_group;
+        ccapi_rci_function_base_t end_group;
+        ccapi_rci_function_lock_t lock_group_instances;
+		ccapi_rci_function_base_t set_group_instances;
+		ccapi_rci_function_base_t remove_group_instance;
+        ccapi_rci_function_base_t unlock_group_instances;
+        ccapi_rci_function_base_t start_list;
+        ccapi_rci_function_base_t end_list;
+        ccapi_rci_function_lock_t lock_list_instances;
+		ccapi_rci_function_base_t set_list_instances;
+		ccapi_rci_function_base_t remove_list_instance;
+        ccapi_rci_function_base_t unlock_list_instances;
+		ccapi_rci_function_element_t get_element;
+        ccapi_rci_function_element_t set_element;
+        ccapi_rci_function_base_t do_command;
+        ccapi_rci_function_base_t set_factory_defaults;
+        ccapi_rci_function_base_t reboot;
     } callback;
     struct connector_remote_config_data const * rci_desc;
 } ccapi_rci_data_t;
