@@ -167,11 +167,19 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
 
 static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t const ccapi_stop)
 {
-#define SAME_VALUE(a, b)    ((int) (a) == (int) (b))
-    ASSERT_MSG(SAME_VALUE(CCAPI_TRANSPORT_STOP_GRACEFULLY, connector_wait_sessions_complete));
-    ASSERT_MSG(SAME_VALUE(CCAPI_TRANSPORT_STOP_IMMEDIATELY, connector_stop_immediately));
+    connector_stop_condition_t stop_condition;
 
-    return (connector_stop_condition_t) ccapi_stop;
+    switch(ccapi_stop)
+    {
+        case CCAPI_TRANSPORT_STOP_GRACEFULLY:
+            stop_condition = connector_wait_sessions_complete;
+            break;
+        case CCAPI_TRANSPORT_STOP_IMMEDIATELY:
+            stop_condition = connector_stop_immediately;
+            break;
+    }
+
+    return stop_condition;
 }
 
 connector_status_t ccapi_initiate_transport_stop(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_transport_stop_t const behavior)
