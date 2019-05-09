@@ -167,7 +167,7 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
 
 static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t const ccapi_stop)
 {
-    connector_stop_condition_t stop_condition;
+    connector_stop_condition_t stop_condition = INVALID_ENUM(connector_stop_condition_t);
 
     switch(ccapi_stop)
     {
