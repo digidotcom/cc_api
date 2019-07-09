@@ -494,7 +494,7 @@ done:
 
 static connector_data_point_type_t get_data_stream_type_from_arg_list(ccapi_dp_argument_t const * const list, unsigned int const count)
 {
-    connector_data_point_type_t type;
+    connector_data_point_type_t type = INVALID_ENUM(connector_data_point_type_t);
     ccapi_bool_t found = CCAPI_FALSE;
     unsigned int i;
 
