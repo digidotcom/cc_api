@@ -20,6 +20,8 @@
 #ifndef _CCAPI_STREAMING_CLI_H_
 #define _CCAPI_STREAMING_CLI_H_
 
+#if (defined CONNECTOR_STREAMING_CLI_SERVICE)
+
 typedef unsigned int (*ccapi_streaming_cli_start_session_t)(connector_streaming_cli_session_start_request_t * request);
 typedef unsigned int (*ccapi_streaming_cli_poll_session_t)(connector_streaming_cli_poll_request_t * request);
 typedef unsigned int (*ccapi_streaming_cli_send_t)(connector_streaming_cli_session_send_data_t * request);
@@ -33,5 +35,7 @@ typedef struct {
 	ccapi_streaming_cli_receive_t receive_data;
 	ccapi_streaming_cli_end_session_t end_session;
 } ccapi_streaming_cli_service_t;
+
+#endif
 
 #endif
