@@ -480,9 +480,120 @@ static connector_callback_status_t ccapi_process_phone_provisioning(connector_sm
     return connector_callback_continue;
 }
 
+/* Encryption is currently mandatory for SM, so for now use an simpler check */
+#if 1
+#define have_encryption(ccapi_data)             ((ccapi_data)->config.sm_supported)
+#else
+#define have_encryption(ccapi_data)             (((ccapi_data)->config.sm_supported) && ((ccapi_data)->service.sm.user_callback.encryption != NULL))
+#endif
+
+#define encryption_callback(ccapi_data, name)   ((ccapi_data)->service.sm.user_callback.encryption->name)
+
+#define HUMAN_CASE(enum)   case enum: return #enum; break
+static char const * human_sm_transport(ccapi_sm_transport_t const transport)
+{
+    switch (transport)
+    {
+        HUMAN_CASE(connector_sm_transport_sms);
+        HUMAN_CASE(connector_sm_transport_satellite);
+        HUMAN_CASE(connector_sm_transport_udp);
+        HUMAN_CASE(connector_sm_transport_edp);
+    }
+
+    return "human_sm_transport UNKNOWN";
+}
+
+static char const * human_sm_encryption_data_type(connector_sm_encryption_data_type_t const type)
+{
+    switch (type)
+    {
+        HUMAN_CASE(connector_sm_encryption_data_type_current_key);
+        HUMAN_CASE(connector_sm_encryption_data_type_previous_key);
+        HUMAN_CASE(connector_sm_encryption_data_type_id);
+        HUMAN_CASE(connector_sm_encryption_data_type_tracking);
+    }
+
+    return "human_sm_encryption_data_type UNKNOWN";
+}
+
+static connector_callback_status_t ccapi_process_load_data(connector_sm_encryption_load_data_t * const load_data, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_load_data: transport=%s, type=%s, bytes-required=%d",
+        human_sm_transport(load_data->transport), human_sm_encryption_data_type(load_data->type), load_data->bytes_required);
+
+    if (!have_encryption(ccapi_data))
+    {
+        return connector_callback_unrecognized;
+    }
+
+    if (!encryption_callback(ccapi_data, load_data)(load_data->transport, load_data->type, load_data->data, load_data->bytes_required))
+    {
+        return connector_callback_error;
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_store_data(connector_sm_encryption_store_data_t const * const store_data, ccapi_data_t * const ccapi_data)
+{
+    ccapi_logging_line("ccapi_process_store_data: transport=%s, type=%s, bytes-used=%d",
+        human_sm_transport(store_data->transport), human_sm_encryption_data_type(store_data->type), store_data->bytes_used);
+
+
+    if (!have_encryption(ccapi_data))
+    {
+        return connector_callback_unrecognized;
+    }
+
+    if (!encryption_callback(ccapi_data, store_data)(store_data->transport, store_data->type, store_data->data, store_data->bytes_used))
+    {
+        return connector_callback_error;
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_encrypt_gcm(connector_sm_encrypt_gcm_t * const encrypt_gcm, ccapi_data_t * const ccapi_data)
+{
+    ccapi_sm_encrypt_gcm_t * const encrypt_gcm_transformed = (ccapi_sm_encrypt_gcm_t *) encrypt_gcm;
+
+    ccapi_logging_line("ccapi_process_encrypt_gcm: message-length=%d", encrypt_gcm_transformed->message.length);
+
+    if (!have_encryption(ccapi_data))
+    {
+        return connector_callback_unrecognized;
+    }
+
+    if (!encryption_callback(ccapi_data, encrypt_gcm)(encrypt_gcm_transformed))
+    {
+        return connector_callback_error;
+    }
+
+    return connector_callback_continue;
+}
+
+static connector_callback_status_t ccapi_process_decrypt_gcm(connector_sm_decrypt_gcm_t * const decrypt_gcm, ccapi_data_t * const ccapi_data)
+{
+    ccapi_sm_decrypt_gcm_t * const decrypt_gcm_transformed = (ccapi_sm_decrypt_gcm_t *) decrypt_gcm;
+
+    ccapi_logging_line("ccapi_process_decrypt_gcm: message-length=%d", decrypt_gcm_transformed->message.length);
+
+    if (!have_encryption(ccapi_data))
+    {
+        return connector_callback_unrecognized;
+    }
+
+    if (!encryption_callback(ccapi_data, decrypt_gcm)(decrypt_gcm_transformed))
+    {
+        return connector_callback_error;
+    }
+
+    return connector_callback_continue;
+}
+
 connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t const sm_service_request, void * const data, ccapi_data_t * const ccapi_data)
 {
-    connector_callback_status_t connector_status;
+    connector_callback_status_t connector_status = connector_callback_unrecognized;
 
     switch (sm_service_request)
     {
@@ -568,6 +679,42 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
 
             break;
          }
+
+        case connector_request_id_sm_encryption_load_data:
+        {
+            connector_sm_encryption_load_data_t * const ptr = data;
+
+            connector_status = ccapi_process_load_data(ptr, ccapi_data);
+
+            break;
+        }
+
+        case connector_request_id_sm_encryption_store_data:
+        {
+            connector_sm_encryption_store_data_t const * const ptr = data;
+
+            connector_status = ccapi_process_store_data(ptr, ccapi_data);
+
+            break;
+        }
+
+        case connector_request_id_sm_encrypt_gcm:
+        {
+            connector_sm_encrypt_gcm_t * const ptr = data;
+
+            connector_status = ccapi_process_encrypt_gcm(ptr, ccapi_data);
+
+            break;
+        }
+
+        case connector_request_id_sm_decrypt_gcm:
+        {
+            connector_sm_decrypt_gcm_t * const ptr = data;
+
+            connector_status = ccapi_process_decrypt_gcm(ptr, ccapi_data);
+
+            break;
+        }
     }
 
     ASSERT_MSG_GOTO(connector_status != connector_callback_unrecognized, done);

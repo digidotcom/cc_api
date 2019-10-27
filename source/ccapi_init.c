@@ -574,7 +574,6 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CONNECTOR_SM_CLI)
     if (start->service.cli != NULL)
     {
-
         /* Check required callbacks */
         if (start->service.cli->request == NULL)
         {
@@ -592,6 +591,25 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
     if (start->service.sm != NULL)
     {
+        ccapi_sm_encryption_t const * encryption = start->service.sm->encryption;
+
+        /* The CCAPI design was meant to allow non-encrypted SM, but problems arose in CCFSM. For now we will require it. */
+        if (encryption == NULL)
+        {
+            error = CCAPI_START_ERROR_INVALID_SM_ENCRYPTION_CALLBACK;
+            goto done;
+        }
+
+        /* Check required callbacks */
+        if (encryption != NULL)
+        {
+            if ((encryption->load_data == NULL) || (encryption->store_data == NULL) || (encryption->encrypt_gcm == NULL) || (encryption->decrypt_gcm == NULL))
+            {
+                error = CCAPI_START_ERROR_INVALID_SM_ENCRYPTION_CALLBACK;
+                goto done;
+            }
+        }
+
         ccapi_data->config.sm_supported = CCAPI_TRUE;
         ccapi_data->service.sm.user_callback = *start->service.sm;
     }
@@ -602,7 +620,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     {
         if (start->service.rci->rci_data == NULL)
         {
-            error = CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK; /* TODO */
+            error = CCAPI_START_ERROR_INVALID_RCI_REQUEST_CALLBACK;
             goto done;
         }
 
@@ -714,8 +732,10 @@ done:
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
         case CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK:
+        case CCAPI_START_ERROR_INVALID_RCI_REQUEST_CALLBACK:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
+        case CCAPI_START_ERROR_INVALID_SM_ENCRYPTION_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_LOCK_FAILED:
@@ -1010,8 +1030,10 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
         case CCAPI_START_ERROR_INVALID_URL:
         case CCAPI_START_ERROR_INVALID_DEVICETYPE:
         case CCAPI_START_ERROR_INVALID_CLI_REQUEST_CALLBACK:
+        case CCAPI_START_ERROR_INVALID_RCI_REQUEST_CALLBACK:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_INFO:
         case CCAPI_START_ERROR_INVALID_FIRMWARE_DATA_CALLBACK:
+        case CCAPI_START_ERROR_INVALID_SM_ENCRYPTION_CALLBACK:
         case CCAPI_START_ERROR_INSUFFICIENT_MEMORY:
         case CCAPI_START_ERROR_THREAD_FAILED:
         case CCAPI_START_ERROR_LOCK_FAILED:

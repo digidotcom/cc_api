@@ -58,8 +58,8 @@ typedef struct {
     } callback;
     uint8_t start_timeout;
     struct {
-       char * phone_number;
-       char * service_id;
+       char const * phone_number;
+       char const * service_id;
     } cloud_config;
     struct {
         size_t max_sessions;

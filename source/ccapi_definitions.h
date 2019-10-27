@@ -402,6 +402,7 @@ void ccapi_cli_thread(void * const argument);
 void ccapi_firmware_thread(void * const argument);
 void ccapi_connector_run_thread(void * const argument);
 void * ccapi_malloc(size_t size);
+#define ccapi_free_const(ptr)   ccapi_free((void *) (ptr))
 ccimp_status_t ccapi_free(void * ptr);
 char * ccapi_strdup(char const * const string);
 

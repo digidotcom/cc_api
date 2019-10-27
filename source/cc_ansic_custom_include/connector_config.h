@@ -55,9 +55,10 @@
 #undef CONNECTOR_FILE_SYSTEM_SUPPORT
 #undef CONNECTOR_STREAMING_CLI_SUPPORT
 
-/* We always enable CLI support if any SM transport is enabled */
+/* We always enable CLI and encryption support if any SM transport is enabled */
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
 #define CONNECTOR_SM_CLI
+#define CONNECTOR_SM_ENCRYPTION
 #endif
 
 /* Limits */

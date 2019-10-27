@@ -802,7 +802,7 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
 
             if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
             {
-                ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+                ccapi_free((void *) ccapi_data->transport_sms.info->cloud_config.phone_number);
             }
 
             ccapi_data->transport_sms.info->cloud_config.phone_number = ccapi_strdup(device_cloud_phone->string);

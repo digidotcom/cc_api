@@ -21,7 +21,7 @@
 #include "ccapi/ccapi_transport_sms.h"
 
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
-static ccapi_bool_t valid_malloc(void * const ptr, ccapi_sms_start_error_t * const error)
+static ccapi_bool_t valid_malloc(void const * const ptr, ccapi_sms_start_error_t * const error)
 {
     if (ptr == NULL)
     {
@@ -261,11 +261,11 @@ done:
             {
                 if (ccapi_data->transport_sms.info->cloud_config.phone_number != NULL)
                 {
-                    ccapi_free(ccapi_data->transport_sms.info->cloud_config.phone_number);
+                    ccapi_free_const(ccapi_data->transport_sms.info->cloud_config.phone_number);
                 }
                 if (ccapi_data->transport_sms.info->cloud_config.service_id != NULL)
                 {
-                    ccapi_free(ccapi_data->transport_sms.info->cloud_config.service_id);
+                    ccapi_free_const(ccapi_data->transport_sms.info->cloud_config.service_id);
                 }
                 ccapi_free(ccapi_data->transport_sms.info);
                 ccapi_data->transport_sms.info = NULL;
@@ -279,11 +279,11 @@ void free_transport_sms_info(ccapi_sms_info_t * const sms_info)
 {
     if (sms_info->cloud_config.phone_number != NULL)
     {
-        ccapi_free(sms_info->cloud_config.phone_number);
+        ccapi_free_const(sms_info->cloud_config.phone_number);
     }
     if (sms_info->cloud_config.service_id != NULL)
     {
-        ccapi_free(sms_info->cloud_config.service_id);
+        ccapi_free_const(sms_info->cloud_config.service_id);
     }
     ccapi_free(sms_info);
 }
