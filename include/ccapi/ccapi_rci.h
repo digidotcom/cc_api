@@ -32,24 +32,24 @@
 
 typedef enum {
     CCAPI_RCI_ELEMENT_TYPE_NOT_SET,
-	CCAPI_RCI_ELEMENT_TYPE_STRING,
-	CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING,
-	CCAPI_RCI_ELEMENT_TYPE_PASSWORD,
+    CCAPI_RCI_ELEMENT_TYPE_STRING,
+    CCAPI_RCI_ELEMENT_TYPE_MULTILINE_STRING,
+    CCAPI_RCI_ELEMENT_TYPE_PASSWORD,
     CCAPI_RCI_ELEMENT_TYPE_INT32,
     CCAPI_RCI_ELEMENT_TYPE_UINT32,
-	CCAPI_RCI_ELEMENT_TYPE_HEX32,
-	CCAPI_RCI_ELEMENT_TYPE_0X32,
-	CCAPI_RCI_ELEMENT_TYPE_FLOAT,
-	CCAPI_RCI_ELEMENT_TYPE_ENUM,
-	CCAPI_RCI_ELEMENT_TYPE_ON_OFF,
-	CCAPI_RCI_ELEMENT_TYPE_BOOL,
-	CCAPI_RCI_ELEMENT_TYPE_IPV4,
-	CCAPI_RCI_ELEMENT_TYPE_FQDNV4,
-	CCAPI_RCI_ELEMENT_TYPE_FQDNV6,
-	CCAPI_RCI_ELEMENT_TYPE_LIST,
-	CCAPI_RCI_ELEMENT_TYPE_MAC,
-	CCAPI_RCI_ELEMENT_TYPE_DATETIME,
-	CCAPI_RCI_ELEMENT_TYPE_REF_ENUM
+    CCAPI_RCI_ELEMENT_TYPE_HEX32,
+    CCAPI_RCI_ELEMENT_TYPE_0X32,
+    CCAPI_RCI_ELEMENT_TYPE_FLOAT,
+    CCAPI_RCI_ELEMENT_TYPE_ENUM,
+    CCAPI_RCI_ELEMENT_TYPE_ON_OFF,
+    CCAPI_RCI_ELEMENT_TYPE_BOOL,
+    CCAPI_RCI_ELEMENT_TYPE_IPV4,
+    CCAPI_RCI_ELEMENT_TYPE_FQDNV4,
+    CCAPI_RCI_ELEMENT_TYPE_FQDNV6,
+    CCAPI_RCI_ELEMENT_TYPE_LIST,
+    CCAPI_RCI_ELEMENT_TYPE_MAC,
+    CCAPI_RCI_ELEMENT_TYPE_DATETIME,
+    CCAPI_RCI_ELEMENT_TYPE_REF_ENUM
 } ccapi_rci_element_type_t;
 
 typedef enum {
@@ -101,10 +101,10 @@ typedef struct {
 } ccapi_rci_dictionary_t;
 
 typedef union {
-	unsigned int index;
-	char const * key;
-	unsigned int count;
-	ccapi_rci_dictionary_t dictionary;
+    unsigned int index;
+    char const * key;
+    unsigned int count;
+    ccapi_rci_dictionary_t dictionary;
 } ccapi_group_item_t;
 
 typedef union {
@@ -116,31 +116,31 @@ typedef union {
 
 typedef struct {
     struct {
-		ccapi_rci_group_type_t CONST type;
-		unsigned int CONST id;
-		ccapi_rci_collection_type_t CONST collection_type;
-		ccapi_group_item_t CONST item;
+        ccapi_rci_group_type_t CONST type;
+        unsigned int CONST id;
+        ccapi_rci_collection_type_t CONST collection_type;
+        ccapi_group_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
         char const * CONST name;
 #endif
     } group;
 
 #ifdef RCI_LIST_MAX_DEPTH
-	struct {
-		unsigned int CONST depth;
-		struct {
-			unsigned int CONST id;
-		    ccapi_rci_collection_type_t CONST collection_type;
-		    ccapi_list_item_t CONST item;
+    struct {
+        unsigned int CONST depth;
+        struct {
+            unsigned int CONST id;
+            ccapi_rci_collection_type_t CONST collection_type;
+            ccapi_list_item_t CONST item;
 #if (defined RCI_PARSER_USES_COLLECTION_NAMES)
-			char const * CONST name;
+            char const * CONST name;
 #endif
-		} data[RCI_LIST_MAX_DEPTH];
-	} list;
+        } data[RCI_LIST_MAX_DEPTH];
+    } list;
 #endif
 
     struct {
-		unsigned int CONST id;
+        unsigned int CONST id;
 #if (defined RCI_PARSER_USES_ELEMENT_NAMES)
         char const * CONST name;
 #endif
@@ -191,16 +191,16 @@ typedef struct {
         ccapi_rci_function_base_t start_group;
         ccapi_rci_function_base_t end_group;
         ccapi_rci_function_lock_t lock_group_instances;
-		ccapi_rci_function_base_t set_group_instances;
-		ccapi_rci_function_base_t remove_group_instance;
+        ccapi_rci_function_base_t set_group_instances;
+        ccapi_rci_function_base_t remove_group_instance;
         ccapi_rci_function_base_t unlock_group_instances;
         ccapi_rci_function_base_t start_list;
         ccapi_rci_function_base_t end_list;
         ccapi_rci_function_lock_t lock_list_instances;
-		ccapi_rci_function_base_t set_list_instances;
-		ccapi_rci_function_base_t remove_list_instance;
+        ccapi_rci_function_base_t set_list_instances;
+        ccapi_rci_function_base_t remove_list_instance;
         ccapi_rci_function_base_t unlock_list_instances;
-		ccapi_rci_function_element_t get_element;
+        ccapi_rci_function_element_t get_element;
         ccapi_rci_function_element_t set_element;
         ccapi_rci_function_base_t do_command;
         ccapi_rci_function_base_t set_factory_defaults;

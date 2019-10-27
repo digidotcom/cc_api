@@ -23,33 +23,33 @@
 
 #if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
 
-#define run_callback_if_available(cb, arg)	(cb) != NULL ? (cb)((arg)) : connector_callback_continue
+#define run_callback_if_available(cb, arg)      (cb) != NULL ? (cb)((arg)) : connector_callback_continue
 
 connector_callback_status_t ccapi_streaming_cli_handler(connector_request_id_streaming_cli_service_t const request, void * const data, ccapi_data_t * const ccapi_data)
 {
-	connector_callback_status_t status = connector_callback_error;
-	ccapi_streaming_cli_service_t * callbacks = &ccapi_data->service.streaming_cli.user_callback;
+    connector_callback_status_t status = connector_callback_error;
+    ccapi_streaming_cli_service_t * callbacks = &ccapi_data->service.streaming_cli.user_callback;
 
-	switch (request)
-	{
-		case connector_request_id_streaming_cli_session_start:
-			status = run_callback_if_available(callbacks->start_session, data);
-			break;
-		case connector_request_id_streaming_cli_poll:
-			status = run_callback_if_available(callbacks->poll_session, data);
-			break;
-		case connector_request_id_streaming_cli_send:
-			status = run_callback_if_available(callbacks->send_data, data);
-			break;
-		case connector_request_id_streaming_cli_receive:
-			status = run_callback_if_available(callbacks->receive_data, data);
-			break;
-		case connector_request_id_streaming_cli_session_end:
-			status = run_callback_if_available(callbacks->end_session, data);
-			break;
-	}
+    switch (request)
+    {
+        case connector_request_id_streaming_cli_session_start:
+            status = run_callback_if_available(callbacks->start_session, data);
+            break;
+        case connector_request_id_streaming_cli_poll:
+            status = run_callback_if_available(callbacks->poll_session, data);
+            break;
+        case connector_request_id_streaming_cli_send:
+            status = run_callback_if_available(callbacks->send_data, data);
+            break;
+        case connector_request_id_streaming_cli_receive:
+            status = run_callback_if_available(callbacks->receive_data, data);
+            break;
+        case connector_request_id_streaming_cli_session_end:
+            status = run_callback_if_available(callbacks->end_session, data);
+            break;
+    }
 
-	return status;
+    return status;
 }
 
 #endif

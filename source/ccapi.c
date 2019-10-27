@@ -128,7 +128,7 @@ ccimp_status_t ccapi_lock_release(void * const lock)
     ccimp_os_lock_release_t release_data;
 
     release_data.lock = lock;
-        
+
     return ccimp_os_lock_release(&release_data);
 }
 
@@ -637,13 +637,13 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             data_service_supported->supported = connector_true;
             break;
         }
-		case connector_request_id_config_streaming_cli:
-		{
+        case connector_request_id_config_streaming_cli:
+        {
             connector_config_supported_t * const streaming_message_service_supported = data;
 
             streaming_message_service_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.streaming_cli_supported);
-			break;
-		}
+            break;
+        }
         case connector_request_id_config_connection_type:
         {
             connector_config_connection_type_t * const connection_type = data;
@@ -1625,11 +1625,11 @@ connector_callback_status_t ccapi_connector_callback(connector_class_id_t const 
             status = ccapi_rci_handler(request_id.remote_config_request, data, ccapi_data);
 #endif
             break;
-		case connector_class_id_streaming_cli:
+        case connector_class_id_streaming_cli:
 #if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
-			status = ccapi_streaming_cli_handler(request_id.streaming_cli_service_request, data, ccapi_data);
+            status = ccapi_streaming_cli_handler(request_id.streaming_cli_service_request, data, ccapi_data);
 #endif
-			break;
+            break;
         default:
             status = connector_callback_unrecognized;
             break;

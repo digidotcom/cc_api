@@ -45,9 +45,9 @@ void ccapi_receive_thread(void * const argument)
             ASSERT_MSG_GOTO(svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED, done);
             ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
 
-            /* Pass data to the user and get possible response from user */ 
-            svc_receive->user_callback.data(svc_receive->target, svc_receive->transport, 
-                                                                   &svc_receive->request_buffer_info, 
+            /* Pass data to the user and get possible response from user */
+            svc_receive->user_callback.data(svc_receive->target, svc_receive->transport,
+                                                                   &svc_receive->request_buffer_info,
                                                                    svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
             /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
             if (svc_receive->receive_thread_status == CCAPI_RECEIVE_THREAD_DATA_CB_QUEUED)
@@ -67,7 +67,7 @@ done:
 static connector_callback_status_t ccapi_process_send_data_request(connector_data_service_send_data_t * const send_ptr)
 {
     connector_callback_status_t status = connector_callback_error;
-	
+
     if (send_ptr != NULL)
     {
         ccapi_svc_send_t * const svc_send = send_ptr->user_context;
@@ -165,7 +165,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     ASSERT_MSG_GOTO(svc_send != NULL, done);
 
     ccapi_logging_line("ccapi_process_send_data_status: %d", status_ptr->status);
-   
+
     switch (status_ptr->status)
     {
         case connector_data_service_status_complete:
@@ -187,7 +187,7 @@ static connector_callback_status_t ccapi_process_send_data_status(connector_data
     }
 
     ASSERT_MSG_GOTO(svc_send->send_lock != NULL, done);
-    
+
     switch (ccapi_lock_release(svc_send->send_lock))
     {
         case CCIMP_STATUS_OK:
@@ -213,7 +213,7 @@ static connector_callback_status_t ccapi_process_send_data_length(connector_data
     length_ptr->total_bytes = svc_send->bytes_remaining;
 
     ccapi_logging_line("ccapi_process_send_data_length: %d", length_ptr->total_bytes);
-   
+
     connector_status = connector_callback_continue;
 
 done:
@@ -223,11 +223,11 @@ done:
 static ccapi_bool_t valid_receive_malloc(void * * ptr, size_t size, ccapi_receive_error_t * const error)
 {
     ccapi_bool_t success;
- 
+
     *ptr = ccapi_malloc(size);
 
     success = CCAPI_BOOL(*ptr != NULL);
-    
+
     if (!success)
     {
         *error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
@@ -389,7 +389,7 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
                     goto done;
                 }
                 svc_receive->request_buffer_info.buffer = ccimp_realloc_data.ptr;
- 
+
                 {
                     uint8_t * const dest_addr = (uint8_t *)svc_receive->request_buffer_info.buffer + svc_receive->request_buffer_info.length;
                     memcpy(dest_addr, data_ptr->buffer, data_ptr->bytes_used);
@@ -536,10 +536,10 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
         {
               return;
         }
-        svc_receive->response_buffer_info.length = sprintf(svc_receive->response_buffer_info.buffer, ERROR_MESSAGE, 
+        svc_receive->response_buffer_info.length = sprintf(svc_receive->response_buffer_info.buffer, ERROR_MESSAGE,
                                                                         svc_receive->receive_error, receive_error_str, svc_receive->target);
 
-        ccapi_logging_line("fill_internal_error: Providing response in buffer at %p: %s", 
+        ccapi_logging_line("fill_internal_error: Providing response in buffer at %p: %s",
                                     svc_receive->response_buffer_info.buffer, (char*)svc_receive->response_buffer_info.buffer);
 }
 
@@ -572,7 +572,7 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
 
         memcpy(reply_ptr->buffer, svc_receive->response_processing.buffer, bytes_to_send);
         svc_receive->response_processing.buffer = ((char *)svc_receive->response_processing.buffer) + bytes_to_send;
- 
+
         reply_ptr->bytes_used = bytes_to_send;
         svc_receive->response_processing.length -= reply_ptr->bytes_used;
         reply_ptr->more_data = CCFSM_BOOL(svc_receive->response_processing.length > 0);
@@ -622,8 +622,8 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     if (ccapi_data->config.receive_supported && svc_receive->user_callback.status != NULL)
     {
        ccapi_bool_t const should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
-       svc_receive->user_callback.status(svc_receive->target, svc_receive->transport, 
-                           should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL, 
+       svc_receive->user_callback.status(svc_receive->target, svc_receive->transport,
+                           should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL,
                            svc_receive->receive_error);
     }
 
@@ -686,7 +686,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         case connector_request_id_data_service_send_status:
         {
             connector_data_service_status_t const * const status_ptr = data;
-            
+
             connector_status = ccapi_process_send_data_status(status_ptr);
 
             break;
@@ -694,7 +694,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         case connector_request_id_data_service_send_length:
         {
             connector_data_service_length_t * const length_ptr = data;
-            
+
             connector_status = ccapi_process_send_data_length(length_ptr);
 
             break;
@@ -706,7 +706,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
             connector_status = ccapi_process_device_request_target(target_ptr, ccapi_data);
 
             break;
-        }           
+        }
         case connector_request_id_data_service_receive_data:
         {
             connector_data_service_receive_data_t * const data_ptr = data;
@@ -734,7 +734,7 @@ connector_callback_status_t ccapi_data_service_handler(connector_request_id_data
         case connector_request_id_data_service_receive_reply_length:
         {
             connector_data_service_length_t * const length_ptr = data;
-            
+
             connector_status = ccapi_process_device_request_length(length_ptr);
 
             break;

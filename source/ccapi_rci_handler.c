@@ -56,7 +56,7 @@ static ccapi_response_item_t * ccapi_response_item_from_connector_response_item(
     ASSERT(sizeof s->dictionary == sizeof d->dictionary);
     ASSERT(offsetof(connector_response_item_t, count) == offsetof(ccapi_response_item_t, count));
     ASSERT(offsetof(connector_response_item_t, dictionary) == offsetof(ccapi_response_item_t, dictionary));
-    
+
     return (ccapi_response_item_t * const) src;
 }
 
@@ -77,20 +77,20 @@ static void clear_group_item(ccapi_rci_info_t * const rci_info)
     {
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_ARRAY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-    	rci_info->group.item.index = 0;
-    	break;
+        rci_info->group.item.index = 0;
+        break;
 
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_DICTIONARY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-    	rci_info->group.item.key = NULL;
+        rci_info->group.item.key = NULL;
     }
 }
 
 static void clear_group_info(ccapi_rci_info_t * const rci_info)
 {
-	rci_info->group.id = 0;
-	clear_group_item(rci_info);
-	CLEAR_GROUP_NAME(rci_info);
+    rci_info->group.id = 0;
+    clear_group_item(rci_info);
+    CLEAR_GROUP_NAME(rci_info);
 }
 
 static void clear_list_item(ccapi_rci_info_t * const rci_info, unsigned int const index)
@@ -99,37 +99,37 @@ static void clear_list_item(ccapi_rci_info_t * const rci_info, unsigned int cons
     {
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_ARRAY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-    	rci_info->list.data[index].item.index = 0;
-    	break;
+        rci_info->list.data[index].item.index = 0;
+        break;
 
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_DICTIONARY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-    	rci_info->list.data[index].item.key = NULL;
+        rci_info->list.data[index].item.key = NULL;
     }
 }
 
 static void clear_list_info(ccapi_rci_info_t * const rci_info, unsigned int const index)
 {
-	rci_info->list.data[index].id = 0;
-	clear_list_item(rci_info, index);
-	CLEAR_LIST_NAME(rci_info, index);
+    rci_info->list.data[index].id = 0;
+    clear_list_item(rci_info, index);
+    CLEAR_LIST_NAME(rci_info, index);
 }
 
 static void clear_all_list_info(ccapi_rci_info_t * const rci_info)
 {
-	unsigned int index;
+    unsigned int index;
 
-	rci_info->list.depth = 0;
-	for (index = 0; index < RCI_LIST_MAX_DEPTH; index++)
-	{
-		clear_list_info(rci_info, index);
-	}
+    rci_info->list.depth = 0;
+    for (index = 0; index < RCI_LIST_MAX_DEPTH; index++)
+    {
+        clear_list_info(rci_info, index);
+    }
 }
 
 static void clear_element_info(ccapi_rci_info_t * const rci_info)
 {
-	rci_info->element.id = 0;
-	CLEAR_ELEMENT_NAME(rci_info);
+    rci_info->element.id = 0;
+    CLEAR_ELEMENT_NAME(rci_info);
 }
 
 static ccapi_rci_query_setting_attribute_compare_to_t connector_to_ccapi_compare_to_attribute(rci_query_setting_attribute_compare_to_t const compare_to)
@@ -177,7 +177,7 @@ static ccapi_rci_query_setting_attribute_source_t connector_to_ccapi_source_attr
 
 #if (defined RCI_ENUMS_AS_STRINGS)
 
-static connector_element_t const * get_ccfsm_element_enum_element(connector_remote_config_data_t const * const rci_internal_data, 
+static connector_element_t const * get_ccfsm_element_enum_element(connector_remote_config_data_t const * const rci_internal_data,
     connector_remote_group_type_t const ccfsm_group_type, unsigned int const group_id, unsigned int const element_id, connector_remote_list_t const list)
 {
     connector_group_t const group = rci_internal_data->group_table[ccfsm_group_type].groups[group_id];
@@ -192,7 +192,7 @@ static connector_element_t const * get_ccfsm_element_enum_element(connector_remo
 
     connector_element_t const * const element = c_collection->item.data[element_id].data.element;
     ASSERT(group_id < rci_internal_data->group_table[ccfsm_group_type].count);
-    
+
     return element;
 }
 
@@ -251,7 +251,7 @@ void ccapi_rci_thread(void * const argument)
 
             ASSERT_MSG_GOTO(ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED, done);
 
-            /* Pass data to the user */ 
+            /* Pass data to the user */
             switch (ccapi_data->service.rci.callback.type)
             {
                 case ccapi_callback_type_none:
@@ -341,7 +341,7 @@ void ccapi_rci_thread(void * const argument)
                     break;
                 }
             }
-                   
+
             /* Check if ccfsm has called cancel callback while we were waiting for the user */
             if (ccapi_data->service.rci.rci_thread_status == CCAPI_RCI_THREAD_CB_QUEUED)
             {
@@ -372,12 +372,12 @@ static void copy_group_item(ccapi_rci_info_t * const rci_info, connector_remote_
     {
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_ARRAY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-    	rci_info->group.item.index = remote_config->group.item.index;
-    	break;
+        rci_info->group.item.index = remote_config->group.item.index;
+        break;
 
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_DICTIONARY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-    	rci_info->group.item.key = remote_config->group.item.key;
+        rci_info->group.item.key = remote_config->group.item.key;
     }
 }
 
@@ -387,12 +387,12 @@ static void copy_list_item(ccapi_rci_info_t * const rci_info, connector_remote_c
     {
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_ARRAY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_ARRAY:
-    	rci_info->list.data[index].item.index = remote_config->list.level[index].item.index;
-    	break;
+        rci_info->list.data[index].item.index = remote_config->list.level[index].item.index;
+        break;
 
     case CCAPI_RCI_COLLECTION_TYPE_FIXED_DICTIONARY:
     case CCAPI_RCI_COLLECTION_TYPE_VARIABLE_DICTIONARY:
-    	rci_info->list.data[index].item.key = remote_config->list.level[index].item.key;
+        rci_info->list.data[index].item.key = remote_config->list.level[index].item.key;
     }
 }
 
@@ -544,7 +544,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             {
                                 ccapi_data->service.rci.callback.as.lock.item = ccapi_response_item_from_connector_response_item(&remote_config->response.item);
                                 break;
-                            }   
+                            }
                         }
                         ccapi_data->service.rci.callback.type = ccapi_callback_type_lock;
                         ccapi_data->service.rci.callback.as.lock.function = rci_data->callback.lock_group_instances;
@@ -610,7 +610,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         COPY_GROUP_NAME(rci_info, remote_config);
                         clear_all_list_info(rci_info);
                         clear_element_info(rci_info);
-                        
+
                         ccapi_data->service.rci.callback.type = ccapi_callback_type_base;
                         ccapi_data->service.rci.callback.as.base.function = rci_data->callback.unlock_group_instances;
                         break;
@@ -632,7 +632,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
                     break;
 
-				case connector_request_id_remote_config_list_instances_lock:
+                case connector_request_id_remote_config_list_instances_lock:
                     if (rci_data->callback.lock_list_instances != NULL)
                     {
                         unsigned int const index = remote_config->list.depth - 1;
@@ -653,7 +653,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             {
                                 ccapi_data->service.rci.callback.as.lock.item = ccapi_response_item_from_connector_response_item(&remote_config->response.item);
                                 break;
-                            }   
+                            }
                         }
 
                         ccapi_data->service.rci.callback.type = ccapi_callback_type_lock;
@@ -716,7 +716,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
                     break;
 
-				case connector_request_id_remote_config_list_instances_unlock:
+                case connector_request_id_remote_config_list_instances_unlock:
                     if (rci_data->callback.unlock_list_instances != NULL)
                     {
                         unsigned int const index = remote_config->list.depth - 1;
@@ -731,7 +731,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
                     break;
 
-				case connector_request_id_remote_config_list_start:
+                case connector_request_id_remote_config_list_start:
                     if (rci_data->callback.start_list != NULL)
                     {
                         unsigned int const index = remote_config->list.depth - 1;
@@ -837,7 +837,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
                     break;
 
-				case connector_request_id_remote_config_list_end:
+                case connector_request_id_remote_config_list_end:
                     if (rci_data->callback.end_list != NULL)
                     {
                         rci_info->list.depth = remote_config->list.depth;
@@ -845,7 +845,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         ccapi_data->service.rci.callback.type = ccapi_callback_type_base;
                         ccapi_data->service.rci.callback.as.base.function = rci_data->callback.end_list;
                     }
-					break;
+                    break;
 
                 case connector_request_id_remote_config_group_end:
                     if (rci_data->callback.end_group != NULL)
@@ -898,7 +898,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
             status = connector_callback_busy;
 
             break;
-        }    
+        }
         case CCAPI_RCI_THREAD_CB_PROCESSED:
         {
             switch (request_id)
@@ -911,7 +911,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 case connector_request_id_remote_config_set_factory_def:
                     break;
                 case connector_request_id_remote_config_group_start:
-				case connector_request_id_remote_config_list_start:
+                case connector_request_id_remote_config_list_start:
                 {
                     if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING && rci_info->action == CCAPI_RCI_ACTION_QUERY)
                     {
@@ -923,13 +923,13 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                 case connector_request_id_remote_config_group_instances_set:
                 case connector_request_id_remote_config_group_instance_remove:
                 case connector_request_id_remote_config_group_instances_unlock:
-                	break;
+                    break;
 
                 case connector_request_id_remote_config_list_instances_lock:
                 case connector_request_id_remote_config_list_instances_set:
                 case connector_request_id_remote_config_list_instance_remove:
                 case connector_request_id_remote_config_list_instances_unlock:
-                	break;
+                    break;
                 case connector_request_id_remote_config_element_process:
                 {
                     switch (rci_info->action)
@@ -951,19 +951,19 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     }
                     break;
                 }
-				case connector_request_id_remote_config_list_end:
-				{
-					unsigned int const index = rci_info->list.depth - 1;
+                case connector_request_id_remote_config_list_end:
+                {
+                    unsigned int const index = rci_info->list.depth - 1;
 
-					clear_list_info(rci_info, index);
-					clear_element_info(rci_info);
-					break;
-				}
+                    clear_list_info(rci_info, index);
+                    clear_element_info(rci_info);
+                    break;
+                }
                 case connector_request_id_remote_config_group_end:
                 {
-					clear_group_info(rci_info);
-					clear_all_list_info(rci_info);
-					clear_element_info(rci_info);
+                    clear_group_info(rci_info);
+                    clear_all_list_info(rci_info);
+                    clear_element_info(rci_info);
                     break;
                 }
                 case connector_request_id_remote_config_action_end:

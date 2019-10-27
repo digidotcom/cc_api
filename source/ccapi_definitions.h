@@ -79,7 +79,7 @@ typedef struct {
     ccapi_bool_t firmware_supported;
     ccapi_bool_t rci_supported;
     ccapi_bool_t filesystem_supported;
-	ccapi_bool_t streaming_cli_supported;
+    ccapi_bool_t streaming_cli_supported;
     ccapi_status_callback_t status_callback;
 } ccapi_config_t;
 
@@ -281,9 +281,9 @@ typedef struct {
         } sm;
 #endif
 #if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
-		struct {
-			ccapi_streaming_cli_service_t user_callback;
-		} streaming_cli;
+        struct {
+            ccapi_streaming_cli_service_t user_callback;
+        } streaming_cli;
 #endif
     } service;
     struct {

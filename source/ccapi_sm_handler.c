@@ -48,11 +48,11 @@ void ccapi_cli_thread(void * const argument)
             ASSERT_MSG_GOTO(svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED, done);
             ASSERT_MSG_GOTO(ccapi_data->service.cli.user_callback.request != NULL, done);
 
-            /* Pass data to the user and get possible response from user */ 
-            ccapi_data->service.cli.user_callback.request(svc_cli->transport, 
+            /* Pass data to the user and get possible response from user */
+            ccapi_data->service.cli.user_callback.request(svc_cli->transport,
                                                                svc_cli->request_string_info.string,
                                                                svc_cli->response_required ? (char const * *)&svc_cli->response_string_info.string : NULL);
-   
+
             /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
             if (svc_cli->cli_thread_status == CCAPI_CLI_THREAD_REQUEST_CB_QUEUED)
             {
@@ -72,11 +72,11 @@ done:
 static ccapi_bool_t valid_cli_malloc(void * * ptr, size_t size, ccapi_cli_error_t * const error)
 {
     ccapi_bool_t success;
- 
+
     *ptr = ccapi_malloc(size);
 
     success = CCAPI_BOOL(*ptr != NULL);
-    
+
     if (!success)
     {
         ccapi_logging_line("valid_cli_malloc: error ccimp_os_realloc for %d bytes", size);
@@ -155,7 +155,7 @@ static connector_callback_status_t ccapi_process_cli_request(connector_sm_cli_re
                     goto done;
                 }
                 svc_cli->request_string_info.string = ccimp_realloc_data.ptr;
- 
+
                 {
                     uint8_t * const dest_addr = (uint8_t *)svc_cli->request_string_info.string + svc_cli->request_string_info.length;
                     memcpy(dest_addr, cli_request_ptr->buffer, cli_request_ptr->bytes_used);
@@ -262,10 +262,10 @@ static void fill_internal_error(ccapi_svc_cli_t * svc_cli)
         {
               return;
         }
-        svc_cli->response_string_info.length = sprintf(svc_cli->response_string_info.string, ERROR_MESSAGE, 
+        svc_cli->response_string_info.length = sprintf(svc_cli->response_string_info.string, ERROR_MESSAGE,
                                                                         svc_cli->cli_error, cli_error_str);
 
-        ccapi_logging_line("fill_internal_error: Providing response in buffer at %p: %s", 
+        ccapi_logging_line("fill_internal_error: Providing response in buffer at %p: %s",
                                     svc_cli->response_string_info.string, (char*)svc_cli->response_string_info.string);
 }
 
@@ -298,7 +298,7 @@ static connector_callback_status_t ccapi_process_cli_response(connector_sm_cli_r
 
         memcpy(cli_response_ptr->buffer, svc_cli->response_processing.string, bytes_to_send);
         svc_cli->response_processing.string = ((char *)svc_cli->response_processing.string) + bytes_to_send;
- 
+
         cli_response_ptr->bytes_used = bytes_to_send;
         svc_cli->response_processing.length -= cli_response_ptr->bytes_used;
         cli_response_ptr->more_data = CCFSM_BOOL(svc_cli->response_processing.length > 0);
@@ -381,7 +381,7 @@ static connector_callback_status_t ccapi_process_ping_response(connector_sm_ping
     ASSERT_MSG_GOTO(svc_ping != NULL, done);
 
     ccapi_logging_line("ccapi_process_ping_response: %d", response_ptr->status);
-   
+
     switch (response_ptr->status)
     {
         case connector_sm_ping_status_success:
@@ -400,7 +400,7 @@ static connector_callback_status_t ccapi_process_ping_response(connector_sm_ping
     }
 
     ASSERT_MSG_GOTO(svc_ping->ping_lock != NULL, done);
-    
+
     switch (ccapi_lock_release(svc_ping->ping_lock))
     {
         case CCIMP_STATUS_OK:
@@ -419,7 +419,7 @@ done:
 static connector_callback_status_t ccapi_process_request_connect(connector_sm_request_connect_t * const request_connect_ptr, ccapi_data_t * const ccapi_data)
 {
     ccapi_logging_line("ccapi_process_request_connect: transport %d", request_connect_ptr->transport);
-   
+
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.request_connect != NULL)
     {
        ccapi_data->service.sm.user_callback.request_connect(request_connect_ptr->transport);
@@ -433,7 +433,7 @@ static connector_callback_status_t ccapi_process_request_connect(connector_sm_re
 static connector_callback_status_t ccapi_process_ping_request(connector_sm_receive_ping_request_t const * const ping_request_ptr, ccapi_data_t * const ccapi_data)
 {
     ccapi_logging_line("ccapi_process_ping_request: response %s needed", ping_request_ptr->response_required ? "is" : "is not");
-   
+
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.ping_request != NULL)
     {
         ccapi_data->service.sm.user_callback.ping_request(ping_request_ptr->transport, CCAPI_BOOL(ping_request_ptr->response_required));
@@ -445,7 +445,7 @@ static connector_callback_status_t ccapi_process_ping_request(connector_sm_recei
 static connector_callback_status_t ccapi_process_unsequenced_response(connector_sm_opaque_response_t const * const unsequenced_response_ptr, ccapi_data_t * const ccapi_data)
 {
     ccapi_logging_line("Received %" PRIsize " unsequenced bytes on id %d\n", unsequenced_response_ptr->bytes_used, unsequenced_response_ptr->id);
-   
+
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.unsequenced_response != NULL)
     {
         ccapi_data->service.sm.user_callback.unsequenced_response(unsequenced_response_ptr->transport, unsequenced_response_ptr->id, unsequenced_response_ptr->data, unsequenced_response_ptr->bytes_used, CCAPI_BOOL(unsequenced_response_ptr->error));
@@ -457,7 +457,7 @@ static connector_callback_status_t ccapi_process_unsequenced_response(connector_
 static connector_callback_status_t ccapi_process_pending_data(connector_sm_more_data_t const * const pending_data_ptr, ccapi_data_t * const ccapi_data)
 {
     ccapi_logging_line("ccapi_process_pending_data: transport %d", pending_data_ptr->transport);
-   
+
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.pending_data != NULL)
     {
        ccapi_data->service.sm.user_callback.pending_data(pending_data_ptr->transport);
@@ -471,7 +471,7 @@ static connector_callback_status_t ccapi_process_phone_provisioning(connector_sm
     ccapi_logging_line("ccapi_process_phone_provisioning: response %s needed", phone_provisioning_ptr->response_required ? "is" : "is not");
     ccapi_logging_line("phone-number=%s", phone_provisioning_ptr->phone_number);
     ccapi_logging_line("service-id=%s", phone_provisioning_ptr->service_id);
-   
+
     if (ccapi_data->config.sm_supported && ccapi_data->service.sm.user_callback.phone_provisioning != NULL)
     {
        ccapi_data->service.sm.user_callback.phone_provisioning(phone_provisioning_ptr->transport, phone_provisioning_ptr->phone_number, phone_provisioning_ptr->service_id, phone_provisioning_ptr->response_required);
@@ -514,7 +514,7 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
         case connector_request_id_sm_cli_response_length:
         {
             connector_sm_cli_response_length_t * const length_ptr = data;
-            
+
             connector_status = ccapi_process_cli_response_length(length_ptr);
 
             break;

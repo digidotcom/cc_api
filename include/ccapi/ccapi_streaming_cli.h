@@ -29,11 +29,11 @@ typedef unsigned int (*ccapi_streaming_cli_receive_t)(connector_streaming_cli_se
 typedef unsigned int (*ccapi_streaming_cli_end_session_t)(connector_streaming_cli_session_end_request_t * request);
 
 typedef struct {
-	ccapi_streaming_cli_start_session_t start_session;
-	ccapi_streaming_cli_poll_session_t poll_session;
-	ccapi_streaming_cli_send_t send_data;
-	ccapi_streaming_cli_receive_t receive_data;
-	ccapi_streaming_cli_end_session_t end_session;
+    ccapi_streaming_cli_start_session_t start_session;
+    ccapi_streaming_cli_poll_session_t poll_session;
+    ccapi_streaming_cli_send_t send_data;
+    ccapi_streaming_cli_receive_t receive_data;
+    ccapi_streaming_cli_end_session_t end_session;
 } ccapi_streaming_cli_service_t;
 
 #endif

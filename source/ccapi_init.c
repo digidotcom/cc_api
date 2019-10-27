@@ -209,7 +209,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     reset_heap_ptr(&ccapi_data->thread.connector_run);
 
     if (ccapi_data->initiate_action_lock != NULL)
-    {   
+    {
         ccimp_status_t const ccimp_status = ccapi_lock_destroy(ccapi_data->initiate_action_lock);
         switch (ccimp_status)
         {
@@ -223,7 +223,7 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
     }
 
 done:
-    return; 
+    return;
 }
 
 #if (defined CCIMP_DEBUG_ENABLED)
@@ -347,7 +347,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     if (logging_lock_users++ == 0)
     {
         ccimp_os_lock_create_t create_data;
-    
+
         if (ccimp_os_lock_create(&create_data) != CCIMP_STATUS_OK || ccapi_lock_release(create_data.lock) != CCIMP_STATUS_OK)
         {
             error = CCAPI_START_ERROR_LOCK_FAILED;
@@ -399,7 +399,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     ccapi_data->config.cli_supported = CCAPI_FALSE;
     ccapi_data->config.sm_supported = CCAPI_FALSE;
     ccapi_data->config.rci_supported = CCAPI_FALSE;
-	ccapi_data->config.streaming_cli_supported = CCAPI_FALSE;
+    ccapi_data->config.streaming_cli_supported = CCAPI_FALSE;
 
     if (start == NULL)
     {
@@ -453,7 +453,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             goto done;
         }
 
-        /* If target info is wrong, we won't let CCAPI start */ 
+        /* If target info is wrong, we won't let CCAPI start */
         if (start->service.firmware->target.item == NULL || start->service.firmware->target.count == 0)
         {
             error = CCAPI_START_ERROR_INVALID_FIRMWARE_INFO;
@@ -614,11 +614,11 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
 #endif
 
 #if (defined CCIMP_STREAMING_CLI_SERVICE_ENABLED)
-	if (start->service.streaming_cli != NULL)
-	{
+    if (start->service.streaming_cli != NULL)
+    {
         ccapi_data->config.streaming_cli_supported = CCAPI_TRUE;
         ccapi_data->service.streaming_cli.user_callback = *start->service.streaming_cli;
-	}
+    }
 #endif
 
     ccapi_data->connector_handle = connector_init(ccapi_connector_callback, ccapi_data);
@@ -747,7 +747,7 @@ static ccapi_transport_stop_t ccapi_stop_to_ccapi_transport_stop(ccapi_stop_t co
             break;
         case CCAPI_STOP_IMMEDIATELY:
             transport_stop_behavior = CCAPI_TRANSPORT_STOP_IMMEDIATELY;
-            break;  
+            break;
     }
     return transport_stop_behavior;
 }
@@ -996,7 +996,7 @@ done:
 
 ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
 {
-	ccapi_start_error_t error;
+    ccapi_start_error_t error;
 
     error = ccxapi_start((ccapi_handle_t *)&ccapi_data_single_instance, start);
 
@@ -1020,7 +1020,7 @@ ccapi_start_error_t ccapi_start(ccapi_start_t const * const start)
             break;
     }
 
-	return error;
+    return error;
 }
 
 ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
@@ -1039,4 +1039,3 @@ ccapi_stop_error_t ccapi_stop(ccapi_stop_t const behavior)
 
     return error;
 }
-
