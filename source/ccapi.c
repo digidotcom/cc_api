@@ -644,6 +644,14 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
             streaming_message_service_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.streaming_cli_supported);
             break;
         }
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED || defined CCIMP_SMS_TRANSPORT_ENABLED)
+		case connector_request_id_config_sm_key_distribution:
+		{
+			connector_config_supported_t * const sm_key_distribution_service_supported = data;
+
+			sm_key_distribution_service_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.sm_key_distribution_supported);
+		}
+#endif
         case connector_request_id_config_connection_type:
         {
             connector_config_connection_type_t * const connection_type = data;

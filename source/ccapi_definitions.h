@@ -80,6 +80,7 @@ typedef struct {
     ccapi_bool_t rci_supported;
     ccapi_bool_t filesystem_supported;
     ccapi_bool_t streaming_cli_supported;
+	ccapi_bool_t sm_key_distribution_supported;
     ccapi_status_callback_t status_callback;
 } ccapi_config_t;
 

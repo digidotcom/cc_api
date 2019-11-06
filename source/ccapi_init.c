@@ -610,6 +610,7 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
             }
         }
 
+		ccapi_data->config.sm_key_distribution_supported = CCAPI_TRUE;
         ccapi_data->config.sm_supported = CCAPI_TRUE;
         ccapi_data->service.sm.user_callback = *start->service.sm;
     }

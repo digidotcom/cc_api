@@ -685,6 +685,9 @@ connector_callback_status_t ccapi_sm_service_handler(connector_request_id_sm_t c
             connector_sm_encryption_load_data_t * const ptr = data;
 
             connector_status = ccapi_process_load_data(ptr, ccapi_data);
+			
+			// hack to allow loads to fail with unrecognized
+			goto done;
 
             break;
         }
