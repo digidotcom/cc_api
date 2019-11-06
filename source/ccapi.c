@@ -996,7 +996,7 @@ done:
 static ccapi_bool_t ask_user_if_reconnect_udp(connector_close_status_t const close_status, ccapi_data_t const * const ccapi_data)
 {
     ccapi_udp_close_cb_t const close_cb = ccapi_data->transport_udp.info->callback.close;
-    ccapi_udp_close_cause_t ccapi_close_cause;
+    ccapi_udp_close_cause_t ccapi_close_cause = INVALID_ENUM(ccapi_udp_close_cause_t);
     ccapi_bool_t reconnect = CCAPI_FALSE;
 
     if (close_cb != NULL)
@@ -1029,7 +1029,7 @@ done:
 static ccapi_bool_t ask_user_if_reconnect_sms(connector_close_status_t const close_status, ccapi_data_t const * const ccapi_data)
 {
     ccapi_sms_close_cb_t const close_cb = ccapi_data->transport_sms.info->callback.close;
-    ccapi_sms_close_cause_t ccapi_close_cause;
+    ccapi_sms_close_cause_t ccapi_close_cause = INVALID_ENUM(ccapi_sms_close_cause_t);
     ccapi_bool_t reconnect = CCAPI_FALSE;
 
     if (close_cb != NULL)
