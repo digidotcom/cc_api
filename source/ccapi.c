@@ -650,6 +650,8 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
 			connector_config_supported_t * const sm_key_distribution_service_supported = data;
 
 			sm_key_distribution_service_supported->supported = CCAPI_BOOL_TO_CONNECTOR_BOOL(ccapi_data->config.sm_key_distribution_supported);
+
+			break;
 		}
 #endif
         case connector_request_id_config_connection_type:
