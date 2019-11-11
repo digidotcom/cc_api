@@ -1102,16 +1102,16 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
         case CCAPI_TRANSPORT_TCP:
             p_transport_started = &ccapi_data->transport_tcp.connected;
             break;
-        case CCAPI_TRANSPORT_UDP:
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_UDP:
             p_transport_started = &ccapi_data->transport_udp.started;
-#endif
             break;
-        case CCAPI_TRANSPORT_SMS:
+#endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_SMS:
             p_transport_started = &ccapi_data->transport_sms.started;
-#endif
             break;
+#endif
     }
 
     if (p_transport_started == NULL || !*p_transport_started)

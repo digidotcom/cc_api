@@ -21,9 +21,15 @@
 #define _CCAPI_TRANSPORT_H_
 
 typedef enum {
+#if (defined CCIMP_TCP_TRANSPORT_ENABLED)
     CCAPI_TRANSPORT_TCP,
+#endif
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
     CCAPI_TRANSPORT_UDP,
+#endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
     CCAPI_TRANSPORT_SMS
+#endif
 } ccapi_transport_t;
 
 typedef enum {

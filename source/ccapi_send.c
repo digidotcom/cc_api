@@ -32,11 +32,11 @@ typedef struct
 static ccapi_bool_t valid_malloc(void * * const ptr, size_t const size, ccapi_send_error_t * const error)
 {
     ccapi_bool_t success;
- 
+
     *ptr = ccapi_malloc(size);
 
     success = CCAPI_BOOL(*ptr != NULL);
-    
+
     if (!success)
     {
         *error = CCAPI_SEND_ERROR_INSUFFICIENT_MEMORY;
@@ -51,7 +51,7 @@ static ccimp_status_t ccapi_send_lock_acquire(ccapi_send_t const * const send_in
     ccimp_status_t status = CCIMP_STATUS_ERROR;
 
     ASSERT_MSG_GOTO(send_info->svc_send.send_lock != NULL, done);
-    
+
     acquire_data.lock = send_info->svc_send.send_lock;
     acquire_data.timeout_ms= timeout_ms;
 
@@ -82,16 +82,16 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
         case CCAPI_TRANSPORT_TCP:
             p_transport_started = &ccapi_data->transport_tcp.connected;
             break;
-        case CCAPI_TRANSPORT_UDP:
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_UDP:
             p_transport_started = &ccapi_data->transport_udp.started;
-#endif
             break;
-        case CCAPI_TRANSPORT_SMS:
+#endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_SMS:
             p_transport_started = &ccapi_data->transport_sms.started;
-#endif
             break;
+#endif
     }
 
     if (p_transport_started == NULL || !*p_transport_started)
@@ -219,7 +219,7 @@ static ccapi_send_error_t setup_send_file(ccapi_data_t * const ccapi_data, ccapi
     {
         ccimp_fs_stat_t fs_status;
 
-        switch (ccapi_get_dir_entry_status(ccapi_data, local_path, &fs_status)) 
+        switch (ccapi_get_dir_entry_status(ccapi_data, local_path, &fs_status))
         {
             case CCIMP_STATUS_OK:
                 break;
@@ -337,7 +337,7 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
     {
         if (send_info->svc_send.send_lock != NULL)
         {
-            ccimp_status_t const ccimp_status = ccapi_lock_destroy(send_info->svc_send.send_lock); 
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(send_info->svc_send.send_lock);
             switch (ccimp_status)
             {
                 case CCIMP_STATUS_OK:

@@ -32,11 +32,11 @@ typedef struct
 static ccapi_bool_t valid_malloc(void * * const ptr, size_t const size, ccapi_ping_error_t * const error)
 {
     ccapi_bool_t success;
- 
+
     *ptr = ccapi_malloc(size);
 
     success = CCAPI_BOOL(*ptr != NULL);
-    
+
     if (!success)
     {
         *error = CCAPI_PING_ERROR_INSUFFICIENT_MEMORY;
@@ -51,7 +51,7 @@ static ccimp_status_t ccapi_send_ping_lock_acquire(ccapi_ping_t const * const pi
     ccimp_status_t status = CCIMP_STATUS_ERROR;
 
     ASSERT_MSG_GOTO(ping_info->svc_ping.ping_lock != NULL, done);
-    
+
     acquire_data.lock = ping_info->svc_ping.ping_lock;
     acquire_data.timeout_ms= timeout_ms;
 
@@ -81,16 +81,16 @@ static ccapi_ping_error_t checkargs_send_ping(ccapi_data_t * const ccapi_data, c
     {
         case CCAPI_TRANSPORT_TCP:
             break;
-        case CCAPI_TRANSPORT_UDP:
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_UDP:
             p_transport_started = &ccapi_data->transport_udp.started;
-#endif
             break;
-        case CCAPI_TRANSPORT_SMS:
+#endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_SMS:
             p_transport_started = &ccapi_data->transport_sms.started;
-#endif
             break;
+#endif
     }
 
     if (p_transport_started == NULL)
@@ -199,7 +199,7 @@ static void finish_send_ping(ccapi_ping_t * const ping_info)
     {
         if (ping_info->svc_ping.ping_lock != NULL)
         {
-            ccimp_status_t const ccimp_status = ccapi_lock_destroy(ping_info->svc_ping.ping_lock); 
+            ccimp_status_t const ccimp_status = ccapi_lock_destroy(ping_info->svc_ping.ping_lock);
             switch (ccimp_status)
             {
                 case CCIMP_STATUS_OK:

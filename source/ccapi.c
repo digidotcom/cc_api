@@ -150,16 +150,16 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
         case CCAPI_TRANSPORT_TCP:
             connector_transport = connector_transport_tcp;
             break;
-        case CCAPI_TRANSPORT_UDP:
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_UDP:
             connector_transport = connector_transport_udp;
-#endif
             break;
-        case CCAPI_TRANSPORT_SMS:
+#endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case CCAPI_TRANSPORT_SMS:
             connector_transport = connector_transport_sms;
-#endif
             break;
+#endif
     }
 
     return connector_transport;
