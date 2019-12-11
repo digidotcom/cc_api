@@ -56,6 +56,8 @@ typedef enum {
 
 typedef enum {
     CCIMP_FS_HASH_NONE,
+    CCIMP_FS_HASH_SHA3_512,
+    CCIMP_FS_HASH_SHA512,
     CCIMP_FS_HASH_MD5,
     CCIMP_FS_HASH_CRC32,
     CCIMP_FS_HASH_BEST

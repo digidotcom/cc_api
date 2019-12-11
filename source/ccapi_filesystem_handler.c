@@ -91,6 +91,12 @@ static connector_file_system_hash_algorithm_t ccfsm_file_system_hash_algorithm_f
         case CCIMP_FS_HASH_MD5:
             ccfsm_hash_algorithm = connector_file_system_hash_md5;
             break;
+        case CCIMP_FS_HASH_SHA512:
+            ccfsm_hash_algorithm = connector_file_system_hash_sha512;
+            break;
+        case CCIMP_FS_HASH_SHA3_512:
+            ccfsm_hash_algorithm = connector_file_system_hash_sha3_512;
+            break;
     }
 
     return ccfsm_hash_algorithm;
@@ -113,6 +119,12 @@ static ccimp_fs_hash_alg_t ccimp_fs_hash_alg_from_ccfsm_file_system_hash_algorit
             break;
         case connector_file_system_hash_md5:
             ccimp_hash_algorithm = CCIMP_FS_HASH_MD5;
+            break;
+        case connector_file_system_hash_sha512:
+            ccimp_hash_algorithm = CCIMP_FS_HASH_SHA512;
+            break;
+        case connector_file_system_hash_sha3_512:
+            ccimp_hash_algorithm = CCIMP_FS_HASH_SHA3_512;
             break;
     }
     
