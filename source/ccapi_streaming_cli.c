@@ -47,6 +47,12 @@ connector_callback_status_t ccapi_streaming_cli_handler(connector_request_id_str
         case connector_request_id_streaming_cli_session_end:
             status = run_callback_if_available(callbacks->end_session, data);
             break;
+        case connector_request_id_streaming_cli_sessionless_execute:
+            status = run_callback_if_available(callbacks->sessionless_execute, data);
+            break;
+        case connector_request_id_streaming_cli_sessionless_store:
+            status = run_callback_if_available(callbacks->sessionless_store, data);
+            break;
     }
 
     return status;
