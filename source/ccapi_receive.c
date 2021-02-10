@@ -25,7 +25,7 @@
 
 static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_receive_target_t * const new_entry)
 {
-    ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
+    ccapi_fs_error_t error = CCAPI_FS_ERROR_NONE;
     ccimp_status_t ccimp_status;
 
     ccimp_status = ccapi_lock_acquire(ccapi_data->service.receive.receive_lock);
@@ -35,7 +35,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             goto done;
     }
 
@@ -53,7 +53,7 @@ static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_
             break;
         case CCIMP_STATUS_ERROR:
         case CCIMP_STATUS_BUSY:
-            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
+            error = CCAPI_FS_ERROR_LOCK_FAILED;
             ASSERT_MSG_GOTO(ccimp_status == CCIMP_STATUS_OK, done);
             break;
     }
@@ -90,6 +90,7 @@ done:
 ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data, char const * const target, ccapi_receive_data_cb_t const data_cb, ccapi_receive_status_cb_t const status_cb, size_t const max_request_size)
 {
     ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
+    ccapi_fs_error_t fs_error = CCAPI_FS_ERROR_NONE;
     ccapi_receive_target_t * new_target_entry;
 
     if (target == NULL)
@@ -131,7 +132,37 @@ ccapi_receive_error_t ccxapi_receive_add_target(ccapi_data_t * const ccapi_data,
         goto done;
     }
 
-    error = add_target_entry(ccapi_data, new_target_entry);
+    fs_error = add_target_entry(ccapi_data, new_target_entry);
+    switch(fs_error)
+    {
+        case CCAPI_FS_ERROR_NONE:
+            error = CCAPI_RECEIVE_ERROR_NONE;
+            break;
+        case CCAPI_FS_ERROR_CCAPI_STOPPED:
+            error = CCAPI_RECEIVE_ERROR_CCAPI_NOT_RUNNING;
+            break;
+        case CCAPI_FS_ERROR_NO_FS_SUPPORT:
+            error = CCAPI_RECEIVE_ERROR_NO_RECEIVE_SUPPORT;
+            break;
+        case CCAPI_FS_ERROR_INVALID_PATH:
+            error = CCAPI_RECEIVE_ERROR_INVALID_TARGET;
+            break;
+        case CCAPI_FS_ERROR_INSUFFICIENT_MEMORY:
+            error = CCAPI_RECEIVE_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        case CCAPI_FS_ERROR_NOT_A_DIR:
+            error = CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED;
+            break;
+        case CCAPI_FS_ERROR_NOT_MAPPED:
+            error = CCAPI_RECEIVE_ERROR_TARGET_NOT_ADDED;
+            break;
+        case CCAPI_FS_ERROR_ALREADY_MAPPED:
+            error = CCAPI_RECEIVE_ERROR_TARGET_ALREADY_ADDED;
+            break;
+        case CCAPI_FS_ERROR_LOCK_FAILED:
+            error = CCAPI_RECEIVE_ERROR_LOCK_FAILED;
+            break;
+    }
 
 done:
     return error;

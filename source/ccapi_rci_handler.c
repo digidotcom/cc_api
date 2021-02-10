@@ -489,7 +489,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
 
                             if (rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
                             {
-                                remote_config->response.compare_matches = CCAPI_FALSE;
+                                remote_config->response.compare_matches = connector_false;
                             }
 
                             switch (remote_config->element.type)
