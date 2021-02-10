@@ -165,6 +165,34 @@ connector_transport_t ccapi_to_connector_transport(ccapi_transport_t const ccapi
     return connector_transport;
 }
 
+ccapi_transport_t connector_transport_to_ccapi(connector_transport_t const connector_transport)
+{
+    ccapi_transport_t ccapi_transport = CCAPI_TRANSPORT_TCP;
+
+    switch(connector_transport)
+    {
+        case connector_transport_all:
+            /* By default we use TCP because there is not a CCAPI_TRANSPORT_ALL */
+            ccapi_transport = CCAPI_TRANSPORT_TCP;
+            break;
+        case connector_transport_tcp:
+            ccapi_transport = CCAPI_TRANSPORT_TCP;
+            break;
+#if (defined CCIMP_UDP_TRANSPORT_ENABLED)
+        case connector_transport_udp:
+            ccapi_transport = CCAPI_TRANSPORT_UDP;
+            break;
+#endif
+#if (defined CCIMP_SMS_TRANSPORT_ENABLED)
+        case connector_transport_sms:
+            ccapi_transport = CCAPI_TRANSPORT_SMS;
+            break;
+#endif
+    }
+
+    return ccapi_transport;
+}
+
 static connector_stop_condition_t ccapi_to_connector_stop(ccapi_transport_stop_t const ccapi_stop)
 {
     connector_stop_condition_t stop_condition;
