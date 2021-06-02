@@ -340,6 +340,43 @@ void ccapi_rci_thread(void * const argument)
                     }
                     break;
                 }
+                
+                case ccapi_callback_type_transform:
+                {
+                    ccapi_rci_function_transform_t const function = ccapi_data->service.rci.callback.as.transform.function;
+                    char const ** const transformed = ccapi_data->service.rci.callback.as.transform.transformed;
+
+                    ASSERT_MSG_GOTO(function != NULL, done);
+
+#if (defined RCI_ENUMS_AS_STRINGS)
+                    connector_element_enum_t const * const enum_array = ccapi_data->service.rci.callback.enum_data.array;
+
+                    if (enum_array != NULL)
+                    {
+                        ccapi_element_value_t element_value;
+                        ccapi_element_value_t * const reference_value = ccapi_data->service.rci.callback.as.transform.value;
+                        unsigned int const enum_element_count = ccapi_data->service.rci.callback.enum_data.element_count;
+
+                        ASSERT_MSG_GOTO(reference_value != NULL, done);
+                        {
+                            unsigned int const actual_value = reference_value->enum_value;
+
+                            ASSERT(actual_value < enum_element_count);
+                            element_value.string_value = enum_to_string(enum_array, actual_value);
+                            ccapi_data->service.rci.callback.error = function(rci_info, &element_value, transformed);
+                        }
+                    }
+                    else
+#endif
+                    {
+                        ccapi_element_value_t * const value = ccapi_data->service.rci.callback.as.transform.value;
+
+                        ASSERT_MSG_GOTO(value != NULL, done);
+
+                        ccapi_data->service.rci.callback.error = function(rci_info, value, transformed);
+                    }
+                    break;
+                }
             }
 
             /* Check if ccfsm has called cancel callback while we were waiting for the user */
@@ -486,6 +523,10 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                             rci_info->query_setting.attributes.compare_to = connector_to_ccapi_compare_to_attribute(remote_config->attribute.compare_to);
                             rci_info->query_setting.attributes.source = connector_to_ccapi_source_attribute(remote_config->attribute.source);
                             rci_info->query_setting.matches = CCAPI_FALSE;
+                        }
+                        else if (rci_info->action == CCAPI_RCI_ACTION_SET && rci_info->group.type == CCAPI_RCI_GROUP_SETTING)
+                        {
+                            rci_info->set_setting.attributes.embed_transformed_values = CCAPI_BOOL(remote_config->attribute.embed_transformed_values == connector_true);
                         }
 
                         clear_group_info(rci_info);
@@ -763,10 +804,21 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                                 ccapi_data->service.rci.callback.as.element.function = rci_data->callback.get_element;
                                 break;
                             case CCAPI_RCI_ACTION_SET:
-                                ccapi_data->service.rci.callback.as.element.value = ccapi_element_value_from_connector_element_value(remote_config->element.value);
+                                if (rci_info->set_setting.attributes.embed_transformed_values == CCAPI_FALSE)
+                                {
+                                    ccapi_data->service.rci.callback.as.element.value = ccapi_element_value_from_connector_element_value(remote_config->element.value);
 
-                                ccapi_data->service.rci.callback.type = ccapi_callback_type_element;
-                                ccapi_data->service.rci.callback.as.element.function = rci_data->callback.set_element;
+                                    ccapi_data->service.rci.callback.type = ccapi_callback_type_element;
+                                    ccapi_data->service.rci.callback.as.element.function = rci_data->callback.set_element;
+                                }
+                                else
+                                {
+                                    ccapi_data->service.rci.callback.as.transform.value = ccapi_element_value_from_connector_element_value(remote_config->element.value);
+                                    ccapi_data->service.rci.callback.as.transform.transformed = &remote_config->response.element_value->string_value;
+
+                                    ccapi_data->service.rci.callback.type = ccapi_callback_type_transform;
+                                    ccapi_data->service.rci.callback.as.transform.function = rci_data->callback.set_and_transform_element;
+                                }
                                 break;
                             case CCAPI_RCI_ACTION_DO_COMMAND:
                             case CCAPI_RCI_ACTION_REBOOT:

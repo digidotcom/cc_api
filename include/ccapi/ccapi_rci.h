@@ -153,6 +153,12 @@ typedef struct {
     } query_setting;
 
     struct {
+        struct {
+            ccapi_bool_t embed_transformed_values;
+        } attributes;
+    } set_setting;
+
+    struct {
         char const * CONST target;
         char const * CONST request;
         char const * * CONST response;
@@ -181,6 +187,7 @@ typedef union {
 typedef unsigned int (*ccapi_rci_function_base_t)(ccapi_rci_info_t * const info);
 typedef unsigned int (*ccapi_rci_function_lock_t)(ccapi_rci_info_t * const info, ccapi_response_item_t * const item);
 typedef unsigned int (*ccapi_rci_function_element_t)(ccapi_rci_info_t * const info, ccapi_element_value_t * const element);
+typedef unsigned int (*ccapi_rci_function_transform_t)(ccapi_rci_info_t * const info, ccapi_element_value_t * const element, char const ** const transformed);
 
 typedef struct {
     struct {
@@ -202,6 +209,7 @@ typedef struct {
         ccapi_rci_function_base_t unlock_list_instances;
         ccapi_rci_function_element_t get_element;
         ccapi_rci_function_element_t set_element;
+        ccapi_rci_function_transform_t set_and_transform_element;
         ccapi_rci_function_base_t do_command;
         ccapi_rci_function_base_t set_factory_defaults;
         ccapi_rci_function_base_t reboot;

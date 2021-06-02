@@ -245,7 +245,8 @@ typedef struct {
                     ccapi_callback_type_none,
                     ccapi_callback_type_base,
                     ccapi_callback_type_lock,
-                    ccapi_callback_type_element
+                    ccapi_callback_type_element,
+                    ccapi_callback_type_transform
                 } type;
                 union {
                     struct {
@@ -259,6 +260,11 @@ typedef struct {
                         ccapi_rci_function_element_t function;
                         ccapi_element_value_t * value;
                     } element;
+                    struct {
+                        ccapi_rci_function_transform_t function;
+                        ccapi_element_value_t * value;
+                        char const ** transformed;
+                    } transform;
                 } as;
                 unsigned int error;
 #if (defined RCI_ENUMS_AS_STRINGS)
