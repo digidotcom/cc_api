@@ -570,7 +570,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     if (rci_data->callback.lock_group_instances != NULL)
                     {
                         rci_info->group.id = remote_config->group.id;
-                        rci_info->group.collection_type = remote_config->group.collection_type;
+                        rci_info->group.collection_type = (ccapi_rci_collection_type_t)remote_config->group.collection_type;
                         COPY_GROUP_NAME(rci_info, remote_config);
                         clear_all_list_info(rci_info);
                         clear_element_info(rci_info);
@@ -619,7 +619,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     if (rci_data->callback.remove_group_instance != NULL)
                     {
                         rci_info->group.id = remote_config->group.id;
-                        rci_info->group.collection_type = remote_config->group.collection_type;
+                        rci_info->group.collection_type = (ccapi_rci_collection_type_t)remote_config->group.collection_type;
                         copy_group_item(rci_info, remote_config);
                         COPY_GROUP_NAME(rci_info, remote_config);
                         clear_all_list_info(rci_info);
@@ -647,7 +647,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     if (rci_data->callback.unlock_group_instances != NULL)
                     {
                         rci_info->group.id = remote_config->group.id;
-                        rci_info->group.collection_type = remote_config->group.collection_type;
+                        rci_info->group.collection_type = (ccapi_rci_collection_type_t)remote_config->group.collection_type;
                         COPY_GROUP_NAME(rci_info, remote_config);
                         clear_all_list_info(rci_info);
                         clear_element_info(rci_info);
@@ -662,7 +662,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                     if (rci_data->callback.start_group != NULL)
                     {
                         rci_info->group.id = remote_config->group.id;
-                        rci_info->group.collection_type = remote_config->group.collection_type;
+                        rci_info->group.collection_type = (ccapi_rci_collection_type_t)remote_config->group.collection_type;
                         copy_group_item(rci_info, remote_config);
                         COPY_GROUP_NAME(rci_info, remote_config);
                         clear_all_list_info(rci_info);
@@ -679,7 +679,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         unsigned int const index = remote_config->list.depth - 1;
 
                         rci_info->list.depth = remote_config->list.depth;
-                        rci_info->list.data[index].collection_type = remote_config->list.level[index].collection_type;
+                        rci_info->list.data[index].collection_type = (ccapi_rci_collection_type_t)remote_config->list.level[index].collection_type;
                         COPY_LIST_NAME(rci_info, remote_config, index);
                         clear_element_info(rci_info);
 
@@ -733,7 +733,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         unsigned int const index = remote_config->list.depth - 1;
 
                         rci_info->list.depth = remote_config->list.depth;
-                        rci_info->list.data[index].collection_type = remote_config->list.level[index].collection_type;
+                        rci_info->list.data[index].collection_type = (ccapi_rci_collection_type_t)remote_config->list.level[index].collection_type;
                         copy_list_item(rci_info, remote_config, index);
                         COPY_LIST_NAME(rci_info, remote_config, index);
                         clear_element_info(rci_info);
@@ -763,7 +763,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         unsigned int const index = remote_config->list.depth - 1;
 
                         rci_info->list.depth = remote_config->list.depth;
-                        rci_info->list.data[index].collection_type = remote_config->list.level[index].collection_type;
+                        rci_info->list.data[index].collection_type = (ccapi_rci_collection_type_t)remote_config->list.level[index].collection_type;
                         COPY_LIST_NAME(rci_info, remote_config, index);
                         clear_element_info(rci_info);
 
@@ -778,7 +778,7 @@ connector_callback_status_t ccapi_rci_handler(connector_request_id_remote_config
                         unsigned int const index = remote_config->list.depth - 1;
 
                         rci_info->list.depth = remote_config->list.depth;
-                        rci_info->list.data[index].collection_type = remote_config->list.level[index].collection_type;
+                        rci_info->list.data[index].collection_type = (ccapi_rci_collection_type_t)remote_config->list.level[index].collection_type;
                         copy_list_item(rci_info, remote_config, index);
                         COPY_LIST_NAME(rci_info, remote_config, index);
                         clear_element_info(rci_info);

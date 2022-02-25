@@ -46,7 +46,7 @@ void ccapi_receive_thread(void * const argument)
             ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
 
             /* Pass data to the user and get possible response from user */
-            svc_receive->user_callback.data(svc_receive->target, svc_receive->transport,
+            svc_receive->user_callback.data(svc_receive->target, (ccapi_transport_t)svc_receive->transport,
                                                                    &svc_receive->request_buffer_info,
                                                                    svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
             /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
@@ -322,7 +322,8 @@ static connector_callback_status_t ccapi_process_device_request_target(connector
 
             if (ccapi_data->service.receive.user_callback.accept != NULL)
             {
-                user_accepts = ccapi_data->service.receive.user_callback.accept(svc_receive->target, svc_receive->transport);
+                user_accepts = ccapi_data->service.receive.user_callback.accept(svc_receive->target,
+										(ccapi_transport_t)svc_receive->transport);
             }
             else
             {
@@ -622,7 +623,7 @@ static connector_callback_status_t ccapi_process_device_request_status(connector
     if (ccapi_data->config.receive_supported && svc_receive->user_callback.status != NULL)
     {
        ccapi_bool_t const should_user_free_response_buffer = !svc_receive->response_handled_internally && svc_receive->response_required && svc_receive->response_buffer_info.buffer != NULL;
-       svc_receive->user_callback.status(svc_receive->target, svc_receive->transport,
+       svc_receive->user_callback.status(svc_receive->target, (ccapi_transport_t)svc_receive->transport,
                            should_user_free_response_buffer ? &svc_receive->response_buffer_info : NULL,
                            svc_receive->receive_error);
     }
