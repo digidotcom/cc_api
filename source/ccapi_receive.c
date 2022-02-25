@@ -23,7 +23,7 @@
 
 #if (defined CCIMP_DATA_SERVICE_ENABLED)
 
-static ccapi_fs_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_receive_target_t * const new_entry)
+static ccapi_receive_error_t add_target_entry(ccapi_data_t * const ccapi_data, ccapi_receive_target_t * const new_entry)
 {
     ccapi_receive_error_t error = CCAPI_RECEIVE_ERROR_NONE;
     ccimp_status_t ccimp_status;
