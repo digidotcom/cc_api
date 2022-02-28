@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Digi International Inc.
+* Copyright (c) 2017-2022 Digi International Inc.
 *
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -40,7 +40,7 @@ typedef enum {
 } ccapi_receive_error_t;
 
 typedef ccapi_bool_t (*ccapi_receive_accept_cb_t)(char const * const target, ccapi_transport_t const transport);
-typedef void (*ccapi_receive_data_cb_t)(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info);
+typedef ccapi_receive_error_t (*ccapi_receive_data_cb_t)(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t const * const request_buffer_info, ccapi_buffer_info_t * const response_buffer_info);
 typedef void (*ccapi_receive_status_cb_t)(char const * const target, ccapi_transport_t const transport, ccapi_buffer_info_t * const response_buffer_info, ccapi_receive_error_t receive_error);
 
 typedef struct {

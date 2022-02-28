@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Digi International Inc.
+* Copyright (c) 2017-2022 Digi International Inc.
 *
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -46,7 +46,7 @@ void ccapi_receive_thread(void * const argument)
             ASSERT_MSG_GOTO(svc_receive->user_callback.data != NULL, done);
 
             /* Pass data to the user and get possible response from user */
-            svc_receive->user_callback.data(svc_receive->target, (ccapi_transport_t)svc_receive->transport,
+            svc_receive->receive_error = svc_receive->user_callback.data(svc_receive->target, (ccapi_transport_t)svc_receive->transport,
                                                                    &svc_receive->request_buffer_info,
                                                                    svc_receive->response_required ? &svc_receive->response_buffer_info : NULL);
             /* Check if ccfsm has called status callback cancelling the session while we were waiting for the user */
@@ -485,7 +485,8 @@ static connector_callback_status_t ccapi_process_device_request_data(connector_d
 
             svc_receive->receive_thread_status = CCAPI_RECEIVE_THREAD_FREE;
 
-            connector_status = connector_callback_continue;
+            if (svc_receive->receive_error == CCAPI_RECEIVE_ERROR_NONE)
+                connector_status = connector_callback_continue;
 
             break;
         }
