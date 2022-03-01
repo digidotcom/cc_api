@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Digi International Inc.
+* Copyright (c) 2017-2022 Digi International Inc.
 *
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -108,6 +108,20 @@
 
 #ifdef CCIMP_STREAMING_CLI_SERVICE_ENABLED
 #define CONNECTOR_STREAMING_CLI_SERVICE
+#endif
+
+/* Capabilities */
+#ifdef CCIMP_SPEEDTEST_CAP_ENABLED
+#define CONNECTOR_SPEEDTEST_CAP_ENABLED
+#endif
+#ifdef CCIMP_MODEM_FW_UPDATE_CAP_ENABLED
+#define CONNECTOR_MODEM_FW_UPDATE_CAP_ENABLED
+#endif
+#ifdef CCIMP_CLIENT_CERTIFICATE_CAP_ENABLED
+#define CONNECTOR_CLIENT_CERTIFICATE_CAP_ENABLED
+#endif
+#ifdef CCIMP_SUBSCRIPTIONS_CAP_ENABLED
+#define CONNECTOR_SUBSCRIPTIONS_CAP_ENABLED
 #endif
 
 /* OS Features */
