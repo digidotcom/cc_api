@@ -560,8 +560,8 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
         goto done;
     }
 
-    /* We initialize the response buffer for internal errors just once */
-    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && svc_receive->receive_error != CCAPI_RECEIVE_ERROR_CUSTOM && !svc_receive->response_handled_internally)
+    /* We initialize the response buffer for internal errors just once and if there are no a custom response */
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && !svc_receive->response_handled_internally && svc_receive->response_buffer_info.length == 0)
     {
         svc_receive->response_handled_internally = CCAPI_TRUE;
 
