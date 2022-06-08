@@ -217,6 +217,14 @@ void free_transport_tcp_info(ccapi_tcp_info_t * const tcp_info)
     ccapi_free(tcp_info);
 }
 
+static ccapi_bool_t
+transport_is_connected(void * const pv)
+{
+    ccapi_data_t const * const ccapi_data = pv;
+
+    return ccapi_data->transport_tcp.connected;
+}
+
 ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_data, ccapi_tcp_info_t const * const tcp_start)
 {
     ccapi_tcp_start_error_t error = CCAPI_TCP_START_ERROR_NONE;
@@ -326,29 +334,33 @@ ccapi_tcp_start_error_t ccxapi_start_transport_tcp(ccapi_data_t * const ccapi_da
 
         if (wait_forever)
         {
-            do {
-                ccimp_os_yield();
-            } while (!ccapi_data->transport_tcp.connected);
+            ccimp_os_condition_wait(
+                ccapi_data->transport_tcp.cond,
+                OS_CONDITION_WAIT_INFINITE,
+                transport_is_connected,
+                ccapi_data);
         }
         else
         {
-            ccimp_os_system_up_time_t time_start;
-            ccimp_os_system_up_time_t end_time;
             unsigned long const jitter = 1;
+            unsigned long const max_wait_time_ms =
+                (tcp_start->connection.start_timeout + jitter) * 1000;
 
-            ccimp_os_get_system_time(&time_start);
-            end_time.sys_uptime = time_start.sys_uptime + tcp_start->connection.start_timeout + jitter;
-            do {
-                ccimp_os_system_up_time_t system_uptime;
+            ccimp_status_t const condition_res =
+                ccimp_os_condition_wait(
+                    ccapi_data->transport_tcp.cond,
+                    max_wait_time_ms,
+                    transport_is_connected,
+                    ccapi_data);
 
-                ccimp_os_yield();
-                ccimp_os_get_system_time(&system_uptime);
-                if (system_uptime.sys_uptime > end_time.sys_uptime)
-                {
-                    error = CCAPI_TCP_START_ERROR_TIMEOUT;
-                    goto done;
-                }
-            } while (!ccapi_data->transport_tcp.connected);
+            if (condition_res == CCIMP_STATUS_BUSY)
+            {
+                error = CCAPI_TCP_START_ERROR_TIMEOUT;
+            }
+            else if (condition_res != CCIMP_STATUS_OK)
+            {
+                error = CCAPI_TCP_START_ERROR_INIT;
+            }
         }
     }
 done:

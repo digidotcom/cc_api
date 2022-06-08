@@ -1080,7 +1080,7 @@ static void free_data_points_from_collection(ccapi_dp_collection_t * const dp_co
 static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, ccapi_dp_collection_t * const dp_collection, ccapi_bool_t const with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
     ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
-    ccapi_bool_t * p_transport_started = NULL;
+    ccapi_bool_t transport_started = CCAPI_FALSE;
     ccapi_dp_transaction_info_t * transaction_info = NULL;
     ccapi_bool_t collection_lock_acquired = CCAPI_FALSE;
 
@@ -1100,21 +1100,21 @@ static ccapi_dp_error_t send_collection(ccapi_data_t * const ccapi_data, ccapi_t
     switch (transport)
     {
         case CCAPI_TRANSPORT_TCP:
-            p_transport_started = &ccapi_data->transport_tcp.connected;
+            transport_started = ccapi_data->transport_tcp.connected;
             break;
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
         case CCAPI_TRANSPORT_UDP:
-            p_transport_started = &ccapi_data->transport_udp.started;
+            transport_started = ccapi_data->transport_udp.started;
             break;
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
         case CCAPI_TRANSPORT_SMS:
-            p_transport_started = &ccapi_data->transport_sms.started;
+            transport_started = ccapi_data->transport_sms.started;
             break;
 #endif
     }
 
-    if (p_transport_started == NULL || !*p_transport_started)
+    if (!transport_started)
     {
         ccapi_logging_line("ccapi_dp_send_collection: Transport not started");
         error = CCAPI_DP_ERROR_TRANSPORT_NOT_STARTED;
