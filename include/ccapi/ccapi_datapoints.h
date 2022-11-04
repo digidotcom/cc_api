@@ -89,5 +89,6 @@ ccapi_dp_error_t ccapi_dp_remove_data_stream_from_collection(ccapi_dp_collection
 ccapi_dp_error_t ccapi_dp_get_collection_points_count(ccapi_dp_collection_handle_t const collection, uint32_t * const count);
 
 ccapi_dp_error_t ccapi_dp_add(ccapi_dp_collection_handle_t const collection, char const * const stream_id, ...);
+ccapi_dp_error_t ccapi_dp_remove_older_data_point_from_streams(ccapi_dp_collection_handle_t const collection);
 
 #endif

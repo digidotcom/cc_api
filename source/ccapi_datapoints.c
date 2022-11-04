@@ -62,6 +62,43 @@ done:
     return error;
 }
 
+static void free_data_point(connector_data_point_t * data_point, connector_data_point_type_t type)
+{
+    if (data_point == NULL)
+        return;
+
+    switch(type)
+    {
+        case connector_data_point_type_string:
+        {
+            ccapi_free(data_point->data.element.native.string_value);
+            break;
+        }
+        case connector_data_point_type_integer:
+        case connector_data_point_type_long:
+        case connector_data_point_type_float:
+        case connector_data_point_type_double:
+        case connector_data_point_type_binary:
+        case connector_data_point_type_json:
+        case connector_data_point_type_geojson:
+            break;
+    }
+
+    switch(data_point->time.source)
+    {
+        case connector_time_local_iso8601:
+        {
+            ccapi_free(data_point->time.value.iso8601_string);
+            break;
+        }
+        case connector_time_cloud:
+        case connector_time_local_epoch_fractional:
+        case connector_time_local_epoch_whole:
+            break;
+    }
+    ccapi_free(data_point);
+}
+
 static unsigned int free_data_points_in_data_stream(connector_data_stream_t * data_stream)
 {
     connector_data_point_t * data_point = data_stream->point;
@@ -71,36 +108,7 @@ static unsigned int free_data_points_in_data_stream(connector_data_stream_t * da
     {
         connector_data_point_t * const next_point = data_point->next;
 
-        switch(data_stream->type)
-        {
-            case connector_data_point_type_string:
-            {
-                ccapi_free(data_point->data.element.native.string_value);
-                break;
-            }
-            case connector_data_point_type_integer:
-            case connector_data_point_type_long:
-            case connector_data_point_type_float:
-            case connector_data_point_type_double:
-            case connector_data_point_type_binary:
-            case connector_data_point_type_json:
-            case connector_data_point_type_geojson:
-                break;
-        }
-
-        switch(data_point->time.source)
-        {
-            case connector_time_local_iso8601:
-            {
-                ccapi_free(data_point->time.value.iso8601_string);
-                break;
-            }
-            case connector_time_cloud:
-            case connector_time_local_epoch_fractional:
-            case connector_time_local_epoch_whole:
-                break;
-        }
-        ccapi_free(data_point);
+        free_data_point(data_point, data_stream->type);
 
         data_point = next_point;
         dp_count++;
@@ -1035,6 +1043,38 @@ done:
     }
 
 error:
+    return error;
+}
+
+ccapi_dp_error_t ccapi_dp_remove_older_data_point_from_streams(ccapi_dp_collection_t * const dp_collection)
+{
+    ccapi_dp_error_t error = CCAPI_DP_ERROR_NONE;
+    ccapi_dp_data_stream_t * current_data_stream = NULL;
+
+    if (dp_collection == NULL)
+    {
+        return CCAPI_DP_ERROR_INVALID_ARGUMENT;
+    }
+
+    current_data_stream = dp_collection->ccapi_data_stream_list;
+
+    while (current_data_stream != NULL)
+    {
+        connector_data_stream_t * const ccfsm_data_stream = current_data_stream->ccfsm_data_stream;
+        connector_data_point_t * rm_point = ccfsm_data_stream->point;
+
+        if (rm_point != NULL)
+        {
+            ccfsm_data_stream->point = rm_point->next;
+
+            free_data_point(rm_point, ccfsm_data_stream->type);
+
+            dp_collection->dp_count -= 1;
+        }
+
+        current_data_stream = current_data_stream->next;
+    }
+
     return error;
 }
 
