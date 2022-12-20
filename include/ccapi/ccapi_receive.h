@@ -36,7 +36,8 @@ typedef enum {
     CCAPI_RECEIVE_ERROR_REQUEST_TOO_BIG,
     CCAPI_RECEIVE_ERROR_STATUS_CANCEL,
     CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT,
-    CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR
+    CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR,
+    CCAPI_RECEIVE_ERROR_CUSTOM
 } ccapi_receive_error_t;
 
 typedef ccapi_bool_t (*ccapi_receive_accept_cb_t)(char const * const target, ccapi_transport_t const transport);
