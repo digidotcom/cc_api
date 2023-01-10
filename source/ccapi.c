@@ -1069,6 +1069,15 @@ done:
 }
 #endif
 
+static void ccapi_transport_state_set(
+    ccapi_data_t * const ccapi_data, ccapi_bool_t const state)
+{
+    ccimp_os_condition_lock(ccapi_data->transport_tcp.cond);
+    ccapi_data->transport_tcp.connected = state;
+    ccimp_os_condition_broadcast(ccapi_data->transport_tcp.cond);
+    ccimp_os_condition_unlock(ccapi_data->transport_tcp.cond);
+}
+
 connector_callback_status_t ccapi_network_handler(connector_request_id_network_t const network_request, void * const data, ccapi_data_t * const ccapi_data)
 {
     connector_callback_status_t connector_status;
@@ -1134,7 +1143,7 @@ connector_callback_status_t ccapi_network_handler(connector_request_id_network_t
             switch(ccimp_status)
             {
                 case CCIMP_STATUS_OK:
-                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    ccapi_transport_state_set(ccapi_data, CCAPI_FALSE);
                     break;
                 case CCIMP_STATUS_ERROR:
                 case CCIMP_STATUS_BUSY:
@@ -1411,7 +1420,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
                 case connector_tcp_communication_started:
                 {
                     ccapi_logging_line("TCP communication started");
-                    ccapi_data->transport_tcp.connected = CCAPI_TRUE;
+                    ccapi_transport_state_set(ccapi_data, CCAPI_TRUE);
                     break;
                 }
                 case connector_tcp_keepalive_missed:
@@ -1445,7 +1454,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
             {
                 case connector_transport_tcp:
                 {
-                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    ccapi_transport_state_set(ccapi_data, CCAPI_FALSE);
                     break;
                 }
 #if (defined CONNECTOR_TRANSPORT_UDP)
@@ -1464,7 +1473,7 @@ connector_callback_status_t ccapi_status_handler(connector_request_id_status_t s
 #endif
                 case connector_transport_all:
                 {
-                    ccapi_data->transport_tcp.connected = CCAPI_FALSE;
+                    ccapi_transport_state_set(ccapi_data, CCAPI_FALSE);
 #if (defined CONNECTOR_TRANSPORT_UDP)
                     ccapi_data->transport_udp.started = CCAPI_FALSE;
 #endif

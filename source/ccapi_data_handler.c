@@ -524,6 +524,7 @@ static void fill_internal_error(ccapi_svc_receive_t * svc_receive)
             case CCAPI_RECEIVE_ERROR_STATUS_CANCEL:
             case CCAPI_RECEIVE_ERROR_STATUS_TIMEOUT:
             case CCAPI_RECEIVE_ERROR_STATUS_SESSION_ERROR:
+            case CCAPI_RECEIVE_ERROR_CUSTOM:
             {
                 static char const this_receive_error_str[] = "Unexpected error";
                 receive_error_str = (char *)this_receive_error_str;
@@ -559,8 +560,8 @@ static connector_callback_status_t ccapi_process_device_request_response(connect
         goto done;
     }
 
-    /* We initialize the response buffer for internal errors just once and if there are no a custom response */
-    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && !svc_receive->response_handled_internally && svc_receive->response_buffer_info.length == 0)
+    /* We initialize the response buffer for internal errors just once */
+    if (svc_receive->receive_error != CCAPI_RECEIVE_ERROR_NONE && svc_receive->receive_error != CCAPI_RECEIVE_ERROR_CUSTOM && !svc_receive->response_handled_internally)
     {
         svc_receive->response_handled_internally = CCAPI_TRUE;
 

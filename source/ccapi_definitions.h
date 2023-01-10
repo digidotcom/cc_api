@@ -27,6 +27,7 @@
 #include "ccimp/ccimp_hal.h"
 #include "ccimp/ccimp_logging.h"
 #include "ccimp/ccimp_os.h"
+#include "ccimp/ccimp_os_condition.h"
 #include "ccimp/ccimp_network.h"
 #include "ccimp/ccimp_filesystem.h"
 #include "connector_api.h"
@@ -295,6 +296,7 @@ typedef struct {
     } service;
     struct {
         ccapi_tcp_info_t * info;
+        ccimp_os_condition_st * cond;
         ccapi_bool_t connected;
     } transport_tcp;
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)

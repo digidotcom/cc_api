@@ -222,6 +222,13 @@ static void free_ccapi_data_internal_resources(ccapi_data_t * const ccapi_data)
         }
     }
 
+    if (ccapi_data->transport_tcp.cond != NULL)
+    {
+        ccimp_os_condition_destroy(ccapi_data->transport_tcp.cond);
+        ccimp_os_condition_free(ccapi_data->transport_tcp.cond);
+        ccapi_data->transport_tcp.cond = NULL;
+    }
+
 done:
     return;
 }
@@ -644,6 +651,19 @@ ccapi_start_error_t ccxapi_start(ccapi_handle_t * const ccapi_handle, ccapi_star
     error = check_malloc(ccapi_data->connector_handle);
     if (error != CCAPI_START_ERROR_NONE)
         goto done;
+
+    ccapi_data->transport_tcp.cond = ccimp_os_condition_alloc();
+    if (ccapi_data->transport_tcp.cond == NULL)
+    {
+        error = CCAPI_START_ERROR_INSUFFICIENT_MEMORY;
+        goto done;
+    }
+    if (ccimp_os_condition_init(ccapi_data->transport_tcp.cond)
+        != CCIMP_STATUS_OK)
+    {
+        error = CCAPI_START_ERROR_INSUFFICIENT_MEMORY;
+        goto done;
+    }
 
     ccapi_data->transport_tcp.connected = CCAPI_FALSE;
     ccapi_data->transport_tcp.info = NULL;

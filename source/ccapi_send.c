@@ -67,7 +67,7 @@ done:
 static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type)
 {
     ccapi_send_error_t error = CCAPI_SEND_ERROR_NONE;
-    ccapi_bool_t const * p_transport_started = NULL;
+    ccapi_bool_t transport_started = CCAPI_FALSE;
 
     if (!CCAPI_RUNNING(ccapi_data))
     {
@@ -80,21 +80,21 @@ static ccapi_send_error_t checkargs_send_common(ccapi_data_t * const ccapi_data,
     switch (transport)
     {
         case CCAPI_TRANSPORT_TCP:
-            p_transport_started = &ccapi_data->transport_tcp.connected;
+            transport_started = ccapi_data->transport_tcp.connected;
             break;
 #if (defined CCIMP_UDP_TRANSPORT_ENABLED)
         case CCAPI_TRANSPORT_UDP:
-            p_transport_started = &ccapi_data->transport_udp.started;
+            transport_started = ccapi_data->transport_udp.started;
             break;
 #endif
 #if (defined CCIMP_SMS_TRANSPORT_ENABLED)
         case CCAPI_TRANSPORT_SMS:
-            p_transport_started = &ccapi_data->transport_sms.started;
+            transport_started = ccapi_data->transport_sms.started;
             break;
 #endif
     }
 
-    if (p_transport_started == NULL || !*p_transport_started)
+    if (!transport_started)
     {
         ccapi_logging_line("checkargs_send_common: Transport not started");
 
