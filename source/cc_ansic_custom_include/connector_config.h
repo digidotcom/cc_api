@@ -19,6 +19,8 @@
 
 #include "custom/custom_connector_config.h"
 
+#define CC_API_COMPAT
+
 /* +++ Layer2 Digi Controlled defines +++ */
 /* Transports */
 #define CCIMP_TCP_TRANSPORT_ENABLED
