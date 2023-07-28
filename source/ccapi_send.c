@@ -372,7 +372,18 @@ static void finish_send(ccapi_data_t * const ccapi_data, ccapi_send_t * const se
     }
 }
 
-ccapi_send_error_t ccxapi_send_data_common(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior, ccapi_bool_t const with_reply, unsigned long const timeout, ccapi_string_info_t * const hint)
+ccapi_send_error_t ccxapi_send_data_common(
+    ccapi_data_t * const ccapi_data,
+    ccapi_transport_t const transport,
+    char const * const cloud_path,
+    char const * const content_type,
+    void const * const data,
+    size_t const bytes,
+    ccapi_send_behavior_t const behavior,
+    ccapi_bool_t const with_reply,
+    unsigned long const timeout,
+    ccapi_string_info_t * const hint,
+    ccapi_optional_uint8_t *error_code_from_server)
 {
     ccapi_send_error_t error;
     ccapi_send_t * send_info = NULL;
@@ -434,6 +445,10 @@ ccapi_send_error_t ccxapi_send_data_common(ccapi_data_t * const ccapi_data, ccap
 
 done:
     finish_send(ccapi_data, send_info);
+
+    if (error_code_from_server != NULL) {
+        memcpy(error_code_from_server, &send_info->svc_send.raw_response_error, sizeof(*error_code_from_server));
+    }
 
     return error;
 }
@@ -525,22 +540,27 @@ done:
 
 ccapi_send_error_t ccxapi_send_data(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior)
 {
-    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, CCAPI_SEND_WAIT_FOREVER, NULL);
+    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, CCAPI_SEND_WAIT_FOREVER, NULL, NULL);
 }
 
 ccapi_send_error_t ccapi_send_data(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior)
 {
-    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, CCAPI_SEND_WAIT_FOREVER, NULL);
+    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_FALSE, CCAPI_SEND_WAIT_FOREVER, NULL, NULL);
 }
 
 ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint);
+    return ccxapi_send_data_common(ccapi_data, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint, NULL);
 }
 
 ccapi_send_error_t ccapi_send_data_with_reply(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior, unsigned long const timeout, ccapi_string_info_t * const hint)
 {
-    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint);
+    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint, NULL);
+}
+
+ccapi_send_error_t ccapi_send_data_with_reply_and_errorcode(ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t const bytes, ccapi_send_behavior_t const behavior, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server)
+{
+    return ccxapi_send_data_common(ccapi_data_single_instance, transport, cloud_path, content_type, data, bytes, behavior, CCAPI_TRUE, timeout, hint, error_code_from_server);
 }
 
 ccapi_send_error_t ccxapi_send_file(ccapi_data_t * const ccapi_data, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t const behavior)

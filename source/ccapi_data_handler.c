@@ -121,6 +121,8 @@ static connector_callback_status_t ccapi_process_send_data_response(connector_da
     /* TODO: we could have a flag in svc_send where to check if user wants a response or not to skip this callback */
 
     ccapi_logging_line("Received %s response from Device Cloud", resp_ptr->response == connector_data_service_send_response_success ? "success" : "error");
+    svc_send->raw_response_error.known = CCAPI_TRUE;
+    svc_send->raw_response_error.value = resp_ptr->response;
 
     switch (resp_ptr->response)
     {

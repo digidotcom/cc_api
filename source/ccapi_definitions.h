@@ -326,6 +326,7 @@ typedef struct
     ccapi_send_error_t response_error;
     ccapi_send_error_t status_error;
     ccapi_string_info_t * hint;
+    ccapi_optional_uint8_t raw_response_error;
 } ccapi_svc_send_t;
 
 ccapi_receive_target_t * * get_pointer_to_target_entry(ccapi_data_t * const ccapi_data, char const * const target);

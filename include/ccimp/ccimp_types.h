@@ -43,4 +43,11 @@ typedef struct {
     size_t length;
 } ccapi_buffer_info_t;
 
+typedef struct
+{
+    ccapi_bool_t known;
+    uint8_t value;
+} ccapi_optional_uint8_t;
+
+
 #endif /* CCIMP_TYPES_H_ */
