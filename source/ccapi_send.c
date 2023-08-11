@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Digi International Inc.
+* Copyright (c) 2017-2023 Digi International Inc.
 *
 * This Source Code Form is subject to the terms of the Mozilla Public
 * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -446,7 +446,7 @@ ccapi_send_error_t ccxapi_send_data_common(
 done:
     finish_send(ccapi_data, send_info);
 
-    if (error_code_from_server != NULL) {
+    if (error_code_from_server != NULL && send_info != NULL) {
         memcpy(error_code_from_server, &send_info->svc_send.raw_response_error, sizeof(*error_code_from_server));
     }
 
