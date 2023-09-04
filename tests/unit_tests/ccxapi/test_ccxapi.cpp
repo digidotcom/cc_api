@@ -244,9 +244,9 @@ TEST(test_ccxapi_api, testSendApi)
     ccapi_string_info_t hint;
 
     send_error = ccxapi_send_data(ccapi_handle, CCAPI_TRANSPORT_TCP, "cloud path", "content type", "data", sizeof("data"), CCAPI_SEND_BEHAVIOR_APPEND);
-    send_error = ccxapi_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "cloud path", "content type", "data", sizeof("data"), CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint);
+    send_error = ccxapi_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "cloud path", "content type", "data", sizeof("data"), CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint, NULL);
     send_error = ccxapi_send_file(ccapi_handle, CCAPI_TRANSPORT_TCP, "local path", "cloud path", "content type", CCAPI_SEND_BEHAVIOR_APPEND);
-    send_error = ccxapi_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local path", "cloud path", "content type", CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint);
+    send_error = ccxapi_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local path", "cloud path", "content type", CCAPI_SEND_BEHAVIOR_APPEND, CCAPI_SEND_WAIT_FOREVER, &hint, NULL);
 
     UNUSED_ARGUMENT(send_error);
 }
@@ -277,9 +277,9 @@ TEST(test_ccxapi_api, testDataPointBinaryApi)
     ccapi_string_info_t hint;
 
     dp_b_error = ccxapi_dp_binary_send_data(ccapi_handle, CCAPI_TRANSPORT_TCP, "stream_id", "data", sizeof("data"));
-    dp_b_error = ccxapi_dp_binary_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "stream_id", "data", sizeof("data"), CCAPI_DP_B_WAIT_FOREVER, &hint);
+    dp_b_error = ccxapi_dp_binary_send_data_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "stream_id", "data", sizeof("data"), CCAPI_DP_B_WAIT_FOREVER, &hint, NULL);
     dp_b_error = ccxapi_dp_binary_send_file(ccapi_handle, CCAPI_TRANSPORT_TCP, "local_path", "stream_id");
-    dp_b_error = ccxapi_dp_binary_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local_path", "stream_id", CCAPI_DP_B_WAIT_FOREVER, &hint);
+    dp_b_error = ccxapi_dp_binary_send_file_with_reply(ccapi_handle, CCAPI_TRANSPORT_TCP, "local_path", "stream_id", CCAPI_DP_B_WAIT_FOREVER, &hint, NULL);
 
     UNUSED_ARGUMENT(dp_b_error);
 }

@@ -48,9 +48,9 @@ ccapi_sms_start_error_t ccxapi_start_transport_sms(ccapi_handle_t const ccapi_ha
 ccapi_sms_stop_error_t ccxapi_stop_transport_sms(ccapi_handle_t const ccapi_handle, ccapi_sms_stop_t const * const sms_stop);
 
 ccapi_send_error_t ccxapi_send_data(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior);
-ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_send_error_t ccxapi_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const cloud_path, char const * const content_type, void const * const data, size_t bytes, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 ccapi_send_error_t ccxapi_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior);
-ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_send_error_t ccxapi_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const cloud_path, char const * const content_type, ccapi_send_behavior_t behavior, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 
 ccapi_receive_error_t ccxapi_receive_add_target(ccapi_handle_t const ccapi_handle, char const * const target, ccapi_receive_data_cb_t data_cb, ccapi_receive_status_cb_t status_cb, size_t maximum_request_size);
 ccapi_receive_error_t ccxapi_receive_remove_target(ccapi_handle_t const ccapi_handle, char const * const target);
@@ -59,9 +59,9 @@ ccapi_fs_error_t ccxapi_fs_add_virtual_dir(ccapi_handle_t const ccapi_handle, ch
 ccapi_fs_error_t ccxapi_fs_remove_virtual_dir(ccapi_handle_t const ccapi_handle, char const * const virtual_dir);
 
 ccapi_dp_b_error_t ccxapi_dp_binary_send_data(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes);
-ccapi_dp_b_error_t ccxapi_dp_binary_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_data_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 ccapi_dp_b_error_t ccxapi_dp_binary_send_file(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
-ccapi_dp_b_error_t ccxapi_dp_binary_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccxapi_dp_binary_send_file_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 
 ccapi_dp_error_t ccxapi_dp_send_collection(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_handle_t const dp_collection);
 ccapi_dp_error_t ccxapi_dp_send_collection_with_reply(ccapi_handle_t const ccapi_handle, ccapi_transport_t const transport, ccapi_dp_collection_handle_t const dp_collection, unsigned long const timeout, ccapi_string_info_t * const hint);

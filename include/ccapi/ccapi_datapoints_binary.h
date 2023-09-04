@@ -46,7 +46,9 @@ typedef enum {
 
 ccapi_dp_b_error_t ccapi_dp_binary_send_data(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes);
 ccapi_dp_b_error_t ccapi_dp_binary_send_data_with_reply(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccapi_dp_binary_send_data_with_reply_and_errorcode(ccapi_transport_t const transport, char const * const stream_id, void const * const data, size_t const bytes, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 ccapi_dp_b_error_t ccapi_dp_binary_send_file(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id);
 ccapi_dp_b_error_t ccapi_dp_binary_send_file_with_reply(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint);
+ccapi_dp_b_error_t ccapi_dp_binary_send_file_with_reply_and_errorcode(ccapi_transport_t const transport, char const * const local_path, char const * const stream_id, unsigned long const timeout, ccapi_string_info_t * const hint, ccapi_optional_uint8_t *error_code_from_server);
 
 #endif
