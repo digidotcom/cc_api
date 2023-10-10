@@ -544,7 +544,7 @@ ccapi_send_error_t ccxapi_send_file_common(
 done:
     finish_send(ccapi_data, send_info);
 
-    if (error_code_from_server != NULL) {
+    if (error_code_from_server != NULL && send_info != NULL) {
         memcpy(error_code_from_server, &send_info->svc_send.raw_response_error, sizeof(*error_code_from_server));
     }
 
