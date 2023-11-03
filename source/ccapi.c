@@ -666,6 +666,12 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
                 case CCAPI_CONNECTION_WAN:
                     connection_type->type = connector_connection_type_wan;
                     break;
+                case CCAPI_CONNECTION_WIFI:
+                    connection_type->type = connector_connection_type_wifi;
+                    break;
+                case CCAPI_CONNECTION_WIMAX:
+                    connection_type->type = connector_connection_type_wimax;
+                    break;
             }
             break;
         }

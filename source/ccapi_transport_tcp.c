@@ -103,6 +103,8 @@ static ccapi_bool_t valid_connection(ccapi_tcp_info_t const * const tcp_start, c
     switch (tcp_start->connection.type)
     {
         case CCAPI_CONNECTION_LAN:
+        case CCAPI_CONNECTION_WIFI:
+        case CCAPI_CONNECTION_WIMAX:
         {
             static uint8_t const invalid_mac[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
@@ -197,7 +199,7 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
     {
         success = copy_wan_info(dest, source, error);
     }
-    /* No buffers to copy if CCAPI_CONNECTION_LAN */
+    /* No buffers to copy if CCAPI_CONNECTION_LAN, CCAPI_CONNECTION_WIFI, CCAPI_CONNECTION_WIMAX */
 
 done:
     return success;
