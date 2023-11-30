@@ -188,4 +188,9 @@
 #endif
 #endif
 
+#ifndef CCIMP_MSG_MAX_RECV_PACKET_SIZE
+#define CCIMP_MSG_MAX_RECV_PACKET_SIZE 1500 /* MAX_ETHV2_BUFFER_SIZE */ - 20 /* TYPICAL_IP_HEADER_SIZE */ - 20 /* TYPICAL_TCP_HEADER_SIZE */
+#endif
+#define MSG_MAX_RECV_PACKET_SIZE CCIMP_MSG_MAX_RECV_PACKET_SIZE
+
 /* --- Match Layer2 User Controlled defines to Layer1 defines --- */

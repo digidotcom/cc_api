@@ -163,7 +163,7 @@ static connector_callback_status_t ccapi_process_firmware_update_request(connect
 
     if (fw_target_item->chunk_size == 0)
     {
-        fw_target_item->chunk_size = 1024;
+        fw_target_item->chunk_size = CCIMP_MSG_MAX_RECV_PACKET_SIZE;
     }
 
     {
