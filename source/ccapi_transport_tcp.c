@@ -39,6 +39,7 @@ static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, c
         }
     }
 
+#ifndef CCAPI_AGGRESSIVE_KEEPALIVES
     if (tcp_start->keepalives.wait_count != 0)
     {
         if (tcp_start->keepalives.wait_count > CCAPI_KEEPALIVES_WCNT_MAX || tcp_start->keepalives.wait_count < CCAPI_KEEPALIVES_WCNT_MIN)
@@ -47,6 +48,7 @@ static ccapi_bool_t valid_keepalives(ccapi_tcp_info_t const * const tcp_start, c
             goto done;
         }
     }
+#endif
 
 done:
     switch(success)
@@ -179,10 +181,12 @@ static ccapi_bool_t copy_ccapi_tcp_info_t_structure(ccapi_tcp_info_t * const des
         dest->keepalives.tx = CCAPI_KEEPALIVES_TX_DEFAULT;
     }
 
+#ifndef CCAPI_AGGRESSIVE_KEEPALIVES
     if (dest->keepalives.wait_count == 0)
     {
         dest->keepalives.wait_count = CCAPI_KEEPALIVES_WCNT_DEFAULT;
     }
+#endif
 
     if (source->connection.password != NULL)
     {

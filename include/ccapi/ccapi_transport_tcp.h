@@ -93,7 +93,9 @@ typedef struct {
     struct {
         uint16_t tx;
         uint16_t rx;
+#ifndef CCAPI_AGGRESSIVE_KEEPALIVES
         uint16_t wait_count;
+#endif
     } keepalives;
 
     struct {

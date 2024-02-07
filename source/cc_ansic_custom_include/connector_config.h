@@ -26,6 +26,10 @@
 #define CCIMP_TCP_TRANSPORT_ENABLED
 #define CONNECTOR_TRANSPORT_TCP
 
+#ifdef CCAPI_AGGRESSIVE_KEEPALIVES
+#define CONNECTOR_AGGRESSIVE_KEEPALIVES
+#endif
+
 /* Transports configuration */
 #define CONNECTOR_NETWORK_TCP_START connector_connect_manual
 #define CONNECTOR_NETWORK_UDP_START connector_connect_manual

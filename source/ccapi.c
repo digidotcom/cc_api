@@ -742,9 +742,11 @@ connector_callback_status_t ccapi_config_handler(connector_request_id_config_t c
         }
         case connector_request_id_config_wait_count:
         {
+#ifndef CCAPI_AGGRESSIVE_KEEPALIVES
             connector_config_wait_count_t * const wc_keepalives = data;
 
             wc_keepalives->count = ccapi_data->transport_tcp.info->keepalives.wait_count;
+#endif
             break;
         }
         case connector_request_id_config_link_speed:
